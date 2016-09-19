@@ -16,10 +16,6 @@ pub enum Status {
     InternalError = 500,
 }
 
-pub trait GetRequest {
-    fn id(&self) -> &str;
-}
-
 pub trait Response: Default {
     type Serializer: Serializer;
     fn set_status(&mut self, status: Status);
