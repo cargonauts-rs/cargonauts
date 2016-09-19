@@ -63,21 +63,21 @@ Thus, the macro in the previous section corresponds to these trait impls:
 
 Some of many things still left todo:
 
-[X] GET resource
-[X] Relationships
-[X] Includes
-[ ] Recursive includes
-[X] INDEX resource
-[ ] Filter
-[ ] PUT resource
-[ ] PATCH resource
-[ ] PUT-ASYNC resource
-[ ] PATCH-ASYNC resource
-[ ] Relationship links
-[ ] Sparse fieldsets
-[ ] Pagination
-[ ] Custom relation names & pluralization issues.
-[ ] ...much more
+ - [X] GET resource
+ - [X] Relationships
+ - [X] Includes
+ - [ ] Recursive includes
+ - [X] INDEX resource
+ - [ ] Filter
+ - [ ] PUT resource
+ - [ ] PATCH resource
+ - [ ] PUT-ASYNC resource
+ - [ ] PATCH-ASYNC resource
+ - [ ] Relationship links
+ - [ ] Sparse fieldsets
+ - [ ] Pagination
+ - [ ] Custom relation names & pluralization issues.
+ - [ ] ...much more
 
 ## License
 
