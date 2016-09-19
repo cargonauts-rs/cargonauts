@@ -28,7 +28,7 @@ routes! {
     }
     resource Comment => ["index", "put"] {
         related User: "has-one";
-        related Comment: "has-many";
+        related Post: "has-one";
     }
 }
 ```
