@@ -22,6 +22,8 @@ macro_rules! resource {
                 vec![]
             }
         }
+
+        methods!($router, $resource, $methods);
     };
     ($router:expr, $resource:ty => $methods:tt { $($rel:ty : $count:tt;)+ }) => {
         impl ::cargonauts::_internal::Wrapper<$resource> for ::cargonauts::_internal::Resource<$resource> {
