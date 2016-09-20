@@ -16,11 +16,11 @@ macro_rules! _resource {
         impl ::cargonauts::_internal::Wrapper<$resource> for ::cargonauts::_internal::Resource<$resource> {
             type Relationships = ();
 
-            fn related(&self) -> Option<()> {
+            fn related(&self, _base_url: &str) -> Option<()> {
                 None
             }
 
-            fn include(&self, params: &[String]) -> Vec<::cargonauts::Value> {
+            fn include(&self, _params: &[String], _base_url: &str) -> Vec<::cargonauts::Value> {
                 vec![]
             }
         }
@@ -31,18 +31,19 @@ macro_rules! _resource {
         impl ::cargonauts::_internal::Wrapper<$resource> for ::cargonauts::_internal::Resource<$resource> {
             type Relationships = Relationships;
 
-            fn related(&self) -> Option<Relationships> {
+            fn related(&self, base_url: &str) -> Option<Relationships> {
                 Some(Relationships {
                     id: self.id(),
+                    base_url: base_url.to_string(),
                 })
             }
 
-            fn include(&self, params: &[String]) -> Vec<::cargonauts::Value> {
+            fn include(&self, params: &[String], base_url: &str) -> Vec<::cargonauts::Value> {
                 let id = self.id();
                 params.iter().flat_map(|param| {
                     $(
                         if param == <$rel as ::cargonauts::api::Resource>::resource() {
-                            _include_relation!(&id, $resource, $rel, $count);
+                            _include_relation!(&id, base_url, $resource, $rel, $count);
                         }
                     )*
                     return vec![]
@@ -52,14 +53,16 @@ macro_rules! _resource {
 
         struct Relationships {
             id: <$resource as ::cargonauts::api::Resource>::Id,
+            base_url: String,
         }
 
         impl ::cargonauts::Serialize for Relationships {
             fn serialize<S: ::cargonauts::Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
                 let mut state = try!(serializer.serialize_map(None));
                 let id = &self.id;
+                let base_url = &self.base_url;
                 $(
-                    { _serialize_relation!(serializer, &mut state, id, $resource, $rel, $count); }
+                    { _serialize_relation!(serializer, &mut state, id, base_url, $resource, $rel, $count); }
                 )*
                 serializer.serialize_map_end(state)
             }
@@ -72,16 +75,16 @@ macro_rules! _resource {
 /// Do not call this macro, it is an implementation detail of the routes! macro.
 #[macro_export]
 macro_rules! _include_relation {
-    ($id:expr, $resource:ty, $rel:ty, "has-one") => {
+    ($id:expr, $base_url:expr, $resource:ty, $rel:ty, "has-one") => {
         if let Some(resource) = <$resource as ::cargonauts::api::HasOne<$rel>>::has_one($id) {
-            let resource = ::cargonauts::_internal::Resource::wrap(resource);
+            let resource = ::cargonauts::_internal::Resource::wrap(resource, $base_url);
             return vec![::cargonauts::to_value(resource)]
         } else { return vec![] }
     };
-    ($id:expr, $resource:ty, $rel:ty, "has-many") => {
+    ($id:expr, $base_url:expr, $resource:ty, $rel:ty, "has-many") => {
         let mut values = vec![];
         for resource in <$resource as ::cargonauts::api::HasMany<$rel>>::has_many($id) {
-            let resource = ::cargonauts::_internal::Resource::wrap(resource);
+            let resource = ::cargonauts::_internal::Resource::wrap(resource, $base_url);
             values.push(::cargonauts::to_value(resource))
         }
         return values
@@ -94,16 +97,16 @@ macro_rules! _include_relation {
 /// Do not call this macro, it is an implementation detail of the routes! macro.
 #[macro_export]
 macro_rules! _serialize_relation {
-    ($serializer:expr, $state:expr, $id:expr, $resource:ty, $rel:ty, "has-one") => {
+    ($serializer:expr, $state:expr, $id:expr, $base_url:expr, $resource:ty, $rel:ty, "has-one") => {
         try!($serializer.serialize_map_key($state, <$rel as ::cargonauts::api::Resource>::resource()));
-        try!($serializer.serialize_map_value($state, ::cargonauts::_internal::HasOne::<$resource, $rel>::new($id)));
+        try!($serializer.serialize_map_value($state, ::cargonauts::_internal::HasOne::<$resource, $rel>::new($id, $base_url)));
     };
-    ($serializer:expr, $state:expr, $id:expr, $resource:ty, $rel:ty, "has-many") => {
+    ($serializer:expr, $state:expr, $id:expr, $base_url:expr, $resource:ty, $rel:ty, "has-many") => {
         try!($serializer.serialize_map_key($state, <$rel as ::cargonauts::api::Resource>::resource()));
-        try!($serializer.serialize_map_value($state, ::cargonauts::_internal::HasMany::<$resource, $rel>::new($id)));
+        try!($serializer.serialize_map_value($state, ::cargonauts::_internal::HasMany::<$resource, $rel>::new($id, $base_url)));
         
     };
-    ($serializer:expr, $state:expr, $id:expr, $resource:ty, $rel:ty, $ignore:tt) => {
+    ($serializer:expr, $state:expr, $id:expr, $base_url:expr, $resource:ty, $rel:ty, $ignore:tt) => {
         // TODO handle errors more betterer
     };
 }

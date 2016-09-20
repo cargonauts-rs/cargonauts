@@ -7,6 +7,7 @@
 //! **always** a mistake.
 mod document;
 mod identifier;
+mod links;
 mod rels;
 mod resource;
 mod router;

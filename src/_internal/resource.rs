@@ -2,17 +2,20 @@ use api;
 use Serialize;
 use Serializer;
 use _internal::Wrapper;
+use _internal::links::{make_link, LinkObject};
 
 pub struct Resource<T: api::Resource> {
     attributes: T,
-    links: bool,
+    base_url: String,
+    self_link: String,
 }
 
 impl<T: api::Resource> Resource<T> {
-    pub fn wrap(resource: T) -> Resource<T> {
+    pub fn wrap(resource: T, base_url: &str) -> Resource<T> {
         Resource {
+            self_link: make_link(&[base_url, T::resource(), &resource.id().to_string()]),
+            base_url: base_url.to_string(),
             attributes: resource,
-            links: false,
         }
     }
 
@@ -23,30 +26,35 @@ impl<T: api::Resource> Resource<T> {
 
 impl<T: api::Resource> Serialize for Resource<T> where Resource<T>: Wrapper<T> {
     fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
-        if let Some(related) = self.related() {
-            let mut state = try!(serializer.serialize_map(Some(4)));
+        if let Some(related) = self.related(&self.base_url) {
+            let mut state = try!(serializer.serialize_map(Some(5)));
             try!(serializer.serialize_map_key(&mut state, "type"));
             try!(serializer.serialize_map_value(&mut state, T::resource()));
             try!(serializer.serialize_map_key(&mut state, "id"));
-            try!(serializer.serialize_map_value(&mut state, self.attributes.id().to_string()));
+            try!(serializer.serialize_map_value(&mut state, self.id().to_string()));
             try!(serializer.serialize_map_key(&mut state, "attributes"));
             try!(serializer.serialize_map_value(&mut state, &self.attributes));
             try!(serializer.serialize_map_key(&mut state, "relationships"));
             try!(serializer.serialize_map_value(&mut state, &related));
-            if self.links {
-                //TODO links
-                unimplemented!()
-            }
+            try!(serializer.serialize_map_key(&mut state, "links"));
+            try!(serializer.serialize_map_value(&mut state, &LinkObject {
+                self_link: Some(&self.self_link),
+                related_link: None,
+            }));
             serializer.serialize_map_end(state)
         } else {
-            let mut state = try!(serializer.serialize_map(Some(3)));
+            let mut state = try!(serializer.serialize_map(Some(4)));
             try!(serializer.serialize_map_key(&mut state, "type"));
             try!(serializer.serialize_map_value(&mut state, T::resource()));
             try!(serializer.serialize_map_key(&mut state, "id"));
-            try!(serializer.serialize_map_value(&mut state, self.attributes.id().to_string()));
+            try!(serializer.serialize_map_value(&mut state, self.id().to_string()));
             try!(serializer.serialize_map_key(&mut state, "attributes"));
             try!(serializer.serialize_map_value(&mut state, &self.attributes));
-            // TODO links?
+            try!(serializer.serialize_map_key(&mut state, "links"));
+            try!(serializer.serialize_map_value(&mut state, &LinkObject {
+                self_link: Some(&self.self_link),
+                related_link: None,
+            }));
             serializer.serialize_map_end(state)
         }
     }
@@ -92,10 +100,10 @@ mod tests {
 
         impl Wrapper<MockResource> for Resource<MockResource> {
             type Relationships = ();
-            fn related(&self) -> Option<()> {
+            fn related(&self, _: &str) -> Option<()> {
                 None
             }
-            fn include(&self, _: &[String]) -> Vec<Value> {
+            fn include(&self, _: &[String], _: &str) -> Vec<Value> {
                 vec![]
             }
         }
@@ -104,11 +112,14 @@ mod tests {
         fn serialize_resource() {
             let mut attributes = BTreeMap::new();
             attributes.insert(String::from("MOCK_KEY"), Value::String(String::from("MOCK_VALUE")));
+            let mut links = BTreeMap::new();
+            links.insert(String::from("self"), Value::String(String::from("BASE_URL/MOCK/ID")));
             let mut resource = BTreeMap::new();
             resource.insert(String::from("attributes"), Value::Object(attributes));
+            resource.insert(String::from("links"), Value::Object(links));
             resource.insert(String::from("type"), Value::String(String::from("MOCK")));
             resource.insert(String::from("id"), Value::String(String::from("ID")));
-            assert_eq!(to_value(Resource::wrap(MockResource)), Value::Object(resource));
+            assert_eq!(to_value(Resource::wrap(MockResource, "BASE_URL")), Value::Object(resource));
         }
     }
 }
