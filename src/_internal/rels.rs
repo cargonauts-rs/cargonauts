@@ -3,7 +3,7 @@ use std::marker::PhantomData;
 use api;
 use Serialize;
 use Serializer;
-use _internal::Identifier;
+use _internal::identifier::Identifier;
 
 pub struct HasOne<'a, T: api::HasOne<R>, R: api::Resource> where T::Id: 'a {
     id: &'a T::Id,

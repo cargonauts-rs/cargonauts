@@ -2,7 +2,8 @@ use api;
 use Serialize;
 use router::Router as RouterTrait;
 use router::{Status, Response};
-use _internal::{self, ResourceDocument, CollectionDocument};
+use _internal::{Resource, Wrapper};
+use _internal::document::{CollectionDocument, ResourceDocument};
 
 pub struct Router<'a, R: RouterTrait + 'a> {
     router: &'a mut R,
@@ -15,7 +16,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         }
     }
 
-    pub fn attach_get<T: api::Get>(&mut self) where _internal::Resource<T>: _internal::Wrapper<T> {
+    pub fn attach_get<T: api::Get>(&mut self) where Resource<T>: Wrapper<T> {
         self.router.attach_get(T::resource(), |id, includes| {
             let mut response = R::Response::default();
             let id = match id.parse() {
@@ -41,7 +42,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         });
     }
 
-    pub fn attach_index<T: api::Index>(&mut self) where _internal::Resource<T>: _internal::Wrapper<T> {
+    pub fn attach_index<T: api::Index>(&mut self) where Resource<T>: Wrapper<T> {
         self.router.attach_index(T::resource(), |includes| {
             let mut response = R::Response::default();
             let resources = T::index();
