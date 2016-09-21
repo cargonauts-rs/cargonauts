@@ -72,7 +72,7 @@ Some of many things still left todo:
  - [X] POST resource
  - [ ] POST resource without object
  - [ ] POST resource with UUID
- - [X} POST resource returning NoContent
+ - [X] POST resource returning NoContent
  - [ ] POST resource with included relationship objects??
  - [ ] PATCH resource
  - [ ] POST-ASYNC resource
