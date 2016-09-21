@@ -2,13 +2,15 @@
 #[macro_use]
 extern crate cargonauts;
 
+use std::collections::HashMap;
+
 use cargonauts::api;
 
 routes! {
     resource User => ["get"] {
         related Photo: "has-many";
     }
-    resource Photo => ["get", "index"] {
+    resource Photo => ["get", "index", "post"] {
         related User: "has-one";
     }
 }
@@ -53,6 +55,12 @@ impl cargonauts::Serialize for Photo {
     }
 }
 
+impl cargonauts::Deserialize for Photo {
+    fn deserialize<D: cargonauts::Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
+        unimplemented!()
+    }
+}
+
 impl api::Resource for Photo {
     type Id = u32;
 
@@ -73,6 +81,12 @@ impl api::Get for Photo {
 
 impl api::Index for Photo {
     fn index() -> Vec<Photo> {
+        unimplemented!()
+    }
+}
+
+impl api::Post for Photo {
+    fn post(self, relationship: HashMap<String, api::Relationship>) -> Result<Option<Photo>, api::PostError> {
         unimplemented!()
     }
 }

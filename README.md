@@ -69,9 +69,13 @@ Some of many things still left todo:
  - [ ] Recursive includes
  - [X] INDEX resource
  - [ ] Filter
- - [ ] PUT resource
+ - [X] POST resource
+ - [ ] POST resource without object
+ - [ ] POST resource with UUID
+ - [X} POST resource returning NoContent
+ - [ ] POST resource with included relationship objects??
  - [ ] PATCH resource
- - [ ] PUT-ASYNC resource
+ - [ ] POST-ASYNC resource
  - [ ] PATCH-ASYNC resource
  - [ ] Relationship links
  - [ ] Sparse fieldsets

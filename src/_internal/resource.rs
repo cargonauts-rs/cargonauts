@@ -24,7 +24,7 @@ impl<T: api::Resource> Resource<T> {
     }
 }
 
-impl<T: api::Resource> Serialize for Resource<T> where Resource<T>: Wrapper<T> {
+impl<T: api::Resource + Serialize> Serialize for Resource<T> where Resource<T>: Wrapper<T> {
     fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
         if let Some(related) = self.related(&self.base_url) {
             let mut state = try!(serializer.serialize_map(Some(5)));

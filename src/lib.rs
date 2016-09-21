@@ -8,5 +8,5 @@ pub mod router;
 mod macros;
 pub mod _internal;
 
-pub use serde::{Serialize, Serializer};
-pub use json::{Value, to_value};
+pub use serde::{Deserialize, Deserializer, Serialize, Serializer};
+pub use json::{Value, from_value, to_value};

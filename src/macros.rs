@@ -123,14 +123,21 @@ macro_rules! _methods {
     };
     ($router:expr, $resource:ty,  ["index", $($method:tt),*]) => {
         $router.attach_index::<$resource>();
-        _methods!($router, $rels, $resource,  [$($method),*])
+        _methods!($router, $resource, [$($method),*])
     };
     ($router:expr, $resource:ty,  ["index"]) => {
         $router.attach_index::<$resource>();
     };
+    ($router:expr, $resource:ty,  ["post", $($method:tt),*]) => {
+        $router.attach_post::<$resource>();
+        _methods!($router, $resource,  [$($method),*])
+    };
+    ($router:expr, $resource:ty,  ["post"]) => {
+        $router.attach_post::<$resource>();
+    };
     ($router:expr, $resource:ty,  [$ignore:tt, $($method:tt),*]) => {
         // TODO handle errors more betterer
-        _methods!($router, $rels, $resource,  [$($method),*])
+        _methods!($router, $resource,  [$($method),*])
     };
     ($router:expr, $resource:ty,  $ignore:tt) => {
         // TODO handle errors more betterer
