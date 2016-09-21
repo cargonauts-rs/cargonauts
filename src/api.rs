@@ -11,15 +11,20 @@ pub trait Resource: Sized {
 }
 
 pub trait Get: Resource + Serialize {
-    fn get(Self::Id) -> Option<Self>;
+    fn get(id: Self::Id) -> Option<Self>;
 }
 
 pub trait Index: Resource + Serialize {
     fn index() -> Vec<Self>;
 }
 
+pub trait Patch: Resource + Serialize {
+    type Patch: Deserialize;
+    fn patch(id: Self::Id, patch: Self::Patch, relationships: HashMap<String, Relationship>) -> Result<Option<Self>, PatchError>;
+}
+
 pub trait Post: Resource + Serialize + Deserialize {
-    fn post(self, relationship: HashMap<String, Relationship>) -> Result<Option<Self>, PostError>;
+    fn post(self, relationships: HashMap<String, Relationship>) -> Result<Option<Self>, PostError>;
 }
 
 pub trait HasOne<T: Resource>: Resource {
@@ -36,8 +41,16 @@ pub struct Relationship {
 }
 
 pub enum PostError {
+    BadRequest,
     Forbidden,
     Conflict,
+    InternalError,
+}
+
+pub enum PatchError {
     BadRequest,
+    Forbidden,
+    NotFound,
+    Conflict,
     InternalError,
 }

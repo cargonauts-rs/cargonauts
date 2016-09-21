@@ -74,9 +74,10 @@ Some of many things still left todo:
  - [ ] POST resource with UUID
  - [X] POST resource returning NoContent
  - [ ] POST resource with included relationship objects??
- - [ ] PATCH resource
+ - [X] PATCH resource
  - [ ] POST-ASYNC resource
  - [ ] PATCH-ASYNC resource
+ - [ ] HEAD requests
  - [ ] Relationship links
  - [ ] Sparse fieldsets
  - [ ] Pagination

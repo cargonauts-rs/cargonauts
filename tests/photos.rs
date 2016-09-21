@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use cargonauts::api;
 
 routes! {
-    resource User => ["get"] {
+    resource User => ["get", "patch"] {
         related Photo: "has-many";
     }
     resource Photo => ["get", "index", "post"] {
@@ -37,6 +37,13 @@ impl api::Resource for User {
 
 impl api::Get for User {
     fn get(id: Self::Id) -> Option<User> {
+        unimplemented!()
+    }
+}
+
+impl api::Patch for User {
+    type Patch = ();
+    fn patch(id: Self::Id, patch: Self::Patch, relationships: HashMap<String, api::Relationship>) -> Result<Option<User>, api::PatchError> {
         unimplemented!()
     }
 }

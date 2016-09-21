@@ -9,6 +9,8 @@ pub trait Router {
     fn attach_get<F>(&mut self, route: &'static str, f: F)
         where F: FnMut(GetObject) -> Self::Response;
     fn attach_index<F: FnMut(IndexObject) -> Self::Response>(&mut self, route: &'static str, f: F);
+    fn attach_patch<F>(&mut self, route: &'static str, f: F)
+        where F: FnMut(PatchObject) -> Self::Response;
     fn attach_post<F>(&mut self, route: &'static str, f: F)
         where F: FnMut(PostObject) -> Self::Response;
     fn base_url(&self) -> &'static str;
@@ -37,6 +39,13 @@ pub struct GetObject {
 
 pub struct IndexObject {
     pub includes: Vec<String>,
+}
+
+pub struct PatchObject {
+    pub attributes: Value,
+    pub relationships: HashMap<String, api::Relationship>,
+    pub resource_type: String,
+    pub id: String,
 }
 
 pub struct PostObject {

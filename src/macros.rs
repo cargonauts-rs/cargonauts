@@ -128,6 +128,13 @@ macro_rules! _methods {
     ($router:expr, $resource:ty,  ["index"]) => {
         $router.attach_index::<$resource>();
     };
+    ($router:expr, $resource:ty,  ["patch", $($method:tt),*]) => {
+        $router.attach_patch::<$resource>();
+        _methods!($router, $resource,  [$($method),*])
+    };
+    ($router:expr, $resource:ty,  ["patch"]) => {
+        $router.attach_patch::<$resource>();
+    };
     ($router:expr, $resource:ty,  ["post", $($method:tt),*]) => {
         $router.attach_post::<$resource>();
         _methods!($router, $resource,  [$($method),*])
