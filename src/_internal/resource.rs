@@ -26,7 +26,7 @@ impl<T: api::Resource> Resource<T> {
 
 impl<T: api::Resource + Serialize> Serialize for Resource<T> where Resource<T>: Wrapper<T> {
     fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
-        if let Some(related) = self.related(&self.base_url) {
+        if let Some(related) = self.get_related(&self.base_url) {
             let mut state = try!(serializer.serialize_map(Some(5)));
             try!(serializer.serialize_map_key(&mut state, "type"));
             try!(serializer.serialize_map_value(&mut state, T::resource()));
@@ -70,6 +70,7 @@ mod tests {
         use api;
         use Serialize;
         use Serializer;
+        use router;
         use to_value;
         use Value;
         use _internal::Wrapper;
@@ -100,8 +101,12 @@ mod tests {
 
         impl Wrapper<MockResource> for Resource<MockResource> {
             type Relationships = ();
-            fn related(&self, _: &str) -> Option<()> {
+            fn get_related(&self, _: &str) -> Option<()> {
                 None
+            }
+            fn put_related<'a, I>(_: &String, _: I) -> Result<(), api::LinkError>
+            where I: IntoIterator<Item = &'a router::Relationship> {
+                Ok(())
             }
             fn include(&self, _: &[String], _: &str) -> Vec<Value> {
                 vec![]

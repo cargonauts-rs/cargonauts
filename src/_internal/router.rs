@@ -84,8 +84,18 @@ impl<'a, R: RouterTrait> Router<'a, R> {
                     return response
                 }
             };
-            match T::patch(id, attributes, relationships) {
+            match T::patch(id, attributes) {
                 Ok(Some(resource))  => {
+                    if let Err(err) = <Resource<T> as Wrapper<T>>::put_related(&resource.id(), &relationships) {
+                        match err {
+                            api::LinkError::BadRequest     => response.set_status(Status::BadRequest),
+                            api::LinkError::Forbidden      => response.set_status(Status::Forbidden),
+                            api::LinkError::NotFound       => response.set_status(Status::NotFound),
+                            api::LinkError::Conflict       => response.set_status(Status::Conflict),
+                            api::LinkError::InternalError  => response.set_status(Status::InternalError),
+                        }
+                        return response
+                    }
                     let document = ResourceDocument::new(resource, &[], base_url);
                     respond_with(document, response)
                 }
@@ -126,8 +136,18 @@ impl<'a, R: RouterTrait> Router<'a, R> {
                     return response
                 }
             };
-            match attributes.post(relationships) {
+            match attributes.post() {
                 Ok(Some(resource))  => {
+                    if let Err(err) = <Resource<T> as Wrapper<T>>::put_related(&resource.id(), &relationships) {
+                        match err {
+                            api::LinkError::BadRequest     => response.set_status(Status::BadRequest),
+                            api::LinkError::Forbidden      => response.set_status(Status::Forbidden),
+                            api::LinkError::NotFound       => response.set_status(Status::NotFound),
+                            api::LinkError::Conflict       => response.set_status(Status::Conflict),
+                            api::LinkError::InternalError  => response.set_status(Status::InternalError),
+                        }
+                        return response
+                    }
                     let document = ResourceDocument::new(resource, &[], base_url);
                     respond_with(document, response)
                 }

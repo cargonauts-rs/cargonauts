@@ -1,6 +1,3 @@
-use std::collections::HashMap;
-
-use api;
 use Serializer;
 use Value;
 
@@ -43,14 +40,24 @@ pub struct IndexObject {
 
 pub struct PatchObject {
     pub attributes: Value,
-    pub relationships: HashMap<String, api::Relationship>,
+    pub relationships: Vec<Relationship>,
     pub resource_type: String,
     pub id: String,
 }
 
 pub struct PostObject {
     pub attributes: Value,
-    pub relationships: HashMap<String, api::Relationship>,
+    pub relationships: Vec<Relationship>,
     pub resource_type: String,
     pub id: Option<String>,
+}
+
+pub struct Relationship {
+    pub resource: String,
+    pub member: RelationshipId,
+}
+
+pub enum RelationshipId {
+    One(String),
+    Many(Vec<String>),
 }

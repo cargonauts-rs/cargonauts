@@ -16,11 +16,20 @@ macro_rules! _resource {
         impl ::cargonauts::_internal::Wrapper<$resource> for ::cargonauts::_internal::Resource<$resource> {
             type Relationships = ();
 
-            fn related(&self, _base_url: &str) -> Option<()> {
+            fn get_related(&self, _base_url: &str) -> Option<()> {
                 None
             }
 
-            fn include(&self, _params: &[String], _base_url: &str) -> Vec<::cargonauts::Value> {
+            fn put_related<'a, I>(id: &<$resource as ::cargonauts::api::Resource>::Id, rels: I) -> Result<(), ::cargonauts::api::LinkError>
+                where I: IntoIterator<Item = &'a ::cargonauts::router::Relationship> {
+                if rels.next().is_none() {
+                    Ok(())
+                } else {
+                    Err(::cargonauts::api::LinkError::Conflict)
+                }
+            }
+
+            fn include(&self, params: &[String], _base_url: &str) -> Vec<::cargonauts::Value> {
                 vec![]
             }
         }
@@ -31,11 +40,25 @@ macro_rules! _resource {
         impl ::cargonauts::_internal::Wrapper<$resource> for ::cargonauts::_internal::Resource<$resource> {
             type Relationships = Relationships;
 
-            fn related(&self, base_url: &str) -> Option<Relationships> {
+            fn get_related(&self, base_url: &str) -> Option<Relationships> {
                 Some(Relationships {
                     id: self.id(),
                     base_url: base_url.to_string(),
                 })
+            }
+
+            fn put_related<'a, I>(id: &<$resource as ::cargonauts::api::Resource>::Id, rels: I) -> Result<(), ::cargonauts::api::LinkError>
+                where I: IntoIterator<Item = &'a ::cargonauts::router::Relationship> {
+                for relationship in rels {
+                    $(
+                        if relationship.resource == <$rel as ::cargonauts::api::Resource>::resource() {
+                            _link_relation!(id, &relationship.member, $resource, $rel, $count);
+                            continue
+                        }
+                    )*
+                    return Err(::cargonauts::api::LinkError::Conflict)
+                }
+                Ok(())
             }
 
             fn include(&self, params: &[String], base_url: &str) -> Vec<::cargonauts::Value> {
@@ -46,7 +69,7 @@ macro_rules! _resource {
                             _include_relation!(&id, base_url, $resource, $rel, $count);
                         }
                     )*
-                    return vec![]
+                    vec![]
                 }).collect()
             }
         }
@@ -70,6 +93,23 @@ macro_rules! _resource {
 
         _methods!($router, $resource, $methods);
     };
+}
+
+/// Do not call this macro, it is an implementation detail of the routes! macro.
+#[macro_export]
+macro_rules! _link_relation {
+    ($id:expr, $rel_id:expr, $resource:ty, $rel:ty, "has-one") => {
+        if let ::cargonauts::router::RelationshipId::One(ref id) = *$rel_id {
+            let id = try!(id.parse().or(Err(::cargonauts::api::LinkError::Conflict)));
+            try!(<$resource as ::cargonauts::api::HasOne<$rel>>::link_one($id, &id));
+        } else { return Err(::cargonauts::api::LinkError::Conflict) }
+    };
+    ($id:expr, $rel_id:expr, $resource:ty, $rel:ty, "has-many") => {
+        if let ::cargonauts::router::RelationshipId::Many(ref ids) = *$rel_id {
+            let ids = try!(ids.into_iter().map(|id| id.parse().or(Err(::cargonauts::api::LinkError::Conflict))).collect::<Result<Vec<_>, _>>());
+            try!(<$resource as ::cargonauts::api::HasMany<$rel>>::link_many($id, &ids));
+        }
+    }
 }
 
 /// Do not call this macro, it is an implementation detail of the routes! macro.

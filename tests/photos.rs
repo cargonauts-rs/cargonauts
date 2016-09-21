@@ -2,7 +2,6 @@
 #[macro_use]
 extern crate cargonauts;
 
-use std::collections::HashMap;
 
 use cargonauts::api;
 
@@ -43,13 +42,16 @@ impl api::Get for User {
 
 impl api::Patch for User {
     type Patch = ();
-    fn patch(id: Self::Id, patch: Self::Patch, relationships: HashMap<String, api::Relationship>) -> Result<Option<User>, api::PatchError> {
+    fn patch(id: Self::Id, patch: Self::Patch) -> Result<Option<User>, api::PatchError> {
         unimplemented!()
     }
 }
 
 impl api::HasMany<Photo> for User {
     fn has_many(id: &Self::Id) -> Vec<Photo> {
+        unimplemented!()
+    }
+    fn link_many(id: &Self::Id, rel_ids: &[<Photo as api::Resource>::Id]) -> Result<(), api::LinkError> {
         unimplemented!()
     }
 }
@@ -93,13 +95,16 @@ impl api::Index for Photo {
 }
 
 impl api::Post for Photo {
-    fn post(self, relationship: HashMap<String, api::Relationship>) -> Result<Option<Photo>, api::PostError> {
+    fn post(self) -> Result<Option<Photo>, api::PostError> {
         unimplemented!()
     }
 }
 
 impl api::HasOne<User> for Photo {
     fn has_one(id: &Self::Id) -> Option<User> {
+        unimplemented!()
+    }
+    fn link_one(id: &Self::Id, rel_id: &<User as api::Resource>::Id) -> Result<(), api::LinkError> {
         unimplemented!()
     }
 }
