@@ -4,7 +4,20 @@ use Serialize;
 use router::Router as RouterTrait;
 use router::{PostObject, PatchObject, Status, Response};
 use _internal::{Resource, Wrapper};
-use _internal::document::{CollectionDocument, ResourceDocument};
+use _internal::document::*;
+
+macro_rules! parse_id {
+    ($id:expr, $response:expr)  => {
+        match $id.parse() {
+            Ok(id)  => id,
+            Err(_)  => {
+                $response.set_status(Status::Conflict);
+                // TODO write the error to the body in the error case
+                return $response;
+            }
+        };
+    }
+}
 
 pub struct Router<'a, R: RouterTrait + 'a> {
     router: &'a mut R,
@@ -24,14 +37,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         let Router { ref mut router, base_url } = *self;
         router.attach_get(T::resource(), |get_object| {
             let mut response = R::Response::default();
-            let id = match get_object.id.parse() {
-                Ok(id)  => id,
-                Err(_)  => {
-                    response.set_status(Status::Conflict);
-                    // TODO write the error to the body in the error case
-                    return response
-                }
-            };
+            let id = parse_id!(get_object.id, response);
             if let Some(resource) = T::get(id) {
                 let document = ResourceDocument::new(resource, &get_object.includes, base_url);
                 respond_with(document, response)
@@ -67,14 +73,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
                 // TODO write the error to the body in the error case
                 return response
             }
-            let id = match patch_object.id.parse() {
-                Ok(id)  => id,
-                Err(_)  => {
-                    response.set_status(Status::Conflict);
-                    // TODO write the error to the body in the error case
-                    return response
-                }
-            };
+            let id = parse_id!(patch_object.id, response);
             let PatchObject { attributes, relationships, .. } = patch_object;
             let attributes = match from_value::<T::Patch>(attributes) {
                 Ok(attributes)  => attributes,
@@ -167,6 +166,35 @@ impl<'a, R: RouterTrait> Router<'a, R> {
                 }
             }
         });
+    }
+
+    pub fn attach_get_has_one<T: api::HasOne<Rel>, Rel: api::Resource>(&mut self) where Resource<Rel>: Wrapper<Rel> {
+        let Router { ref mut router, base_url } = *self;
+        router.attach_get_rel(T::resource(), Rel::resource(), |id| {
+            let mut response = R::Response::default();
+            let parsed_id = parse_id!(id, response);
+            match <T as api::HasOne<Rel>>::has_one(&parsed_id) {
+                Some(related)   => {
+                    let document = HasOneDocument::new(related, base_url, T::resource(), &id);
+                    respond_with(document, response)
+                }
+                None            => {
+                    response.set_status(Status::NotFound);
+                    response
+                }
+            }
+        });
+    }
+
+    pub fn attach_get_has_many<T: api::HasMany<Rel>, Rel: api::Resource>(&mut self) where Resource<Rel>: Wrapper<Rel> {
+        let Router { ref mut router, base_url } = *self;
+        router.attach_get_rel(T::resource(), Rel::resource(), |id| {
+            let mut response = R::Response::default();
+            let parsed_id = parse_id!(id, response);
+            let related = <T as api::HasMany<Rel>>::has_many(&parsed_id);
+            let document = HasManyDocument::<Rel>::new(related, base_url, T::resource(), &id);
+            respond_with(document, response)
+        })
     }
 }
 

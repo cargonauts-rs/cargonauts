@@ -3,13 +3,19 @@ use Value;
 
 pub trait Router {
     type Response: Response;
-    fn attach_get<F>(&mut self, route: &'static str, f: F)
-        where F: FnMut(GetObject) -> Self::Response;
-    fn attach_index<F: FnMut(IndexObject) -> Self::Response>(&mut self, route: &'static str, f: F);
-    fn attach_patch<F>(&mut self, route: &'static str, f: F)
-        where F: FnMut(PatchObject) -> Self::Response;
-    fn attach_post<F>(&mut self, route: &'static str, f: F)
-        where F: FnMut(PostObject) -> Self::Response;
+    fn attach_get<F>(&mut self, resource: &'static str, f: F)
+        where F: Fn(GetObject) -> Self::Response;
+    fn attach_index<F>(&mut self, resource: &'static str, f: F)
+        where F: Fn(IndexObject) -> Self::Response;
+    fn attach_patch<F>(&mut self, resource: &'static str, f: F)
+        where F: Fn(PatchObject) -> Self::Response;
+    fn attach_post<F>(&mut self, resource: &'static str, f: F)
+        where F: Fn(PostObject) -> Self::Response;
+    fn attach_get_rel<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
+        where F: Fn(String) -> Self::Response;
+    fn attach_to_one_patch<F>(&mut self);
+    fn attach_to_many_patch<F>(&mut self);
+    fn attach_to_many_post<F>(&mut self);
     fn base_url(&self) -> &'static str;
 }
 

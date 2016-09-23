@@ -77,8 +77,12 @@ Some of many things still left todo:
  - [X] PATCH resource
  - [ ] POST-ASYNC resource
  - [ ] PATCH-ASYNC resource
+ - [ ] DELETE requests
  - [ ] HEAD requests
- - [ ] Relationship links
+ - [X] GET relationships
+ - [ ] POST/PATCH relationships
+ - [ ] DELETE relationships
+ - [ ] Raw methods
  - [ ] Sparse fieldsets
  - [ ] Pagination
  - [ ] Custom relation names & pluralization issues.

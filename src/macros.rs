@@ -34,7 +34,7 @@ macro_rules! _resource {
             }
         }
 
-        _methods!($router, $resource, $methods);
+        _methods!($router, $resource, $methods { });
     };
     ($router:expr, $resource:ty => $methods:tt { $($rel:ty : $count:tt;)+ }) => {
         impl ::cargonauts::_internal::Wrapper<$resource> for ::cargonauts::_internal::Resource<$resource> {
@@ -91,7 +91,7 @@ macro_rules! _resource {
             }
         }
 
-        _methods!($router, $resource, $methods);
+        _methods!($router, $resource, $methods {$($rel, $count);*});
     };
 }
 
@@ -154,39 +154,54 @@ macro_rules! _serialize_relation {
 /// Do not call this macro, it is an implementation detail of the routes! macro.
 #[macro_export]
 macro_rules! _methods {
-    ($router:expr, $resource:ty,  ["get", $($method:tt),*]) => {
+    ($router:expr, $resource:ty, ["get", $($method:tt),*] {$($rel:ty, $count:expr);*}) => {
         $router.attach_get::<$resource>();
-        _methods!($router, $resource,  [$($method),*])
+        $(_rel_methods!($router, $resource, $rel, "get", $count);)*
+        _methods!($router, $resource, [$($method),*] {$($rel, $count);*});
     };
-    ($router:expr, $resource:ty,  ["get"]) => {
+    ($router:expr, $resource:ty, ["get"] {$($rel:ty, $count:expr);*}) => {
         $router.attach_get::<$resource>();
+        $(_rel_methods!($router, $resource, $rel, "get", $count);)*
     };
-    ($router:expr, $resource:ty,  ["index", $($method:tt),*]) => {
+    ($router:expr, $resource:ty, ["index", $($method:tt),*] {$($rel:ty, $count:expr);*}) => {
         $router.attach_index::<$resource>();
+        _methods!($router, $resource, [$($method),*] {$($rel, $count);*})
+    };
+    ($router:expr, $resource:ty, ["index"] {$($rel:ty, $count:expr);*}) => {
+        $router.attach_index::<$resource>();
+    };
+    ($router:expr, $resource:ty,  ["patch", $($method:tt),*] {$($rel:ty, $count:expr);*}) => {
+        $router.attach_patch::<$resource>();
         _methods!($router, $resource, [$($method),*])
     };
-    ($router:expr, $resource:ty,  ["index"]) => {
-        $router.attach_index::<$resource>();
-    };
-    ($router:expr, $resource:ty,  ["patch", $($method:tt),*]) => {
-        $router.attach_patch::<$resource>();
-        _methods!($router, $resource,  [$($method),*])
-    };
-    ($router:expr, $resource:ty,  ["patch"]) => {
+    ($router:expr, $resource:ty, ["patch"] {$($rel:ty, $count:expr);*}) => {
         $router.attach_patch::<$resource>();
     };
-    ($router:expr, $resource:ty,  ["post", $($method:tt),*]) => {
+    ($router:expr, $resource:ty, ["post", $($method:tt),*] {$($rel:ty, $count:expr);*}) => {
         $router.attach_post::<$resource>();
-        _methods!($router, $resource,  [$($method),*])
+        _methods!($router, $resource, [$($method),*])
     };
-    ($router:expr, $resource:ty,  ["post"]) => {
+    ($router:expr, $resource:ty, ["post"] {$($rel:ty, $count:expr);*}) => {
         $router.attach_post::<$resource>();
     };
-    ($router:expr, $resource:ty,  [$ignore:tt, $($method:tt),*]) => {
+    ($router:expr, $resource:ty, [$ignore:tt, $($method:tt),*] {$($rel:ty, $count:expr);*}) => {
         // TODO handle errors more betterer
-        _methods!($router, $resource,  [$($method),*])
+        _methods!($router, $resource, [$($method),*])
     };
-    ($router:expr, $resource:ty,  $ignore:tt) => {
+    ($router:expr, $resource:ty, $ignore:tt {$($rel:ty, $count:expr);*}) => {
+        // TODO handle errors more betterer
+    };
+}
+
+#[macro_export]
+macro_rules! _rel_methods {
+    ($router:expr, $resource:ty, $rel:ty, "get", "has-one") => {
+        $router.attach_get_has_one::<$resource, $rel>();
+    };
+    ($router:expr, $resource:ty, $rel:ty, "get", "has-many") => {
+        $router.attach_get_has_many::<$resource, $rel>();
+    };
+    ($router:expr, $resource:ty, $rel:ty, $method:expr, $count:expr) => {
         // TODO handle errors more betterer
     };
 }
