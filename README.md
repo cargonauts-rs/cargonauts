@@ -77,7 +77,7 @@ Some of many things still left todo:
  - [X] PATCH resource
  - [ ] POST-ASYNC resource
  - [ ] PATCH-ASYNC resource
- - [ ] DELETE requests
+ - [X] DELETE requests
  - [ ] HEAD requests
  - [X] GET relationships
  - [ ] POST/PATCH relationships

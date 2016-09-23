@@ -33,6 +33,21 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         }
     }
 
+    pub fn attach_delete<T: api::Delete>(&mut self) where Resource<T>: Wrapper<T> {
+        self.router.attach_delete(T::resource(), |id| {
+            let mut response = R::Response::default();
+            let id = parse_id!(id, response);
+            match T::delete(id) {
+                Ok(())                                  => response.set_status(Status::NoContent),
+                Err(api::DeleteError::BadRequest)       => response.set_status(Status::BadRequest),
+                Err(api::DeleteError::Forbidden)        => response.set_status(Status::Forbidden),
+                Err(api::DeleteError::NotFound)         => response.set_status(Status::NotFound),
+                Err(api::DeleteError::InternalError)    => response.set_status(Status::InternalError),
+            }
+            response
+        });
+    }
+
     pub fn attach_get<T: api::Get>(&mut self) where Resource<T>: Wrapper<T> {
         let Router { ref mut router, base_url } = *self;
         router.attach_get(T::resource(), |get_object| {

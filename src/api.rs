@@ -9,6 +9,10 @@ pub trait Resource: Sized {
     fn resource() -> &'static str;
 }
 
+pub trait Delete: Resource {
+    fn delete(id: Self::Id) -> Result<(), DeleteError>;
+}
+
 pub trait Get: Resource + Serialize {
     fn get(id: Self::Id) -> Option<Self>;
 }
@@ -36,10 +40,10 @@ pub trait HasMany<T: Resource>: Resource {
     fn link_many(id: &Self::Id, rel_ids: &[T::Id]) -> Result<(), LinkError>;
 }
 
-pub enum PostError {
+pub enum DeleteError {
     BadRequest,
     Forbidden,
-    Conflict,
+    NotFound,
     InternalError,
 }
 
@@ -50,6 +54,14 @@ pub enum PatchError {
     Conflict,
     InternalError,
 }
+
+pub enum PostError {
+    BadRequest,
+    Forbidden,
+    Conflict,
+    InternalError,
+}
+
 
 pub enum LinkError {
     BadRequest,

@@ -9,7 +9,7 @@ routes! {
     resource User => ["get", "patch"] {
         related Photo: "has-many";
     }
-    resource Photo => ["get", "index", "post"] {
+    resource Photo => ["get", "index", "post", "delete"] {
         related User: "has-one";
     }
 }
@@ -79,6 +79,12 @@ impl api::Resource for Photo {
 
     fn resource() -> &'static str {
         "photo"
+    }
+}
+
+impl api::Delete for Photo {
+    fn delete(id: Self::Id) -> Result<(), api::DeleteError> {
+        unimplemented!()
     }
 }
 

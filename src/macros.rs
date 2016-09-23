@@ -154,6 +154,13 @@ macro_rules! _serialize_relation {
 /// Do not call this macro, it is an implementation detail of the routes! macro.
 #[macro_export]
 macro_rules! _methods {
+    ($router:expr, $resource:ty, ["delete", $($method:tt),*] {$($rel:ty, $count:expr);*}) => {
+        $router.attach_delete::<$resource>();
+        _methods!($router, $resource, [$($method),*] {$($rel, $count);*})
+    };
+    ($router:expr, $resource:ty, ["delete"] {$($rel:ty, $count:expr);*}) => {
+        $router.attach_delete::<$resource>()
+    };
     ($router:expr, $resource:ty, ["get", $($method:tt),*] {$($rel:ty, $count:expr);*}) => {
         $router.attach_get::<$resource>();
         $(_rel_methods!($router, $resource, $rel, "get", $count);)*
@@ -172,21 +179,21 @@ macro_rules! _methods {
     };
     ($router:expr, $resource:ty,  ["patch", $($method:tt),*] {$($rel:ty, $count:expr);*}) => {
         $router.attach_patch::<$resource>();
-        _methods!($router, $resource, [$($method),*])
+        _methods!($router, $resource, [$($method),*] {$($rel, $count);*})
     };
     ($router:expr, $resource:ty, ["patch"] {$($rel:ty, $count:expr);*}) => {
         $router.attach_patch::<$resource>();
     };
     ($router:expr, $resource:ty, ["post", $($method:tt),*] {$($rel:ty, $count:expr);*}) => {
         $router.attach_post::<$resource>();
-        _methods!($router, $resource, [$($method),*])
+        _methods!($router, $resource, [$($method),*] {$($rel, $count);*})
     };
     ($router:expr, $resource:ty, ["post"] {$($rel:ty, $count:expr);*}) => {
         $router.attach_post::<$resource>();
     };
     ($router:expr, $resource:ty, [$ignore:tt, $($method:tt),*] {$($rel:ty, $count:expr);*}) => {
         // TODO handle errors more betterer
-        _methods!($router, $resource, [$($method),*])
+        _methods!($router, $resource, [$($method),*] {$($rel, $count);*});
     };
     ($router:expr, $resource:ty, $ignore:tt {$($rel:ty, $count:expr);*}) => {
         // TODO handle errors more betterer
