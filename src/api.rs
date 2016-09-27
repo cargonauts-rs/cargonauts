@@ -32,12 +32,14 @@ pub trait Post: Resource + Serialize + Deserialize {
 
 pub trait HasOne<T: Resource>: Resource {
     fn has_one(id: &Self::Id) -> Option<T>;
-    fn link_one(id: &Self::Id, rel_id: &T::Id) -> Result<(), LinkError>;
+    fn link(id: &Self::Id, rel_id: &T::Id) -> Result<(), LinkError>;
+    fn unlink(id: &Self::Id) -> Result<(), DeleteError>;
 }
 
 pub trait HasMany<T: Resource>: Resource {
     fn has_many(id: &Self::Id) -> Vec<T>;
-    fn link_many(id: &Self::Id, rel_ids: &[T::Id]) -> Result<(), LinkError>;
+    fn link(id: &Self::Id, rel_ids: &[T::Id]) -> Result<(), LinkError>;
+    fn unlink(id: &Self::Id, rel_ids: &[T::Id]) -> Result<(), DeleteError>;
 }
 
 pub enum DeleteError {

@@ -101,13 +101,13 @@ macro_rules! _link_relation {
     ($id:expr, $rel_id:expr, $resource:ty, $rel:ty, "has-one") => {
         if let ::cargonauts::router::RelationshipId::One(ref id) = *$rel_id {
             let id = try!(id.parse().or(Err(::cargonauts::api::LinkError::Conflict)));
-            try!(<$resource as ::cargonauts::api::HasOne<$rel>>::link_one($id, &id));
+            try!(<$resource as ::cargonauts::api::HasOne<$rel>>::link($id, &id));
         } else { return Err(::cargonauts::api::LinkError::Conflict) }
     };
     ($id:expr, $rel_id:expr, $resource:ty, $rel:ty, "has-many") => {
         if let ::cargonauts::router::RelationshipId::Many(ref ids) = *$rel_id {
             let ids = try!(ids.into_iter().map(|id| id.parse().or(Err(::cargonauts::api::LinkError::Conflict))).collect::<Result<Vec<_>, _>>());
-            try!(<$resource as ::cargonauts::api::HasMany<$rel>>::link_many($id, &ids));
+            try!(<$resource as ::cargonauts::api::HasMany<$rel>>::link($id, &ids));
         }
     }
 }
@@ -156,9 +156,11 @@ macro_rules! _serialize_relation {
 macro_rules! _methods {
     ($router:expr, $resource:ty, ["delete", $($method:tt),*] {$($rel:ty, $count:expr);*}) => {
         $router.attach_delete::<$resource>();
+        $(_rel_methods!($router, $resource, $rel, "delete", $count);)*
         _methods!($router, $resource, [$($method),*] {$($rel, $count);*})
     };
     ($router:expr, $resource:ty, ["delete"] {$($rel:ty, $count:expr);*}) => {
+        $(_rel_methods!($router, $resource, $rel, "delete", $count);)*
         $router.attach_delete::<$resource>()
     };
     ($router:expr, $resource:ty, ["get", $($method:tt),*] {$($rel:ty, $count:expr);*}) => {
@@ -207,6 +209,12 @@ macro_rules! _rel_methods {
     };
     ($router:expr, $resource:ty, $rel:ty, "get", "has-many") => {
         $router.attach_get_has_many::<$resource, $rel>();
+    };
+    ($router:expr, $resource:ty, $rel:ty, "delete", "has-one") => {
+        $router.attach_delete_has_one::<$resource, $rel>();
+    };
+    ($router:expr, $resource:ty, $rel:ty, "delete", "has-many") => {
+        $router.attach_delete_has_many::<$resource, $rel>();
     };
     ($router:expr, $resource:ty, $rel:ty, $method:expr, $count:expr) => {
         // TODO handle errors more betterer

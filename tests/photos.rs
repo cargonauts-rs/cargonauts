@@ -51,7 +51,10 @@ impl api::HasMany<Photo> for User {
     fn has_many(id: &Self::Id) -> Vec<Photo> {
         unimplemented!()
     }
-    fn link_many(id: &Self::Id, rel_ids: &[<Photo as api::Resource>::Id]) -> Result<(), api::LinkError> {
+    fn link(id: &Self::Id, rel_ids: &[<Photo as api::Resource>::Id]) -> Result<(), api::LinkError> {
+        unimplemented!()
+    }
+    fn unlink(id: &Self::Id, rel_ids: &[<Photo as api::Resource>::Id]) -> Result<(), api::DeleteError> {
         unimplemented!()
     }
 }
@@ -110,7 +113,10 @@ impl api::HasOne<User> for Photo {
     fn has_one(id: &Self::Id) -> Option<User> {
         unimplemented!()
     }
-    fn link_one(id: &Self::Id, rel_id: &<User as api::Resource>::Id) -> Result<(), api::LinkError> {
+    fn link(id: &Self::Id, rel_id: &<User as api::Resource>::Id) -> Result<(), api::LinkError> {
+        unimplemented!()
+    }
+    fn unlink(id: &Self::Id) -> Result<(), api::DeleteError> {
         unimplemented!()
     }
 }

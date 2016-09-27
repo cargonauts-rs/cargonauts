@@ -183,6 +183,43 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         });
     }
 
+    pub fn attach_delete_has_one<T: api::HasOne<Rel>, Rel: api::Resource>(&mut self) where Resource<Rel>: Wrapper<Rel> {
+        self.router.attach_delete_has_one(T::resource(), Rel::resource(), |id| {
+            let mut response = R::Response::default();
+            let parsed_id = parse_id!(id, response);
+            match <T as api::HasOne<Rel>>::unlink(&parsed_id) {
+                Ok(())                                  => response.set_status(Status::NoContent),
+                Err(api::DeleteError::BadRequest)       => response.set_status(Status::BadRequest),
+                Err(api::DeleteError::Forbidden)        => response.set_status(Status::Forbidden),
+                Err(api::DeleteError::NotFound)         => response.set_status(Status::NotFound),
+                Err(api::DeleteError::InternalError)    => response.set_status(Status::InternalError),
+            }
+            response
+        });
+    }
+
+    pub fn attach_delete_has_many<T: api::HasMany<Rel>, Rel: api::Resource>(&mut self) where Resource<Rel>: Wrapper<Rel> {
+        self.router.attach_delete_has_many(T::resource(), Rel::resource(), |id, rel_ids| {
+            let mut response = R::Response::default();
+            let parsed_id = parse_id!(id, response);
+            let parsed_rel_ids = match rel_ids.iter().map(|s| s.parse()).collect::<Result<Vec<_>, _>>() {
+                Ok(ids) => ids,
+                Err(_)  => {
+                    response.set_status(Status::InternalError);
+                    return response
+                }
+            };
+            match <T as api::HasMany<Rel>>::unlink(&parsed_id, &parsed_rel_ids) {
+                Ok(())                                  => response.set_status(Status::NoContent),
+                Err(api::DeleteError::BadRequest)       => response.set_status(Status::BadRequest),
+                Err(api::DeleteError::Forbidden)        => response.set_status(Status::Forbidden),
+                Err(api::DeleteError::NotFound)         => response.set_status(Status::NotFound),
+                Err(api::DeleteError::InternalError)    => response.set_status(Status::InternalError),
+            }
+            response
+        })
+    }
+
     pub fn attach_get_has_one<T: api::HasOne<Rel>, Rel: api::Resource>(&mut self) where Resource<Rel>: Wrapper<Rel> {
         let Router { ref mut router, base_url } = *self;
         router.attach_get_rel(T::resource(), Rel::resource(), |id| {

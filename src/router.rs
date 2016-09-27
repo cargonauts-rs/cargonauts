@@ -15,6 +15,10 @@ pub trait Router {
         where F: Fn(PostObject) -> Self::Response;
     fn attach_get_rel<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
         where F: Fn(String) -> Self::Response;
+    fn attach_delete_has_one<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
+        where F: Fn(String) -> Self::Response;
+    fn attach_delete_has_many<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
+        where F: Fn(String, Vec<String>) -> Self::Response;
     fn base_url(&self) -> &'static str;
 }
 

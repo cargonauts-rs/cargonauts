@@ -81,7 +81,7 @@ Some of many things still left todo:
  - [ ] HEAD requests
  - [X] GET relationships
  - [ ] POST/PATCH relationships
- - [ ] DELETE relationships
+ - [X] DELETE relationships
  - [ ] Raw methods
  - [ ] Sparse fieldsets
  - [ ] Pagination
