@@ -101,13 +101,13 @@ macro_rules! _link_relation {
     ($id:expr, $rel_id:expr, $resource:ty, $rel:ty, "has-one") => {
         if let ::cargonauts::router::RelationshipId::One(ref id) = *$rel_id {
             let id = try!(id.parse().or(Err(::cargonauts::api::LinkError::Conflict)));
-            try!(<$resource as ::cargonauts::api::HasOne<$rel>>::link($id, &id));
+            try!(<$resource as ::cargonauts::api::UpdateOne<$rel>>::link($id, &id));
         } else { return Err(::cargonauts::api::LinkError::Conflict) }
     };
     ($id:expr, $rel_id:expr, $resource:ty, $rel:ty, "has-many") => {
         if let ::cargonauts::router::RelationshipId::Many(ref ids) = *$rel_id {
             let ids = try!(ids.into_iter().map(|id| id.parse().or(Err(::cargonauts::api::LinkError::Conflict))).collect::<Result<Vec<_>, _>>());
-            try!(<$resource as ::cargonauts::api::HasMany<$rel>>::link($id, &ids));
+            try!(<$resource as ::cargonauts::api::UpdateMany<$rel>>::link($id, &ids));
         }
     }
 }

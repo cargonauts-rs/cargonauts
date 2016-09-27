@@ -1,5 +1,9 @@
 use std::str::FromStr;
 
+mod rel;
+
+pub use self::rel::*;
+
 use Deserialize;
 use Serialize;
 
@@ -28,18 +32,6 @@ pub trait Patch: Resource + Serialize {
 
 pub trait Post: Resource + Serialize + Deserialize {
     fn post(self) -> Result<Option<Self>, PostError>;
-}
-
-pub trait HasOne<T: Resource>: Resource {
-    fn has_one(id: &Self::Id) -> Option<T>;
-    fn link(id: &Self::Id, rel_id: &T::Id) -> Result<(), LinkError>;
-    fn unlink(id: &Self::Id) -> Result<(), DeleteError>;
-}
-
-pub trait HasMany<T: Resource>: Resource {
-    fn has_many(id: &Self::Id) -> Vec<T>;
-    fn link(id: &Self::Id, rel_ids: &[T::Id]) -> Result<(), LinkError>;
-    fn unlink(id: &Self::Id, rel_ids: &[T::Id]) -> Result<(), DeleteError>;
 }
 
 pub enum DeleteError {
