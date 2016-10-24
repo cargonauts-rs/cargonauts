@@ -6,14 +6,8 @@
 //! other than the expansion of the `routes!` macro. Using one of these types directly is
 //! **always** a mistake.
 mod document;
-mod identifier;
-mod links;
 mod rels;
-mod resource;
 mod router;
-mod wrapper;
 
-pub use self::rels::{HasOne, HasMany};
-pub use self::resource::Resource;
-pub use self::router::Router;
-pub use self::wrapper::Wrapper;
+pub use self::rels::{_FetchRels, _UpdateRels};
+pub use self::router::Router as _Router;

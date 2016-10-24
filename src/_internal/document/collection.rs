@@ -1,35 +1,27 @@
-use api;
+use api::raw::{Include, RawFetch, ResourceObject};
+use BASE_URL;
 use Serialize;
 use Serializer;
-use Value;
-use _internal::{Resource, Wrapper};
-use _internal::links::{make_link, LinkObject};
+use links::{make_link, LinkObject};
 
-pub struct CollectionDocument<T: api::Resource> where Resource<T>: Wrapper<T> {
-    resources: Vec<Resource<T>>,
-    included: Vec<Value>,
+pub struct CollectionDocument<T: RawFetch> {
+    resources: Vec<ResourceObject<T>>,
+    included: Vec<Include>,
     self_link: String,
 }
 
-impl<T> CollectionDocument<T> where T: api::Resource, Resource<T>: Wrapper<T> {
-    pub fn new(resources: Vec<T>, params: &[String], base_url: &str) -> CollectionDocument<T> {
-        let wrapped_resources = resources.into_iter().map(|resource| {
-            Resource::wrap(resource, base_url)
-        }).collect::<Vec<_>>();
-
-        let included = wrapped_resources.iter().flat_map(|resource| {
-            resource.include(params, base_url)
-        }).collect();
-
+impl<T> CollectionDocument<T> where T: RawFetch {
+    pub fn new(resources: Vec<ResourceObject<T>>, included: Vec<Include>) -> CollectionDocument<T> {
+        let self_link = make_link(&[BASE_URL, T::resource_plural()]);
         CollectionDocument {
-            resources: wrapped_resources,
+            resources: resources,
             included: included,
-            self_link: make_link(&[base_url, T::resource()]),
+            self_link: self_link,
         }
     }
 }
 
-impl<T> Serialize for CollectionDocument<T> where T: api::Resource, Resource<T>: Wrapper<T> {
+impl<T> Serialize for CollectionDocument<T> where T: RawFetch {
     fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
         if self.included.is_empty() {
             let mut state = try!(serializer.serialize_map(Some(2)));

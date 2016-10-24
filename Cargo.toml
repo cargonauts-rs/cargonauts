@@ -1,11 +1,12 @@
 [package]
 authors = ["Without Boats <woboats@gmail.com>"]
-name = "cargonauts"
-version = "0.1.0"
-license = "MIT OR Apache-2.0"
-repository = "https://github.com/withoutboats/cargonauts"
 description = "cargonauts - easy REST API in Rust"
+license = "MIT OR Apache-2.0"
+name = "cargonauts"
+repository = "https://github.com/withoutboats/cargonauts"
+version = "0.1.0"
 
 [dependencies]
+itertools = "0.5.2"
 serde = "0.8.8"
 serde_json = "0.8.2"

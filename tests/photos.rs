@@ -6,11 +6,11 @@ extern crate cargonauts;
 use cargonauts::api;
 
 routes! {
-    resource User => ["get", "patch"] {
-        related Photo: "has-many";
+    resource User: [get, patch] {
+        has many Photo: [fetch, append];
     }
-    resource Photo => ["get", "index", "post", "delete"] {
-        related User: "has-one";
+    resource Photo: [get, index, post, delete] {
+        has one User: [fetch];
     }
 }
 
@@ -25,42 +25,39 @@ impl cargonauts::Serialize for User {
 impl api::Resource for User {
     type Id = u32;
 
-    fn id(&self) -> u32 {
-        unimplemented!()
-    }
+    fn id(&self) -> u32 { unimplemented!() }
 
-    fn resource() -> &'static str {
-        "user"
-    }
+    fn resource() -> &'static str { "user" }
+    fn resource_plural() -> &'static str { "users" }
 }
 
 impl api::Get for User {
-    fn get(id: Self::Id) -> Option<User> {
+    fn get(id: &u32) -> api::Result<User> {
         unimplemented!()
     }
 }
 
 impl api::Patch for User {
     type Patch = ();
-    fn patch(id: Self::Id, patch: Self::Patch) -> Result<Option<User>, api::PatchError> {
+    fn patch(id: &u32, patch: Self::Patch) -> api::Result<User> {
         unimplemented!()
     }
 }
 
-impl api::HasMany<Photo> for User {
-    fn has_many(id: &Self::Id) -> Vec<Photo> {
+impl api::rel::HasMany<Photo> for User {
+    fn has_many(id: &u32) -> api::Result<Vec<u32>> {
         unimplemented!()
     }
 }
 
-impl api::UpdateMany<Photo> for User {
-    fn link(id: &Self::Id, rel_ids: &[<Photo as api::Resource>::Id]) -> Result<(), api::LinkError> {
+impl api::rel::AppendLinks<Photo> for User {
+    fn append_links(id: &u32, rel_ids: &[u32]) -> api::Result<()> {
         unimplemented!()
     }
 }
 
-impl api::DeleteMany<Photo> for User {
-    fn unlink(id: &Self::Id, rel_ids: &[<Photo as api::Resource>::Id]) -> Result<(), api::DeleteError> {
+impl api::rel::ReplaceLinks<Photo> for User {
+    fn replace_links(id: &u32, rel_ids: &[u32]) -> api::Result<()> {
         unimplemented!()
     }
 }
@@ -86,52 +83,69 @@ impl api::Resource for Photo {
         unimplemented!()
     }
 
-    fn resource() -> &'static str {
-        "photo"
-    }
+    fn resource() -> &'static str { "photo" }
+    fn resource_plural() -> &'static str { "photos" }
 }
 
 impl api::Delete for Photo {
-    fn delete(id: Self::Id) -> Result<(), api::DeleteError> {
+    fn delete(id: &u32) -> api::Result<()> {
         unimplemented!()
     }
 }
 
 impl api::Get for Photo {
-    fn get(id: Self::Id) -> Option<Photo> {
+    fn get(id: &u32) -> api::Result<Photo> {
         unimplemented!()
     }
 }
 
 impl api::Index for Photo {
-    fn index() -> Vec<Photo> {
+    fn index() -> api::Result<Vec<Photo>> {
         unimplemented!()
     }
 }
 
 impl api::Post for Photo {
-    fn post(self) -> Result<Option<Photo>, api::PostError> {
+    fn post(self) -> api::Result<Photo> {
         unimplemented!()
     }
 }
 
-impl api::HasOne<User> for Photo {
-    fn has_one(id: &Self::Id) -> Option<User> {
+impl api::rel::HasOne<User> for Photo {
+    fn has_one(id: &u32) -> api::Result<Option<u32>> {
         unimplemented!()
     }
 }
 
-impl api::UpdateOne<User> for Photo {
-    fn link(id: &Self::Id, rel_id: &<User as api::Resource>::Id) -> Result<(), api::LinkError> {
+impl api::rel::LinkOne<User> for Photo {
+    fn link_one(id: &u32, rel_id: &u32) -> api::Result<()> {
         unimplemented!()
     }
 }
 
-impl api::DeleteOne<User> for Photo {
-    fn unlink(id: &Self::Id) -> Result<(), api::DeleteError> {
+impl api::rel::UnlinkOne<User> for Photo {
+    fn unlink_one(id: &u32) -> api::Result<()> {
         unimplemented!()
     }
 }
 
 #[test]
 fn it_compiles() { }
+
+#[test]
+fn it_has_attached_routes() {
+    use cargonauts::router::mock::MockRouter;
+    
+    const USERS_ROUTES: &'static [&'static str] = &["get", "patch"];
+    const PHOTOS_ROUTES: &'static [&'static str] = &["get", "index", "post", "delete"];
+    const USERS_PHOTOS_ROUTES: &'static [&'static str] = &["fetch-one", "fetch-rel", "append", "append-links"];
+    const PHOTOS_USER_ROUTES: &'static [&'static str] = &["fetch-many", "fetch-rel"];
+
+    let mut router = MockRouter::new();
+    attach_routes(&mut router);
+
+    assert_eq!(&router.methods_for("users")[..], USERS_ROUTES);
+    assert_eq!(&router.methods_for("photos")[..], PHOTOS_ROUTES);
+    assert_eq!(&router.methods_for_rel("users", "photos")[..], USERS_PHOTOS_ROUTES);
+    assert_eq!(&router.methods_for_rel("photos", "user")[..], PHOTOS_USER_ROUTES);
+}

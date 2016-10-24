@@ -18,17 +18,17 @@ using the `routes!` macro, like this:
 
 ```rust
 routes! {
-    resource User => ["get", "put", "patch"] {
-        related Post: "has-many";
-        related Comment: "has-many";
+    resource User => [Get, Put, Patch] {
+        has many Post;
+        has many Comment;
     }
-    resource Post => ["get", "index", "put", "patch"] {
-        related User: "has-one";
-        related Comment: "has-many";
+    resource Post => [Get, Index, Put, Patch] {
+        has one User;
+        has many Comment;
     }
-    resource Comment => ["index", "put"] {
-        related User: "has-one";
-        related Post: "has-one";
+    resource Comment => [Index, Put] {
+        has one User;
+        has one Post;
     }
 }
 ```
@@ -70,9 +70,7 @@ Some of many things still left todo:
  - [X] INDEX resource
  - [ ] Filter
  - [X] POST resource
- - [ ] POST resource without object
  - [ ] POST resource with UUID
- - [X] POST resource returning NoContent
  - [ ] POST resource with included relationship objects??
  - [X] PATCH resource
  - [ ] POST-ASYNC resource
@@ -80,7 +78,7 @@ Some of many things still left todo:
  - [X] DELETE requests
  - [ ] HEAD requests
  - [X] GET relationships
- - [ ] POST/PATCH relationships
+ - [X] POST/PATCH relationships
  - [X] DELETE relationships
  - [ ] Raw methods
  - [ ] Sparse fieldsets
