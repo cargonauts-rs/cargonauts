@@ -15,8 +15,8 @@ pub trait RawPatch: RawUpdate {
 impl<T> RawPatch for T where T: Patch + _UpdateRels {
     type Patch = <Self as Patch>::Patch;
     fn patch(id: Self::Id, patch: Self::Patch, rels: <Self as RawUpdate>::Relationships) -> Result<PatchResponse<Self>, Error> {
-        let entity = Entity::Resource(try!(<T as Patch>::patch(&id, patch)));
-        let relationships = try!(<T as _UpdateRels>::update_rels(&entity, rels));
+        let entity = Entity::Resource(<T as Patch>::patch(&id, patch)?);
+        let relationships = <T as _UpdateRels>::update_rels(&entity, rels)?;
         let resource = match entity {
             Entity::Resource(resource)  => resource,
             _                           => unreachable!()

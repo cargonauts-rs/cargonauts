@@ -10,8 +10,8 @@ where T:             HasOne<Rel> + UnlinkOne<Rel>,
       Rel:           Relation,
       Rel::Resource: Delete {
     fn delete_one(entity: &Entity<Self>) -> Result<(), Error> {
-        if let Some(rel_id) = try!(<T as HasOne<Rel>>::has_one(entity)) {
-            try!(<Rel::Resource as Delete>::delete(&rel_id));
+        if let Some(rel_id) = <T as HasOne<Rel>>::has_one(entity)? {
+            <Rel::Resource as Delete>::delete(&rel_id)?;
             <T as UnlinkOne<Rel>>::unlink_one(entity)
         } else { Ok(()) }
     }
@@ -26,9 +26,9 @@ where T:             HasMany<Rel> + RemoveLinks<Rel>,
       Rel:           Relation,
       Rel::Resource: Delete {
     fn remove_many(entity: &Entity<Self>, rel_ids: &[RelationId<Rel::Resource>]) -> Result<(), Error> {
-        let rel_ids: Vec<_> = try!(<T as HasMany<Rel>>::has_many(entity)).into_iter().filter(|id| rel_ids.contains(id)).collect();
+        let rel_ids: Vec<_> = <T as HasMany<Rel>>::has_many(entity)?.into_iter().filter(|id| rel_ids.contains(id)).collect();
         for id in &rel_ids {
-            try!(<Rel::Resource as Delete>::delete(id));
+            <Rel::Resource as Delete>::delete(id)?;
         }
         <T as RemoveLinks<Rel>>::unlink_many(entity, &rel_ids)
     }
@@ -43,8 +43,8 @@ where T:             HasMany<Rel> + ClearLinks<Rel>,
       Rel:           Relation,
       Rel::Resource: Delete {
     fn clear_many(entity: &Entity<Self>) -> Result<(), Error> {
-        for id in try!(<T as HasMany<Rel>>::has_many(entity)) {
-            try!(<Rel::Resource as Delete>::delete(&id));
+        for id in <T as HasMany<Rel>>::has_many(entity)? {
+            <Rel::Resource as Delete>::delete(&id)?;
         }
         <T as ClearLinks<Rel>>::unlink_all(entity)
     }

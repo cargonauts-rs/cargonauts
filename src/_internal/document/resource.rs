@@ -24,26 +24,26 @@ impl<T> ResourceDocument<T> where T: RawFetch {
 impl<T> Serialize for ResourceDocument<T> where T: RawFetch {
     fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
         if self.included.is_empty() {
-            let mut state = try!(serializer.serialize_map(Some(2)));
-            try!(serializer.serialize_map_key(&mut state, "data"));
-            try!(serializer.serialize_map_value(&mut state, &self.resource));
-            try!(serializer.serialize_map_key(&mut state, "links"));
-            try!(serializer.serialize_map_value(&mut state, LinkObject {
+            let mut state = serializer.serialize_map(Some(2))?;
+            serializer.serialize_map_key(&mut state, "data")?;
+            serializer.serialize_map_value(&mut state, &self.resource)?;
+            serializer.serialize_map_key(&mut state, "links")?;
+            serializer.serialize_map_value(&mut state, LinkObject {
                 self_link: Some(&self.self_link),
                 related_link: None,
-            }));
+            })?;
             serializer.serialize_map_end(state)
         } else {
-            let mut state = try!(serializer.serialize_map(Some(3)));
-            try!(serializer.serialize_map_key(&mut state, "data"));
-            try!(serializer.serialize_map_value(&mut state, &self.resource));
-            try!(serializer.serialize_map_key(&mut state, "included"));
-            try!(serializer.serialize_map_value(&mut state, &self.included));
-            try!(serializer.serialize_map_key(&mut state, "links"));
-            try!(serializer.serialize_map_value(&mut state, LinkObject {
+            let mut state = serializer.serialize_map(Some(3))?;
+            serializer.serialize_map_key(&mut state, "data")?;
+            serializer.serialize_map_value(&mut state, &self.resource)?;
+            serializer.serialize_map_key(&mut state, "included")?;
+            serializer.serialize_map_value(&mut state, &self.included)?;
+            serializer.serialize_map_key(&mut state, "links")?;
+            serializer.serialize_map_value(&mut state, LinkObject {
                 self_link: Some(&self.self_link),
                 related_link: None,
-            }));
+            })?;
             serializer.serialize_map_end(state)
         }
     }

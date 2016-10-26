@@ -14,8 +14,8 @@ pub trait RawGet: RawFetch {
 
 impl<T> RawGet for T where T: Get + _FetchRels {
     fn get(id: Self::Id, includes: &[String]) -> Result<GetResponse<T>, Error> {
-        let entity = Entity::Resource(try!(<T as Get>::get(&id)));
-        let (rels, includes) = try!(<T as _FetchRels>::rels(&entity, &includes));
+        let entity = Entity::Resource(<T as Get>::get(&id)?);
+        let (rels, includes) = <T as _FetchRels>::rels(&entity, &includes)?;
         let includes = includes.into_iter()
             .unique_by(|include| (include.id.clone(), include.resource))
             .collect();

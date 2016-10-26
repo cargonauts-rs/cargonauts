@@ -25,9 +25,9 @@ impl RelDocument {
 
 impl Serialize for RelDocument {
     fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
-        let mut state = try!(serializer.serialize_map(Some(3)));
-        try!(serializer.serialize_map_key(&mut state, "links"));
-        try!(serializer.serialize_map_value(&mut state, LinkObject {
+        let mut state = serializer.serialize_map(Some(3))?;
+        serializer.serialize_map_key(&mut state, "links")?;
+        serializer.serialize_map_value(&mut state, LinkObject {
             self_link: Some(&make_link(&[
                 BASE_URL,
                 self.base_resource,
@@ -41,18 +41,18 @@ impl Serialize for RelDocument {
                 &self.base_id,
                 self.relation,
             ])),
-        }));
-        try!(serializer.serialize_map_key(&mut state, "data"));
+        })?;
+        serializer.serialize_map_key(&mut state, "data")?;
         match self.rel {
             Relationship::One(ref identifier)   => {
-                try!(serializer.serialize_map_value(&mut state, identifier));
+                serializer.serialize_map_value(&mut state, identifier)?;
             }
             Relationship::Many(ref identifiers) => {
-                try!(serializer.serialize_map_value(&mut state, identifiers));
+                serializer.serialize_map_value(&mut state, identifiers)?;
             }
         }
-        try!(serializer.serialize_map_key(&mut state, "jsonapi"));
-        try!(serializer.serialize_map_value(&mut state, JsonApi));
+        serializer.serialize_map_key(&mut state, "jsonapi")?;
+        serializer.serialize_map_value(&mut state, JsonApi)?;
         serializer.serialize_map_end(state)
     }
 }

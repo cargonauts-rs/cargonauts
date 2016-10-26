@@ -16,9 +16,9 @@ impl<T> RawIndex for T where T: Index + _FetchRels {
     fn index(includes: &[String]) -> Result<IndexResponse<Self>, Error> {
         let mut resources = vec![];
         let mut include_objects = vec![];
-        for resource in try!(<T as Index>::index()) {
+        for resource in <T as Index>::index()? {
             let entity = Entity::Resource(resource);
-            let (rels, incls) = try!(<T as _FetchRels>::rels(&entity, includes));
+            let (rels, incls) = <T as _FetchRels>::rels(&entity, includes)?;
             let resource = match entity {
                 Entity::Resource(resource)  => resource,
                 _                           => unreachable!()

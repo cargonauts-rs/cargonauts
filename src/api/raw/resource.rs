@@ -40,38 +40,38 @@ impl<T: RawFetch> Serialize for ResourceRepr<T> {
     fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
         let id = self.id.to_string();
         if self.relationships.count() == 0 {
-            let mut state = try!(serializer.serialize_map(Some(4)));
-            try!(serializer.serialize_map_key(&mut state, "id"));
-            try!(serializer.serialize_map_value(&mut state, &id));
-            try!(serializer.serialize_map_key(&mut state, "type"));
-            try!(serializer.serialize_map_value(&mut state, T::resource()));
-            try!(serializer.serialize_map_key(&mut state, "attributes"));
-            try!(serializer.serialize_map_value(&mut state, &self.attributes));
-            try!(serializer.serialize_map_key(&mut state, "links"));
-            try!(serializer.serialize_map_value(&mut state, LinkObject {
+            let mut state = serializer.serialize_map(Some(4))?;
+            serializer.serialize_map_key(&mut state, "id")?;
+            serializer.serialize_map_value(&mut state, &id)?;
+            serializer.serialize_map_key(&mut state, "type")?;
+            serializer.serialize_map_value(&mut state, T::resource())?;
+            serializer.serialize_map_key(&mut state, "attributes")?;
+            serializer.serialize_map_value(&mut state, &self.attributes)?;
+            serializer.serialize_map_key(&mut state, "links")?;
+            serializer.serialize_map_value(&mut state, LinkObject {
                 self_link: Some(&make_link(&[BASE_URL, T::resource_plural(), &id])),
                 related_link: None,
-            }));
+            })?;
             serializer.serialize_map_end(state)
         } else {
-            let mut state = try!(serializer.serialize_map(Some(5)));
-            try!(serializer.serialize_map_key(&mut state, "id"));
-            try!(serializer.serialize_map_value(&mut state, &id));
-            try!(serializer.serialize_map_key(&mut state, "type"));
-            try!(serializer.serialize_map_value(&mut state, T::resource()));
-            try!(serializer.serialize_map_key(&mut state, "attributes"));
-            try!(serializer.serialize_map_value(&mut state, &self.attributes));
-            try!(serializer.serialize_map_key(&mut state, "relationships"));
-            try!(serializer.serialize_map_value(&mut state, SerializeRelationships {
+            let mut state = serializer.serialize_map(Some(5))?;
+            serializer.serialize_map_key(&mut state, "id")?;
+            serializer.serialize_map_value(&mut state, &id)?;
+            serializer.serialize_map_key(&mut state, "type")?;
+            serializer.serialize_map_value(&mut state, T::resource())?;
+            serializer.serialize_map_key(&mut state, "attributes")?;
+            serializer.serialize_map_value(&mut state, &self.attributes)?;
+            serializer.serialize_map_key(&mut state, "relationships")?;
+            serializer.serialize_map_value(&mut state, SerializeRelationships {
                 resource: T::resource_plural(),
                 id: &id,
                 relationships: &self.relationships
-            }));
-            try!(serializer.serialize_map_key(&mut state, "links"));
-            try!(serializer.serialize_map_value(&mut state, LinkObject {
+            })?;
+            serializer.serialize_map_key(&mut state, "links")?;
+            serializer.serialize_map_value(&mut state, LinkObject {
                 self_link: Some(&make_link(&[BASE_URL, T::resource_plural(), &id])),
                 related_link: None,
-            }));
+            })?;
             serializer.serialize_map_end(state)
         }
     }

@@ -13,8 +13,8 @@ where T:                LinkOne<Rel>,
       Rel::Resource:    RawPost,
       <Rel::Resource as Resource>::Repr: Deserialize {
     fn post_one(entity: &Entity<Self>, post: <Rel::Resource as Resource>::Repr, rels: <Rel::Resource as RawUpdate>::Relationships) -> Result<PostResponse<Rel::Resource>> {
-        let response = try!(RawPost::post(post, rels));
-        try!(<T as LinkOne<Rel>>::link_one(entity, &response.resource.id));
+        let response = RawPost::post(post, rels)?;
+        <T as LinkOne<Rel>>::link_one(entity, &response.resource.id)?;
         Ok(response)
     }
 }
@@ -29,9 +29,9 @@ where T:                AppendLinks<Rel>,
       Rel::Resource:    RawPost,
       <Rel::Resource as Resource>::Repr: Deserialize {
     fn append(entity: &Entity<Self>, post: <Rel::Resource as Resource>::Repr, rels: <Rel::Resource as RawUpdate>::Relationships) -> Result<PostResponse<Rel::Resource>> {
-        let response: PostResponse<Rel::Resource> = try!(RawPost::post(post, rels));
+        let response: PostResponse<Rel::Resource> = RawPost::post(post, rels)?;
         let rel_id = response.resource.id.clone();
-        try!(<T as AppendLinks<Rel>>::append_links(entity, &[rel_id]));
+        <T as AppendLinks<Rel>>::append_links(entity, &[rel_id])?;
         Ok(response)
     }
 }

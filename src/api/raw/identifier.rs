@@ -38,11 +38,11 @@ impl<'a, T: RawFetch> From<&'a ResourceObject<T>> for Identifier {
 
 impl Serialize for Identifier {
     fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
-        let mut state = try!(serializer.serialize_map(Some(2)));
-        try!(serializer.serialize_map_key(&mut state, "id"));
-        try!(serializer.serialize_map_value(&mut state, &self.id));
-        try!(serializer.serialize_map_key(&mut state, "type"));
-        try!(serializer.serialize_map_value(&mut state, self.resource));
+        let mut state = serializer.serialize_map(Some(2))?;
+        serializer.serialize_map_key(&mut state, "id")?;
+        serializer.serialize_map_value(&mut state, &self.id)?;
+        serializer.serialize_map_key(&mut state, "type")?;
+        serializer.serialize_map_value(&mut state, self.resource)?;
         serializer.serialize_map_end(state)
     }
 }

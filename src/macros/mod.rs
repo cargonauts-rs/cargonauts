@@ -64,7 +64,7 @@ macro_rules! _resource {
 
         impl $crate::_internal::_UpdateRels for $resource {
             fn update_rels(id: &$crate::api::Entity<Self>, rels: UpdateRelationships) -> Result<Relationships, $crate::api::Error> {
-                let (mut current_rels, _) = try!(<$resource as $crate::_internal::_FetchRels>::rels(id, &[]));
+                let (mut current_rels, _) = <$resource as $crate::_internal::_FetchRels>::rels(id, &[])?;
                 $(
                     if let Some(rel) = rels.$rel {
                         _link_rel!(id, rel, $resource, $rel, $count);
@@ -262,7 +262,7 @@ macro_rules! _rel_methods {
 macro_rules! _fetch_rel {
     ($id:expr, $includes:expr, $includes_out:expr, $resource:ty, $rel:ty, one) => {
         if $includes.iter().any(|include| include == _name_rel!($rel, one)) {
-            match try!(<$resource as $crate::api::rel::raw::FetchOne<$rel>>::fetch_one($id, &[])) {
+            match <$resource as $crate::api::rel::raw::FetchOne<$rel>>::fetch_one($id, &[])? {
                 Some(response)  => {
                     let identifier = $crate::api::raw::Identifier::from(&response.resource);
                     $includes_out.push(response.resource.into());
@@ -273,7 +273,7 @@ macro_rules! _fetch_rel {
                 }
             }
         } else {
-            let identifier = match try!(<$resource as $crate::api::rel::HasOne<$rel>>::has_one($id)) {
+            let identifier = match <$resource as $crate::api::rel::HasOne<$rel>>::has_one($id)? {
                 Some(id)    => {
                     Some($crate::api::raw::Identifier::new::<<$rel as $crate::api::rel::Relation>::Resource>(&id))
                 }
@@ -284,12 +284,12 @@ macro_rules! _fetch_rel {
     };
     ($id:expr, $includes:expr, $includes_out:expr, $resource:ty, $rel:ty, many) => {
         if $includes.iter().any(|include| include == _name_rel!($rel, many)) {
-            let response = try!(<$resource as $crate::api::rel::raw::FetchMany<$rel>>::fetch_many($id, &[]));
+            let response = <$resource as $crate::api::rel::raw::FetchMany<$rel>>::fetch_many($id, &[])?;
             let identifiers = response.resources.iter().map($crate::api::raw::Identifier::from).collect();
             $includes_out.extend(response.resources.into_iter().map(Into::into));
             $crate::api::raw::Relationship::Many(identifiers)
         } else {
-            let ids = try!(<$resource as $crate::api::rel::HasMany<$rel>>::has_many($id));
+            let ids = <$resource as $crate::api::rel::HasMany<$rel>>::has_many($id)?;
             let identifiers = ids.iter().map($crate::api::raw::Identifier::new::<<$rel as $crate::api::rel::Relation>::Resource>).collect();
             $crate::api::raw::Relationship::Many(identifiers)
         }
@@ -301,12 +301,12 @@ macro_rules! _link_rel {
     ($id:expr, $rel_obj:expr, $resource:ty, $rel:ty, one)   => {
         match $rel_obj {
             $crate::api::raw::Relationship::One(Some(ref identifier)) => {
-                let rel_id = try!(identifier.id.parse().or(Err($crate::api::Error::BadRequest)));
-                try!(<$resource as $crate::_internal::_MaybeLinkOne<$rel>>::link_one($id, &rel_id));
+                let rel_id = identifier.id.parse().or(Err($crate::api::Error::BadRequest))?;
+                <$resource as $crate::_internal::_MaybeLinkOne<$rel>>::link_one($id, &rel_id)?;
 
             }
             $crate::api::raw::Relationship::One(None)           => {
-                try!(<$resource as $crate::_internal::_MaybeUnlinkOne<$rel>>::unlink_one($id));
+                <$resource as $crate::_internal::_MaybeUnlinkOne<$rel>>::unlink_one($id)?;
             }
             $crate::api::raw::Relationship::Many(_)             => {
                 return Err($crate::api::Error::BadRequest);
@@ -319,8 +319,8 @@ macro_rules! _link_rel {
                 return Err($crate::api::Error::BadRequest);
             }
             $crate::api::raw::Relationship::Many(ref identifiers)   => {
-                let rel_ids = try!(identifiers.iter().map(|identifier| identifier.id.parse().or(Err($crate::api::Error::BadRequest))).collect::<Result<Vec<_>, _>>());
-                try!(<$resource as $crate::_internal::_MaybeReplaceLinks<$rel>>::replace_links($id, &rel_ids));
+                let rel_ids = identifiers.iter().map(|identifier| identifier.id.parse().or(Err($crate::api::Error::BadRequest))).collect::<Result<Vec<_>, _>>()?;
+                <$resource as $crate::_internal::_MaybeReplaceLinks<$rel>>::replace_links($id, &rel_ids)?;
             }
         }
     };

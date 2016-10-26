@@ -14,7 +14,7 @@ where T:                HasOne<Rel>,
       Rel::Resource:    RawPatch {
     type Patch = <<Rel as Relation>::Resource as RawPatch>::Patch;
     fn patch_one(entity: &Entity<Self>, patch: Self::Patch, rels: <Rel::Resource as RawUpdate>::Relationships) -> Result<Option<PatchResponse<Rel::Resource>>, Error> {
-        if let Some(id) = try!(<T as HasOne<Rel>>::has_one(entity)) {
+        if let Some(id) = <T as HasOne<Rel>>::has_one(entity)? {
             <Rel::Resource as RawPatch>::patch(id, patch, rels).map(Some)
         } else { Ok(None) }
     }

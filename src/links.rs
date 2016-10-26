@@ -22,14 +22,14 @@ impl<'a> LinkObject<'a> {
 
 impl<'a> Serialize for LinkObject<'a> {
     fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
-        let mut state = try!(serializer.serialize_map(Some(self.count())));
+        let mut state = serializer.serialize_map(Some(self.count()))?;
         if let Some(self_link) = self.self_link.as_ref() {
-            try!(serializer.serialize_map_key(&mut state, "self"));
-            try!(serializer.serialize_map_value(&mut state, self_link));
+            serializer.serialize_map_key(&mut state, "self")?;
+            serializer.serialize_map_value(&mut state, self_link)?;
         }
         if let Some(related_link) = self.related_link.as_ref() {
-            try!(serializer.serialize_map_key(&mut state, "related"));
-            try!(serializer.serialize_map_value(&mut state, related_link));
+            serializer.serialize_map_key(&mut state, "related")?;
+            serializer.serialize_map_value(&mut state, related_link)?;
         }
         serializer.serialize_map_end(state)
     }

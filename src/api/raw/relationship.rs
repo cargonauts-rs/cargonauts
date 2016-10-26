@@ -128,15 +128,15 @@ pub struct SerializeRelationships<'a, R: FetchRelationships<'a>> {
 
 impl<'a, R> Serialize for SerializeRelationships<'a, R> where R: FetchRelationships<'a> {
     fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
-        let mut state = try!(serializer.serialize_map(Some(self.relationships.count())));
+        let mut state = serializer.serialize_map(Some(self.relationships.count()))?;
         for (name, relationship) in self.relationships.iter() {
-            try!(serializer.serialize_map_key(&mut state, name));
-            try!(serializer.serialize_map_value(&mut state, SerializeRelationship {
+            serializer.serialize_map_key(&mut state, name)?;
+            serializer.serialize_map_value(&mut state, SerializeRelationship {
                 base_resource: self.resource,
                 base_id: self.id,
                 relation: name,
                 relationship: relationship,
-            }));
+            })?;
         }
         serializer.serialize_map_end(state)
     }
@@ -151,9 +151,9 @@ struct SerializeRelationship<'a> {
 
 impl<'a> Serialize for SerializeRelationship<'a> {
     fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
-        let mut state = try!(serializer.serialize_map(Some(2)));
-        try!(serializer.serialize_map_key(&mut state, "links"));
-        try!(serializer.serialize_map_value(&mut state, LinkObject {
+        let mut state = serializer.serialize_map(Some(2))?;
+        serializer.serialize_map_key(&mut state, "links")?;
+        serializer.serialize_map_value(&mut state, LinkObject {
             self_link: Some(&make_link(&[
                 BASE_URL,
                 self.base_resource,
@@ -167,14 +167,14 @@ impl<'a> Serialize for SerializeRelationship<'a> {
                 self.base_id,
                 self.relation,
             ])),
-        }));
-        try!(serializer.serialize_map_key(&mut state, "data"));
+        })?;
+        serializer.serialize_map_key(&mut state, "data")?;
         match *self.relationship {
             Relationship::One(ref identifier)   => {
-                try!(serializer.serialize_map_value(&mut state, identifier));
+                serializer.serialize_map_value(&mut state, identifier)?;
             }
             Relationship::Many(ref identifiers) => {
-                try!(serializer.serialize_map_value(&mut state, identifiers));
+                serializer.serialize_map_value(&mut state, identifiers)?;
             }
         }
         serializer.serialize_map_end(state)
