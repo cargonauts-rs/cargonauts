@@ -84,6 +84,9 @@ Some of many things still left todo:
  - [ ] Sparse fieldsets
  - [ ] Pagination
  - [X] Custom relation names & pluralization issues.
+ - [ ] Full linkage correctness.
+ - [ ] Entry point aliases.
+ - [ ] External relations.
  - [ ] ...much more
 
 ## License
