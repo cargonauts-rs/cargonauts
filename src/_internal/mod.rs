@@ -9,5 +9,5 @@ mod document;
 mod rels;
 mod router;
 
-pub use self::rels::{_FetchRels, _UpdateRels};
+pub use self::rels::{_FetchRels, _UpdateRels, _MaybeLinkOne, _MaybeUnlinkOne, _MaybeReplaceLinks};
 pub use self::router::Router as _Router;

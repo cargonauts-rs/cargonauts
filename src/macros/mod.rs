@@ -302,11 +302,11 @@ macro_rules! _link_rel {
         match $rel_obj {
             $crate::api::raw::Relationship::One(Some(ref identifier)) => {
                 let rel_id = try!(identifier.id.parse().or(Err($crate::api::Error::BadRequest)));
-                try!(<$resource as $crate::api::rel::LinkOne<$rel>>::link_one($id, &rel_id));
+                try!(<$resource as $crate::_internal::_MaybeLinkOne<$rel>>::link_one($id, &rel_id));
 
             }
             $crate::api::raw::Relationship::One(None)           => {
-                try!(<$resource as $crate::api::rel::UnlinkOne<$rel>>::unlink_one($id));
+                try!(<$resource as $crate::_internal::_MaybeUnlinkOne<$rel>>::unlink_one($id));
             }
             $crate::api::raw::Relationship::Many(_)             => {
                 return Err($crate::api::Error::BadRequest);
@@ -320,7 +320,7 @@ macro_rules! _link_rel {
             }
             $crate::api::raw::Relationship::Many(ref identifiers)   => {
                 let rel_ids = try!(identifiers.iter().map(|identifier| identifier.id.parse().or(Err($crate::api::Error::BadRequest))).collect::<Result<Vec<_>, _>>());
-                try!(<$resource as $crate::api::rel::ReplaceLinks<$rel>>::replace_links($id, &rel_ids));
+                try!(<$resource as $crate::_internal::_MaybeReplaceLinks<$rel>>::replace_links($id, &rel_ids));
             }
         }
     };

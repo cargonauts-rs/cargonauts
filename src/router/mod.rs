@@ -75,7 +75,6 @@ pub struct IndexRequest {
     pub includes: Vec<String>,
 }
 
-
 pub struct PatchRequest {
     pub attributes: Value,
     pub relationships: BTreeMap<String, Relationship>,

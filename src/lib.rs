@@ -1,3 +1,5 @@
+#![feature(specialization)]
+
 extern crate itertools;
 extern crate serde;
 extern crate serde_json as json;

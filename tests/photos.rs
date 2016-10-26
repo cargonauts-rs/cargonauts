@@ -58,12 +58,6 @@ impl api::rel::AppendLinks<Photo> for User {
     }
 }
 
-impl api::rel::ReplaceLinks<Photo> for User {
-    fn replace_links(entity: &api::Entity<User>, rel_ids: &[u32]) -> api::Result<()> {
-        unimplemented!()
-    }
-}
-
 struct Photo;
 
 impl cargonauts::Serialize for Photo {
@@ -115,18 +109,6 @@ impl api::Post for Photo {
 
 impl api::rel::HasOne<User> for Photo {
     fn has_one(entity: &api::Entity<Photo>) -> api::Result<Option<u32>> {
-        unimplemented!()
-    }
-}
-
-impl api::rel::LinkOne<User> for Photo {
-    fn link_one(entity: &api::Entity<Photo>, rel_id: &u32) -> api::Result<()> {
-        unimplemented!()
-    }
-}
-
-impl api::rel::UnlinkOne<User> for Photo {
-    fn unlink_one(entity: &api::Entity<Photo>) -> api::Result<()> {
         unimplemented!()
     }
 }
