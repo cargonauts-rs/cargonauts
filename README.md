@@ -80,10 +80,10 @@ Some of many things still left todo:
  - [X] GET relationships
  - [X] POST/PATCH relationships
  - [X] DELETE relationships
- - [ ] Raw methods
+ - [X] Raw methods
  - [ ] Sparse fieldsets
  - [ ] Pagination
- - [ ] Custom relation names & pluralization issues.
+ - [X] Custom relation names & pluralization issues.
  - [ ] ...much more
 
 ## License
