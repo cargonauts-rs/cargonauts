@@ -10,6 +10,11 @@ use links::{LinkObject, make_link};
 use Serialize;
 use Serializer;
 
+#[derive(Clone, Eq, PartialEq, Debug, Default)]
+pub struct RelationshipLinkage {
+    pub linkage: Option<Relationship>,
+}
+
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub enum Relationship {
     One(Option<Identifier>),
@@ -17,7 +22,7 @@ pub enum Relationship {
 }
 
 pub trait FetchRelationships<'a>: 'a {
-    type Iter: Iterator<Item = (&'a str, &'a Relationship)>;
+    type Iter: Iterator<Item = (&'a str, &'a RelationshipLinkage)>;
     fn iter(&'a self) -> Self::Iter;
     fn count(&self) -> usize;
 }
@@ -27,7 +32,7 @@ pub trait UpdateRelationships: Sized {
 }
 
 impl<'a> FetchRelationships<'a> for () {
-    type Iter = Empty<(&'a str, &'a Relationship)>;
+    type Iter = Empty<(&'a str, &'a RelationshipLinkage)>;
 
     fn iter(&'a self) -> Self::Iter {
         iter::empty()
@@ -48,9 +53,9 @@ impl UpdateRelationships for () {
     }
 }
 
-impl<'a> FetchRelationships<'a> for BTreeMap<&'static str, Relationship> {
-    type Iter = Map<BTreeMapIter<'a, &'static str, Relationship>,
-                    fn((&'a &'static str, &'a Relationship)) -> (&'a str, &'a Relationship)>;
+impl<'a> FetchRelationships<'a> for BTreeMap<&'static str, RelationshipLinkage> {
+    type Iter = Map<BTreeMapIter<'a, &'static str, RelationshipLinkage>,
+                    fn((&'a &'static str, &'a RelationshipLinkage)) -> (&'a str, &'a RelationshipLinkage)>;
 
     fn iter(&'a self) -> Self::Iter {
         self.iter().map(deref_str)
@@ -61,9 +66,9 @@ impl<'a> FetchRelationships<'a> for BTreeMap<&'static str, Relationship> {
     }
 }
 
-impl<'a> FetchRelationships<'a> for BTreeMap<String, Relationship> {
-    type Iter = Map<BTreeMapIter<'a, String, Relationship>,
-                    fn((&'a String, &'a Relationship)) -> (&'a str, &'a Relationship)>;
+impl<'a> FetchRelationships<'a> for BTreeMap<String, RelationshipLinkage> {
+    type Iter = Map<BTreeMapIter<'a, String, RelationshipLinkage>,
+                    fn((&'a String, &'a RelationshipLinkage)) -> (&'a str, &'a RelationshipLinkage)>;
 
     fn iter(&'a self) -> Self::Iter {
         self.iter().map(deref_string)
@@ -80,9 +85,9 @@ impl UpdateRelationships for BTreeMap<String, Relationship> {
     }
 }
 
-impl<'a> FetchRelationships<'a> for HashMap<&'static str, Relationship> {
-    type Iter = Map<HashMapIter<'a, &'static str, Relationship>,
-                    fn((&'a &'static str, &'a Relationship)) -> (&'a str, &'a Relationship)>;
+impl<'a> FetchRelationships<'a> for HashMap<&'static str, RelationshipLinkage> {
+    type Iter = Map<HashMapIter<'a, &'static str, RelationshipLinkage>,
+                    fn((&'a &'static str, &'a RelationshipLinkage)) -> (&'a str, &'a RelationshipLinkage)>;
 
     fn iter(&'a self) -> Self::Iter {
         self.iter().map(deref_str)
@@ -93,9 +98,9 @@ impl<'a> FetchRelationships<'a> for HashMap<&'static str, Relationship> {
     }
 }
 
-impl<'a> FetchRelationships<'a> for HashMap<String, Relationship> {
-    type Iter = Map<HashMapIter<'a, String, Relationship>,
-                    fn((&'a String, &'a Relationship)) -> (&'a str, &'a Relationship)>;
+impl<'a> FetchRelationships<'a> for HashMap<String, RelationshipLinkage> {
+    type Iter = Map<HashMapIter<'a, String, RelationshipLinkage>,
+                    fn((&'a String, &'a RelationshipLinkage)) -> (&'a str, &'a RelationshipLinkage)>;
 
     fn iter(&'a self) -> Self::Iter {
         self.iter().map(deref_string)
@@ -112,11 +117,11 @@ impl UpdateRelationships for HashMap<String, Relationship> {
     }
 }
 
-fn deref_str<'a>((&key, val): (&'a &'static str, &'a Relationship)) -> (&'a str, &'a Relationship) {
+fn deref_str<'a>((&key, val): (&'a &'static str, &'a RelationshipLinkage)) -> (&'a str, &'a RelationshipLinkage) {
     (key, val)
 }
 
-fn deref_string<'a>((key, val): (&'a String, &'a Relationship)) -> (&'a str, &'a Relationship) {
+fn deref_string<'a>((key, val): (&'a String, &'a RelationshipLinkage)) -> (&'a str, &'a RelationshipLinkage) {
     (&key[..], val)
 }
 
@@ -146,7 +151,7 @@ struct SerializeRelationship<'a> {
     base_resource: &'static str,
     base_id: &'a str,
     relation: &'a str,
-    relationship: &'a Relationship,
+    relationship: &'a RelationshipLinkage,
 }
 
 impl<'a> Serialize for SerializeRelationship<'a> {
@@ -168,14 +173,16 @@ impl<'a> Serialize for SerializeRelationship<'a> {
                 self.relation,
             ])),
         })?;
-        serializer.serialize_map_key(&mut state, "data")?;
-        match *self.relationship {
-            Relationship::One(ref identifier)   => {
+        match self.relationship.linkage {
+            Some(Relationship::One(ref identifier))     => {
+                serializer.serialize_map_key(&mut state, "data")?;
                 serializer.serialize_map_value(&mut state, identifier)?;
             }
-            Relationship::Many(ref identifiers) => {
+            Some(Relationship::Many(ref identifiers))   => {
+                serializer.serialize_map_key(&mut state, "data")?;
                 serializer.serialize_map_value(&mut state, identifiers)?;
             }
+            None                                        => {}
         }
         serializer.serialize_map_end(state)
     }
@@ -190,12 +197,33 @@ mod tests {
     use Value;
 
     #[test]
+    fn serialize_rel_no_linkage() {
+        let rel = super::SerializeRelationship {
+            base_resource: "base",
+            base_id: "1",
+            relation: "relation",
+            relationship: &RelationshipLinkage::default(),
+        };
+        let expected = {
+            let mut relationship = BTreeMap::new();
+            let mut links = BTreeMap::new();
+            links.insert(String::from("self"), to_value("https://example.org/api/base/1/relationships/relation"));
+            links.insert(String::from("related"), to_value("https://example.org/api/base/1/relation"));
+            relationship.insert(String::from("links"), Value::Object(links));
+            Value::Object(relationship)
+        };
+        assert_eq!(to_value(rel), expected);
+    }
+
+    #[test]
     fn serialize_rel_to_one_empty() {
         let rel = super::SerializeRelationship {
             base_resource: "base",
             base_id: "1",
             relation: "relation",
-            relationship: &Relationship::One(None),
+            relationship: &RelationshipLinkage {
+                linkage: Some(Relationship::One(None)),
+            },
         };
         let expected = {
             let mut relationship = BTreeMap::new();
@@ -215,10 +243,12 @@ mod tests {
             base_resource: "base",
             base_id: "1",
             relation: "relation",
-            relationship: &Relationship::One(Some(Identifier {
-                resource: "related",
-                id: String::from("2"),
-            })),
+            relationship: &RelationshipLinkage {
+                linkage: Some(Relationship::One(Some(Identifier {
+                    resource: "related",
+                    id: String::from("2"),
+                }))),
+            },
         };
         let expected = {
             let mut relationship = BTreeMap::new();
@@ -241,7 +271,7 @@ mod tests {
             base_resource: "base",
             base_id: "1",
             relation: "relation",
-            relationship: &Relationship::Many(vec![]),
+            relationship: &RelationshipLinkage { linkage: Some(Relationship::Many(vec![])) },
         };
         let expected = {
             let mut relationship = BTreeMap::new();
@@ -261,10 +291,12 @@ mod tests {
             base_resource: "base",
             base_id: "1",
             relation: "relation",
-            relationship: &Relationship::Many(vec![Identifier {
-                resource: "related",
-                id: String::from("2"),
-            }]),
+            relationship: &RelationshipLinkage {
+                linkage: Some(Relationship::Many(vec![Identifier {
+                    resource: "related",
+                    id: String::from("2"),
+                }])),
+            },
         };
         let expected = {
             let mut relationship = BTreeMap::new();

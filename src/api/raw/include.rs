@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use api::raw::{RawFetch, FetchRelationships, ResourceObject, Relationship};
+use api::raw::{RawFetch, FetchRelationships, ResourceObject, RelationshipLinkage};
 use api::raw::relationship::SerializeRelationships;
 use BASE_URL;
 use json;
@@ -12,7 +12,7 @@ pub struct Include {
     pub id: String,
     pub resource: &'static str,
     pub attributes: json::Value,
-    pub relationships: BTreeMap<String, Relationship>,
+    pub relationships: BTreeMap<String, RelationshipLinkage>,
 }
 
 impl<T: RawFetch> From<ResourceObject<T>> for Include {

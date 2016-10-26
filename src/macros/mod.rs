@@ -64,21 +64,20 @@ macro_rules! _resource {
 
         impl $crate::_internal::_UpdateRels for $resource {
             fn update_rels(id: &$crate::api::Entity<Self>, rels: UpdateRelationships) -> Result<Relationships, $crate::api::Error> {
-                let (mut current_rels, _) = <$resource as $crate::_internal::_FetchRels>::rels(id, &[])?;
                 $(
                     if let Some(rel) = rels.$rel {
                         _link_rel!(id, rel, $resource, $rel, $count);
-                        current_rels.$rel = rel;
                     };
                 )*
-                Ok(current_rels)
+                Ok(Relationships::default())
             }
         }
 
         #[allow(non_snake_case)]
+        #[derive(Default)]
         struct Relationships {
             $(
-                $rel: $crate::api::raw::Relationship,
+                $rel: $crate::api::raw::RelationshipLinkage,
             )*
         }
 
@@ -103,7 +102,7 @@ macro_rules! _resource {
         }
 
         impl<'a> Iterator for RelationshipsIter<'a> {
-            type Item = (&'a str, &'a $crate::api::raw::Relationship);
+            type Item = (&'a str, &'a $crate::api::raw::RelationshipLinkage);
             fn next(&mut self) -> Option<Self::Item> {
                 match self.state {
                     RelationshipsEnum::Init => $( {
@@ -266,20 +265,20 @@ macro_rules! _fetch_rel {
                 Some(response)  => {
                     let identifier = $crate::api::raw::Identifier::from(&response.resource);
                     $includes_out.push(response.resource.into());
-                    $crate::api::raw::Relationship::One(Some(identifier))
+                    $crate::api::raw::RelationshipLinkage {
+                        linkage: Some($crate::api::raw::Relationship::One(Some(identifier))),
+                    }
                 }
                 None            => {
-                    $crate::api::raw::Relationship::One(None)
+                    $crate::api::raw::RelationshipLinkage {
+                        linkage: Some($crate::api::raw::Relationship::One(None)),
+                    }
                 }
             }
         } else {
-            let identifier = match <$resource as $crate::api::rel::HasOne<$rel>>::has_one($id)? {
-                Some(id)    => {
-                    Some($crate::api::raw::Identifier::new::<<$rel as $crate::api::rel::Relation>::Resource>(&id))
-                }
-                None        => None,
-            };
-            $crate::api::raw::Relationship::One(identifier)
+            $crate::api::raw::RelationshipLinkage {
+                linkage: None,
+            }
         };
     };
     ($id:expr, $includes:expr, $includes_out:expr, $resource:ty, $rel:ty, many) => {
@@ -287,11 +286,13 @@ macro_rules! _fetch_rel {
             let response = <$resource as $crate::api::rel::raw::FetchMany<$rel>>::fetch_many($id, &[])?;
             let identifiers = response.resources.iter().map($crate::api::raw::Identifier::from).collect();
             $includes_out.extend(response.resources.into_iter().map(Into::into));
-            $crate::api::raw::Relationship::Many(identifiers)
+            $crate::api::raw::RelationshipLinkage {
+                linkage: Some($crate::api::raw::Relationship::Many(identifiers)),
+            }
         } else {
-            let ids = <$resource as $crate::api::rel::HasMany<$rel>>::has_many($id)?;
-            let identifiers = ids.iter().map($crate::api::raw::Identifier::new::<<$rel as $crate::api::rel::Relation>::Resource>).collect();
-            $crate::api::raw::Relationship::Many(identifiers)
+            $crate::api::raw::RelationshipLinkage {
+                linkage: None,
+            }
         }
     };
 }
