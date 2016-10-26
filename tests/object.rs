@@ -25,7 +25,9 @@ impl cargonauts::Deserialize for Object {
 
 impl api::Resource for Object {
     type Id = u32;
+    type Repr = Object;
     fn id(&self) -> u32 { unimplemented!() }
+    fn repr(self) -> Object { self }
     fn resource() -> &'static str { "object" }
     fn resource_plural() -> &'static str { "objects" }
 }
@@ -43,7 +45,7 @@ impl api::Index for Object {
 }
 
 impl api::Post for Object {
-    fn post(self) -> api::Result<Object> {
+    fn post(repr: Object) -> api::Result<Object> {
         unimplemented!()
     }
 }

@@ -26,13 +26,13 @@ macro_rules! _resource {
         }
 
         impl $crate::_internal::_FetchRels for $resource {
-            fn rels(_: &Self::Id, _: &[String]) -> Result<(Self::Relationships, Vec<$crate::api::raw::Include>), $crate::api::Error> {
+            fn rels(_: &$crate::api::Entity<Self>, _: &[String]) -> Result<(Self::Relationships, Vec<$crate::api::raw::Include>), $crate::api::Error> {
                 Ok(((), vec![]))
             }
         }
 
         impl $crate::_internal::_UpdateRels for $resource {
-            fn update_rels(_: &Self::Id, rels: ()) -> Result<(), $crate::api::Error> {
+            fn update_rels(_: &$crate::api::Entity<Self>, rels: ()) -> Result<(), $crate::api::Error> {
                 Ok(())
             }
         }
@@ -49,7 +49,7 @@ macro_rules! _resource {
         }
 
         impl $crate::_internal::_FetchRels for $resource {
-            fn rels(id: &Self::Id, includes: &[String]) -> Result<(Self::Relationships, Vec<$crate::api::raw::Include>), $crate::api::Error> {
+            fn rels(id: &$crate::api::Entity<Self>, includes: &[String]) -> Result<(Self::Relationships, Vec<$crate::api::raw::Include>), $crate::api::Error> {
                 let mut include_objects = vec![];
                 let rels = Relationships {
                     $(
@@ -63,7 +63,7 @@ macro_rules! _resource {
         }
 
         impl $crate::_internal::_UpdateRels for $resource {
-            fn update_rels(id: &Self::Id, rels: UpdateRelationships) -> Result<Relationships, $crate::api::Error> {
+            fn update_rels(id: &$crate::api::Entity<Self>, rels: UpdateRelationships) -> Result<Relationships, $crate::api::Error> {
                 let (mut current_rels, _) = try!(<$resource as $crate::_internal::_FetchRels>::rels(id, &[]));
                 $(
                     if let Some(rel) = rels.$rel {

@@ -1,17 +1,17 @@
-use api::raw::{Include, RawFetch, ResourceObject};
+use api::raw::{Include, RawFetch, ResourceRepr};
 use BASE_URL;
 use Serialize;
 use Serializer;
 use links::{make_link, LinkObject};
 
 pub struct CollectionDocument<T: RawFetch> {
-    resources: Vec<ResourceObject<T>>,
+    resources: Vec<ResourceRepr<T>>,
     included: Vec<Include>,
     self_link: String,
 }
 
 impl<T> CollectionDocument<T> where T: RawFetch {
-    pub fn new(resources: Vec<ResourceObject<T>>, included: Vec<Include>) -> CollectionDocument<T> {
+    pub fn new(resources: Vec<ResourceRepr<T>>, included: Vec<Include>) -> CollectionDocument<T> {
         let self_link = make_link(&[BASE_URL, T::resource_plural()]);
         CollectionDocument {
             resources: resources,

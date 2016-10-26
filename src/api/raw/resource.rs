@@ -20,7 +20,23 @@ pub struct ResourceObject<T: RawFetch> {
     pub relationships: <T as RawFetch>::Relationships,
 }
 
-impl<T: RawFetch> Serialize for ResourceObject<T> {
+impl<T: RawFetch> ResourceObject<T> {
+    pub fn repr(self) -> ResourceRepr<T> {
+        ResourceRepr {
+            id: self.id,
+            attributes: self.attributes.repr(),
+            relationships: self.relationships,
+        }
+    }
+}
+
+pub struct ResourceRepr<T: RawFetch> {
+    pub id: <T as Resource>::Id,
+    pub attributes: <T as Resource>::Repr,
+    pub relationships: <T as RawFetch>::Relationships,
+}
+
+impl<T: RawFetch> Serialize for ResourceRepr<T> {
     fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
         let id = self.id.to_string();
         if self.relationships.count() == 0 {

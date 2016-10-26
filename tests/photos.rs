@@ -24,8 +24,10 @@ impl cargonauts::Serialize for User {
 
 impl api::Resource for User {
     type Id = u32;
+    type Repr = User;
 
     fn id(&self) -> u32 { unimplemented!() }
+    fn repr(self) -> User { self }
 
     fn resource() -> &'static str { "user" }
     fn resource_plural() -> &'static str { "users" }
@@ -45,19 +47,19 @@ impl api::Patch for User {
 }
 
 impl api::rel::HasMany<Photo> for User {
-    fn has_many(id: &u32) -> api::Result<Vec<u32>> {
+    fn has_many(entity: &api::Entity<User>) -> api::Result<Vec<u32>> {
         unimplemented!()
     }
 }
 
 impl api::rel::AppendLinks<Photo> for User {
-    fn append_links(id: &u32, rel_ids: &[u32]) -> api::Result<()> {
+    fn append_links(entity: &api::Entity<User>, rel_ids: &[u32]) -> api::Result<()> {
         unimplemented!()
     }
 }
 
 impl api::rel::ReplaceLinks<Photo> for User {
-    fn replace_links(id: &u32, rel_ids: &[u32]) -> api::Result<()> {
+    fn replace_links(entity: &api::Entity<User>, rel_ids: &[u32]) -> api::Result<()> {
         unimplemented!()
     }
 }
@@ -78,10 +80,10 @@ impl cargonauts::Deserialize for Photo {
 
 impl api::Resource for Photo {
     type Id = u32;
+    type Repr = Photo;
 
-    fn id(&self) -> u32 {
-        unimplemented!()
-    }
+    fn id(&self) -> u32 { unimplemented!() }
+    fn repr(self) -> Photo { self }
 
     fn resource() -> &'static str { "photo" }
     fn resource_plural() -> &'static str { "photos" }
@@ -106,25 +108,25 @@ impl api::Index for Photo {
 }
 
 impl api::Post for Photo {
-    fn post(self) -> api::Result<Photo> {
+    fn post(repr: Photo) -> api::Result<Photo> {
         unimplemented!()
     }
 }
 
 impl api::rel::HasOne<User> for Photo {
-    fn has_one(id: &u32) -> api::Result<Option<u32>> {
+    fn has_one(entity: &api::Entity<Photo>) -> api::Result<Option<u32>> {
         unimplemented!()
     }
 }
 
 impl api::rel::LinkOne<User> for Photo {
-    fn link_one(id: &u32, rel_id: &u32) -> api::Result<()> {
+    fn link_one(entity: &api::Entity<Photo>, rel_id: &u32) -> api::Result<()> {
         unimplemented!()
     }
 }
 
 impl api::rel::UnlinkOne<User> for Photo {
-    fn unlink_one(id: &u32) -> api::Result<()> {
+    fn unlink_one(entity: &api::Entity<Photo>) -> api::Result<()> {
         unimplemented!()
     }
 }

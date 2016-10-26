@@ -19,6 +19,7 @@ mod tests {
     use Serialize;
     use Serializer;
 
+    #[derive(Copy, Clone)]
     struct User;
 
     impl Serialize for User {
@@ -27,7 +28,9 @@ mod tests {
 
     impl Resource for User {
         type Id = u32;
+        type Repr = User;
         fn id(&self) -> u32 { unimplemented!() }
+        fn repr(self) -> User { self }
         fn resource() -> &'static str { "user" }
         fn resource_plural() -> &'static str { "users" }
     }

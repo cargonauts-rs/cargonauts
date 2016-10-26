@@ -20,11 +20,18 @@ pub use self::index::Index;
 pub use self::patch::Patch;
 pub use self::post::Post;
 
-pub trait Resource: Serialize + Sized {
+pub trait Resource: Sized {
     type Id: ToString + FromStr + PartialEq + Clone;
+    type Repr: Serialize;
     fn id(&self) -> Self::Id;
+    fn repr(self) -> Self::Repr;
     fn resource() -> &'static str;
     fn resource_plural() -> &'static str;
+}
+
+pub enum Entity<T: Resource> {
+    Id(T::Id),
+    Resource(T),
 }
 
 pub type Result<T> = result::Result<T, Error>;

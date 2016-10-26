@@ -39,7 +39,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
             let id = try_status!(request.id.parse(), response);
             match T::get(id, &request.includes) {
                 Ok(object)      => {
-                    let document = ResourceDocument::new(object.resource, object.includes);
+                    let document = ResourceDocument::new(object.resource.repr(), object.includes);
                     respond_with(document, &mut response);
                 }
                 Err(ref error)  => response.set_status(error.into()),
@@ -53,7 +53,8 @@ impl<'a, R: RouterTrait> Router<'a, R> {
             let mut response = R::Response::default();
             match T::index(&request.includes) {
                 Ok(object)      => {
-                    let document = CollectionDocument::new(object.resources, object.includes);
+                    let reprs = object.resources.into_iter().map(|x| x.repr()).collect();
+                    let document = CollectionDocument::new(reprs, object.includes);
                     respond_with(document, &mut response);
                 }
                 Err(ref error)  => response.set_status(error.into()),
@@ -70,7 +71,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
             let rels = try_status!(<<T as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), response);
             match T::patch(id, patch, rels) {
                 Ok(object)      => {
-                    let document = ResourceDocument::new(object.resource, vec![]);
+                    let document = ResourceDocument::new(object.resource.repr(), vec![]);
                     respond_with(document, &mut response);
                 }
                 Err(ref error)  => response.set_status(error.into()),
@@ -79,14 +80,14 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         });
     }
 
-    pub fn attach_post<T: raw::RawPost>(&mut self) {
+    pub fn attach_post<T: raw::RawPost>(&mut self) where T::Repr: Deserialize {
         self.router.attach_post(T::resource_plural(), |request| {
             let mut response = R::Response::default();
             let post = try_status!(::from_value(request.attributes), response);
             let rels = try_status!(<<T as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), response);
             match T::post(post, rels) {
                 Ok(object)      => {
-                    let document = ResourceDocument::new(object.resource, vec![]);
+                    let document = ResourceDocument::new(object.resource.repr(), vec![]);
                     respond_with(document, &mut response);
                 }
                 Err(ref error)  => response.set_status(error.into()),
@@ -112,9 +113,9 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         self.router.attach_fetch_one(T::resource_plural(), Rel::to_one(), |request| {
             let mut response = R::Response::default();
             let id = try_status!(request.id.parse(), response);
-            match T::fetch_one(&id, &request.includes) {
+            match T::fetch_one(&api::Entity::Id(id), &request.includes) {
                 Ok(Some(object))    => {
-                    let document = ResourceDocument::new(object.resource, object.includes);
+                    let document = ResourceDocument::new(object.resource.repr(), object.includes);
                     respond_with(document, &mut response);
                 }
                 Ok(None)            => {
@@ -133,7 +134,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         self.router.attach_fetch_rel(T::resource_plural(), Rel::to_one(), |id| {
             let mut response = R::Response::default();
             let parsed_id = try_status!(id.parse(), response);
-            match T::has_one(&parsed_id) {
+            match T::has_one(&api::Entity::Id(parsed_id)) {
                 Ok(rel)         => {
                     let rel = raw::Relationship::One(rel.map(|id| raw::Identifier::new::<Rel::Resource>(&id)));
                     let document = RelDocument::new(rel, T::resource_plural(), id, Rel::to_one());
@@ -150,9 +151,10 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         self.router.attach_fetch_many(T::resource_plural(), Rel::to_many(), |request| {
             let mut response = R::Response::default();
             let id = try_status!(request.id.parse(), response);
-            match T::fetch_many(&id, &request.includes) {
+            match T::fetch_many(&api::Entity::Id(id), &request.includes) {
                 Ok(object)     => {
-                    let document = CollectionDocument::new(object.resources, object.includes);
+                    let reprs = object.resources.into_iter().map(|x| x.repr()).collect();
+                    let document = CollectionDocument::new(reprs, object.includes);
                     respond_with(document, &mut response);
                 }
                 Err(ref error)      => response.set_status(error.into()),
@@ -162,7 +164,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         self.router.attach_fetch_rel(T::resource_plural(), Rel::to_many(), |id| {
             let mut response = R::Response::default();
             let parsed_id = try_status!(id.parse(), response);
-            match T::has_many(&parsed_id) {
+            match T::has_many(&api::Entity::Id(parsed_id)) {
                 Ok(rel)         => {
                     let rel = raw::Relationship::Many(rel.into_iter().map(|id| raw::Identifier::new::<Rel::Resource>(&id)).collect());
                     let document = RelDocument::new(rel, T::resource_plural(), id, Rel::to_many());
@@ -178,7 +180,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         self.router.attach_delete_one(T::resource_plural(), Rel::to_one(), |id| {
             let mut response = R::Response::default();
             let id = try_status!(id.parse(), response);
-            match T::delete_one(&id) {
+            match T::delete_one(&api::Entity::Id(id)) {
                 Ok(_)           => response.set_status(Status::NoContent),
                 Err(ref error)  => response.set_status(error.into()),
             }
@@ -187,7 +189,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         self.router.attach_delete_one_rel(T::resource_plural(), Rel::to_one(), |id| {
             let mut response = R::Response::default();
             let parsed_id = try_status!(id.parse(), response);
-            match T::unlink_one(&parsed_id) {
+            match T::unlink_one(&api::Entity::Id(parsed_id)) {
                 Ok(_)           => response.set_status(Status::NoContent),
                 Err(ref error)  => response.set_status(error.into()),
             }
@@ -199,7 +201,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         self.router.attach_clear_many(T::resource_plural(), Rel::to_many(), |id| {
             let mut response = R::Response::default();
             let id = try_status!(id.parse(), response);
-            match T::clear_many(&id) {
+            match T::clear_many(&api::Entity::Id(id)) {
                 Ok(_)           => response.set_status(Status::NoContent),
                 Err(ref error)  => response.set_status(error.into()),
             }
@@ -208,7 +210,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         self.router.attach_clear_many_rel(T::resource_plural(), Rel::to_many(), |id| {
             let mut response = R::Response::default();
             let id = try_status!(id.parse(), response);
-            match T::unlink_all(&id) {
+            match T::unlink_all(&api::Entity::Id(id)) {
                 Ok(_)           => response.set_status(Status::NoContent),
                 Err(ref error)  => response.set_status(error.into()),
             }
@@ -221,7 +223,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
             let mut response = R::Response::default();
             let id = try_status!(id.parse(), response);
             let parsed_rel_ids = try_status!(rel_ids.iter().map(|id| id.parse()).collect::<Result<Vec<_>, _>>(), response);
-            match T::remove_many(&id, &parsed_rel_ids) {
+            match T::remove_many(&api::Entity::Id(id), &parsed_rel_ids) {
                 Ok(_)           => response.set_status(Status::NoContent),
                 Err(ref error)  => response.set_status(error.into()),
             }
@@ -231,7 +233,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
             let mut response = R::Response::default();
             let parsed_id = try_status!(id.parse(), response);
             let parsed_rel_ids = try_status!(rel_ids.iter().map(|id| id.parse()).collect::<Result<Vec<_>, _>>(), response);
-            match T::unlink_many(&parsed_id, &parsed_rel_ids) {
+            match T::unlink_many(&api::Entity::Id(parsed_id), &parsed_rel_ids) {
                 Ok(_)           => response.set_status(Status::NoContent),
                 Err(ref error)  => response.set_status(error.into()),
             }
@@ -246,9 +248,9 @@ impl<'a, R: RouterTrait> Router<'a, R> {
             let id = try_status!(request.id.parse(), response);
             let patch = try_status!(::from_value(request.attributes), response);
             let rels = try_status!(<<Rel::Resource as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), response);
-            match T::patch_one(&id, patch, rels) {
+            match T::patch_one(&api::Entity::Id(id), patch, rels) {
                 Ok(Some(patch)) => {
-                    let document = ResourceDocument::new(patch.resource, vec![]);
+                    let document = ResourceDocument::new(patch.resource.repr(), vec![]);
                     respond_with(document, &mut response);
                 }
                 Ok(None)        => response.set_status(Status::NoContent),
@@ -259,15 +261,15 @@ impl<'a, R: RouterTrait> Router<'a, R> {
     }
 
     pub fn attach_post_one<T, Rel>(&mut self)
-    where T: rel::raw::PostOne<Rel>, Rel: rel::Relation, Rel::Resource: raw::RawUpdate + Deserialize {
+    where T: rel::raw::PostOne<Rel>, Rel: rel::Relation, Rel::Resource: raw::RawUpdate, <Rel::Resource as api::Resource>::Repr: Deserialize {
         self.router.attach_post_one(T::resource_plural(), Rel::to_one(), |id, request| {
             let mut response = R::Response::default();
             let id = try_status!(id.parse(), response);
             let post = try_status!(::from_value(request.attributes), response);
             let rels = try_status!(<<Rel::Resource as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), response);
-            match T::post_one(&id, post, rels) {
+            match T::post_one(&api::Entity::Id(id), post, rels) {
                 Ok(post)    => {
-                    let document = ResourceDocument::new(post.resource, vec![]);
+                    let document = ResourceDocument::new(post.resource.repr(), vec![]);
                     respond_with(document, &mut response);
                 }
                 Err(ref error)  => response.set_status(error.into()),
@@ -286,7 +288,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
                     return response
                 }
             };
-            match T::link_one(&id, &rel_id) {
+            match T::link_one(&api::Entity::Id(id), &rel_id) {
                 Ok(_)           => response.set_status(Status::NoContent),
                 Err(ref error)  => response.set_status(error.into()),
             }
@@ -295,15 +297,15 @@ impl<'a, R: RouterTrait> Router<'a, R> {
     }
 
     pub fn attach_append_many<T, Rel>(&mut self)
-    where T: rel::raw::Append<Rel>, Rel: rel::Relation, Rel::Resource: raw::RawUpdate + Deserialize {
+    where T: rel::raw::Append<Rel>, Rel: rel::Relation, Rel::Resource: raw::RawUpdate, <Rel::Resource as api::Resource>::Repr: Deserialize {
         self.router.attach_append_many(T::resource_plural(), Rel::to_many(), |id, request| {
             let mut response = R::Response::default();
             let id = try_status!(id.parse(), response);
             let post = try_status!(::from_value(request.attributes), response);
             let rels = try_status!(<<Rel::Resource as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), response);
-            match T::append(&id, post, rels) {
+            match T::append(&api::Entity::Id(id), post, rels) {
                 Ok(post)    => {
-                    let document = ResourceDocument::new(post.resource, vec![]);
+                    let document = ResourceDocument::new(post.resource.repr(), vec![]);
                     respond_with(document, &mut response);
                 }
                 Err(ref error)  => response.set_status(error.into()),
@@ -326,7 +328,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
                     return response
                 }
             };
-            match T::append_links(&id, &rel_ids) {
+            match T::append_links(&api::Entity::Id(id), &rel_ids) {
                 Ok(_)           => response.set_status(Status::NoContent),
                 Err(ref error)  => response.set_status(error.into()),
             }

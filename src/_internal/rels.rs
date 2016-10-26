@@ -1,11 +1,11 @@
 use api::raw::{RawFetch, RawUpdate, Include};
-use api::Error;
+use api::{Entity, Error};
 
 pub trait _FetchRels: RawFetch {
-    fn rels(id: &Self::Id, includes: &[String]) -> Result<(Self::Relationships, Vec<Include>), Error>;
+    fn rels(entity: &Entity<Self>, includes: &[String]) -> Result<(Self::Relationships, Vec<Include>), Error>;
 }
 
 pub trait _UpdateRels: RawUpdate {
-    fn update_rels(id: &Self::Id, rels: <Self as RawUpdate>::Relationships)
+    fn update_rels(entity: &Entity<Self>, rels: <Self as RawUpdate>::Relationships)
         -> Result<<Self as RawFetch>::Relationships, Error>;
 }

@@ -20,7 +20,7 @@ impl<T: RawFetch> From<ResourceObject<T>> for Include {
         Include {
             id: resource.id.to_string(),
             resource: T::resource(),
-            attributes: json::to_value(resource.attributes),
+            attributes: json::to_value(resource.attributes.repr()),
             relationships: resource.relationships.iter().map(|(k, v)| (k.to_owned(), v.clone())).collect(),
         }
     }

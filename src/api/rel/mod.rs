@@ -1,4 +1,4 @@
-use api::{Resource, Result};
+use api::{Resource, Entity, Result};
 
 mod fetch;
 mod delete;
@@ -32,33 +32,33 @@ impl<T: Resource> Relation for T {
 pub type RelationId<T> = <<T as Relation>::Resource as Resource>::Id;
 
 pub trait HasOne<T: Relation>: Resource {
-    fn has_one(id: &Self::Id) -> Result<Option<RelationId<T>>>;
+    fn has_one(entity: &Entity<Self>) -> Result<Option<RelationId<T>>>;
 }
 
 pub trait HasMany<T: Relation>: Resource {
-    fn has_many(id: &Self::Id) -> Result<Vec<RelationId<T>>>;
+    fn has_many(entity: &Entity<Self>) -> Result<Vec<RelationId<T>>>;
 }
 
 pub trait LinkOne<T: Relation>: HasOne<T> {
-    fn link_one(id: &Self::Id, rel_id: &RelationId<T>) -> Result<()>;
+    fn link_one(entity: &Entity<Self>, rel_id: &RelationId<T>) -> Result<()>;
 }
 
 pub trait AppendLinks<T: Relation>: HasMany<T> {
-    fn append_links(id: &Self::Id, rel_ids: &[RelationId<T>]) -> Result<()>;
+    fn append_links(entity: &Entity<Self>, rel_ids: &[RelationId<T>]) -> Result<()>;
 }
 
 pub trait ReplaceLinks<T: Relation>: HasMany<T> {
-    fn replace_links(id: &Self::Id, rel_ids: &[RelationId<T>]) -> Result<()>;
+    fn replace_links(entity: &Entity<Self>, rel_ids: &[RelationId<T>]) -> Result<()>;
 }
 
 pub trait UnlinkOne<T: Relation>: HasOne<T> {
-    fn unlink_one(id: &Self::Id) -> Result<()>;
+    fn unlink_one(entity: &Entity<Self>) -> Result<()>;
 }
 
 pub trait RemoveLinks<T: Relation>: HasMany<T> {
-    fn unlink_many(id: &Self::Id, rel_ids: &[RelationId<T>]) -> Result<()>;
+    fn unlink_many(entity: &Entity<Self>, rel_ids: &[RelationId<T>]) -> Result<()>;
 }
 
 pub trait ClearLinks<T: Relation>: HasMany<T> {
-    fn unlink_all(id: &Self::Id) -> Result<()>;
+    fn unlink_all(entity: &Entity<Self>) -> Result<()>;
 }
