@@ -10,6 +10,7 @@ mod delete;
 mod index;
 mod patch;
 mod post;
+mod sort;
 
 pub mod raw;
 pub mod rel;

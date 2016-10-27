@@ -6,8 +6,10 @@ use Value;
 
 pub mod mock;
 mod include;
+mod sort;
 
 pub use self::include::IncludeQuery;
+pub use self::sort::SortQuery;
 
 pub trait Router {
     type Response: Response;
@@ -76,6 +78,7 @@ pub struct GetRequest {
 
 pub struct IndexRequest {
     pub includes: Vec<IncludeQuery>,
+    pub sort: Vec<SortQuery>,
 }
 
 pub struct PatchRequest {

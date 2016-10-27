@@ -51,7 +51,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
     pub fn attach_index<T: raw::RawIndex>(&mut self) {
         self.router.attach_index(T::resource_plural(), |request| {
             let mut response = R::Response::default();
-            match T::index(&request.includes) {
+            match T::index(&request.includes, &request.sort) {
                 Ok(object)      => {
                     let reprs = object.resources.into_iter().map(|x| x.repr()).collect();
                     let document = CollectionDocument::new(reprs, object.includes);
