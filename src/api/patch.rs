@@ -1,5 +1,5 @@
 use Deserialize;
-use api::{Resource, Error, Entity};
+use api::{AsyncJob, Resource, Error, Entity};
 use api::raw::{RawUpdate, ResourceObject, RawFetch};
 use _internal::_UpdateRels;
 
@@ -7,9 +7,22 @@ pub trait Patch: Resource {
     type Patch: Deserialize;
     fn patch(id: &Self::Id, patch: Self::Patch) -> Result<Self, Error>;
 }
+
 pub trait RawPatch: RawUpdate {
     type Patch: Deserialize;
     fn patch(id: Self::Id, patch: Self::Patch, rels: <Self as RawUpdate>::Relationships) -> Result<PatchResponse<Self>, Error>;
+}
+
+pub trait PatchAsync: RawUpdate {
+    type Patch: Deserialize;
+    type Job: AsyncJob<Self>;
+    fn patch_async(id: &Self::Id, patch: Self::Patch) -> Result<Self::Job, Error>;
+}
+
+pub trait RawPatchAsync: RawUpdate {
+    type Patch: Deserialize;
+    type Job: AsyncJob<Self>;
+    fn patch_async(id: Self::Id, patch: Self::Patch, rels: <Self as RawUpdate>::Relationships) -> Result<PatchResponse<Self::Job>, Error>;
 }
 
 impl<T> RawPatch for T where T: Patch + _UpdateRels {
@@ -26,6 +39,22 @@ impl<T> RawPatch for T where T: Patch + _UpdateRels {
                 id: resource.id(),
                 attributes: resource,
                 relationships: relationships,
+            }
+        })
+    }
+}
+
+impl<T> RawPatchAsync for T where T: PatchAsync + _UpdateRels {
+    type Patch = <T as PatchAsync>::Patch;
+    type Job = <T as PatchAsync>::Job;
+    fn patch_async(id: Self::Id, patch: Self::Patch, rels: <Self as RawUpdate>::Relationships) -> Result<PatchResponse<Self::Job>, Error> {
+        let mut job = <Self as PatchAsync>::patch_async(&id, patch)?;
+        job.cache_rels(rels)?;
+        Ok(PatchResponse {
+            resource: ResourceObject {
+                id: job.id(),
+                attributes: job,
+                relationships: (),
             }
         })
     }

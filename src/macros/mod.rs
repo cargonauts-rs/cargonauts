@@ -178,12 +178,26 @@ macro_rules! _methods {
     ($router:expr, $resource:ty, [patch]) => {
         $router.attach_patch::<$resource>();
     };
+    ($router:expr, $resource:ty,  [patch-async, $($method:ident),*]) => {
+        $router.attach_patch_async::<$resource>();
+        _methods!($router, $resource, [$($method),*]);
+    };
+    ($router:expr, $resource:ty, [patch-async]) => {
+        $router.attach_patch_async::<$resource>();
+    };
     ($router:expr, $resource:ty, [post, $($method:ident),*]) => {
         $router.attach_post::<$resource>();
         _methods!($router, $resource, [$($method),*])
     };
     ($router:expr, $resource:ty, [post]) => {
         $router.attach_post::<$resource>();
+    };
+    ($router:expr, $resource:ty, [post-async, $($method:ident),*]) => {
+        $router.attach_post_async::<$resource>();
+        _methods!($router, $resource, [$($method),*])
+    };
+    ($router:expr, $resource:ty, [post-async]) => {
+        $router.attach_post_async::<$resource>();
     };
     ($router:expr, $resource:ty, []) => {
     };

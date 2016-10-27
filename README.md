@@ -73,8 +73,8 @@ Some of many things still left todo:
  - [ ] POST resource with UUID
  - [ ] POST resource with included relationship objects??
  - [X] PATCH resource
- - [ ] POST-ASYNC resource
- - [ ] PATCH-ASYNC resource
+ - [X] POST-ASYNC resource
+ - [X] PATCH-ASYNC resource
  - [X] DELETE requests
  - [ ] HEAD requests
  - [X] GET relationships

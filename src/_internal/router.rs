@@ -80,6 +80,24 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         });
     }
 
+    pub fn attach_patch_async<T: raw::RawPatchAsync>(&mut self) {
+        self.router.attach_patch(T::resource_plural(), |request| {
+            let mut response = R::Response::default();
+            let id = try_status!(request.id.parse(), response);
+            let patch = try_status!(::from_value(request.attributes), response);
+            let rels = try_status!(<<T as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), response);
+            match T::patch_async(id, patch, rels) {
+                Ok(object)      => {
+                    let document = ResourceDocument::new(object.resource.repr(), vec![]);
+                    // TODO respond as accepted and set content location header
+                    respond_with(document, &mut response);
+                }
+                Err(ref error)  => response.set_status(error.into()),
+            }
+            response
+        });
+    }
+
     pub fn attach_post<T: raw::RawPost>(&mut self) where T::Repr: Deserialize {
         self.router.attach_post(T::resource_plural(), |request| {
             let mut response = R::Response::default();
@@ -88,6 +106,23 @@ impl<'a, R: RouterTrait> Router<'a, R> {
             match T::post(post, rels) {
                 Ok(object)      => {
                     let document = ResourceDocument::new(object.resource.repr(), vec![]);
+                    respond_with(document, &mut response);
+                }
+                Err(ref error)  => response.set_status(error.into()),
+            }
+            response
+        });
+    }
+
+    pub fn attach_post_async<T: raw::RawPostAsync>(&mut self) where T::Repr: Deserialize {
+        self.router.attach_post(T::resource_plural(), |request| {
+            let mut response = R::Response::default();
+            let post = try_status!(::from_value(request.attributes), response);
+            let rels = try_status!(<<T as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), response);
+            match T::post_async(post, rels) {
+                Ok(object)      => {
+                    let document = ResourceDocument::new(object.resource.repr(), vec![]);
+                    // TODO respond as accepted and set content location header
                     respond_with(document, &mut response);
                 }
                 Err(ref error)  => response.set_status(error.into()),
