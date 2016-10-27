@@ -84,7 +84,7 @@ Some of many things still left todo:
  - [ ] Sparse fieldsets
  - [X] Sorting by attributes
  - [ ] Sorting by relations
- - [ ] Pagination
+ - [X] Pagination
  - [X] Custom relation names & pluralization issues.
  - [X] Full linkage correctness.
  - [ ] Entry point aliases.

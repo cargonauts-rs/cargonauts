@@ -6,9 +6,11 @@ use Value;
 
 pub mod mock;
 mod include;
+mod page;
 mod sort;
 
 pub use self::include::IncludeQuery;
+pub use self::page::Pagination;
 pub use self::sort::SortQuery;
 
 pub trait Router {
@@ -79,6 +81,7 @@ pub struct GetRequest {
 pub struct IndexRequest {
     pub includes: Vec<IncludeQuery>,
     pub sort: Vec<SortQuery>,
+    pub page: Option<Pagination>,
 }
 
 pub struct PatchRequest {
