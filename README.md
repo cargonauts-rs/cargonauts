@@ -66,7 +66,7 @@ Some of many things still left todo:
  - [X] GET resource
  - [X] Relationships
  - [X] Includes
- - [ ] Recursive includes
+ - [X] Recursive includes
  - [X] INDEX resource
  - [ ] Filter
  - [X] POST resource
@@ -84,7 +84,7 @@ Some of many things still left todo:
  - [ ] Sparse fieldsets
  - [ ] Pagination
  - [X] Custom relation names & pluralization issues.
- - [ ] Full linkage correctness.
+ - [X] Full linkage correctness.
  - [ ] Entry point aliases.
  - [ ] External relations.
  - [ ] ...much more
