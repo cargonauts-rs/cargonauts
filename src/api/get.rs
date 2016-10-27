@@ -2,6 +2,7 @@ use itertools::Itertools;
 
 use api::{Resource, Error, Entity};
 use api::raw::{Include, RawFetch, ResourceObject};
+use router::IncludeQuery;
 use _internal::_FetchRels;
 
 pub trait Get: Resource {
@@ -9,11 +10,11 @@ pub trait Get: Resource {
 }
 
 pub trait RawGet: RawFetch {
-    fn get(id: Self::Id, includes: &[String]) -> Result<GetResponse<Self>, Error>;
+    fn get(id: Self::Id, includes: &[IncludeQuery]) -> Result<GetResponse<Self>, Error>;
 }
 
 impl<T> RawGet for T where T: Get + _FetchRels {
-    fn get(id: Self::Id, includes: &[String]) -> Result<GetResponse<T>, Error> {
+    fn get(id: Self::Id, includes: &[IncludeQuery]) -> Result<GetResponse<T>, Error> {
         let entity = Entity::Resource(<T as Get>::get(&id)?);
         let (rels, includes) = <T as _FetchRels>::rels(&entity, &includes)?;
         let includes = includes.into_iter()

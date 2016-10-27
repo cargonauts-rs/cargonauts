@@ -2,6 +2,7 @@ use itertools::Itertools;
 
 use api::{Resource, Error, Entity};
 use api::raw::{Include, RawFetch, ResourceObject};
+use router::IncludeQuery;
 use _internal::_FetchRels;
 
 pub trait Index: Resource {
@@ -9,11 +10,11 @@ pub trait Index: Resource {
 }
 
 pub trait RawIndex: RawFetch {
-    fn index(includes: &[String]) -> Result<IndexResponse<Self>, Error>;
+    fn index(includes: &[IncludeQuery]) -> Result<IndexResponse<Self>, Error>;
 }
 
 impl<T> RawIndex for T where T: Index + _FetchRels {
-    fn index(includes: &[String]) -> Result<IndexResponse<Self>, Error> {
+    fn index(includes: &[IncludeQuery]) -> Result<IndexResponse<Self>, Error> {
         let mut resources = vec![];
         let mut include_objects = vec![];
         for resource in <T as Index>::index()? {

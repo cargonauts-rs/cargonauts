@@ -26,7 +26,7 @@ macro_rules! _resource {
         }
 
         impl $crate::_internal::_FetchRels for $resource {
-            fn rels(_: &$crate::api::Entity<Self>, _: &[String]) -> Result<(Self::Relationships, Vec<$crate::api::raw::Include>), $crate::api::Error> {
+            fn rels(_: &$crate::api::Entity<Self>, _: &[$crate::router::IncludeQuery]) -> Result<(Self::Relationships, Vec<$crate::api::raw::Include>), $crate::api::Error> {
                 Ok(((), vec![]))
             }
         }
@@ -49,7 +49,7 @@ macro_rules! _resource {
         }
 
         impl $crate::_internal::_FetchRels for $resource {
-            fn rels(id: &$crate::api::Entity<Self>, includes: &[String]) -> Result<(Self::Relationships, Vec<$crate::api::raw::Include>), $crate::api::Error> {
+            fn rels(id: &$crate::api::Entity<Self>, includes: &[$crate::router::IncludeQuery]) -> Result<(Self::Relationships, Vec<$crate::api::raw::Include>), $crate::api::Error> {
                 let mut include_objects = vec![];
                 let rels = Relationships {
                     $(
@@ -260,8 +260,8 @@ macro_rules! _rel_methods {
 #[macro_export]
 macro_rules! _fetch_rel {
     ($id:expr, $includes:expr, $includes_out:expr, $resource:ty, $rel:ty, one) => {
-        if $includes.iter().any(|include| include == _name_rel!($rel, one)) {
-            match <$resource as $crate::api::rel::raw::FetchOne<$rel>>::fetch_one($id, &[])? {
+        if let Some(include) = $includes.iter().find(|include| include.is_of(_name_rel!($rel, one))) {
+            match <$resource as $crate::api::rel::raw::FetchOne<$rel>>::fetch_one($id, &include.transitive)? {
                 Some(response)  => {
                     let identifier = $crate::api::raw::Identifier::from(&response.resource);
                     $includes_out.push(response.resource.into());
@@ -282,8 +282,8 @@ macro_rules! _fetch_rel {
         };
     };
     ($id:expr, $includes:expr, $includes_out:expr, $resource:ty, $rel:ty, many) => {
-        if $includes.iter().any(|include| include == _name_rel!($rel, many)) {
-            let response = <$resource as $crate::api::rel::raw::FetchMany<$rel>>::fetch_many($id, &[])?;
+        if let Some(include) = $includes.iter().find(|include| include.is_of(_name_rel!($rel, many))) {
+            let response = <$resource as $crate::api::rel::raw::FetchMany<$rel>>::fetch_many($id, &include.transitive)?;
             let identifiers = response.resources.iter().map($crate::api::raw::Identifier::from).collect();
             $includes_out.extend(response.resources.into_iter().map(Into::into));
             $crate::api::raw::RelationshipLinkage {

@@ -5,6 +5,9 @@ use Serializer;
 use Value;
 
 pub mod mock;
+mod include;
+
+pub use self::include::IncludeQuery;
 
 pub trait Router {
     type Response: Response;
@@ -68,11 +71,11 @@ pub trait Response: Default {
 
 pub struct GetRequest {
     pub id: String,
-    pub includes: Vec<String>,
+    pub includes: Vec<IncludeQuery>,
 }
 
 pub struct IndexRequest {
-    pub includes: Vec<String>,
+    pub includes: Vec<IncludeQuery>,
 }
 
 pub struct PatchRequest {
