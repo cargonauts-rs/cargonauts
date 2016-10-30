@@ -5,7 +5,7 @@ use BASE_URL;
 use links::make_link;
 use router::Router as RouterTrait;
 use router::{Status, Response};
-use Serialize;
+use SerializeTo;
 use Deserialize;
 use _internal::document::*;
 
@@ -372,8 +372,11 @@ impl<'a, R: RouterTrait> Router<'a, R> {
     }
 }
 
-fn respond_with<T: Serialize, R: Response>(document: T, response: &mut R) {
-    match document.serialize(response.serializer()) {
+fn respond_with<T, R>(document: T, response: &mut R)
+    where R: Response,
+          T: SerializeTo<R::Serializer>,
+{
+    match document.serialize_to(response.serializer()) {
         Ok(_)   => response.set_status(Status::Ok),
         // TODO write the error to the body in the error case
         Err(_)  => response.set_status(Status::InternalError),

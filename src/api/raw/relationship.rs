@@ -212,7 +212,7 @@ mod tests {
             relationship.insert(String::from("links"), Value::Object(links));
             Value::Object(relationship)
         };
-        assert_eq!(to_value(rel), expected);
+        assert_eq!(to_value(&rel), expected);
     }
 
     #[test]
@@ -231,10 +231,10 @@ mod tests {
             links.insert(String::from("self"), to_value("https://example.org/api/base/1/relationships/relation"));
             links.insert(String::from("related"), to_value("https://example.org/api/base/1/relation"));
             relationship.insert(String::from("links"), Value::Object(links));
-            relationship.insert(String::from("data"), to_value(()));
+            relationship.insert(String::from("data"), to_value(&()));
             Value::Object(relationship)
         };
-        assert_eq!(to_value(rel), expected);
+        assert_eq!(to_value(&rel), expected);
     }
 
     #[test]
@@ -259,10 +259,10 @@ mod tests {
             let mut identifier = BTreeMap::new();
             identifier.insert(String::from("type"), to_value("related"));
             identifier.insert(String::from("id"), to_value("2"));
-            relationship.insert(String::from("data"), to_value(identifier));
+            relationship.insert(String::from("data"), to_value(&identifier));
             Value::Object(relationship)
         };
-        assert_eq!(to_value(rel), expected);
+        assert_eq!(to_value(&rel), expected);
     }
 
     #[test]
@@ -279,10 +279,11 @@ mod tests {
             links.insert(String::from("self"), to_value("https://example.org/api/base/1/relationships/relation"));
             links.insert(String::from("related"), to_value("https://example.org/api/base/1/relation"));
             relationship.insert(String::from("links"), Value::Object(links));
-            relationship.insert(String::from("data"), to_value(Vec::<Value>::new()));
+            let empty_slice: &[()] = &[];
+            relationship.insert(String::from("data"), to_value(empty_slice));
             Value::Object(relationship)
         };
-        assert_eq!(to_value(rel), expected);
+        assert_eq!(to_value(&rel), expected);
     }
 
     #[test]
@@ -307,9 +308,9 @@ mod tests {
             let mut identifier = BTreeMap::new();
             identifier.insert(String::from("type"), to_value("related"));
             identifier.insert(String::from("id"), to_value("2"));
-            relationship.insert(String::from("data"), to_value(vec![identifier]));
+            relationship.insert(String::from("data"), to_value(&[identifier]));
             Value::Object(relationship)
         };
-        assert_eq!(to_value(rel), expected);
+        assert_eq!(to_value(&rel), expected);
     }
 }

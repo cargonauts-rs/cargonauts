@@ -8,5 +8,5 @@ version = "0.1.1"
 
 [dependencies]
 itertools = "0.5.2"
-serde = "0.8.8"
-serde_json = "0.8.2"
+serde = { path = "../../patches/serde/serde" }
+serde_json = { path = "../../patches/json/json" }

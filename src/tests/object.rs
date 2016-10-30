@@ -1,9 +1,6 @@
 #![allow(unused_variables)]
 
-#[macro_use]
-extern crate cargonauts;
-
-use cargonauts::api;
+use api;
 
 routes! {
     resource Object: [get, index, post, patch, delete] { }
@@ -11,14 +8,14 @@ routes! {
 
 pub struct Object;
 
-impl cargonauts::Serialize for Object {
-    fn serialize<S: cargonauts::Serializer>(&self, _: &mut S) -> Result<(), S::Error> {
+impl ::Serialize for Object {
+    fn serialize<S: ::Serializer>(&self, _: &mut S) -> Result<(), S::Error> {
         unimplemented!()
     }
 }
 
-impl cargonauts::Deserialize for Object {
-    fn deserialize<D: cargonauts::Deserializer>(_: &mut D) -> Result<Self, D::Error> {
+impl ::Deserialize for Object {
+    fn deserialize<D: ::Deserializer>(_: &mut D) -> Result<Self, D::Error> {
         unimplemented!()
     }
 }
@@ -68,7 +65,7 @@ fn it_compiles() { }
 
 #[test]
 fn it_has_attached_routes() {
-    use cargonauts::router::mock::MockRouter;
+    use router::mock::MockRouter;
     
     const ROUTES: &'static [&'static str] = &["get", "index", "post", "patch", "delete"];
 

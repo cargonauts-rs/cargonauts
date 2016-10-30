@@ -63,8 +63,8 @@ mod tests {
             let mut identifier = BTreeMap::new();
             identifier.insert(String::from("type"), to_value("identified"));
             identifier.insert(String::from("id"), to_value("101"));
-            to_value(identifier)
+            to_value(&identifier)
         };
-        assert_eq!(to_value(identifier), expected);
+        assert_eq!(to_value(&identifier), expected);
     }
 }

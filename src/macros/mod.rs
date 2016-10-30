@@ -26,7 +26,7 @@ macro_rules! _resource {
         }
 
         impl $crate::_internal::_FetchRels for $resource {
-            fn rels(_: &$crate::api::Entity<Self>, _: &[$crate::router::IncludeQuery]) -> Result<(Self::Relationships, Vec<$crate::api::raw::Include>), $crate::api::Error> {
+            fn rels<S: $crate::Serializer>(_: &$crate::api::Entity<Self>, _: &[$crate::router::IncludeQuery]) -> Result<(Self::Relationships, Vec<$crate::api::raw::Include<S>>), $crate::api::Error> {
                 Ok(((), vec![]))
             }
         }
@@ -49,7 +49,7 @@ macro_rules! _resource {
         }
 
         impl $crate::_internal::_FetchRels for $resource {
-            fn rels(id: &$crate::api::Entity<Self>, includes: &[$crate::router::IncludeQuery]) -> Result<(Self::Relationships, Vec<$crate::api::raw::Include>), $crate::api::Error> {
+            fn rels<S: $crate::Serializer>(id: &$crate::api::Entity<Self>, includes: &[$crate::router::IncludeQuery]) -> Result<(Self::Relationships, Vec<$crate::api::raw::Include<S>>), $crate::api::Error> {
                 let mut include_objects = vec![];
                 let rels = Relationships {
                     $(
@@ -279,6 +279,7 @@ macro_rules! _fetch_rel {
                 Some(response)  => {
                     let identifier = $crate::api::raw::Identifier::from(&response.resource);
                     $includes_out.push(response.resource.into());
+                    $includes_out.extend(response.includes);
                     $crate::api::raw::RelationshipLinkage {
                         linkage: Some($crate::api::raw::Relationship::One(Some(identifier))),
                     }
@@ -300,6 +301,7 @@ macro_rules! _fetch_rel {
             let response = <$resource as $crate::api::rel::raw::FetchMany<$rel>>::fetch_many($id, &include.transitive)?;
             let identifiers = response.resources.iter().map($crate::api::raw::Identifier::from).collect();
             $includes_out.extend(response.resources.into_iter().map(Into::into));
+            $includes_out.extend(response.includes);
             $crate::api::raw::RelationshipLinkage {
                 linkage: Some($crate::api::raw::Relationship::Many(identifiers)),
             }

@@ -12,8 +12,11 @@ mod macros;
 mod links;
 pub mod _internal;
 
-pub use serde::{Deserialize, Deserializer, Serialize, Serializer};
+pub use serde::{Deserialize, Deserializer, Serialize, SerializeTo, Serializer};
 pub use json::{Value, from_value, to_value};
+
+#[cfg(test)]
+mod tests;
 
 // TODO figure out how to have a user defined const
 const BASE_URL: &'static str = "https://example.org/api";

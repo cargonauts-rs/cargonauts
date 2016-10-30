@@ -2,9 +2,10 @@ use api::raw::{RawFetch, RawUpdate, Include};
 use api::{Resource, Entity, Result, Error};
 use api::rel::{Relation, LinkOne, UnlinkOne, ReplaceLinks, HasOne, HasMany, RelationId};
 use router::IncludeQuery;
+use Serializer;
 
 pub trait _FetchRels: RawFetch {
-    fn rels(entity: &Entity<Self>, includes: &[IncludeQuery]) -> Result<(Self::Relationships, Vec<Include>)>;
+    fn rels<S: Serializer>(entity: &Entity<Self>, includes: &[IncludeQuery]) -> Result<(Self::Relationships, Vec<Include<S>>)>;
 }
 
 pub trait _UpdateRels: RawUpdate {

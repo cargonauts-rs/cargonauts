@@ -25,7 +25,7 @@ pub use self::post::{Post, PostAsync};
 
 pub trait Resource: Sized {
     type Id: ToString + FromStr + PartialEq + Clone;
-    type Repr: Serialize;
+    type Repr: Serialize + 'static;
     fn id(&self) -> Self::Id;
     fn repr(self) -> Self::Repr;
     fn resource() -> &'static str;

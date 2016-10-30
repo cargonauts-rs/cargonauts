@@ -1,9 +1,7 @@
 #![allow(unused_variables)]
-#[macro_use]
-extern crate cargonauts;
 
 
-use cargonauts::api;
+use api;
 
 routes! {
     resource User: [get, patch] {
@@ -16,8 +14,8 @@ routes! {
 
 struct User;
 
-impl cargonauts::Serialize for User {
-    fn serialize<S: cargonauts::Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
+impl ::Serialize for User {
+    fn serialize<S: ::Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
         unimplemented!()
     }
 }
@@ -60,14 +58,14 @@ impl api::rel::AppendLinks<Photo> for User {
 
 struct Photo;
 
-impl cargonauts::Serialize for Photo {
-    fn serialize<S: cargonauts::Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
+impl ::Serialize for Photo {
+    fn serialize<S: ::Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
         unimplemented!()
     }
 }
 
-impl cargonauts::Deserialize for Photo {
-    fn deserialize<D: cargonauts::Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
+impl ::Deserialize for Photo {
+    fn deserialize<D: ::Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
         unimplemented!()
     }
 }
@@ -118,7 +116,7 @@ fn it_compiles() { }
 
 #[test]
 fn it_has_attached_routes() {
-    use cargonauts::router::mock::MockRouter;
+    use router::mock::MockRouter;
     
     const USERS_ROUTES: &'static [&'static str] = &["get", "patch"];
     const PHOTOS_ROUTES: &'static [&'static str] = &["get", "index", "post", "delete"];
