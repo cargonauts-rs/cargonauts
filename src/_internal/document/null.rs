@@ -1,7 +1,6 @@
-use Serialize;
-use Serializer;
 use links::LinkObject;
 use super::JsonApi;
+use presenter::{Represent, Presenter};
 
 pub struct NullDocument {
     self_link: String,
@@ -15,18 +14,18 @@ impl NullDocument {
     }
 }
 
-impl Serialize for NullDocument {
-    fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
-        let mut state = serializer.serialize_map(Some(3))?;
-        serializer.serialize_map_key(&mut state, "links")?;
-        serializer.serialize_map_value(&mut state, LinkObject {
+impl Represent for NullDocument {
+    fn repr<P: Presenter>(&self, presenter: &mut P) -> Result<(), P::Error> {
+        let mut state = presenter.serialize_map(Some(3))?;
+        presenter.serialize_map_key(&mut state, "links")?;
+        presenter.serialize_map_value(&mut state, LinkObject {
             self_link: Some(&self.self_link),
             related_link: None,
         })?;
-        serializer.serialize_map_key(&mut state, "data")?;
-        serializer.serialize_map_value(&mut state, ())?;
-        serializer.serialize_map_key(&mut state, "jsonapi")?;
-        serializer.serialize_map_value(&mut state, JsonApi)?;
-        serializer.serialize_map_end(state)
+        presenter.serialize_map_key(&mut state, "data")?;
+        presenter.serialize_map_value(&mut state, ())?;
+        presenter.serialize_map_key(&mut state, "jsonapi")?;
+        presenter.serialize_map_value(&mut state, JsonApi)?;
+        presenter.serialize_map_end(state)
     }
 }

@@ -1,50 +1,55 @@
-use api::raw::{Include, Includes, RawFetch, ResourceRepr};
+use api::raw::{Include, RawFetch, ResourceRepr};
 use BASE_URL;
-use SerializeTo;
-use Serializer;
+use presenter::{Presenter, RepresentWith, SerializeRepr};
 use links::{make_link, LinkObject};
 
-pub struct CollectionDocument<S: Serializer, T: RawFetch> {
+pub struct CollectionDocument<P: Presenter, T: RawFetch> {
     resources: Vec<ResourceRepr<T>>,
-    included: Includes<S>,
+    included: Vec<Include<P>>,
     self_link: String,
 }
 
-impl<S: Serializer, T> CollectionDocument<S, T> where T: RawFetch {
-    pub fn new(resources: Vec<ResourceRepr<T>>, included: Vec<Include<S>>) -> CollectionDocument<S, T> {
+impl<P, T> CollectionDocument<P, T> where T: RawFetch, P: Presenter {
+    pub fn new(resources: Vec<ResourceRepr<T>>, included: Vec<Include<P>>) -> CollectionDocument<P, T> {
         let self_link = make_link(&[BASE_URL, T::resource_plural()]);
         CollectionDocument {
             resources: resources,
-            included: included.into(),
+            included: included,
             self_link: self_link,
         }
     }
 }
 
-impl<S: Serializer, T> SerializeTo<S> for CollectionDocument<S, T> where T: RawFetch {
-    fn serialize_to(&self, serializer: &mut S) -> Result<(), S::Error> {
+impl<P: Presenter, T: RawFetch> RepresentWith<P> for CollectionDocument<P, T> {
+    fn repr_with(&self, presenter: &mut P) -> Result<(), P::Error> {
         if self.included.is_empty() {
-            let mut state = serializer.serialize_map(Some(2))?;
-            serializer.serialize_map_key(&mut state, "data")?;
-            serializer.serialize_map_value(&mut state, &self.resources)?;
-            serializer.serialize_map_key(&mut state, "links")?;
-            serializer.serialize_map_value(&mut state, LinkObject {
+            let mut state = presenter.serialize_map(Some(2))?;
+            presenter.serialize_map_key(&mut state, "data")?;
+            presenter.serialize_map_value(&mut state, SerializeRepr {
+                repr: &self.resources,
+            })?;
+            presenter.serialize_map_key(&mut state, "links")?;
+            presenter.serialize_map_value(&mut state, LinkObject {
                 self_link: Some(&self.self_link),
                 related_link: None,
             })?;
-            serializer.serialize_map_end(state)
+            presenter.serialize_map_end(state)
         } else {
-            let mut state = serializer.serialize_map(Some(3))?;
-            serializer.serialize_map_key(&mut state, "data")?;
-            serializer.serialize_map_value(&mut state, &self.resources)?;
-            serializer.serialize_map_key(&mut state, "included")?;
-            serializer.serialize_map_value(&mut state, &self.included)?;
-            serializer.serialize_map_key(&mut state, "links")?;
-            serializer.serialize_map_value(&mut state, LinkObject {
+            let mut state = presenter.serialize_map(Some(3))?;
+            presenter.serialize_map_key(&mut state, "data")?;
+            presenter.serialize_map_value(&mut state, SerializeRepr {
+                repr: &self.resources,
+            })?;
+            presenter.serialize_map_key(&mut state, "included")?;
+            presenter.serialize_map_value(&mut state, SerializeRepr {
+                repr: &self.included,
+            })?;
+            presenter.serialize_map_key(&mut state, "links")?;
+            presenter.serialize_map_value(&mut state, LinkObject {
                 self_link: Some(&self.self_link),
                 related_link: None,
             })?;
-            serializer.serialize_map_end(state)
+            presenter.serialize_map_end(state)
         }
     }
 }

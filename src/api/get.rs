@@ -4,18 +4,18 @@ use api::{Resource, Error, Entity};
 use api::raw::{Include, RawFetch, ResourceObject};
 use router::IncludeQuery;
 use _internal::_FetchRels;
-use Serializer;
+use presenter::Presenter;
 
 pub trait Get: Resource {
     fn get(id: &Self::Id) -> Result<Self, Error>;
 }
 
 pub trait RawGet: RawFetch {
-    fn get<S: Serializer>(id: Self::Id, includes: &[IncludeQuery]) -> Result<GetResponse<S, Self>, Error>;
+    fn get<P: Presenter>(id: Self::Id, includes: &[IncludeQuery]) -> Result<GetResponse<P, Self>, Error>;
 }
 
 impl<T> RawGet for T where T: Get + _FetchRels {
-    fn get<S: Serializer>(id: Self::Id, includes: &[IncludeQuery]) -> Result<GetResponse<S, T>, Error> {
+    fn get<P: Presenter>(id: Self::Id, includes: &[IncludeQuery]) -> Result<GetResponse<P, T>, Error> {
         let entity = Entity::Resource(<T as Get>::get(&id)?);
         let (rels, includes) = <T as _FetchRels>::rels(&entity, &includes)?;
         let includes = includes.into_iter()
@@ -36,7 +36,7 @@ impl<T> RawGet for T where T: Get + _FetchRels {
     }
 }
 
-pub struct GetResponse<S: Serializer, T: RawFetch> {
+pub struct GetResponse<P: Presenter, T: RawFetch> {
     pub resource: ResourceObject<T>,
-    pub includes: Vec<Include<S>>,
+    pub includes: Vec<Include<P>>,
 }

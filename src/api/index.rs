@@ -5,7 +5,7 @@ use api::{Resource, Error, Entity};
 use api::raw::{Include, RawFetch, ResourceObject};
 use router::{IncludeQuery, SortQuery, Pagination};
 use _internal::_FetchRels;
-use Serializer;
+use presenter::Presenter;
 
 pub trait Index: Resource {
     fn index() -> Result<Vec<Self>, Error>;
@@ -16,11 +16,11 @@ pub trait Paginated: Index {
 }
 
 pub trait RawIndex: RawFetch {
-    fn index<S: Serializer>(includes: &[IncludeQuery], sorts: &[SortQuery], pagination: &Option<Pagination>) -> Result<IndexResponse<S, Self>, Error>;
+    fn index<P: Presenter>(includes: &[IncludeQuery], sorts: &[SortQuery], pagination: &Option<Pagination>) -> Result<IndexResponse<P, Self>, Error>;
 }
 
 impl<T> RawIndex for T where T: Index + _FetchRels {
-    default fn index<S: Serializer>(includes: &[IncludeQuery], sorts: &[SortQuery], pagination: &Option<Pagination>) -> Result<IndexResponse<S, Self>, Error> {
+    default fn index<P: Presenter>(includes: &[IncludeQuery], sorts: &[SortQuery], pagination: &Option<Pagination>) -> Result<IndexResponse<P, Self>, Error> {
         match pagination.is_none() {
             true    => raw_index(<T as Index>::index()?, includes, sorts),
             false   => Err(Error::BadRequest),
@@ -28,7 +28,7 @@ impl<T> RawIndex for T where T: Index + _FetchRels {
     }
 }
 impl<T> RawIndex for T where T: Paginated + _FetchRels {
-    fn index<S: Serializer>(includes: &[IncludeQuery], sorts: &[SortQuery], pagination: &Option<Pagination>) -> Result<IndexResponse<S, Self>, Error> {
+    fn index<P: Presenter>(includes: &[IncludeQuery], sorts: &[SortQuery], pagination: &Option<Pagination>) -> Result<IndexResponse<P, Self>, Error> {
         let index = match pagination.as_ref() {
             Some(pagination)    => <T as Paginated>::paginated_index(pagination)?,
             None                => <T as Index>::index()?,
@@ -37,12 +37,12 @@ impl<T> RawIndex for T where T: Paginated + _FetchRels {
     }
 }
 
-pub struct IndexResponse<S: Serializer, T: RawFetch> {
+pub struct IndexResponse<P: Presenter, T: RawFetch> {
     pub resources: Vec<ResourceObject<T>>,
-    pub includes: Vec<Include<S>>,
+    pub includes: Vec<Include<P>>,
 }
 
-fn raw_index<S: Serializer, T: _FetchRels>(index: Vec<T>, includes: &[IncludeQuery], sorts: &[SortQuery]) -> Result<IndexResponse<S, T>, Error> {
+fn raw_index<P: Presenter, T: _FetchRels>(index: Vec<T>, includes: &[IncludeQuery], sorts: &[SortQuery]) -> Result<IndexResponse<P, T>, Error> {
     let mut resources = vec![];
     let mut include_objects = vec![];
     for resource in index {

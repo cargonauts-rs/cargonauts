@@ -1,7 +1,7 @@
 use std::result;
 use std::str::FromStr;
 
-use Serialize;
+use presenter::Represent;
 
 mod async;
 mod error;
@@ -25,7 +25,7 @@ pub use self::post::{Post, PostAsync};
 
 pub trait Resource: Sized {
     type Id: ToString + FromStr + PartialEq + Clone;
-    type Repr: Serialize + 'static;
+    type Repr: Represent + 'static;
     fn id(&self) -> Self::Id;
     fn repr(self) -> Self::Repr;
     fn resource() -> &'static str;

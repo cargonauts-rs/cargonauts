@@ -5,6 +5,7 @@ extern crate serde;
 extern crate serde_json as json;
 
 pub mod api;
+pub mod presenter;
 pub mod router;
 
 #[macro_use]
