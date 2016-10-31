@@ -19,23 +19,7 @@ pub struct ResourceObject<T: RawFetch> {
     pub relationships: <T as RawFetch>::Relationships,
 }
 
-impl<T: RawFetch> ResourceObject<T> {
-    pub fn repr(self) -> ResourceRepr<T> {
-        ResourceRepr {
-            id: self.id,
-            attributes: self.attributes.repr(),
-            relationships: self.relationships,
-        }
-    }
-}
-
-pub struct ResourceRepr<T: RawFetch> {
-    pub id: <T as Resource>::Id,
-    pub attributes: <T as Resource>::Repr,
-    pub relationships: <T as RawFetch>::Relationships,
-}
-
-impl<T: RawFetch> Represent for ResourceRepr<T> {
+impl<T: RawFetch> Represent for ResourceObject<T> {
     fn repr<P: Presenter>(&self, presenter: &mut P) -> Result<(), P::Error> {
         let id = self.id.to_string();
         if self.relationships.count() == 0 {
@@ -82,7 +66,7 @@ impl<T: RawFetch> Represent for ResourceRepr<T> {
     }
 }
 
-impl<T: RawFetch> Represent for Vec<ResourceRepr<T>> {
+impl<T: RawFetch> Represent for Vec<ResourceObject<T>> {
     fn repr<P: Presenter>(&self, presenter: &mut P) -> Result<(), P::Error> {
         let mut state = presenter.serialize_seq(Some(self.len()))?;
         for resource in self {

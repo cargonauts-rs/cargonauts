@@ -22,10 +22,8 @@ impl repr::Represent for User {
 
 impl api::Resource for User {
     type Id = u32;
-    type Repr = User;
 
     fn id(&self) -> u32 { unimplemented!() }
-    fn repr(self) -> User { self }
 
     fn resource() -> &'static str { "user" }
     fn resource_plural() -> &'static str { "users" }
@@ -72,10 +70,8 @@ impl ::Deserialize for Photo {
 
 impl api::Resource for Photo {
     type Id = u32;
-    type Repr = Photo;
 
     fn id(&self) -> u32 { unimplemented!() }
-    fn repr(self) -> Photo { self }
 
     fn resource() -> &'static str { "photo" }
     fn resource_plural() -> &'static str { "photos" }
@@ -100,7 +96,7 @@ impl api::Index for Photo {
 }
 
 impl api::Post for Photo {
-    fn post(repr: Photo) -> api::Result<Photo> {
+    fn post(self) -> api::Result<Photo> {
         unimplemented!()
     }
 }

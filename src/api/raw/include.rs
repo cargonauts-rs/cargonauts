@@ -18,7 +18,7 @@ impl<P: Presenter, T: RawFetch> From<ResourceObject<T>> for Include<P> {
         Include {
             id: resource.id.to_string(),
             resource: T::resource(),
-            attributes: Box::new(resource.attributes.repr()),
+            attributes: Box::new(resource.attributes),
             relationships: resource.relationships.iter().map(|(k, v)| (k.to_owned(), v.clone())).collect(),
         }
     }

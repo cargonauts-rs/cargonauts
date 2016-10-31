@@ -23,11 +23,9 @@ pub use self::index::Index;
 pub use self::patch::{Patch, PatchAsync};
 pub use self::post::{Post, PostAsync};
 
-pub trait Resource: Sized {
+pub trait Resource: Represent + Sized + 'static {
     type Id: ToString + FromStr + PartialEq + Clone;
-    type Repr: Represent + 'static;
     fn id(&self) -> Self::Id;
-    fn repr(self) -> Self::Repr;
     fn resource() -> &'static str;
     fn resource_plural() -> &'static str;
 }
