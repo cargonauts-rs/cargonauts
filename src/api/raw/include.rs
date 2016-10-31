@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use api::raw::{RawFetch, FetchRelationships, ResourceObject, RelationshipLinkage};
-use api::raw::relationship::SerializeRelationships;
+use api::raw::relationship::ReprRels;
 use BASE_URL;
 use links::{LinkObject, make_link};
 use repr::{Presenter, RepresentWith, SerializeRepr};
@@ -52,10 +52,12 @@ impl<P: Presenter> RepresentWith<P> for Include<P> {
                 repr: &*self.attributes,
             })?;
             presenter.serialize_map_key(&mut state, "relationships")?;
-            presenter.serialize_map_value(&mut state, SerializeRelationships {
-                resource: self.resource,
-                id: &self.id,
-                relationships: &self.relationships
+            presenter.serialize_map_value(&mut state, SerializeRepr {
+                repr: &ReprRels {
+                    resource: self.resource,
+                    id: &self.id,
+                    relationships: &self.relationships
+                },
             })?;
             presenter.serialize_map_key(&mut state, "links")?;
             presenter.serialize_map_value(&mut state, LinkObject {

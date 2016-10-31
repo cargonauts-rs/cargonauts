@@ -7,6 +7,7 @@ use api::Error;
 use api::raw::identifier::Identifier;
 use BASE_URL;
 use links::{LinkObject, make_link};
+use repr::{Presenter, Represent};
 use Serialize;
 use Serializer;
 
@@ -125,36 +126,56 @@ fn deref_string<'a>((key, val): (&'a String, &'a RelationshipLinkage)) -> (&'a s
     (&key[..], val)
 }
 
-pub struct SerializeRelationships<'a, R: FetchRelationships<'a>> {
+pub struct ReprRels<'a, R: FetchRelationships<'a>> {
     pub resource: &'static str,
     pub id: &'a str,
     pub relationships: &'a R
 }
 
-impl<'a, R> Serialize for SerializeRelationships<'a, R> where R: FetchRelationships<'a> {
-    fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
-        let mut state = serializer.serialize_map(Some(self.relationships.count()))?;
-        for (name, relationship) in self.relationships.iter() {
-            serializer.serialize_map_key(&mut state, name)?;
-            serializer.serialize_map_value(&mut state, SerializeRelationship {
-                base_resource: self.resource,
-                base_id: self.id,
-                relation: name,
-                relationship: relationship,
-            })?;
+impl<'a, R> Represent for ReprRels<'a, R> where R: FetchRelationships<'a> {
+    fn repr<P: Presenter>(&self, presenter: &mut P) -> Result<(), P::Error> {
+        match presenter.field_set() {
+            Some(field_set) => {
+                let mut state = presenter.serialize_map(None)?;
+                let relationships = self.relationships.iter().filter(|&(ref name, _)| {
+                    field_set.iter().any(|field| field == name)
+                });
+                for (name, relationship) in relationships {
+                    presenter.serialize_map_key(&mut state, name)?;
+                    presenter.serialize_map_value(&mut state, ReprRel {
+                        base_resource: self.resource,
+                        base_id: self.id,
+                        relation: name,
+                        relationship: relationship,
+                    })?;
+                }
+                presenter.serialize_map_end(state)
+            }
+            None            => {
+                let mut state = presenter.serialize_map(Some(self.relationships.count()))?;
+                for (name, relationship) in self.relationships.iter() {
+                    presenter.serialize_map_key(&mut state, name)?;
+                    presenter.serialize_map_value(&mut state, ReprRel {
+                        base_resource: self.resource,
+                        base_id: self.id,
+                        relation: name,
+                        relationship: relationship,
+                    })?;
+                }
+                presenter.serialize_map_end(state)
+            }
         }
-        serializer.serialize_map_end(state)
     }
 }
 
-struct SerializeRelationship<'a> {
+struct ReprRel<'a> {
     base_resource: &'static str,
     base_id: &'a str,
     relation: &'a str,
     relationship: &'a RelationshipLinkage,
 }
 
-impl<'a> Serialize for SerializeRelationship<'a> {
+impl<'a> Serialize for ReprRel<'a> {
     fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
         let mut state = serializer.serialize_map(Some(2))?;
         serializer.serialize_map_key(&mut state, "links")?;
@@ -198,7 +219,7 @@ mod tests {
 
     #[test]
     fn serialize_rel_no_linkage() {
-        let rel = super::SerializeRelationship {
+        let rel = super::ReprRel {
             base_resource: "base",
             base_id: "1",
             relation: "relation",
@@ -217,7 +238,7 @@ mod tests {
 
     #[test]
     fn serialize_rel_to_one_empty() {
-        let rel = super::SerializeRelationship {
+        let rel = super::ReprRel {
             base_resource: "base",
             base_id: "1",
             relation: "relation",
@@ -239,7 +260,7 @@ mod tests {
 
     #[test]
     fn serialize_rel_to_one_some() {
-        let rel = super::SerializeRelationship {
+        let rel = super::ReprRel {
             base_resource: "base",
             base_id: "1",
             relation: "relation",
@@ -267,7 +288,7 @@ mod tests {
 
     #[test]
     fn serialize_rel_to_many_empty() {
-        let rel = super::SerializeRelationship {
+        let rel = super::ReprRel {
             base_resource: "base",
             base_id: "1",
             relation: "relation",
@@ -288,7 +309,7 @@ mod tests {
 
     #[test]
     fn serialize_rel_to_many_some() {
-        let rel = super::SerializeRelationship {
+        let rel = super::ReprRel {
             base_resource: "base",
             base_id: "1",
             relation: "relation",

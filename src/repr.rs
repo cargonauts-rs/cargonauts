@@ -11,7 +11,7 @@ pub trait RepresentWith<P: Presenter> {
 }
 
 pub trait Presenter: Serializer {
-    fn field_sets(&self) -> Option<&[String]>;
+    fn field_set(&self) -> Option<Vec<String>>;
 }
 
 impl<P: Presenter, T: Represent> RepresentWith<P> for T {
@@ -34,7 +34,7 @@ where T: RepresentWith<P>,
 }
 
 impl Presenter for json::value::Serializer {
-    fn field_sets(&self) -> Option<&[String]> {
+    fn field_set(&self) -> Option<Vec<String>> {
         None
     }
 }

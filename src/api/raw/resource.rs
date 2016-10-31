@@ -1,6 +1,6 @@
 use api::Resource;
 use api::raw::{FetchRelationships, UpdateRelationships};
-use api::raw::relationship::SerializeRelationships;
+use api::raw::relationship::ReprRels;
 use BASE_URL;
 use links::{LinkObject, make_link};
 use repr::{Represent, Presenter, SerializeRepr};
@@ -65,10 +65,12 @@ impl<T: RawFetch> Represent for ResourceRepr<T> {
                 repr: &self.attributes,
             })?;
             presenter.serialize_map_key(&mut state, "relationships")?;
-            presenter.serialize_map_value(&mut state, SerializeRelationships {
-                resource: T::resource_plural(),
-                id: &id,
-                relationships: &self.relationships
+            presenter.serialize_map_value(&mut state, SerializeRepr {
+                repr: &ReprRels {
+                    resource: T::resource_plural(),
+                    id: &id,
+                    relationships: &self.relationships
+                },
             })?;
             presenter.serialize_map_key(&mut state, "links")?;
             presenter.serialize_map_value(&mut state, LinkObject {
