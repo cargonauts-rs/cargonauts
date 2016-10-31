@@ -16,14 +16,13 @@ macro_rules! relation {
 mod tests {
     use api::Resource;
     use api::rel::Relation;
-    use Serialize;
-    use Serializer;
+    use presenter;
 
     #[derive(Copy, Clone)]
     struct User;
 
-    impl Serialize for User {
-        fn serialize<S: Serializer>(&self, _: &mut S) -> Result<(), S::Error> { unimplemented!() }
+    impl presenter::Represent for User {
+        fn repr<P: presenter::Presenter>(&self, _: &mut P) -> Result<(), P::Error> { unimplemented!() }
     }
 
     impl Resource for User {

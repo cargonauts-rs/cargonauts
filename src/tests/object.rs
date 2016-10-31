@@ -1,6 +1,7 @@
 #![allow(unused_variables)]
 
 use api;
+use presenter;
 
 routes! {
     resource Object: [get, index, post, patch, delete] { }
@@ -8,8 +9,8 @@ routes! {
 
 pub struct Object;
 
-impl ::Serialize for Object {
-    fn serialize<S: ::Serializer>(&self, _: &mut S) -> Result<(), S::Error> {
+impl presenter::Represent for Object {
+    fn repr<P: presenter::Presenter>(&self, _: &mut P) -> Result<(), P::Error> {
         unimplemented!()
     }
 }

@@ -1,7 +1,7 @@
 #![allow(unused_variables)]
 
-
 use api;
+use presenter;
 
 routes! {
     resource User: [get, patch] {
@@ -14,8 +14,8 @@ routes! {
 
 struct User;
 
-impl ::Serialize for User {
-    fn serialize<S: ::Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
+impl presenter::Represent for User {
+    fn repr<P: presenter::Presenter>(&self, _: &mut P) -> Result<(), P::Error> {
         unimplemented!()
     }
 }
@@ -58,8 +58,8 @@ impl api::rel::AppendLinks<Photo> for User {
 
 struct Photo;
 
-impl ::Serialize for Photo {
-    fn serialize<S: ::Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
+impl presenter::Represent for Photo {
+    fn repr<P: presenter::Presenter>(&self, _: &mut P) -> Result<(), P::Error> {
         unimplemented!()
     }
 }

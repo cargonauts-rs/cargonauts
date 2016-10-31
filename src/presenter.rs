@@ -3,7 +3,7 @@ use Serializer;
 use json;
 
 pub trait Represent {
-    fn repr<P: Presenter>(&self, serializer: &mut P) -> Result<(), P::Error>;
+    fn repr<P: Presenter>(&self, presenter: &mut P) -> Result<(), P::Error>;
 }
 
 pub trait RepresentWith<P: Presenter> {
