@@ -1,7 +1,7 @@
 #![allow(unused_variables)]
 
 use api;
-use presenter;
+use repr;
 
 routes! {
     resource Object: [get, index, post, patch, delete] { }
@@ -9,8 +9,8 @@ routes! {
 
 pub struct Object;
 
-impl presenter::Represent for Object {
-    fn repr<P: presenter::Presenter>(&self, _: &mut P) -> Result<(), P::Error> {
+impl repr::Represent for Object {
+    fn repr<P: repr::Presenter>(&self, _: &mut P) -> Result<(), P::Error> {
         unimplemented!()
     }
 }

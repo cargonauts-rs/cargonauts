@@ -2,7 +2,7 @@ use BASE_URL;
 use api::raw::Relationship;
 use links::{make_link, LinkObject};
 use super::JsonApi;
-use presenter::{Represent, Presenter};
+use repr::{Represent, Presenter};
 
 pub struct RelDocument {
     base_resource: &'static str,

@@ -1,7 +1,7 @@
 #![allow(unused_variables)]
 
 use api;
-use presenter;
+use repr;
 
 routes! {
     resource User: [get, patch] {
@@ -14,8 +14,8 @@ routes! {
 
 struct User;
 
-impl presenter::Represent for User {
-    fn repr<P: presenter::Presenter>(&self, _: &mut P) -> Result<(), P::Error> {
+impl repr::Represent for User {
+    fn repr<P: repr::Presenter>(&self, _: &mut P) -> Result<(), P::Error> {
         unimplemented!()
     }
 }
@@ -58,8 +58,8 @@ impl api::rel::AppendLinks<Photo> for User {
 
 struct Photo;
 
-impl presenter::Represent for Photo {
-    fn repr<P: presenter::Presenter>(&self, _: &mut P) -> Result<(), P::Error> {
+impl repr::Represent for Photo {
+    fn repr<P: repr::Presenter>(&self, _: &mut P) -> Result<(), P::Error> {
         unimplemented!()
     }
 }

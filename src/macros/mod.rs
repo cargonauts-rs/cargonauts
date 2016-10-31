@@ -26,7 +26,7 @@ macro_rules! _resource {
         }
 
         impl $crate::_internal::_FetchRels for $resource {
-            fn rels<P: $crate::presenter::Presenter>(_: &$crate::api::Entity<Self>, _: &[$crate::router::IncludeQuery]) -> Result<(Self::Relationships, Vec<$crate::api::raw::Include<P>>), $crate::api::Error> {
+            fn rels<P: $crate::repr::Presenter>(_: &$crate::api::Entity<Self>, _: &[$crate::router::IncludeQuery]) -> Result<(Self::Relationships, Vec<$crate::api::raw::Include<P>>), $crate::api::Error> {
                 Ok(((), vec![]))
             }
         }
@@ -49,7 +49,7 @@ macro_rules! _resource {
         }
 
         impl $crate::_internal::_FetchRels for $resource {
-            fn rels<P: $crate::presenter::Presenter>(id: &$crate::api::Entity<Self>, includes: &[$crate::router::IncludeQuery]) -> Result<(Self::Relationships, Vec<$crate::api::raw::Include<P>>), $crate::api::Error> {
+            fn rels<P: $crate::repr::Presenter>(id: &$crate::api::Entity<Self>, includes: &[$crate::router::IncludeQuery]) -> Result<(Self::Relationships, Vec<$crate::api::raw::Include<P>>), $crate::api::Error> {
                 let mut include_objects = vec![];
                 let rels = Relationships {
                     $(

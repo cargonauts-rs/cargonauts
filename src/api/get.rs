@@ -4,7 +4,7 @@ use api::{Resource, Error, Entity};
 use api::raw::{Include, RawFetch, ResourceObject};
 use router::IncludeQuery;
 use _internal::_FetchRels;
-use presenter::Presenter;
+use repr::Presenter;
 
 pub trait Get: Resource {
     fn get(id: &Self::Id) -> Result<Self, Error>;

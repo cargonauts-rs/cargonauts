@@ -5,7 +5,7 @@ use api::{Resource, Error, Entity};
 use api::raw::{Include, RawFetch, ResourceObject};
 use router::{IncludeQuery, SortQuery, Pagination};
 use _internal::_FetchRels;
-use presenter::Presenter;
+use repr::Presenter;
 
 pub trait Index: Resource {
     fn index() -> Result<Vec<Self>, Error>;

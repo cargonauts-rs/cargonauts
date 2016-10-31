@@ -2,7 +2,7 @@ use api::{Entity, Error};
 use api::raw::{RawFetch, GetResponse, IndexResponse, RawGet};
 use api::rel::{Relation, HasOne, HasMany};
 use router::IncludeQuery;
-use presenter::Presenter;
+use repr::Presenter;
 
 pub trait FetchOne<T: Relation>: HasOne<T> where T::Resource: RawFetch {
     fn fetch_one<P: Presenter>(entity: &Entity<Self>, includes: &[IncludeQuery]) -> Result<Option<GetResponse<P, T::Resource>>, Error>;

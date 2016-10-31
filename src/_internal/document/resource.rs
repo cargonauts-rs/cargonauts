@@ -1,6 +1,6 @@
 use api::raw::{Include, RawFetch, ResourceRepr};
 use BASE_URL;
-use presenter::{Presenter, RepresentWith, SerializeRepr};
+use repr::{Presenter, RepresentWith, SerializeRepr};
 use links::{make_link, LinkObject};
 
 pub struct ResourceDocument<P: Presenter, T: RawFetch> {

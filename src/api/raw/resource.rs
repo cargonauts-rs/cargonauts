@@ -3,7 +3,7 @@ use api::raw::{FetchRelationships, UpdateRelationships};
 use api::raw::relationship::SerializeRelationships;
 use BASE_URL;
 use links::{LinkObject, make_link};
-use presenter::{Represent, Presenter, SerializeRepr};
+use repr::{Represent, Presenter, SerializeRepr};
 
 pub trait RawFetch: Resource {
     type Relationships: for<'a> FetchRelationships<'a>;

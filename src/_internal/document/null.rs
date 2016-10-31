@@ -1,6 +1,6 @@
 use links::LinkObject;
 use super::JsonApi;
-use presenter::{Represent, Presenter};
+use repr::{Represent, Presenter};
 
 pub struct NullDocument {
     self_link: String,

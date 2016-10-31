@@ -4,7 +4,7 @@ use api::raw::{RawFetch, FetchRelationships, ResourceObject, RelationshipLinkage
 use api::raw::relationship::SerializeRelationships;
 use BASE_URL;
 use links::{LinkObject, make_link};
-use presenter::{Presenter, RepresentWith, SerializeRepr};
+use repr::{Presenter, RepresentWith, SerializeRepr};
 
 pub struct Include<P: Presenter> {
     pub id: String,

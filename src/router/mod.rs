@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use api::raw::Relationship;
-use presenter::Presenter;
+use repr::Presenter;
 use Value;
 
 pub mod mock;
