@@ -8,5 +8,5 @@ version = "0.1.1"
 
 [dependencies]
 itertools = "0.5.2"
-serde = { path = "../../patches/serde/serde" }
-serde_json = { path = "../../patches/json/json" }
+serde = { git = "https://github.com/withoutboats/serde", branch = "serializeable_objects" }
+serde_json = { git = "https://github.com/withoutboats/json", branch = "serializeable_objects" }

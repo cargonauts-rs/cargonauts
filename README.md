@@ -81,7 +81,7 @@ Some of many things still left todo:
  - [X] POST/PATCH relationships
  - [X] DELETE relationships
  - [X] Raw methods
- - [ ] Sparse fieldsets
+ - [X] Sparse fieldsets
  - [X] Sorting by attributes
  - [ ] Sorting by relations
  - [X] Pagination
@@ -89,6 +89,7 @@ Some of many things still left todo:
  - [X] Full linkage correctness.
  - [ ] Entry point aliases.
  - [ ] External relations.
+ - [X] JSON API as a swappable 'presenter' layer.
  - [ ] ...much more
 
 ## License
