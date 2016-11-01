@@ -13,13 +13,6 @@ pub struct JsonApi<R: Response> {
 }
 
 impl<R: Response> JsonApi<R> {
-    pub fn new(field_set: Option<Vec<String>>) -> JsonApi<R> {
-        JsonApi {
-            response: R::default(),
-            field_set: field_set,
-        }
-    }
-
     fn respond(mut self, status: Status) -> R {
         self.response.set_status(status);
         self.response.set_content("application/vnd.api+json");
@@ -141,6 +134,13 @@ impl<R: Response> JsonApi<R> {
 }
 
 impl<R: Response> Presenter<R> for JsonApi<R> {
+    fn prepare(field_set: Option<Vec<String>>) -> Self {
+        JsonApi {
+            response: R::default(),
+            field_set: field_set,
+        }
+    }
+
     fn present_resource<T>(mut self, self_link: &str, resource: ResourceObject<T>, includes: Vec<Include<R::Serializer>>) -> R
     where T: RawFetch {
         match self.serialize_resource(self_link, resource, includes) {

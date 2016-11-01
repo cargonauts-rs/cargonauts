@@ -7,6 +7,7 @@ mod jsonapi;
 pub use self::jsonapi::JsonApi;
 
 pub trait Presenter<R: Response>: Sized {
+    fn prepare(field_set: Option<Vec<String>>) -> Self;
     fn present_resource<T>(self, self_link: &str, resource: ResourceObject<T>, includes: Vec<Include<R::Serializer>>) -> R
         where T: RawFetch;
     fn present_collection<T>(self, self_link: &str, resources: Vec<ResourceObject<T>>, includes: Vec<Include<R::Serializer>>) -> R
