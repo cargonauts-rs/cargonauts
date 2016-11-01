@@ -4,17 +4,18 @@ use api::raw::{RawFetch, FetchRelationships, ResourceObject, RelationshipLinkage
 use api::raw::relationship::ReprRels;
 use BASE_URL;
 use links::{LinkObject, make_link};
-use repr::{Presenter, RepresentWith, SerializeRepr};
+use repr::{RepresentWith, SerializeRepr};
+use Serializer;
 
-pub struct Include<P: Presenter> {
+pub struct Include<S: Serializer> {
     pub id: String,
     pub resource: &'static str,
-    pub attributes: Box<RepresentWith<P>>,
+    pub attributes: Box<RepresentWith<S>>,
     pub relationships: BTreeMap<String, RelationshipLinkage>,
 }
 
-impl<P: Presenter, T: RawFetch> From<ResourceObject<T>> for Include<P> {
-    fn from(resource: ResourceObject<T>) -> Include<P> {
+impl<S: Serializer, T: RawFetch> From<ResourceObject<T>> for Include<S> {
+    fn from(resource: ResourceObject<T>) -> Include<S> {
         Include {
             id: resource.id.to_string(),
             resource: T::resource(),
@@ -24,59 +25,63 @@ impl<P: Presenter, T: RawFetch> From<ResourceObject<T>> for Include<P> {
     }
 }
 
-impl<P: Presenter> RepresentWith<P> for Include<P> {
-    fn repr_with(&self, presenter: &mut P) -> Result<(), P::Error> {
+impl<S: Serializer> RepresentWith<S> for Include<S> {
+    fn repr_with(&self, serializer: &mut S, field_set: Option<&[String]>) -> Result<(), S::Error> {
         if self.relationships.is_empty() {
-            let mut state = presenter.serialize_map(Some(4))?;
-            presenter.serialize_map_key(&mut state, "id")?;
-            presenter.serialize_map_value(&mut state, &self.id)?;
-            presenter.serialize_map_key(&mut state, "type")?;
-            presenter.serialize_map_value(&mut state, self.resource)?;
-            presenter.serialize_map_key(&mut state, "attributes")?;
-            presenter.serialize_map_value(&mut state, SerializeRepr {
+            let mut state = serializer.serialize_map(Some(4))?;
+            serializer.serialize_map_key(&mut state, "id")?;
+            serializer.serialize_map_value(&mut state, &self.id)?;
+            serializer.serialize_map_key(&mut state, "type")?;
+            serializer.serialize_map_value(&mut state, self.resource)?;
+            serializer.serialize_map_key(&mut state, "attributes")?;
+            serializer.serialize_map_value(&mut state, SerializeRepr {
                 repr: &*self.attributes,
+                field_set: field_set,
             })?;
-            presenter.serialize_map_key(&mut state, "links")?;
-            presenter.serialize_map_value(&mut state, LinkObject {
+            serializer.serialize_map_key(&mut state, "links")?;
+            serializer.serialize_map_value(&mut state, LinkObject {
                 self_link: Some(&make_link(&[BASE_URL, self.resource, &self.id.to_string()])),
                 related_link: None,
             })?;
-            presenter.serialize_map_end(state)
+            serializer.serialize_map_end(state)
         } else {
-            let mut state = presenter.serialize_map(Some(5))?;
-            presenter.serialize_map_key(&mut state, "id")?;
-            presenter.serialize_map_value(&mut state, &self.id)?;
-            presenter.serialize_map_key(&mut state, "type")?;
-            presenter.serialize_map_value(&mut state, self.resource)?;
-            presenter.serialize_map_value(&mut state, SerializeRepr {
+            let mut state = serializer.serialize_map(Some(5))?;
+            serializer.serialize_map_key(&mut state, "id")?;
+            serializer.serialize_map_value(&mut state, &self.id)?;
+            serializer.serialize_map_key(&mut state, "type")?;
+            serializer.serialize_map_value(&mut state, self.resource)?;
+            serializer.serialize_map_value(&mut state, SerializeRepr {
                 repr: &*self.attributes,
+                field_set: field_set,
             })?;
-            presenter.serialize_map_key(&mut state, "relationships")?;
-            presenter.serialize_map_value(&mut state, SerializeRepr {
+            serializer.serialize_map_key(&mut state, "relationships")?;
+            serializer.serialize_map_value(&mut state, SerializeRepr {
                 repr: &ReprRels {
                     resource: self.resource,
                     id: &self.id,
                     relationships: &self.relationships
                 },
+                field_set: field_set,
             })?;
-            presenter.serialize_map_key(&mut state, "links")?;
-            presenter.serialize_map_value(&mut state, LinkObject {
+            serializer.serialize_map_key(&mut state, "links")?;
+            serializer.serialize_map_value(&mut state, LinkObject {
                 self_link: Some(&make_link(&[BASE_URL, self.resource, &self.id.to_string()])),
                 related_link: None,
             })?;
-            presenter.serialize_map_end(state)
+            serializer.serialize_map_end(state)
         }
     }
 }
 
-impl<P: Presenter> RepresentWith<P> for Vec<Include<P>> {
-    fn repr_with(&self, presenter: &mut P) -> Result<(), P::Error> {
-        let mut state = presenter.serialize_seq(Some(self.len()))?;
+impl<S: Serializer> RepresentWith<S> for Vec<Include<S>> {
+    fn repr_with(&self, serializer: &mut S, field_set: Option<&[String]>) -> Result<(), S::Error> {
+        let mut state = serializer.serialize_seq(Some(self.len()))?;
         for include in self {
-            presenter.serialize_seq_elt(&mut state, SerializeRepr {
+            serializer.serialize_seq_elt(&mut state, SerializeRepr {
                 repr: include,
+                field_set: field_set,
             })?;
         }
-        presenter.serialize_seq_end(state)
+        serializer.serialize_seq_end(state)
     }
 }

@@ -5,7 +5,6 @@
 //! guarantee about its backward compatibility, and it is not designed to support any use case
 //! other than the expansion of the `routes!` macro. Using one of these types directly is
 //! **always** a mistake.
-mod document;
 mod rels;
 mod router;
 

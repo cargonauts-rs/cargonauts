@@ -22,7 +22,7 @@ mod tests {
     struct User;
 
     impl repr::Represent for User {
-        fn repr<P: repr::Presenter>(&self, _: &mut P) -> Result<(), P::Error> { unimplemented!() }
+        fn repr<S: ::Serializer>(&self, _: &mut S, _: Option<&[String]>) -> Result<(), S::Error> { unimplemented!() }
     }
 
     impl Resource for User {

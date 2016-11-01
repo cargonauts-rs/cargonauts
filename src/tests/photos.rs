@@ -15,7 +15,7 @@ routes! {
 struct User;
 
 impl repr::Represent for User {
-    fn repr<P: repr::Presenter>(&self, _: &mut P) -> Result<(), P::Error> {
+    fn repr<S: ::Serializer>(&self, _: &mut S, _: Option<&[String]>) -> Result<(), S::Error> {
         unimplemented!()
     }
 }
@@ -57,7 +57,7 @@ impl api::rel::AppendLinks<Photo> for User {
 struct Photo;
 
 impl repr::Represent for Photo {
-    fn repr<P: repr::Presenter>(&self, _: &mut P) -> Result<(), P::Error> {
+    fn repr<S: ::Serializer>(&self, _: &mut S, _: Option<&[String]>) -> Result<(), S::Error> {
         unimplemented!()
     }
 }

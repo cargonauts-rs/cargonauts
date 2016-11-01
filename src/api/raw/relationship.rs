@@ -7,7 +7,7 @@ use api::Error;
 use api::raw::identifier::Identifier;
 use BASE_URL;
 use links::{LinkObject, make_link};
-use repr::{Presenter, Represent};
+use repr::Represent;
 use Serialize;
 use Serializer;
 
@@ -133,36 +133,36 @@ pub struct ReprRels<'a, R: FetchRelationships<'a>> {
 }
 
 impl<'a, R> Represent for ReprRels<'a, R> where R: FetchRelationships<'a> {
-    fn repr<P: Presenter>(&self, presenter: &mut P) -> Result<(), P::Error> {
-        match presenter.field_set() {
+    fn repr<S: Serializer>(&self, serializer: &mut S, field_set: Option<&[String]>) -> Result<(), S::Error> {
+        match field_set {
             Some(field_set) => {
-                let mut state = presenter.serialize_map(None)?;
+                let mut state = serializer.serialize_map(None)?;
                 let relationships = self.relationships.iter().filter(|&(ref name, _)| {
                     field_set.iter().any(|field| field == name)
                 });
                 for (name, relationship) in relationships {
-                    presenter.serialize_map_key(&mut state, name)?;
-                    presenter.serialize_map_value(&mut state, ReprRel {
+                    serializer.serialize_map_key(&mut state, name)?;
+                    serializer.serialize_map_value(&mut state, ReprRel {
                         base_resource: self.resource,
                         base_id: self.id,
                         relation: name,
                         relationship: relationship,
                     })?;
                 }
-                presenter.serialize_map_end(state)
+                serializer.serialize_map_end(state)
             }
             None            => {
-                let mut state = presenter.serialize_map(Some(self.relationships.count()))?;
+                let mut state = serializer.serialize_map(Some(self.relationships.count()))?;
                 for (name, relationship) in self.relationships.iter() {
-                    presenter.serialize_map_key(&mut state, name)?;
-                    presenter.serialize_map_value(&mut state, ReprRel {
+                    serializer.serialize_map_key(&mut state, name)?;
+                    serializer.serialize_map_value(&mut state, ReprRel {
                         base_resource: self.resource,
                         base_id: self.id,
                         relation: name,
                         relationship: relationship,
                     })?;
                 }
-                presenter.serialize_map_end(state)
+                serializer.serialize_map_end(state)
             }
         }
     }

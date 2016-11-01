@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use api::raw::Relationship;
-use repr::Presenter;
+use Serializer;
 use Value;
 
 pub mod mock;
@@ -68,7 +68,7 @@ pub enum Status {
 }
 
 pub trait Response: Default {
-    type Serializer: Presenter;
+    type Serializer: Serializer;
     fn set_status(&mut self, status: Status);
     fn serializer(&mut self) -> &mut Self::Serializer;
 }
