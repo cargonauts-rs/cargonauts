@@ -1,13 +1,9 @@
 use api::{self, Error};
 use api::rel;
 use api::raw;
-use BASE_URL;
-use links::make_link;
 use router::Router as RouterTrait;
-use router::{Status};
 use Deserialize;
 use presenter::{JsonApi, Presenter};
-use repr::RepresentWith;
 
 macro_rules! try_status {
     ($x:expr, $p:expr)  => {
@@ -33,12 +29,11 @@ impl<'a, R: RouterTrait> Router<'a, R> {
 
     pub fn attach_get<T: raw::RawGet>(&mut self) {
         self.router.attach_get(T::resource_plural(), |request| {
-            let presenter = JsonApi::new(None);
+            let presenter = JsonApi::new(request.field_set);
             let id = try_status!(request.id.parse(), presenter);
             match T::get(id, &request.includes) {
                 Ok(object)  => {
-                    let url = unimplemented!();
-                    presenter.present_resource(url, object.resource, object.includes)
+                    presenter.present_resource(&request.route, object.resource, object.includes)
                 }
                 Err(error)  => presenter.present_err(error),
             }
@@ -47,11 +42,10 @@ impl<'a, R: RouterTrait> Router<'a, R> {
 
     pub fn attach_index<T: raw::RawIndex>(&mut self) {
         self.router.attach_index(T::resource_plural(), |request| {
-            let presenter = JsonApi::new(None);
+            let presenter = JsonApi::new(request.field_set);
             match T::index(&request.includes, &request.sort, &request.page) {
                 Ok(object)  => {
-                    let url = unimplemented!();
-                    presenter.present_collection(url, object.resources, object.includes)
+                    presenter.present_collection(&request.route, object.resources, object.includes)
                 }
                 Err(error)  => presenter.present_err(error),
             }
@@ -60,14 +54,13 @@ impl<'a, R: RouterTrait> Router<'a, R> {
 
     pub fn attach_patch<T: raw::RawPatch>(&mut self) {
         self.router.attach_patch(T::resource_plural(), |request| {
-            let presenter = JsonApi::new(None);
+            let presenter = JsonApi::new(request.field_set);
             let id = try_status!(request.id.parse(), presenter);
             let patch = try_status!(::from_value(request.attributes), presenter);
             let rels = try_status!(<<T as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), presenter);
             match T::patch(id, patch, rels) {
                 Ok(object)  => {
-                    let url = unimplemented!();
-                    presenter.present_resource(url, object.resource, vec![])
+                    presenter.present_resource(&request.route, object.resource, vec![])
                 }
                 Err(error)  => presenter.present_err(error),
             }
@@ -82,9 +75,8 @@ impl<'a, R: RouterTrait> Router<'a, R> {
             let rels = try_status!(<<T as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), presenter);
             match T::patch_async(id, patch, rels) {
                 Ok(object)  => {
-                    let url = unimplemented!();
                     // TODO respond as accepted and set content location header
-                    presenter.present_resource(url, object.resource, vec![])
+                    presenter.present_resource(&request.route, object.resource, vec![])
                 }
                 Err(error)  => presenter.present_err(error),
             }
@@ -93,13 +85,12 @@ impl<'a, R: RouterTrait> Router<'a, R> {
 
     pub fn attach_post<T: raw::RawPost>(&mut self) {
         self.router.attach_post(T::resource_plural(), |request| {
-            let presenter = JsonApi::new(None);
+            let presenter = JsonApi::new(request.field_set);
             let post = try_status!(::from_value(request.attributes), presenter);
             let rels = try_status!(<<T as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), presenter);
             match T::post(post, rels) {
                 Ok(object)  => {
-                    let url = unimplemented!();
-                    presenter.present_resource(url, object.resource, vec![])
+                    presenter.present_resource(&request.route, object.resource, vec![])
                 }
                 Err(error)  => presenter.present_err(error),
             }
@@ -113,9 +104,8 @@ impl<'a, R: RouterTrait> Router<'a, R> {
             let rels = try_status!(<<T as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), presenter);
             match T::post_async(post, rels) {
                 Ok(object)  => {
-                    let url = unimplemented!();
                     // TODO respond as accepted and set content location header
-                    presenter.present_resource(url, object.resource, vec![])
+                    presenter.present_resource(&request.route, object.resource, vec![])
                 }
                 Err(error)  => presenter.present_err(error),
             }
@@ -140,30 +130,21 @@ impl<'a, R: RouterTrait> Router<'a, R> {
             let id = try_status!(request.id.parse(), presenter);
             match T::fetch_one(&api::Entity::Id(id), &request.includes) {
                 Ok(Some(object))    => {
-                    let url = unimplemented!();
-                    presenter.present_resource(url, object.resource, object.includes)
+                    presenter.present_resource(&request.route, object.resource, object.includes)
                 }
                 Ok(None)            => {
-                    let url = make_link(&[
-                        BASE_URL,
-                        T::resource_plural(),
-                        &request.id,
-                        Rel::to_one(),
-                    ]);
-                    presenter.present_nil(&url)
+                    presenter.present_nil(&request.route)
                 }
                 Err(error)          => presenter.present_err(error),
             }
         });
-        self.router.attach_fetch_rel(T::resource_plural(), Rel::to_one(), |id| {
+        self.router.attach_fetch_rel(T::resource_plural(), Rel::to_one(), |request| {
             let presenter = JsonApi::new(None);
-            let parsed_id = try_status!(id.parse(), presenter);
+            let parsed_id = try_status!(request.id.parse(), presenter);
             match T::has_one(&api::Entity::Id(parsed_id)) {
                 Ok(rel)         => {
                     let rel = raw::Relationship::One(rel.map(|id| raw::Identifier::new::<Rel::Resource>(&id)));
-                    let self_url = unimplemented!();
-                    let rel_url = unimplemented!();
-                    presenter.present_rel(self_url, rel_url, rel, vec![])
+                    presenter.present_rel(&request.relationship_route, &request.related_resource_route, rel, vec![])
                 }
                 Err(error)          => presenter.present_err(error),
             }
@@ -177,21 +158,18 @@ impl<'a, R: RouterTrait> Router<'a, R> {
             let id = try_status!(request.id.parse(), presenter);
             match T::fetch_many(&api::Entity::Id(id), &request.includes) {
                 Ok(object)     => {
-                    let url = unimplemented!();
-                    presenter.present_collection(url, object.resources, object.includes)
+                    presenter.present_collection(&request.route, object.resources, object.includes)
                 }
                 Err(error)          => presenter.present_err(error),
             }
         });
-        self.router.attach_fetch_rel(T::resource_plural(), Rel::to_many(), |id| {
+        self.router.attach_fetch_rel(T::resource_plural(), Rel::to_many(), |request| {
             let presenter = JsonApi::new(None);
-            let parsed_id = try_status!(id.parse(), presenter);
+            let parsed_id = try_status!(request.id.parse(), presenter);
             match T::has_many(&api::Entity::Id(parsed_id)) {
                 Ok(rel)         => {
                     let rel = raw::Relationship::Many(rel.into_iter().map(|id| raw::Identifier::new::<Rel::Resource>(&id)).collect());
-                    let self_url = unimplemented!();
-                    let rel_url = unimplemented!();
-                    presenter.present_rel(self_url, rel_url, rel, vec![])
+                    presenter.present_rel(&request.relationship_route, &request.related_resource_route, rel, vec![])
                 }
                 Err(error)          => presenter.present_err(error),
             }
@@ -266,17 +244,10 @@ impl<'a, R: RouterTrait> Router<'a, R> {
             let rels = try_status!(<<Rel::Resource as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), presenter);
             match T::patch_one(&api::Entity::Id(id), patch, rels) {
                 Ok(Some(object))    => {
-                    let url = unimplemented!();
-                    presenter.present_resource(url, object.resource, vec![])
+                    presenter.present_resource(&request.route, object.resource, vec![])
                 }
                 Ok(None)            => {
-                    let url = make_link(&[
-                        BASE_URL,
-                        T::resource_plural(),
-                        &request.id,
-                        Rel::to_one(),
-                    ]);
-                    presenter.present_nil(&url)
+                    presenter.present_nil(&request.route)
                 }
                 Err(error)          => presenter.present_err(error),
             }
@@ -292,8 +263,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
             let rels = try_status!(<<Rel::Resource as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), presenter);
             match T::post_one(&api::Entity::Id(id), post, rels) {
                 Ok(object)  => {
-                    let url = unimplemented!();
-                    presenter.present_resource(url, object.resource, vec![])
+                    presenter.present_resource(&request.route, object.resource, vec![])
                 }
                 Err(error)  => presenter.present_err(error),
             }
@@ -325,8 +295,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
             let rels = try_status!(<<Rel::Resource as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), presenter);
             match T::append(&api::Entity::Id(id), post, rels) {
                 Ok(object)  => {
-                    let url = unimplemented!();
-                    presenter.present_resource(url, object.resource, vec![])
+                    presenter.present_resource(&request.route, object.resource, vec![])
                 }
                 Err(error)  => presenter.present_err(error),
             }

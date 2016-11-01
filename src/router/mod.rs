@@ -30,7 +30,7 @@ pub trait Router {
     fn attach_fetch_many<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
         where F: Fn(GetRequest) -> Self::Response;
     fn attach_fetch_rel<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
-        where F: Fn(String) -> Self::Response;
+        where F: Fn(FetchRelRequest) -> Self::Response;
     fn attach_delete_one<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
         where F: Fn(String) -> Self::Response;
     fn attach_delete_one_rel<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
@@ -70,27 +70,43 @@ pub enum Status {
 pub trait Response: Default {
     type Serializer: Serializer;
     fn set_status(&mut self, status: Status);
+    fn set_content(&mut self, content_type: &str);
     fn serializer(&mut self) -> &mut Self::Serializer;
 }
 
 pub struct GetRequest {
     pub id: String,
     pub includes: Vec<IncludeQuery>,
+    pub field_set: Option<Vec<String>>,
+    pub route: String,
 }
 
 pub struct IndexRequest {
     pub includes: Vec<IncludeQuery>,
     pub sort: Vec<SortQuery>,
     pub page: Option<Pagination>,
+    pub field_set: Option<Vec<String>>,
+    pub route: String,
+}
+
+pub struct FetchRelRequest {
+    pub id: String,
+    pub includes: Vec<IncludeQuery>,
+    pub relationship_route: String,
+    pub related_resource_route: String,
 }
 
 pub struct PatchRequest {
     pub attributes: Value,
     pub relationships: BTreeMap<String, Relationship>,
     pub id: String,
+    pub field_set: Option<Vec<String>>,
+    pub route: String,
 }
 
 pub struct PostRequest {
     pub attributes: Value,
     pub relationships: BTreeMap<String, Relationship>,
+    pub field_set: Option<Vec<String>>,
+    pub route: String,
 }

@@ -96,7 +96,7 @@ impl Router for MockRouter {
         self.register_rel("fetch-one", resource, relationship);
     }
     fn attach_fetch_rel<F>(&mut self, resource: &'static str, relationship: &'static str, _: F)
-            where F: Fn(String) -> Self::Response {
+            where F: Fn(FetchRelRequest) -> Self::Response {
         self.register_rel("fetch-rel", resource, relationship);
     }
     fn attach_delete_one<F>(&mut self, resource: &'static str, relationship: &'static str, _: F)
@@ -156,5 +156,6 @@ pub struct MockResponse;
 impl Response for MockResponse {
     type Serializer = json::value::Serializer;
     fn set_status(&mut self, _: Status) { unimplemented!() }
+    fn set_content(&mut self, _: &str) { unimplemented!() }
     fn serializer(&mut self) -> &mut Self::Serializer { unimplemented!() }
 }

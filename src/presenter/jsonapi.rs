@@ -5,7 +5,7 @@ use presenter::Presenter;
 use Serializer;
 use Serialize;
 use repr::SerializeRepr;
-use router::Response;
+use router::{Response, Status};
 
 pub struct JsonApi<R: Response> {
     response: R,
@@ -18,6 +18,12 @@ impl<R: Response> JsonApi<R> {
             response: R::default(),
             field_set: field_set,
         }
+    }
+
+    fn respond(mut self, status: Status) -> R {
+        self.response.set_status(status);
+        self.response.set_content("application/vnd.api+json");
+        self.response
     }
 
     fn split_up(&mut self) -> (&mut R::Serializer, Option<&[String]>) {
@@ -138,46 +144,30 @@ impl<R: Response> Presenter<R> for JsonApi<R> {
     fn present_resource<T>(mut self, self_link: &str, resource: ResourceObject<T>, includes: Vec<Include<R::Serializer>>) -> R
     where T: RawFetch {
         match self.serialize_resource(self_link, resource, includes) {
-            Ok(())  => {
-                unimplemented!()
-            }
-            Err(_)  => {
-                unimplemented!()
-            }
+            Ok(())  => self.respond(Status::Ok),
+            Err(_)  => self.respond(Status::BadRequest),
         }
     }
 
     fn present_collection<T>(mut self, self_link: &str, resources: Vec<ResourceObject<T>>, includes: Vec<Include<R::Serializer>>) -> R
     where T: RawFetch {
         match self.serialize_collection(self_link, resources, includes) {
-            Ok(())  => {
-                unimplemented!()
-            }
-            Err(_)  => {
-                unimplemented!()
-            }
+            Ok(())  => self.respond(Status::Ok),
+            Err(_)  => self.respond(Status::BadRequest),
         }
     }
 
     fn present_nil(mut self, self_link: &str) -> R {
         match self.serialize_nil(self_link) {
-            Ok(())  => {
-                unimplemented!()
-            }
-            Err(_)  => {
-                unimplemented!()
-            }
+            Ok(())  => self.respond(Status::Ok),
+            Err(_)  => self.respond(Status::BadRequest),
         }
     }
 
     fn present_rel(mut self, self_link: &str, rel_link: &str, rel: Relationship, includes: Vec<Include<R::Serializer>>) -> R {
         match self.serialize_rel(self_link, rel_link, rel, includes) {
-            Ok(())  => {
-                unimplemented!()
-            }
-            Err(_)  => {
-                unimplemented!()
-            }
+            Ok(())  => self.respond(Status::Ok),
+            Err(_)  => self.respond(Status::BadRequest),
         }
     }
 
