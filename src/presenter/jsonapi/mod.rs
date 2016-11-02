@@ -1,13 +1,23 @@
-use std::error::Error as ErrorTrait;
-
 use api::Error;
 use api::raw::{ResourceObject, Include, RawFetch, Relationship};
 use links::LinkObject;
 use presenter::Presenter;
 use Serializer;
-use Serialize;
 use repr::SerializeRepr;
 use router::{Response, Status};
+
+mod error;
+mod include;
+mod jsonapi;
+mod linkage;
+mod rels;
+mod resource;
+
+use self::error::ErrorObject;
+use self::include::IncludesObject;
+use self::jsonapi::JsonApiObject;
+use self::linkage::{ToOneLinkage, ToManyLinkage};
+use self::resource::{JsonApiResourceObject, JsonApiCollectionObject};
 
 pub struct JsonApi<R: Response> {
     response: R,
@@ -26,9 +36,9 @@ impl<R: Response> JsonApi<R> {
         (response.serializer(), field_set.as_ref().map(|fields| &fields[..]))
     }
 
-    fn serialize_resource<T>(&mut self, self_link: &str, resource: ResourceObject<T>, includes: Vec<Include<R::Serializer>>) -> Result<(), <R::Serializer as Serializer>::Error>
+    fn serialize_resource<T>(&mut self, self_link: &str, resource: JsonApiResourceObject<T>, includes: IncludesObject<R::Serializer>) -> Result<(), <R::Serializer as Serializer>::Error>
     where T: RawFetch {
-        if includes.is_empty() {
+        if includes.0.is_empty() {
             self.serialize_document(LinkObject {
                 self_link: Some(self_link),
                 related_link: None,
@@ -47,9 +57,9 @@ impl<R: Response> JsonApi<R> {
         }
     }
 
-    fn serialize_collection<T>(&mut self, self_link: &str, resources: Vec<ResourceObject<T>>, includes: Vec<Include<R::Serializer>>) -> Result<(), <R::Serializer as Serializer>::Error>
+    fn serialize_collection<T>(&mut self, self_link: &str, resources: JsonApiCollectionObject<T>, includes: IncludesObject<R::Serializer>) -> Result<(), <R::Serializer as Serializer>::Error>
     where T: RawFetch {
-        if includes.is_empty() {
+        if includes.0.is_empty() {
             self.serialize_document(LinkObject {
                 self_link: Some(self_link),
                 related_link: None,
@@ -68,18 +78,18 @@ impl<R: Response> JsonApi<R> {
         }
     }
 
-    fn serialize_rel(&mut self, self_link: &str, rel_link: &str, rel: Relationship, includes: Vec<Include<R::Serializer>>) -> Result<(), <R::Serializer as Serializer>::Error> {
+    fn serialize_rel(&mut self, self_link: &str, rel_link: &str, rel: Relationship, includes: IncludesObject<R::Serializer>) -> Result<(), <R::Serializer as Serializer>::Error> {
         fn serialize_rel<S: Serializer>(s: &mut S, state: &mut S::MapState, rel: Relationship) -> Result<(), S::Error> {
             match rel {
                 Relationship::One(identifier)   => {
-                    s.serialize_map_value(state, identifier)
+                    s.serialize_map_value(state, ToOneLinkage(&identifier))
                 }
                 Relationship::Many(identifiers) => {
-                    s.serialize_map_value(state, identifiers)
+                    s.serialize_map_value(state, ToManyLinkage(&identifiers))
                 }
             }
         }
-        if includes.is_empty() {
+        if includes.0.is_empty() {
             self.serialize_document(LinkObject {
                 self_link: Some(self_link),
                 related_link: Some(rel_link),
@@ -114,7 +124,7 @@ impl<R: Response> JsonApi<R> {
         serializer.serialize_map_end(state)
     }
 
-    fn serialize_compound_document<F>(&mut self, includes: Vec<Include<R::Serializer>>, links: LinkObject, data: F) -> Result<(), <R::Serializer as Serializer>::Error>
+    fn serialize_compound_document<F>(&mut self, includes: IncludesObject<R::Serializer>, links: LinkObject, data: F) -> Result<(), <R::Serializer as Serializer>::Error>
     where F: FnOnce(&mut R::Serializer,
                     &mut <R::Serializer as Serializer>::MapState,
                     Option<&[String]>) -> Result<(), <R::Serializer as Serializer>::Error> {
@@ -157,7 +167,7 @@ impl<R: Response> Presenter<R> for JsonApi<R> {
 
     fn present_resource<T>(mut self, self_link: &str, resource: ResourceObject<T>, includes: Vec<Include<R::Serializer>>) -> R
     where T: RawFetch {
-        match self.serialize_resource(self_link, resource, includes) {
+        match self.serialize_resource(self_link, JsonApiResourceObject(&resource), IncludesObject(includes)) {
             Ok(())  => self.respond(Status::Ok),
             Err(_)  => self.respond(Status::BadRequest),
         }
@@ -165,7 +175,7 @@ impl<R: Response> Presenter<R> for JsonApi<R> {
 
     fn present_collection<T>(mut self, self_link: &str, resources: Vec<ResourceObject<T>>, includes: Vec<Include<R::Serializer>>) -> R
     where T: RawFetch {
-        match self.serialize_collection(self_link, resources, includes) {
+        match self.serialize_collection(self_link, JsonApiCollectionObject(resources), IncludesObject(includes)) {
             Ok(())  => self.respond(Status::Ok),
             Err(_)  => self.respond(Status::BadRequest),
         }
@@ -179,7 +189,7 @@ impl<R: Response> Presenter<R> for JsonApi<R> {
     }
 
     fn present_rel(mut self, self_link: &str, rel_link: &str, rel: Relationship, includes: Vec<Include<R::Serializer>>) -> R {
-        match self.serialize_rel(self_link, rel_link, rel, includes) {
+        match self.serialize_rel(self_link, rel_link, rel, IncludesObject(includes)) {
             Ok(())  => self.respond(Status::Ok),
             Err(_)  => self.respond(Status::BadRequest),
         }
@@ -190,29 +200,5 @@ impl<R: Response> Presenter<R> for JsonApi<R> {
             Ok(())  => self.respond(error.into()),
             Err(_)  => self.respond(Status::InternalError),
         }
-    }
-}
-
-struct JsonApiObject;
-
-impl Serialize for JsonApiObject {
-    fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
-        let mut state = serializer.serialize_map(Some(1))?;
-        serializer.serialize_map_key(&mut state, "version")?;
-        serializer.serialize_map_value(&mut state, "1.0")?;
-        serializer.serialize_map_end(state)
-    }
-}
-
-struct ErrorObject<'a> {
-    status: &'a Error,
-}
-
-impl<'a> Serialize for ErrorObject<'a> {
-    fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
-        let mut state = serializer.serialize_map(Some(1))?;
-        serializer.serialize_map_key(&mut state, "status")?;
-        serializer.serialize_map_value(&mut state, self.status.description())?;
-        serializer.serialize_map_end(state)
     }
 }

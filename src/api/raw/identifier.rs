@@ -1,7 +1,5 @@
 use api::Resource;
 use api::raw::{ResourceObject, RawFetch};
-use Serialize;
-use Serializer;
 
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub struct Identifier {
@@ -33,38 +31,5 @@ impl<'a, T: RawFetch> From<&'a ResourceObject<T>> for Identifier {
             resource: T::resource(),
             id: resource.id.to_string(),
         }
-    }
-}
-
-impl Serialize for Identifier {
-    fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
-        let mut state = serializer.serialize_map(Some(2))?;
-        serializer.serialize_map_key(&mut state, "id")?;
-        serializer.serialize_map_value(&mut state, &self.id)?;
-        serializer.serialize_map_key(&mut state, "type")?;
-        serializer.serialize_map_value(&mut state, self.resource)?;
-        serializer.serialize_map_end(state)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::collections::BTreeMap;
-    use to_value;
-
-    #[test]
-    fn serialize_identifier() {
-        let identifier = Identifier {
-            resource: "identified",
-            id: String::from("101"),
-        };
-        let expected = {
-            let mut identifier = BTreeMap::new();
-            identifier.insert(String::from("type"), to_value("identified"));
-            identifier.insert(String::from("id"), to_value("101"));
-            to_value(&identifier)
-        };
-        assert_eq!(to_value(&identifier), expected);
     }
 }

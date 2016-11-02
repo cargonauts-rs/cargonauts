@@ -1,7 +1,7 @@
 mod identifier;
 mod include;
 mod resource;
-mod relationship;
+pub mod relationship;
 
 pub use api::get::{RawGet, GetResponse};
 pub use api::index::{RawIndex, IndexResponse};
