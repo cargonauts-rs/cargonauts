@@ -1,3 +1,5 @@
+use std::error::Error as ErrorTrait;
+
 use api::Error;
 use api::raw::{ResourceObject, Include, RawFetch, Relationship};
 use links::LinkObject;
@@ -131,6 +133,18 @@ impl<R: Response> JsonApi<R> {
         serializer.serialize_map_value(&mut state, JsonApiObject)?;
         serializer.serialize_map_end(state)
     }
+
+    fn serialize_err(&mut self, error: &Error) -> Result<(), <R::Serializer as Serializer>::Error> {
+        let (serializer, _) = self.split_up();
+        let mut state = serializer.serialize_map(Some(2))?;
+        serializer.serialize_map_key(&mut state, "errors")?;
+        serializer.serialize_map_value(&mut state, ErrorObject {
+            status: error,
+        })?;
+        serializer.serialize_map_key(&mut state, "jsonapi")?;
+        serializer.serialize_map_value(&mut state, JsonApiObject)?;
+        serializer.serialize_map_end(state)
+    }
 }
 
 impl<R: Response> Presenter<R> for JsonApi<R> {
@@ -171,8 +185,11 @@ impl<R: Response> Presenter<R> for JsonApi<R> {
         }
     }
 
-    fn present_err(self, error: Error) -> R {
-        unimplemented!()
+    fn present_err(mut self, error: Error) -> R {
+        match self.serialize_err(&error) {
+            Ok(())  => self.respond(error.into()),
+            Err(_)  => self.respond(Status::InternalError),
+        }
     }
 }
 
@@ -183,6 +200,19 @@ impl Serialize for JsonApiObject {
         let mut state = serializer.serialize_map(Some(1))?;
         serializer.serialize_map_key(&mut state, "version")?;
         serializer.serialize_map_value(&mut state, "1.0")?;
+        serializer.serialize_map_end(state)
+    }
+}
+
+struct ErrorObject<'a> {
+    status: &'a Error,
+}
+
+impl<'a> Serialize for ErrorObject<'a> {
+    fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
+        let mut state = serializer.serialize_map(Some(1))?;
+        serializer.serialize_map_key(&mut state, "status")?;
+        serializer.serialize_map_value(&mut state, self.status.description())?;
         serializer.serialize_map_end(state)
     }
 }
