@@ -17,8 +17,8 @@ pub enum Relationship {
     Many(Vec<Identifier>),
 }
 
-pub trait FetchRelationships<'a>: 'a {
-    type Iter: Iterator<Item = (&'a str, &'a RelationshipLinkage)>;
+pub trait FetchRelationships<'a>: IntoIterator<Item = (&'static str, RelationshipLinkage)> + 'a {
+    type Iter: Iterator<Item = (&'static str, &'a RelationshipLinkage)>;
     fn iter(&'a self) -> Self::Iter;
     fn count(&self) -> usize;
 }
@@ -27,8 +27,19 @@ pub trait UpdateRelationships: Sized {
     fn from_iter<I>(iter: I) -> Result<Self, Error> where I: Iterator<Item = (String, Relationship)>;
 }
 
-impl<'a> FetchRelationships<'a> for () {
-    type Iter = Empty<(&'a str, &'a RelationshipLinkage)>;
+pub struct NoRelationships;
+
+impl IntoIterator for NoRelationships {
+    type Item = (&'static str, RelationshipLinkage);
+    type IntoIter = Empty<(&'static str, RelationshipLinkage)>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        iter::empty()
+    }
+}
+
+impl<'a> FetchRelationships<'a> for NoRelationships {
+    type Iter = Empty<(&'static str, &'a RelationshipLinkage)>;
 
     fn iter(&'a self) -> Self::Iter {
         iter::empty()
@@ -39,10 +50,10 @@ impl<'a> FetchRelationships<'a> for () {
     }
 }
 
-impl UpdateRelationships for () {
+impl UpdateRelationships for NoRelationships {
     fn from_iter<I>(mut iter: I) -> Result<Self, Error> where I: Iterator<Item = (String, Relationship)> {
         if let None = iter.next() {
-            Ok(())
+            Ok(NoRelationships)
         } else {
             Err(Error::Conflict)
         }
@@ -51,23 +62,10 @@ impl UpdateRelationships for () {
 
 impl<'a> FetchRelationships<'a> for BTreeMap<&'static str, RelationshipLinkage> {
     type Iter = Map<BTreeMapIter<'a, &'static str, RelationshipLinkage>,
-                    fn((&'a &'static str, &'a RelationshipLinkage)) -> (&'a str, &'a RelationshipLinkage)>;
+                    fn((&'a &'static str, &'a RelationshipLinkage)) -> (&'static str, &'a RelationshipLinkage)>;
 
     fn iter(&'a self) -> Self::Iter {
         self.iter().map(deref_str)
-    }
-
-    fn count(&self) -> usize {
-        self.len()
-    }
-}
-
-impl<'a> FetchRelationships<'a> for BTreeMap<String, RelationshipLinkage> {
-    type Iter = Map<BTreeMapIter<'a, String, RelationshipLinkage>,
-                    fn((&'a String, &'a RelationshipLinkage)) -> (&'a str, &'a RelationshipLinkage)>;
-
-    fn iter(&'a self) -> Self::Iter {
-        self.iter().map(deref_string)
     }
 
     fn count(&self) -> usize {
@@ -83,23 +81,10 @@ impl UpdateRelationships for BTreeMap<String, Relationship> {
 
 impl<'a> FetchRelationships<'a> for HashMap<&'static str, RelationshipLinkage> {
     type Iter = Map<HashMapIter<'a, &'static str, RelationshipLinkage>,
-                    fn((&'a &'static str, &'a RelationshipLinkage)) -> (&'a str, &'a RelationshipLinkage)>;
+                    fn((&'a &'static str, &'a RelationshipLinkage)) -> (&'static str, &'a RelationshipLinkage)>;
 
     fn iter(&'a self) -> Self::Iter {
         self.iter().map(deref_str)
-    }
-
-    fn count(&self) -> usize {
-        self.len()
-    }
-}
-
-impl<'a> FetchRelationships<'a> for HashMap<String, RelationshipLinkage> {
-    type Iter = Map<HashMapIter<'a, String, RelationshipLinkage>,
-                    fn((&'a String, &'a RelationshipLinkage)) -> (&'a str, &'a RelationshipLinkage)>;
-
-    fn iter(&'a self) -> Self::Iter {
-        self.iter().map(deref_string)
     }
 
     fn count(&self) -> usize {
@@ -113,10 +98,6 @@ impl UpdateRelationships for HashMap<String, Relationship> {
     }
 }
 
-fn deref_str<'a>((&key, val): (&'a &'static str, &'a RelationshipLinkage)) -> (&'a str, &'a RelationshipLinkage) {
+fn deref_str<'a>((&key, val): (&'a &'static str, &'a RelationshipLinkage)) -> (&'static str, &'a RelationshipLinkage) {
     (key, val)
-}
-
-fn deref_string<'a>((key, val): (&'a String, &'a RelationshipLinkage)) -> (&'a str, &'a RelationshipLinkage) {
-    (&key[..], val)
 }

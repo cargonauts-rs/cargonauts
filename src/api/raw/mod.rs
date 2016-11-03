@@ -10,5 +10,5 @@ pub use api::post::{RawPost, RawPostAsync, PostResponse};
 
 pub use self::identifier::Identifier;
 pub use self::include::Include;
-pub use self::relationship::{Relationship, RelationshipLinkage, FetchRelationships, UpdateRelationships};
+pub use self::relationship::{Relationship, RelationshipLinkage, FetchRelationships, UpdateRelationships, NoRelationships};
 pub use self::resource::{RawFetch, RawUpdate, ResourceObject};

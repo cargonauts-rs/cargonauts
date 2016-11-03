@@ -18,22 +18,22 @@ macro_rules! _resource {
     ($router:expr, $resource:ty: [] $ignore:tt) => { };
     ($router:expr, $resource:ty: [$($method:ident),*] {}) => {
         impl $crate::api::raw::RawFetch for $resource {
-            type Relationships = ();
+            type Relationships = $crate::api::raw::NoRelationships;
         }
 
         impl $crate::api::raw::RawUpdate for $resource {
-            type Relationships = ();
+            type Relationships = $crate::api::raw::NoRelationships;
         }
 
         impl $crate::_internal::_FetchRels for $resource {
-            fn rels<S: $crate::Serializer>(_: &$crate::api::Entity<Self>, _: &[$crate::router::IncludeQuery]) -> Result<(Self::Relationships, Vec<$crate::api::raw::Include<S>>), $crate::api::Error> {
-                Ok(((), vec![]))
+            fn rels<S: $crate::Serializer>(_: &$crate::api::Entity<Self>, _: &[$crate::router::IncludeQuery]) -> $crate::api::Result<(Self::Relationships, Vec<$crate::api::raw::Include<S>>)> {
+                Ok(($crate::api::raw::NoRelationships, vec![]))
             }
         }
 
         impl $crate::_internal::_UpdateRels for $resource {
-            fn update_rels(_: &$crate::api::Entity<Self>, rels: ()) -> Result<(), $crate::api::Error> {
-                Ok(())
+            fn update_rels(_: &$crate::api::Entity<Self>, rels: $crate::api::raw::NoRelationships) -> $crate::api::Result<$crate::api::raw::NoRelationships> {
+                Ok($crate::api::raw::NoRelationships)
             }
         }
         _methods!($router, $resource, [$($method),*]);
@@ -81,6 +81,19 @@ macro_rules! _resource {
             )*
         }
 
+        impl IntoIterator for Relationships {
+            type Item = (&'static str, $crate::api::raw::RelationshipLinkage);
+            type IntoIter = RelationshipsIntoIter;
+            fn into_iter(self) -> RelationshipsIntoIter {
+                RelationshipsIntoIter {
+                    $(
+                        $rel: Some(self.$rel),
+                    )*
+                    state: RelationshipsEnum::Init,
+                }
+            }
+        }
+
         impl<'a> $crate::api::raw::FetchRelationships<'a> for Relationships {
             type Iter = RelationshipsIter<'a>;
 
@@ -96,13 +109,34 @@ macro_rules! _resource {
             }
         }
 
+        #[allow(non_snake_case)]
+        struct RelationshipsIntoIter {
+            $(
+                $rel: Option<$crate::api::raw::RelationshipLinkage>,
+            )*
+            state: RelationshipsEnum,
+        }
+
+        impl Iterator for RelationshipsIntoIter {
+            type Item = (&'static str, $crate::api::raw::RelationshipLinkage);
+            fn next(&mut self) -> Option<Self::Item> {
+                match self.state {
+                    RelationshipsEnum::Init => $( {
+                        self.state = RelationshipsEnum::$rel;
+                        self.$rel.take().map(|rel| (_name_rel!($rel, $count), rel))
+                    }
+                    RelationshipsEnum::$rel => )* { None }
+                }
+            }
+        }
+
         struct RelationshipsIter<'a> {
             rels: &'a Relationships,
             state: RelationshipsEnum,
         }
 
         impl<'a> Iterator for RelationshipsIter<'a> {
-            type Item = (&'a str, &'a $crate::api::raw::RelationshipLinkage);
+            type Item = (&'static str, &'a $crate::api::raw::RelationshipLinkage);
             fn next(&mut self) -> Option<Self::Item> {
                 match self.state {
                     RelationshipsEnum::Init => $( {

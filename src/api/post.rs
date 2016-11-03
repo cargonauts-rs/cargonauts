@@ -1,6 +1,6 @@
 use Deserialize;
 use api::{AsyncJob, Resource, Result, Entity};
-use api::raw::{RawUpdate, ResourceObject, RawFetch};
+use api::raw::{RawUpdate, ResourceObject, RawFetch, NoRelationships};
 use _internal::_UpdateRels;
 
 pub trait Post: Resource + Deserialize {
@@ -48,7 +48,7 @@ impl<T> RawPostAsync for T where T: PostAsync + _UpdateRels {
             resource: ResourceObject {
                 id: job.id(),
                 attributes: job,
-                relationships: (),
+                relationships: NoRelationships,
             }
         })
     }

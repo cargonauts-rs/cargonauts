@@ -1,3 +1,5 @@
+use std::cell::RefCell;
+
 use api::raw::{FetchRelationships, RelationshipLinkage, Relationship};
 use BASE_URL;
 use links::{LinkObject, make_link};
@@ -40,6 +42,48 @@ impl<'a, R> Represent for RelsObject<'a, R> where R: FetchRelationships<'a> {
                         base_id: self.id,
                         relation: name,
                         relationship: relationship,
+                    })?;
+                }
+                serializer.serialize_map_end(state)
+            }
+        }
+    }
+}
+
+pub struct IncludeRelsObject<'a> {
+    pub resource: &'static str,
+    pub id: &'a str,
+    pub relationships: &'a RefCell<Iterator<Item = (&'static str, RelationshipLinkage)>>,
+}
+
+impl<'a> Represent for IncludeRelsObject<'a> {
+    fn repr<S: Serializer>(&self, serializer: &mut S, field_set: Option<&[String]>) -> Result<(), S::Error> {
+        let mut relationships = self.relationships.borrow_mut();
+        match field_set {
+            Some(field_set) => {
+                let mut state = serializer.serialize_map(None)?;
+                for (name, relationship) in &mut *relationships {
+                    if field_set.iter().any(|field| field == name) {
+                        serializer.serialize_map_key(&mut state, name)?;
+                        serializer.serialize_map_value(&mut state, ReprRel {
+                            base_resource: self.resource,
+                            base_id: self.id,
+                            relation: &name,
+                            relationship: &relationship,
+                        })?;
+                    }
+                }
+                serializer.serialize_map_end(state)
+            }
+            None            => {
+                let mut state = serializer.serialize_map(None)?;
+                for (name, relationship) in &mut *relationships {
+                    serializer.serialize_map_key(&mut state, name)?;
+                    serializer.serialize_map_value(&mut state, ReprRel {
+                        base_resource: self.resource,
+                        base_id: self.id,
+                        relation: &name,
+                        relationship: &relationship,
                     })?;
                 }
                 serializer.serialize_map_end(state)
