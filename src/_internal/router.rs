@@ -29,12 +29,16 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         }
     }
 
-    pub fn attach_get<T: raw::RawGet<P::Include>, P: Presenter<T, Response = R::Response, Linker = R::Linker>>(&mut self) {
+    pub fn attach_get<T, P>(&mut self)
+    where
+        T: raw::RawGet<P::Include>,
+        P: Presenter<T, Response = R::Response, Linker = R::Linker>,
+    {
         let Router { ref mut router, ref linker } = *self;
         router.attach_get(T::resource_plural(), |request| {
             let presenter = P::prepare(request.field_set, linker.clone());
             let id = try_status!(request.id.parse(), presenter);
-            match T::get(id, &request.includes) {
+            match T::get(api::Entity::Id(id), &request.includes) {
                 Ok(object)  => {
                     presenter.present_resource(object.resource, object.includes)
                 }
@@ -132,8 +136,28 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         });
     }
 
-    pub fn attach_fetch_one<T, Rel, P: Presenter<Rel::Resource, Response = R::Response, Linker = R::Linker>>(&mut self)
-    where T: rel::raw::FetchOne<P::Include, Rel>, Rel: rel::Relation, Rel::Resource: raw::RawFetch {
+    pub fn attach_get_alias<T, P>(&mut self, route: &'static str)
+    where
+        T: raw::RawGetAliased<P::Include>,
+        P: Presenter<T, Response = R::Response, Linker = R::Linker>,
+    { 
+        let Router { ref mut router, ref linker } = *self;
+        router.attach_get_alias(route, |alias_request, get_request| {
+            let presenter = P::prepare(None, linker.clone());
+            match T::get(alias_request, &get_request.includes) {
+                Ok(obj)     => presenter.present_resource(obj.resource, obj.includes),
+                Err(error)  => presenter.present_err(error),
+            }
+        });
+    }
+
+    pub fn attach_fetch_one<T, Rel, P>(&mut self)
+    where
+        T: rel::raw::FetchOne<P::Include, Rel>,
+        Rel: rel::Relation,
+        Rel::Resource: raw::RawFetch,
+        P: Presenter<Rel::Resource, Response = R::Response, Linker = R::Linker>,
+    {
         let Router { ref mut router, ref linker } = *self;
         router.attach_fetch_one(T::resource_plural(), Rel::to_one(), |request| {
             let presenter = P::prepare(None, linker.clone());
@@ -302,8 +326,13 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         })
     }
 
-    pub fn attach_append_many<T, Rel, P: Presenter<Rel::Resource, Response = R::Response, Linker = R::Linker>>(&mut self)
-    where T: rel::raw::Append<Rel>, Rel: rel::Relation, Rel::Resource: raw::RawUpdate + Deserialize {
+    pub fn attach_append_many<T, Rel, P>(&mut self)
+    where
+        T: rel::raw::Append<Rel>,
+        Rel: rel::Relation,
+        Rel::Resource: raw::RawUpdate + Deserialize,
+        P: Presenter<Rel::Resource, Response = R::Response, Linker = R::Linker>
+    {
         let Router { ref mut router, ref linker } = *self;
         router.attach_append_many(T::resource_plural(), Rel::to_many(), |id, request| {
             let presenter = P::prepare(None, linker.clone());

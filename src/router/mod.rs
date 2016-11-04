@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
 
+use api::AliasRequest;
 use api::raw::Relationship;
 use Serializer;
 use Value;
@@ -56,6 +57,8 @@ pub trait Router {
         where F: Fn(String, Relationship) -> Self::Response;
     fn attach_replace_link_many<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
         where F: Fn(String, Relationship) -> Self::Response;
+    fn attach_get_alias<F>(&mut self, alias: &'static str, f: F)
+        where F: Fn(AliasRequest, GetRequest) -> Self::Response;
 }
 
 pub enum Status {

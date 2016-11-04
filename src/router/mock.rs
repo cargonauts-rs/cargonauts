@@ -1,5 +1,6 @@
 use json;
 use router::*;
+use api::AliasRequest;
 use api::raw::Relationship;
 
 pub struct MockRouter {
@@ -148,6 +149,10 @@ impl Router for MockRouter {
     fn attach_append_many<F>(&mut self, resource: &'static str, relationship: &'static str, _: F)
             where F: Fn(String, PostRequest) -> Self::Response {
         self.register_rel("append", resource, relationship);
+    }
+    fn attach_get_alias<F>(&mut self, alias: &'static str, _: F)
+            where F: Fn(AliasRequest, GetRequest) -> Self::Response {
+        self.register("alias-get", alias);
     }
 }
 

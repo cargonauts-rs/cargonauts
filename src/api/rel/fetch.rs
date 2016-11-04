@@ -13,7 +13,7 @@ where T:                HasOne<Rel>,
       Rel::Resource:    RawGet<I> {
     fn fetch_one(entity: &Entity<Self>, includes: &[IncludeQuery]) -> Result<Option<GetResponse<I, Rel::Resource>>, Error> {
         if let Some(id) = <T as HasOne<Rel>>::has_one(entity)? {
-            <Rel::Resource as RawGet<I>>::get(id, includes).map(Some)
+            <Rel::Resource as RawGet<I>>::get(Entity::Id(id), includes).map(Some)
         } else { Ok(None) }
         
     }
@@ -31,7 +31,7 @@ where T:                HasMany<Rel>,
         let mut resources = vec![];
         let mut include_objects = vec![];
         for id in <T as HasMany<Rel>>::has_many(entity)? {
-            let response = <Rel::Resource as RawGet<I>>::get(id, includes)?;
+            let response = <Rel::Resource as RawGet<I>>::get(Entity::Id(id), includes)?;
             resources.push(response.resource);
             include_objects.extend(response.includes);
         }

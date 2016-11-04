@@ -4,10 +4,13 @@ mod relation;
 /// The entry point for the routes DSL, which defines the endpoints of your API.
 #[macro_export]
 macro_rules! routes {
-    {$(resource $resource:ident : [$($method:ident),*] { $(has $count:ident $rel:ident : [$($rel_method:ident),*];)*})*} => {
+    {$(resource $resource:ident : [$($method:ident),*] { $(has $count:ident $rel:ident : [$($rel_method:ident),*];)* $(alias [$($alias_method:ident),*] as $route:expr;)*})*} => {
         pub fn attach_routes<T: $crate::router::Router>(router: &mut T, linker: T::Linker) {
             let mut router = $crate::_internal::_Router::new(router, linker);
-            $({ _resource!(router, $resource : [$($method),*] {$($count $rel: [$($rel_method),*];)*}); })*
+            $({ _resource!(router, $resource : [$($method),*]
+                          { $($count $rel: [$($rel_method),*];)* }
+                          { $($route => [$($alias_method),*];)* }
+            );})*
         }
     }
 }
@@ -15,8 +18,8 @@ macro_rules! routes {
 /// Do not call this macro, it is an implementation detail of the routes! macro.
 #[macro_export]
 macro_rules! _resource {
-    ($router:expr, $resource:ty: [] $ignore:tt) => { };
-    ($router:expr, $resource:ty: [$($method:ident),*] {}) => {
+    ($router:expr, $resource:ty: [] $ignore:tt $ignore:tt) => { };
+    ($router:expr, $resource:ty: [$($method:ident),*] {} {$($route:expr => [$($alias_method:ident),*];)*}) => {
         impl $crate::api::raw::RawFetch for $resource {
             type Relationships = $crate::api::raw::NoRelationships;
         }
@@ -36,10 +39,11 @@ macro_rules! _resource {
                 Ok($crate::api::raw::NoRelationships)
             }
         }
+        $(_alias!($router, $resource, $route, [$($alias_method),*]);)*
         _methods!($router, $resource, [$($method),*]);
 
     };
-    ($router:expr, $resource:ty: [$($method:ident),*] { $($count:ident $rel:ident : [$($rel_method:ident),*];)* }) => {
+    ($router:expr, $resource:ty: [$($method:ident),*] { $($count:ident $rel:ident : [$($rel_method:ident),*];)* } {$($route:expr => [$($alias_method:ident),*];)*}) => {
         impl $crate::api::raw::RawFetch for $resource {
             type Relationships = Relationships;
         }
@@ -181,6 +185,7 @@ macro_rules! _resource {
         }
 
         _methods!($router, $resource, [$($method),*]);
+        $(_alias!($router, $resource, $route, [$($alias_method),*]);)*
         $(_rel_methods!($router, $resource, $count $rel [$($rel_method),*]);)*
     };
 }
@@ -238,6 +243,17 @@ macro_rules! _methods {
         $router.attach_post_async::<$resource, $crate::presenter::JsonApi<T::Response, T::Linker>>();
     };
     ($router:expr, $resource:ty, []) => {
+    };
+}
+
+#[macro_export]
+macro_rules! _alias {
+    ($router:expr, $resource:ty, $route:expr, [get, $($method:ident),*]) => {
+        $router.attach_get_alias::<$resource, $crate::presenter::JsonApi<T::Response, T::Linker>>($route);
+        _alias!($router, $resource, $route, [$($method:ident),*]);
+    };
+    ($router:expr, $resource:ty, $route:expr, [get]) => {
+        $router.attach_get_alias::<$resource, $crate::presenter::JsonApi<T::Response, T::Linker>>($route);
     };
 }
 

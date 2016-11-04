@@ -2,6 +2,7 @@ mod identifier;
 mod include;
 mod relationship;
 
+pub use api::alias::RawGetAliased;
 pub use api::get::{RawGet, GetResponse};
 pub use api::index::{RawIndex, IndexResponse};
 pub use api::patch::{RawPatch, RawPatchAsync, PatchResponse};

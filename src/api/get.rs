@@ -10,12 +10,20 @@ pub trait Get: Resource {
 }
 
 pub trait RawGet<I>: RawFetch {
-    fn get(id: Self::Id, includes: &[IncludeQuery]) -> Result<GetResponse<I, Self>, Error>;
+    fn get(id: Entity<Self>, includes: &[IncludeQuery]) -> Result<GetResponse<I, Self>, Error>;
 }
 
 impl<I, T> RawGet<I> for T where T: Get + _FetchRels<I> {
-    fn get(id: Self::Id, includes: &[IncludeQuery]) -> Result<GetResponse<I, T>, Error> {
-        let entity = Entity::Resource(<T as Get>::get(&id)?);
+    fn get(entity: Entity<Self>, includes: &[IncludeQuery]) -> Result<GetResponse<I, T>, Error> {
+        let (id, entity) = match entity {
+            Entity::Id(id)              => {
+                let resource = <T as Get>::get(&id)?;
+                (id, Entity::Resource(resource))
+            }
+            Entity::Resource(resource)  => {
+                (resource.id(), Entity::Resource(resource))
+            }
+        };
         let (rels, includes) = <T as _FetchRels<I>>::rels(&entity, &includes)?;
         let includes = includes.into_iter()
             .unique_by(|include| (include.id.clone(), include.resource))

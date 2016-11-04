@@ -87,7 +87,7 @@ Some of many things still left todo:
  - [X] Pagination
  - [X] Custom relation names & pluralization issues.
  - [X] Full linkage correctness.
- - [ ] Entry point aliases.
+ - [X] Entry point aliases.
  - [ ] External relations.
  - [X] JSON API as a swappable 'presenter' layer.
  - [ ] ...much more

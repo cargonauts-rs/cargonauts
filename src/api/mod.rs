@@ -1,6 +1,7 @@
 use std::result;
 use std::str::FromStr;
 
+mod alias;
 mod async;
 mod error;
 mod get;
@@ -13,6 +14,7 @@ mod sort;
 pub mod raw;
 pub mod rel;
 
+pub use self::alias::{GetAliased, AliasRequest};
 pub use self::async::AsyncJob;
 pub use self::error::Error;
 pub use self::get::Get;

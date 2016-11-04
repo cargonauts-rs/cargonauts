@@ -6,9 +6,16 @@ use repr;
 routes! {
     resource User: [get, patch] {
         has many Photo: [fetch, append];
+        alias [get] as "me";
     }
     resource Photo: [get, index, post, delete] {
         has one User: [fetch];
+    }
+}
+
+impl api::GetAliased for User {
+    fn get(request: api::AliasRequest) -> api::Result<api::Entity<Self>> {
+        unimplemented!()
     }
 }
 
@@ -114,6 +121,7 @@ fn it_compiles() { }
 fn it_has_attached_routes() {
     use router::mock::{MockRouter, MockLinker};
     
+    const ME_ROUTES: &'static [&'static str] = &["alias-get"];
     const USERS_ROUTES: &'static [&'static str] = &["get", "patch"];
     const PHOTOS_ROUTES: &'static [&'static str] = &["get", "index", "post", "delete"];
     const USERS_PHOTOS_ROUTES: &'static [&'static str] = &["fetch-one", "fetch-rel", "append", "append-links"];
@@ -122,6 +130,7 @@ fn it_has_attached_routes() {
     let mut router = MockRouter::new();
     attach_routes(&mut router, MockLinker);
 
+    assert_eq!(&router.methods_for("me")[..], ME_ROUTES);
     assert_eq!(&router.methods_for("users")[..], USERS_ROUTES);
     assert_eq!(&router.methods_for("photos")[..], PHOTOS_ROUTES);
     assert_eq!(&router.methods_for_rel("users", "photos")[..], USERS_PHOTOS_ROUTES);
