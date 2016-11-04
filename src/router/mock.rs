@@ -67,6 +67,7 @@ impl MockRouter {
 
 impl Router for MockRouter {
     type Response = MockResponse;
+    type Linker = MockLinker;
     fn attach_delete<F>(&mut self, resource: &'static str, _: F)
             where F: Fn(String) -> Self::Response {
         self.register("delete", resource);
@@ -147,6 +148,26 @@ impl Router for MockRouter {
     fn attach_append_many<F>(&mut self, resource: &'static str, relationship: &'static str, _: F)
             where F: Fn(String, PostRequest) -> Self::Response {
         self.register_rel("append", resource, relationship);
+    }
+}
+
+#[derive(Copy, Clone)]
+pub struct MockLinker;
+
+impl Linker for MockLinker {
+    fn collection(&self, resource: &str) -> String {
+        ["https://example.org", resource].join("/")
+    }
+
+    fn resource(&self, resource: &str, id: &str) -> String {
+        ["https://example.org", resource, id].join("/")
+    }
+
+    fn relationship(&self, resource: &str, id: &str, relation: &str) -> String {
+        ["https://example.org", resource, id, "relationships", relation].join("/")
+    }
+    fn related_resource(&self, resource: &str, id: &str, relation: &str) -> String {
+        ["https://example.org", resource, id, relation].join("/")
     }
 }
 

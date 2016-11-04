@@ -1,4 +1,5 @@
 use api::raw::Identifier;
+use repr::Represent;
 use Serialize;
 use Serializer;
 
@@ -13,8 +14,26 @@ impl<'a> Serialize for ToOneLinkage<'a> {
     }
 }
 
+impl<'a> Represent for ToOneLinkage<'a> {
+    fn repr<S: Serializer>(&self, serializer: &mut S, _: Option<&[String]>) -> Result<(), S::Error> {
+        match self.0.as_ref() {
+            Some(identifier)    => IdentifierObject(identifier).serialize(serializer),
+            None                => serializer.serialize_unit(),
+        }
+    }
+}
+
 pub struct ToManyLinkage<'a>(pub &'a [Identifier]);
 
+impl<'a> Represent for ToManyLinkage<'a> {
+    fn repr<S: Serializer>(&self, serializer: &mut S, _: Option<&[String]>) -> Result<(), S::Error> {
+        let mut state = serializer.serialize_seq(Some(self.0.len()))?;
+        for identifier in self.0 {
+            serializer.serialize_seq_elt(&mut state, IdentifierObject(identifier))?;
+        }
+        serializer.serialize_seq_end(state)
+    }
+}
 impl<'a> Serialize for ToManyLinkage<'a> {
     fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
         let mut state = serializer.serialize_seq(Some(self.0.len()))?;

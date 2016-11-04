@@ -34,3 +34,9 @@ impl<'a, S: Serializer> SerializeTo<S> for SerializeRepr<'a, RepresentWith<S>> {
         self.repr.repr_with(serializer, self.field_set)
     }
 }
+
+impl Represent for () {
+    fn repr<S: Serializer>(&self, serializer: &mut S, _: Option<&[String]>) -> Result<(), S::Error> {
+        serializer.serialize_unit()
+    }
+}

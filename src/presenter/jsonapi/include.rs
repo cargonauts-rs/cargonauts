@@ -1,53 +1,57 @@
 use api::raw::Include;
-use BASE_URL;
-use links::{LinkObject, make_link};
+use presenter::jsonapi::links::LinkObject;
 use presenter::jsonapi::rels::IncludeRelsObject;
 use repr::{RepresentWith, SerializeRepr};
+use router::Linker;
 use Serializer;
 
-struct IncludeObject<'a, S: Serializer + 'a>(&'a Include<S>);
+struct IncludeObject<'a, S: Serializer + 'a, L: Linker + 'a> {
+    pub include: &'a Include<S>,
+    pub linker: &'a L,
+}
 
-impl<'a, S: Serializer> RepresentWith<S> for IncludeObject<'a, S> {
+impl<'a, S: Serializer, L: Linker> RepresentWith<S> for IncludeObject<'a, S, L> {
     fn repr_with(&self, serializer: &mut S, field_set: Option<&[String]>) -> Result<(), S::Error> {
-        if let Some(relationships) = self.0.relationships.as_ref() {
+        if let Some(relationships) = self.include.relationships.as_ref() {
             let mut state = serializer.serialize_map(Some(5))?;
             serializer.serialize_map_key(&mut state, "id")?;
-            serializer.serialize_map_value(&mut state, &self.0.id)?;
+            serializer.serialize_map_value(&mut state, &self.include.id)?;
             serializer.serialize_map_key(&mut state, "type")?;
-            serializer.serialize_map_value(&mut state, self.0.resource)?;
+            serializer.serialize_map_value(&mut state, self.include.resource)?;
             serializer.serialize_map_value(&mut state, SerializeRepr {
-                repr: &*self.0.attributes,
+                repr: &*self.include.attributes,
                 field_set: field_set,
             })?;
             serializer.serialize_map_key(&mut state, "relationships")?;
             serializer.serialize_map_value(&mut state, SerializeRepr {
                 repr: &IncludeRelsObject {
-                    resource: self.0.resource,
-                    id: &self.0.id,
-                    relationships: &*relationships
+                    resource: self.include.resource,
+                    id: &self.include.id,
+                    relationships: &*relationships,
+                    linker: &self.linker,
                 },
                 field_set: field_set,
             })?;
             serializer.serialize_map_key(&mut state, "links")?;
             serializer.serialize_map_value(&mut state, LinkObject {
-                self_link: Some(&make_link(&[BASE_URL, self.0.resource, &self.0.id.to_string()])),
+                self_link: Some(&self.linker.resource(self.include.resource, &self.include.id)),
                 related_link: None,
             })?;
             serializer.serialize_map_end(state)
         } else {
             let mut state = serializer.serialize_map(Some(4))?;
             serializer.serialize_map_key(&mut state, "id")?;
-            serializer.serialize_map_value(&mut state, &self.0.id)?;
+            serializer.serialize_map_value(&mut state, &self.include.id)?;
             serializer.serialize_map_key(&mut state, "type")?;
-            serializer.serialize_map_value(&mut state, self.0.resource)?;
+            serializer.serialize_map_value(&mut state, self.include.resource)?;
             serializer.serialize_map_key(&mut state, "attributes")?;
             serializer.serialize_map_value(&mut state, SerializeRepr {
-                repr: &*self.0.attributes,
+                repr: &*self.include.attributes,
                 field_set: field_set,
             })?;
             serializer.serialize_map_key(&mut state, "links")?;
             serializer.serialize_map_value(&mut state, LinkObject {
-                self_link: Some(&make_link(&[BASE_URL, self.0.resource, &self.0.id.to_string()])),
+                self_link: Some(&self.linker.resource(self.include.resource, &self.include.id)),
                 related_link: None,
             })?;
             serializer.serialize_map_end(state)
@@ -55,14 +59,20 @@ impl<'a, S: Serializer> RepresentWith<S> for IncludeObject<'a, S> {
     }
 }
 
-pub struct IncludesObject<S: Serializer>(pub Vec<Include<S>>);
+pub struct IncludesObject<'a, S: Serializer + 'a, L: Linker + 'a> {
+    pub includes: &'a [Include<S>],
+    pub linker: &'a L,
+}
 
-impl<S: Serializer> RepresentWith<S> for IncludesObject<S> {
+impl<'a, S: Serializer, L: Linker> RepresentWith<S> for IncludesObject<'a, S, L> {
     fn repr_with(&self, serializer: &mut S, field_set: Option<&[String]>) -> Result<(), S::Error> {
-        let mut state = serializer.serialize_seq(Some(self.0.len()))?;
-        for include in &self.0 {
+        let mut state = serializer.serialize_seq(Some(self.includes.len()))?;
+        for include in self.includes {
             serializer.serialize_seq_elt(&mut state, SerializeRepr {
-                repr: &IncludeObject(include),
+                repr: &IncludeObject {
+                    include: include,
+                    linker: self.linker,
+                },
                 field_set: field_set,
             })?;
         }

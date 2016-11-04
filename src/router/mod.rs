@@ -15,6 +15,7 @@ pub use self::sort::SortQuery;
 
 pub trait Router {
     type Response: Response;
+    type Linker: Linker;
     fn attach_delete<F>(&mut self, resource: &'static str, f: F)
         where F: Fn(String) -> Self::Response;
     fn attach_get<F>(&mut self, resource: &'static str, f: F)
@@ -72,6 +73,28 @@ pub trait Response: Default {
     fn set_status(&mut self, status: Status);
     fn set_content(&mut self, content_type: &str);
     fn serializer(&mut self) -> &mut Self::Serializer;
+}
+
+pub trait Linker: Clone {
+    fn collection(&self, resource: &str) -> String;
+    fn resource(&self, resource: &str, id: &str) -> String;
+    fn relationship(&self, resource: &str, id: &str, relation: &str) -> String;
+    fn related_resource(&self, resource: &str, id: &str, relation: &str) -> String;
+}
+
+impl<'a, L: Linker> Linker for &'a L {
+    fn collection(&self, resource: &str) -> String {
+        L::collection(self, resource)
+    }
+    fn resource(&self, resource: &str, id: &str) -> String {
+        L::resource(self, resource, id)
+    }
+    fn relationship(&self, resource: &str, id: &str, relation: &str) -> String {
+        L::relationship(self, resource, id, relation)
+    }
+    fn related_resource(&self, resource: &str, id: &str, relation: &str) -> String {
+        L::related_resource(self, resource, id, relation)
+    }
 }
 
 pub struct GetRequest {

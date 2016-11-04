@@ -1,20 +1,21 @@
 use std::cell::RefCell;
 
 use api::raw::{FetchRelationships, RelationshipLinkage, Relationship};
-use BASE_URL;
-use links::{LinkObject, make_link};
 use presenter::jsonapi::linkage::{ToOneLinkage, ToManyLinkage};
+use presenter::jsonapi::links::LinkObject;
 use repr::Represent;
+use router::Linker;
 use Serialize;
 use Serializer;
 
-pub struct RelsObject<'a, R: FetchRelationships<'a>> {
+pub struct RelsObject<'a, R: FetchRelationships<'a>, L: Linker + 'a> {
     pub resource: &'static str,
     pub id: &'a str,
-    pub relationships: &'a R
+    pub relationships: &'a R,
+    pub linker: &'a L,
 }
 
-impl<'a, R> Represent for RelsObject<'a, R> where R: FetchRelationships<'a> {
+impl<'a, R, L> Represent for RelsObject<'a, R, L> where R: FetchRelationships<'a>, L: Linker {
     fn repr<S: Serializer>(&self, serializer: &mut S, field_set: Option<&[String]>) -> Result<(), S::Error> {
         match field_set {
             Some(field_set) => {
@@ -23,12 +24,13 @@ impl<'a, R> Represent for RelsObject<'a, R> where R: FetchRelationships<'a> {
                     field_set.iter().any(|field| field == name)
                 });
                 for (name, relationship) in relationships {
+                    let rel_link = self.linker.relationship(self.resource, self.id, name);
+                    let resource_link = self.linker.related_resource(self.resource, self.id, name);
                     serializer.serialize_map_key(&mut state, name)?;
                     serializer.serialize_map_value(&mut state, ReprRel {
-                        base_resource: self.resource,
-                        base_id: self.id,
-                        relation: name,
                         relationship: relationship,
+                        rel_link: &rel_link,
+                        resource_link: &resource_link,
                     })?;
                 }
                 serializer.serialize_map_end(state)
@@ -36,12 +38,13 @@ impl<'a, R> Represent for RelsObject<'a, R> where R: FetchRelationships<'a> {
             None            => {
                 let mut state = serializer.serialize_map(Some(self.relationships.count()))?;
                 for (name, relationship) in self.relationships.iter() {
+                    let rel_link = self.linker.relationship(self.resource, self.id, name);
+                    let resource_link = self.linker.related_resource(self.resource, self.id, name);
                     serializer.serialize_map_key(&mut state, name)?;
                     serializer.serialize_map_value(&mut state, ReprRel {
-                        base_resource: self.resource,
-                        base_id: self.id,
-                        relation: name,
                         relationship: relationship,
+                        rel_link: &rel_link,
+                        resource_link: &resource_link,
                     })?;
                 }
                 serializer.serialize_map_end(state)
@@ -50,13 +53,14 @@ impl<'a, R> Represent for RelsObject<'a, R> where R: FetchRelationships<'a> {
     }
 }
 
-pub struct IncludeRelsObject<'a> {
+pub struct IncludeRelsObject<'a, L: Linker + 'a> {
     pub resource: &'static str,
     pub id: &'a str,
     pub relationships: &'a RefCell<Iterator<Item = (&'static str, RelationshipLinkage)>>,
+    pub linker: &'a L,
 }
 
-impl<'a> Represent for IncludeRelsObject<'a> {
+impl<'a, L: Linker> Represent for IncludeRelsObject<'a, L> {
     fn repr<S: Serializer>(&self, serializer: &mut S, field_set: Option<&[String]>) -> Result<(), S::Error> {
         let mut relationships = self.relationships.borrow_mut();
         match field_set {
@@ -64,12 +68,13 @@ impl<'a> Represent for IncludeRelsObject<'a> {
                 let mut state = serializer.serialize_map(None)?;
                 for (name, relationship) in &mut *relationships {
                     if field_set.iter().any(|field| field == name) {
+                        let rel_link = self.linker.relationship(self.resource, self.id, name);
+                        let resource_link = self.linker.related_resource(self.resource, self.id, name);
                         serializer.serialize_map_key(&mut state, name)?;
                         serializer.serialize_map_value(&mut state, ReprRel {
-                            base_resource: self.resource,
-                            base_id: self.id,
-                            relation: &name,
                             relationship: &relationship,
+                            rel_link: &rel_link,
+                            resource_link: &resource_link,
                         })?;
                     }
                 }
@@ -78,12 +83,13 @@ impl<'a> Represent for IncludeRelsObject<'a> {
             None            => {
                 let mut state = serializer.serialize_map(None)?;
                 for (name, relationship) in &mut *relationships {
+                    let rel_link = self.linker.relationship(self.resource, self.id, name);
+                    let resource_link = self.linker.related_resource(self.resource, self.id, name);
                     serializer.serialize_map_key(&mut state, name)?;
                     serializer.serialize_map_value(&mut state, ReprRel {
-                        base_resource: self.resource,
-                        base_id: self.id,
-                        relation: &name,
                         relationship: &relationship,
+                        rel_link: &rel_link,
+                        resource_link: &resource_link,
                     })?;
                 }
                 serializer.serialize_map_end(state)
@@ -93,10 +99,9 @@ impl<'a> Represent for IncludeRelsObject<'a> {
 }
 
 struct ReprRel<'a> {
-    base_resource: &'static str,
-    base_id: &'a str,
-    relation: &'a str,
     relationship: &'a RelationshipLinkage,
+    rel_link: &'a str,
+    resource_link: &'a str,
 }
 
 impl<'a> Serialize for ReprRel<'a> {
@@ -104,19 +109,8 @@ impl<'a> Serialize for ReprRel<'a> {
         let mut state = serializer.serialize_map(Some(2))?;
         serializer.serialize_map_key(&mut state, "links")?;
         serializer.serialize_map_value(&mut state, LinkObject {
-            self_link: Some(&make_link(&[
-                BASE_URL,
-                self.base_resource,
-                self.base_id,
-                "relationships",
-                self.relation,
-            ])),
-            related_link: Some(&make_link(&[
-                BASE_URL,
-                self.base_resource,
-                self.base_id,
-                self.relation,
-            ])),
+            self_link: Some(self.rel_link),
+            related_link: Some(self.resource_link),
         })?;
         match self.relationship.linkage {
             Some(Relationship::One(ref identifier))     => {
@@ -143,9 +137,8 @@ mod tests {
     #[test]
     fn serialize_rel_no_linkage() {
         let rel = super::ReprRel {
-            base_resource: "base",
-            base_id: "1",
-            relation: "relation",
+            rel_link: "https://example.org/api/base/1/relationships/relation",
+            resource_link: "https://example.org/api/base/1/relation",
             relationship: &RelationshipLinkage::default(),
         };
         let expected = {
@@ -162,9 +155,8 @@ mod tests {
     #[test]
     fn serialize_rel_to_one_empty() {
         let rel = super::ReprRel {
-            base_resource: "base",
-            base_id: "1",
-            relation: "relation",
+            rel_link: "https://example.org/api/base/1/relationships/relation",
+            resource_link: "https://example.org/api/base/1/relation",
             relationship: &RelationshipLinkage {
                 linkage: Some(Relationship::One(None)),
             },
@@ -184,9 +176,8 @@ mod tests {
     #[test]
     fn serialize_rel_to_one_some() {
         let rel = super::ReprRel {
-            base_resource: "base",
-            base_id: "1",
-            relation: "relation",
+            rel_link: "https://example.org/api/base/1/relationships/relation",
+            resource_link: "https://example.org/api/base/1/relation",
             relationship: &RelationshipLinkage {
                 linkage: Some(Relationship::One(Some(Identifier {
                     resource: "related",
@@ -212,10 +203,9 @@ mod tests {
     #[test]
     fn serialize_rel_to_many_empty() {
         let rel = super::ReprRel {
-            base_resource: "base",
-            base_id: "1",
-            relation: "relation",
             relationship: &RelationshipLinkage { linkage: Some(Relationship::Many(vec![])) },
+            rel_link: "https://example.org/api/base/1/relationships/relation",
+            resource_link: "https://example.org/api/base/1/relation",
         };
         let expected = {
             let mut relationship = BTreeMap::new();
@@ -233,9 +223,8 @@ mod tests {
     #[test]
     fn serialize_rel_to_many_some() {
         let rel = super::ReprRel {
-            base_resource: "base",
-            base_id: "1",
-            relation: "relation",
+            rel_link: "https://example.org/api/base/1/relationships/relation",
+            resource_link: "https://example.org/api/base/1/relation",
             relationship: &RelationshipLinkage {
                 linkage: Some(Relationship::Many(vec![Identifier {
                     resource: "related",

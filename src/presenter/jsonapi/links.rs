@@ -1,10 +1,6 @@
 use Serialize;
 use Serializer;
 
-pub fn make_link(components: &[&str]) -> String {
-    components.join("/")
-}
-
 pub struct LinkObject<'a> {
     pub self_link: Option<&'a str>,
     pub related_link: Option<&'a str>,
