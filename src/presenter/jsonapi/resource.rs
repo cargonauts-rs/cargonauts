@@ -12,7 +12,7 @@ pub struct JsonApiResourceObject<'a, T: RawFetch, L: Linker + 'a> {
     pub self_link: &'a str,
 }
 
-impl<'a, T: RawFetch, L: Linker> Represent for JsonApiResourceObject<'a, T, L> {
+impl<'a, T: RawFetch + Represent, L: Linker> Represent for JsonApiResourceObject<'a, T, L> {
     fn repr<S: Serializer>(&self, serializer: &mut S, field_set: Option<&[String]>) -> Result<(), S::Error> {
         if self.resource.relationships.count() == 0 {
             let mut state = serializer.serialize_map(Some(4))?;
@@ -67,7 +67,7 @@ pub struct JsonApiCollectionObject<'a, T: RawFetch, L: Linker + 'a> {
     pub linker: &'a L,
 }
 
-impl<'a, T: RawFetch, L: Linker> Represent for JsonApiCollectionObject<'a, T, L> {
+impl<'a, T: RawFetch + Represent, L: Linker> Represent for JsonApiCollectionObject<'a, T, L> {
     fn repr<S: Serializer>(&self, serializer: &mut S, field_set: Option<&[String]>) -> Result<(), S::Error> {
         let mut state = serializer.serialize_seq(Some(self.resources.len()))?;
         for resource in self.resources {

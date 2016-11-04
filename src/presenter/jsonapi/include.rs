@@ -1,12 +1,21 @@
 use api::raw::Include;
+use presenter::ConvertInclude;
 use presenter::jsonapi::links::LinkObject;
 use presenter::jsonapi::rels::IncludeRelsObject;
 use repr::{RepresentWith, SerializeRepr};
 use router::Linker;
 use Serializer;
 
+pub struct JsonApiInclude<S: Serializer>(Box<RepresentWith<S>>);
+
+impl<T: RepresentWith<S> + 'static, S: Serializer> ConvertInclude<T> for JsonApiInclude<S> {
+    fn convert(attributes: T) -> JsonApiInclude<S> {
+        JsonApiInclude(Box::new(attributes))
+    }
+}
+
 struct IncludeObject<'a, S: Serializer + 'a, L: Linker + 'a> {
-    pub include: &'a Include<S>,
+    pub include: &'a Include<JsonApiInclude<S>>,
     pub linker: &'a L,
 }
 
@@ -19,7 +28,7 @@ impl<'a, S: Serializer, L: Linker> RepresentWith<S> for IncludeObject<'a, S, L> 
             serializer.serialize_map_key(&mut state, "type")?;
             serializer.serialize_map_value(&mut state, self.include.resource)?;
             serializer.serialize_map_value(&mut state, SerializeRepr {
-                repr: &*self.include.attributes,
+                repr: &*self.include.attributes.0,
                 field_set: field_set,
             })?;
             serializer.serialize_map_key(&mut state, "relationships")?;
@@ -46,7 +55,7 @@ impl<'a, S: Serializer, L: Linker> RepresentWith<S> for IncludeObject<'a, S, L> 
             serializer.serialize_map_value(&mut state, self.include.resource)?;
             serializer.serialize_map_key(&mut state, "attributes")?;
             serializer.serialize_map_value(&mut state, SerializeRepr {
-                repr: &*self.include.attributes,
+                repr: &*self.include.attributes.0,
                 field_set: field_set,
             })?;
             serializer.serialize_map_key(&mut state, "links")?;
@@ -60,7 +69,7 @@ impl<'a, S: Serializer, L: Linker> RepresentWith<S> for IncludeObject<'a, S, L> 
 }
 
 pub struct IncludesObject<'a, S: Serializer + 'a, L: Linker + 'a> {
-    pub includes: &'a [Include<S>],
+    pub includes: &'a [Include<JsonApiInclude<S>>],
     pub linker: &'a L,
 }
 

@@ -25,8 +25,8 @@ macro_rules! _resource {
             type Relationships = $crate::api::raw::NoRelationships;
         }
 
-        impl $crate::_internal::_FetchRels for $resource {
-            fn rels<S: $crate::Serializer>(_: &$crate::api::Entity<Self>, _: &[$crate::router::IncludeQuery]) -> $crate::api::Result<(Self::Relationships, Vec<$crate::api::raw::Include<S>>)> {
+        impl<I> $crate::_internal::_FetchRels<I> for $resource {
+            fn rels(_: &$crate::api::Entity<Self>, _: &[$crate::router::IncludeQuery]) -> $crate::api::Result<(Self::Relationships, Vec<$crate::api::raw::Include<I>>)> {
                 Ok(($crate::api::raw::NoRelationships, vec![]))
             }
         }
@@ -48,8 +48,12 @@ macro_rules! _resource {
             type Relationships = UpdateRelationships;
         }
 
-        impl $crate::_internal::_FetchRels for $resource {
-            fn rels<S: $crate::Serializer>(id: &$crate::api::Entity<Self>, includes: &[$crate::router::IncludeQuery]) -> Result<(Self::Relationships, Vec<$crate::api::raw::Include<S>>), $crate::api::Error> {
+        impl<I> $crate::_internal::_FetchRels<I> for $resource where
+            I: $crate::presenter::ConvertInclude<$resource>,
+        $(
+            I: $crate::presenter::ConvertInclude<<$rel as $crate::api::rel::Relation>::Resource>,
+        )* {
+            fn rels(id: &$crate::api::Entity<Self>, includes: &[$crate::router::IncludeQuery]) -> Result<(Self::Relationships, Vec<$crate::api::raw::Include<I>>), $crate::api::Error> {
                 let mut include_objects = vec![];
                 let rels = Relationships {
                     $(
@@ -309,7 +313,7 @@ macro_rules! _rel_methods {
 macro_rules! _fetch_rel {
     ($id:expr, $includes:expr, $includes_out:expr, $resource:ty, $rel:ty, one) => {
         if let Some(include) = $includes.iter().find(|include| include.is_of(_name_rel!($rel, one))) {
-            match <$resource as $crate::api::rel::raw::FetchOne<$rel>>::fetch_one($id, &include.transitive)? {
+            match <$resource as $crate::api::rel::raw::FetchOne<I, $rel>>::fetch_one($id, &include.transitive)? {
                 Some(response)  => {
                     let identifier = $crate::api::raw::Identifier::from(&response.resource);
                     $includes_out.push(response.resource.into());
@@ -332,7 +336,7 @@ macro_rules! _fetch_rel {
     };
     ($id:expr, $includes:expr, $includes_out:expr, $resource:ty, $rel:ty, many) => {
         if let Some(include) = $includes.iter().find(|include| include.is_of(_name_rel!($rel, many))) {
-            let response = <$resource as $crate::api::rel::raw::FetchMany<$rel>>::fetch_many($id, &include.transitive)?;
+            let response = <$resource as $crate::api::rel::raw::FetchMany<I, $rel>>::fetch_many($id, &include.transitive)?;
             let identifiers = response.resources.iter().map($crate::api::raw::Identifier::from).collect();
             $includes_out.extend(response.resources.into_iter().map(Into::into));
             $includes_out.extend(response.includes);

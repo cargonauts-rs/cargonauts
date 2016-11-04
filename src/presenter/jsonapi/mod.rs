@@ -2,7 +2,7 @@ use api::Error;
 use api::raw::{ResourceObject, Include, RawFetch, Relationship};
 use presenter::Presenter;
 use Serializer;
-use repr::{SerializeRepr, RepresentWith};
+use repr::{SerializeRepr, Represent, RepresentWith};
 use router::{Response, Status, Linker};
 
 mod error;
@@ -14,7 +14,7 @@ mod rels;
 mod resource;
 
 use self::error::ErrorObject;
-use self::include::IncludesObject;
+use self::include::{JsonApiInclude, IncludesObject};
 use self::jsonapi::JsonApiObject;
 use self::linkage::{ToOneLinkage, ToManyLinkage};
 use self::links::LinkObject;
@@ -88,8 +88,8 @@ impl<'a, L: Linker> JsonApiInner<'a, L> {
         serializer.serialize_map_end(state)
     }
 
-    fn serialize_resource<T, S>(self, serializer: &mut S, resource: &ResourceObject<T>, includes: &[Include<S>]) -> Result<(), S::Error>
-    where T: RawFetch, S: Serializer {
+    fn serialize_resource<T, S>(self, serializer: &mut S, resource: &ResourceObject<T>, includes: &[Include<JsonApiInclude<S>>]) -> Result<(), S::Error>
+    where T: RawFetch + Represent, S: Serializer {
         let id = resource.id.to_string();
         let self_link = self.linker.resource(T::resource_plural(), &id);
         let links = LinkObject {
@@ -113,8 +113,8 @@ impl<'a, L: Linker> JsonApiInner<'a, L> {
         }
     }
 
-    fn serialize_collection<T, S>(self, serializer: &mut S, resources: &[ResourceObject<T>], includes: &[Include<S>]) -> Result<(), S::Error>
-    where T: RawFetch, S: Serializer {
+    fn serialize_collection<T, S>(self, serializer: &mut S, resources: &[ResourceObject<T>], includes: &[Include<JsonApiInclude<S>>]) -> Result<(), S::Error>
+    where T: RawFetch + Represent, S: Serializer {
         let self_link = self.linker.collection(T::resource_plural());
         let links = LinkObject {
             self_link: Some(&self_link),
@@ -135,7 +135,7 @@ impl<'a, L: Linker> JsonApiInner<'a, L> {
         }
     }
 
-    fn serialize_rel<S: Serializer>(self, serializer: &mut S, resource: &str, id: &str, name: &str, rel: &Relationship, includes: &[Include<S>]) -> Result<(),S::Error> {
+    fn serialize_rel<S: Serializer>(self, serializer: &mut S, resource: &str, id: &str, name: &str, rel: &Relationship, includes: &[Include<JsonApiInclude<S>>]) -> Result<(),S::Error> {
         let self_link = self.linker.relationship(resource, id, name);
         let related_link = self.linker.related_resource(resource, id, name);
         let links = LinkObject {
@@ -191,7 +191,11 @@ impl<'a, L: Linker> JsonApiInner<'a, L> {
     }
 }
 
-impl<R: Response, L: Linker> Presenter<R, L> for JsonApi<R, L> {
+impl<R: Response, L: Linker, T: RawFetch + Represent> Presenter<T> for JsonApi<R, L> {
+    type Response = R;
+    type Linker = L;
+    type Include = JsonApiInclude<R::Serializer>;
+
     fn prepare(field_set: Option<Vec<String>>, linker: L) -> Self {
         JsonApi {
             response: R::default(),
@@ -200,8 +204,7 @@ impl<R: Response, L: Linker> Presenter<R, L> for JsonApi<R, L> {
         }
     }
 
-    fn present_resource<T>(mut self, resource: ResourceObject<T>, includes: Vec<Include<R::Serializer>>) -> R
-    where T: RawFetch {
+    fn present_resource(mut self, resource: ResourceObject<T>, includes: Vec<Include<JsonApiInclude<R::Serializer>>>) -> R {
         match {
             let (serializer, jsonapi) = self.split_up();
             jsonapi.serialize_resource(serializer, &resource, &includes)
@@ -211,8 +214,7 @@ impl<R: Response, L: Linker> Presenter<R, L> for JsonApi<R, L> {
         }
     }
 
-    fn present_collection<T>(mut self, resources: Vec<ResourceObject<T>>, includes: Vec<Include<R::Serializer>>) -> R
-    where T: RawFetch {
+    fn present_collection(mut self, resources: Vec<ResourceObject<T>>, includes: Vec<Include<JsonApiInclude<R::Serializer>>>) -> R {
         match {
             let (serializer, jsonapi) = self.split_up();
             jsonapi.serialize_collection(serializer, &resources, &includes) 
@@ -232,7 +234,7 @@ impl<R: Response, L: Linker> Presenter<R, L> for JsonApi<R, L> {
         }
     }
 
-    fn present_rel(mut self, resource: &str, id: &str, name: &str, rel: Relationship, includes: Vec<Include<R::Serializer>>) -> R {
+    fn present_rel(mut self, resource: &str, id: &str, name: &str, rel: Relationship, includes: Vec<Include<JsonApiInclude<R::Serializer>>>) -> R {
         match {
             let (serializer, jsonapi) = self.split_up();
             jsonapi.serialize_rel(serializer, resource, id, name, &rel, &includes)

@@ -26,3 +26,7 @@ pub struct ResourceObject<T: RawFetch> {
     pub attributes: T,
     pub relationships: <T as RawFetch>::Relationships,
 }
+
+impl RawFetch for () {
+    type Relationships = NoRelationships;
+}

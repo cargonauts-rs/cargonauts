@@ -4,20 +4,19 @@ use api::{Resource, Error, Entity};
 use api::raw::{Include, RawFetch, ResourceObject};
 use router::IncludeQuery;
 use _internal::_FetchRels;
-use Serializer;
 
 pub trait Get: Resource {
     fn get(id: &Self::Id) -> Result<Self, Error>;
 }
 
-pub trait RawGet: RawFetch {
-    fn get<S: Serializer>(id: Self::Id, includes: &[IncludeQuery]) -> Result<GetResponse<S, Self>, Error>;
+pub trait RawGet<I>: RawFetch {
+    fn get(id: Self::Id, includes: &[IncludeQuery]) -> Result<GetResponse<I, Self>, Error>;
 }
 
-impl<T> RawGet for T where T: Get + _FetchRels {
-    fn get<S: Serializer>(id: Self::Id, includes: &[IncludeQuery]) -> Result<GetResponse<S, T>, Error> {
+impl<I, T> RawGet<I> for T where T: Get + _FetchRels<I> {
+    fn get(id: Self::Id, includes: &[IncludeQuery]) -> Result<GetResponse<I, T>, Error> {
         let entity = Entity::Resource(<T as Get>::get(&id)?);
-        let (rels, includes) = <T as _FetchRels>::rels(&entity, &includes)?;
+        let (rels, includes) = <T as _FetchRels<I>>::rels(&entity, &includes)?;
         let includes = includes.into_iter()
             .unique_by(|include| (include.id.clone(), include.resource))
             .collect();
@@ -36,7 +35,7 @@ impl<T> RawGet for T where T: Get + _FetchRels {
     }
 }
 
-pub struct GetResponse<S: Serializer, T: RawFetch> {
+pub struct GetResponse<I, T: RawFetch> {
     pub resource: ResourceObject<T>,
-    pub includes: Vec<Include<S>>,
+    pub includes: Vec<Include<I>>,
 }

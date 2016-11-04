@@ -1,8 +1,6 @@
 use std::result;
 use std::str::FromStr;
 
-use repr::Represent;
-
 mod async;
 mod error;
 mod get;
@@ -23,7 +21,7 @@ pub use self::index::Index;
 pub use self::patch::{Patch, PatchAsync};
 pub use self::post::{Post, PostAsync};
 
-pub trait Resource: Represent + Sized + 'static {
+pub trait Resource: Sized + 'static {
     type Id: ToString + FromStr + PartialEq + Clone;
     fn id(&self) -> Self::Id;
     fn resource() -> &'static str;
@@ -36,3 +34,10 @@ pub enum Entity<T: Resource> {
 }
 
 pub type Result<T> = result::Result<T, Error>;
+
+impl Resource for () {
+    type Id = String;
+    fn id(&self) -> Self::Id { String::new() }
+    fn resource() -> &'static str { "" }
+    fn resource_plural() -> &'static str { "" }
+}
