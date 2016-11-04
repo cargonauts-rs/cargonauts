@@ -18,15 +18,15 @@ using the `routes!` macro, like this:
 
 ```rust
 routes! {
-    resource User: [Get, Put, Patch] {
+    resource User: [get, put, patch] {
         has many Post;
         has many Comment;
     }
-    resource Post: [Get, Index, Put, Patch] {
+    resource Post: [get, index, put, patch] {
         has one User;
         has many Comment;
     }
-    resource Comment: [Index, Put] {
+    resource Comment: [index, put] {
         has one User;
         has one Post;
     }
