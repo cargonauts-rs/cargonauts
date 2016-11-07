@@ -2,6 +2,7 @@ use api::{self, Error};
 use api::rel;
 use api::raw;
 use router::Router as RouterTrait;
+use router::Linker;
 use Deserialize;
 use presenter::Presenter;
 
@@ -167,7 +168,8 @@ impl<'a, R: RouterTrait> Router<'a, R> {
                     presenter.present_resource(object.resource, object.includes)
                 }
                 Ok(None)            => {
-                    presenter.present_nil(&request.route)
+                    let self_link = linker.related_resource(T::resource_plural(), &request.id, Rel::to_one());
+                    presenter.present_nil(&self_link)
                 }
                 Err(error)          => presenter.present_err(error),
             }
@@ -286,7 +288,8 @@ impl<'a, R: RouterTrait> Router<'a, R> {
                     presenter.present_resource(object.resource, vec![])
                 }
                 Ok(None)            => {
-                    presenter.present_nil(&request.route)
+                    let self_link = linker.related_resource(T::resource_plural(), &request.id, Rel::to_one());
+                    presenter.present_nil(&self_link)
                 }
                 Err(error)          => presenter.present_err(error),
             }

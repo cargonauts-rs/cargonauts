@@ -104,7 +104,6 @@ pub struct GetRequest {
     pub id: String,
     pub includes: Vec<IncludeQuery>,
     pub field_set: Option<Vec<String>>,
-    pub route: String,
 }
 
 pub struct IndexRequest {
@@ -112,7 +111,6 @@ pub struct IndexRequest {
     pub sort: Vec<SortQuery>,
     pub page: Option<Pagination>,
     pub field_set: Option<Vec<String>>,
-    pub route: String,
 }
 
 pub struct FetchRelRequest {
@@ -127,12 +125,10 @@ pub struct PatchRequest {
     pub relationships: BTreeMap<String, Relationship>,
     pub id: String,
     pub field_set: Option<Vec<String>>,
-    pub route: String,
 }
 
 pub struct PostRequest {
     pub attributes: Value,
     pub relationships: BTreeMap<String, Relationship>,
     pub field_set: Option<Vec<String>>,
-    pub route: String,
 }
