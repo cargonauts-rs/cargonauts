@@ -61,7 +61,7 @@ impl<'a> Serialize for IdentifierObject<'a> {
 mod tests {
     use api::raw::Identifier;
     use std::collections::BTreeMap;
-    use to_value;
+    use json::to_value;
 
     #[test]
     fn serialize_identifier() {

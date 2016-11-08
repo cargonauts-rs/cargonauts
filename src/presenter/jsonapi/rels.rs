@@ -131,8 +131,8 @@ impl<'a> Serialize for ReprRel<'a> {
 mod tests {
     use api::raw::{Identifier, Relationship, RelationshipLinkage};
     use std::collections::BTreeMap;
-    use to_value;
-    use Value;
+    use json::to_value;
+    use json::Value;
 
     #[test]
     fn serialize_rel_no_linkage() {

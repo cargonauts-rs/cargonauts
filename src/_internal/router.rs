@@ -1,3 +1,5 @@
+use json;
+
 use api::{self, Error};
 use api::rel;
 use api::raw;
@@ -66,7 +68,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         router.attach_patch(T::resource_plural(), |request| {
             let presenter = P::prepare(request.field_set, linker.clone());
             let id = try_status!(request.id.parse(), presenter);
-            let patch = try_status!(::from_value(request.attributes), presenter);
+            let patch = try_status!(json::from_reader(request.attributes), presenter);
             let rels = try_status!(<<T as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), presenter);
             match T::patch(id, patch, rels) {
                 Ok(object)  => {
@@ -82,7 +84,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         router.attach_patch(T::resource_plural(), |request| {
             let presenter = P::prepare(None, linker.clone());
             let id = try_status!(request.id.parse(), presenter);
-            let patch = try_status!(::from_value(request.attributes), presenter);
+            let patch = try_status!(json::from_reader(request.attributes), presenter);
             let rels = try_status!(<<T as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), presenter);
             match T::patch_async(id, patch, rels) {
                 Ok(object)  => {
@@ -98,7 +100,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         let Router { ref mut router, ref linker } = *self;
         router.attach_post(T::resource_plural(), |request| {
             let presenter = P::prepare(request.field_set, linker.clone());
-            let post = try_status!(::from_value(request.attributes), presenter);
+            let post = try_status!(json::from_reader(request.attributes), presenter);
             let rels = try_status!(<<T as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), presenter);
             match T::post(post, rels) {
                 Ok(object)  => {
@@ -113,7 +115,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         let Router { ref mut router, ref linker } = *self;
         router.attach_post(T::resource_plural(), |request| {
             let presenter = P::prepare(None, linker.clone());
-            let post = try_status!(::from_value(request.attributes), presenter);
+            let post = try_status!(json::from_reader(request.attributes), presenter);
             let rels = try_status!(<<T as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), presenter);
             match T::post_async(post, rels) {
                 Ok(object)  => {
@@ -281,7 +283,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         router.attach_patch_one(T::resource_plural(), Rel::to_one(), |request| {
             let presenter = P::prepare(None, linker.clone());
             let id = try_status!(request.id.parse(), presenter);
-            let patch = try_status!(::from_value(request.attributes), presenter);
+            let patch = try_status!(json::from_reader(request.attributes), presenter);
             let rels = try_status!(<<Rel::Resource as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), presenter);
             match T::patch_one(&api::Entity::Id(id), patch, rels) {
                 Ok(Some(object))    => {
@@ -302,7 +304,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         router.attach_post_one(T::resource_plural(), Rel::to_one(), |id, request| {
             let presenter = P::prepare(None, linker.clone());
             let id = try_status!(id.parse(), presenter);
-            let post = try_status!(::from_value(request.attributes), presenter);
+            let post = try_status!(json::from_reader(request.attributes), presenter);
             let rels = try_status!(<<Rel::Resource as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), presenter);
             match T::post_one(&api::Entity::Id(id), post, rels) {
                 Ok(object)  => {
@@ -340,7 +342,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         router.attach_append_many(T::resource_plural(), Rel::to_many(), |id, request| {
             let presenter = P::prepare(None, linker.clone());
             let id = try_status!(id.parse(), presenter);
-            let post = try_status!(::from_value(request.attributes), presenter);
+            let post = try_status!(json::from_reader(request.attributes), presenter);
             let rels = try_status!(<<Rel::Resource as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), presenter);
             match T::append(&api::Entity::Id(id), post, rels) {
                 Ok(object)  => {

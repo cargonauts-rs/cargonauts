@@ -14,7 +14,6 @@ mod macros;
 pub mod _internal;
 
 pub use serde::{Deserialize, Deserializer, Serialize, SerializeTo, Serializer};
-pub use json::{Value, from_value, to_value};
 
 #[cfg(test)]
 mod tests;

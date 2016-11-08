@@ -1,9 +1,9 @@
 use std::collections::BTreeMap;
+use std::io::Read;
 
 use api::AliasRequest;
 use api::raw::Relationship;
 use Serializer;
-use Value;
 
 pub mod mock;
 mod include;
@@ -121,14 +121,14 @@ pub struct FetchRelRequest {
 }
 
 pub struct PatchRequest {
-    pub attributes: Value,
+    pub attributes: Box<Read>,
     pub relationships: BTreeMap<String, Relationship>,
     pub id: String,
     pub field_set: Option<Vec<String>>,
 }
 
 pub struct PostRequest {
-    pub attributes: Value,
+    pub attributes: Box<Read>,
     pub relationships: BTreeMap<String, Relationship>,
     pub field_set: Option<Vec<String>>,
 }
