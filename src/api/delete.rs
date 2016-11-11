@@ -1,5 +1,7 @@
 use api::{Resource, Error};
+use IntoFuture;
 
 pub trait Delete: Resource {
-    fn delete(id: &Self::Id) -> Result<(), Error>;
+    type DeleteFut: IntoFuture<Item = (), Error = Error>;
+    fn delete(id: &Self::Id) -> Self::DeleteFut;
 }

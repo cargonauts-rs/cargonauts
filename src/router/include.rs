@@ -1,3 +1,4 @@
+#[derive(Clone)]
 pub struct IncludeQuery {
     pub direct: String,
     pub transitive: Vec<IncludeQuery>,

@@ -14,7 +14,8 @@ routes! {
 }
 
 impl api::GetAliased for User {
-    fn get(request: api::AliasRequest) -> api::Result<api::Entity<Self>> {
+    type GetAliasedFut = Result<api::Entity<Self>, api::Error>;
+    fn get(request: api::AliasRequest) -> Self::GetAliasedFut {
         unimplemented!()
     }
 }
@@ -37,26 +38,30 @@ impl api::Resource for User {
 }
 
 impl api::Get for User {
-    fn get(id: &u32) -> api::Result<User> {
+    type GetFut = Result<User, api::Error>;
+    fn get(id: &u32) -> Self::GetFut {
         unimplemented!()
     }
 }
 
 impl api::Patch for User {
     type Patch = ();
-    fn patch(id: &u32, patch: Self::Patch) -> api::Result<User> {
+    type PatchFut = Result<User, api::Error>;
+    fn patch(id: &u32, patch: Self::Patch) -> Self::PatchFut {
         unimplemented!()
     }
 }
 
 impl api::rel::HasMany<Photo> for User {
-    fn has_many(entity: &api::Entity<User>) -> api::Result<Vec<u32>> {
+    type HasManyFut = Result<Vec<u32>, api::Error>;
+    fn has_many(entity: &api::Entity<User>) -> Self::HasManyFut {
         unimplemented!()
     }
 }
 
 impl api::rel::AppendLinks<Photo> for User {
-    fn append_links(entity: &api::Entity<User>, rel_ids: &[u32]) -> api::Result<()> {
+    type AppendLinksFut = Result<(), api::Error>;
+    fn append_links(entity: &api::Entity<User>, rel_ids: &[u32]) -> Self::AppendLinksFut {
         unimplemented!()
     }
 }
@@ -85,31 +90,36 @@ impl api::Resource for Photo {
 }
 
 impl api::Delete for Photo {
-    fn delete(id: &u32) -> api::Result<()> {
+    type DeleteFut = Result<(), api::Error>;
+    fn delete(id: &u32) -> Self::DeleteFut {
         unimplemented!()
     }
 }
 
 impl api::Get for Photo {
-    fn get(id: &u32) -> api::Result<Photo> {
+    type GetFut = Result<Photo, api::Error>;
+    fn get(id: &u32) -> Self::GetFut {
         unimplemented!()
     }
 }
 
 impl api::Index for Photo {
-    fn index() -> api::Result<Vec<Photo>> {
+    type IndexFut = Result<Vec<Photo>, api::Error>;
+    fn index() -> Self::IndexFut {
         unimplemented!()
     }
 }
 
 impl api::Post for Photo {
-    fn post(self) -> api::Result<Photo> {
+    type PostFut = Result<Photo, api::Error>;
+    fn post(self) -> Self::PostFut {
         unimplemented!()
     }
 }
 
 impl api::rel::HasOne<User> for Photo {
-    fn has_one(entity: &api::Entity<Photo>) -> api::Result<Option<u32>> {
+    type HasOneFut = Result<Option<u32>, api::Error>;
+    fn has_one(entity: &api::Entity<Photo>) -> Self::HasOneFut {
         unimplemented!()
     }
 }

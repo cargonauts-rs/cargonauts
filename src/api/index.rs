@@ -5,32 +5,38 @@ use api::{Resource, Error, Entity};
 use api::raw::{Include, RawFetch, ResourceObject};
 use router::{IncludeQuery, SortQuery, Pagination};
 use _internal::_FetchRels;
+use IntoFuture;
+use futures::Future;
 
 pub trait Index: Resource {
-    fn index() -> Result<Vec<Self>, Error>;
+    type IndexFut: IntoFuture<Item = Vec<Self>, Error = Error>;
+    fn index() -> Self::IndexFut;
 }
 
 pub trait Paginated: Index {
-    fn paginated_index(pagination: &Pagination) -> Result<Vec<Self>, Error>;
+    type PaginatedFut: IntoFuture<Item = Vec<Self>, Error = Error>;
+    fn paginated_index(pagination: &Pagination) -> Self::PaginatedFut;
 }
 
 pub trait RawIndex<I>: RawFetch {
-    fn index(includes: &[IncludeQuery], sorts: &[SortQuery], pagination: &Option<Pagination>) -> Result<IndexResponse<I, Self>, Error>;
+    type RawIndexFut: IntoFuture<Item = IndexResponse<I, Self>, Error = Error>;
+    fn index(includes: &[IncludeQuery], sorts: &[SortQuery], pagination: &Option<Pagination>) -> Self::RawIndexFut;
 }
 
 impl<I, T> RawIndex<I> for T where T: Index + _FetchRels<I> {
-    default fn index(includes: &[IncludeQuery], sorts: &[SortQuery], pagination: &Option<Pagination>) -> Result<IndexResponse<I, Self>, Error> {
+    type RawIndexFut = Result<IndexResponse<I, Self>, Error>;
+    default fn index(includes: &[IncludeQuery], sorts: &[SortQuery], pagination: &Option<Pagination>) -> Self::RawIndexFut {
         match pagination.is_none() {
-            true    => raw_index(<T as Index>::index()?, includes, sorts),
+            true    => raw_index(<T as Index>::index().into_future().wait()?, includes, sorts),
             false   => Err(Error::BadRequest),
         }
     }
 }
 impl<I, T> RawIndex<I> for T where T: Paginated + _FetchRels<I> {
-    fn index(includes: &[IncludeQuery], sorts: &[SortQuery], pagination: &Option<Pagination>) -> Result<IndexResponse<I, Self>, Error> {
+    fn index(includes: &[IncludeQuery], sorts: &[SortQuery], pagination: &Option<Pagination>) -> Self::RawIndexFut {
         let index = match pagination.as_ref() {
-            Some(pagination)    => <T as Paginated>::paginated_index(pagination)?,
-            None                => <T as Index>::index()?,
+            Some(pagination)    => <T as Paginated>::paginated_index(pagination).into_future().wait()?,
+            None                => <T as Index>::index().into_future().wait()?,
         };
         raw_index(index, includes, sorts)
     }

@@ -15,6 +15,7 @@ mod macros;
 pub mod _internal;
 
 pub use serde::{Deserialize, Deserializer, Serialize, SerializeTo, Serializer};
+pub use futures::IntoFuture;
 
 #[cfg(test)]
 mod tests;

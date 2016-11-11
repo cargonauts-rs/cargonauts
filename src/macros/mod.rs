@@ -29,13 +29,13 @@ macro_rules! _resource {
         }
 
         impl<I> $crate::_internal::_FetchRels<I> for $resource {
-            fn rels(_: &$crate::api::Entity<Self>, _: &[$crate::router::IncludeQuery]) -> $crate::api::Result<(Self::Relationships, Vec<$crate::api::raw::Include<I>>)> {
+            fn rels(_: &$crate::api::Entity<Self>, _: &[$crate::router::IncludeQuery]) -> ::std::result::Result<(Self::Relationships, Vec<$crate::api::raw::Include<I>>), $crate::api::Error> {
                 Ok(($crate::api::raw::NoRelationships, vec![]))
             }
         }
 
         impl $crate::_internal::_UpdateRels for $resource {
-            fn update_rels(_: &$crate::api::Entity<Self>, rels: $crate::api::raw::NoRelationships) -> $crate::api::Result<$crate::api::raw::NoRelationships> {
+            fn update_rels(_: &$crate::api::Entity<Self>, rels: $crate::api::raw::NoRelationships) -> ::std::result::Result<$crate::api::raw::NoRelationships, $crate::api::Error> {
                 Ok($crate::api::raw::NoRelationships)
             }
         }
@@ -57,7 +57,7 @@ macro_rules! _resource {
         $(
             I: $crate::presenter::ConvertInclude<<$rel as $crate::api::rel::Relation>::Resource>,
         )* {
-            fn rels(id: &$crate::api::Entity<Self>, includes: &[$crate::router::IncludeQuery]) -> Result<(Self::Relationships, Vec<$crate::api::raw::Include<I>>), $crate::api::Error> {
+            fn rels(id: &$crate::api::Entity<Self>, includes: &[$crate::router::IncludeQuery]) -> ::std::result::Result<(Self::Relationships, Vec<$crate::api::raw::Include<I>>), $crate::api::Error> {
                 let mut include_objects = vec![];
                 let rels = Relationships {
                     $(
@@ -71,7 +71,7 @@ macro_rules! _resource {
         }
 
         impl $crate::_internal::_UpdateRels for $resource {
-            fn update_rels(id: &$crate::api::Entity<Self>, rels: UpdateRelationships) -> Result<Relationships, $crate::api::Error> {
+            fn update_rels(id: &$crate::api::Entity<Self>, rels: UpdateRelationships) -> ::std::result::Result<Relationships, $crate::api::Error> {
                 $(
                     if let Some(rel) = rels.$rel {
                         _link_rel!(id, rel, $resource, $rel, $count);
@@ -171,7 +171,7 @@ macro_rules! _resource {
         }
 
         impl $crate::api::raw::UpdateRelationships for UpdateRelationships {
-            fn from_iter<I>(iter: I) -> Result<Self, $crate::api::Error> where I: Iterator<Item = (String, $crate::api::raw::Relationship)> {
+            fn from_iter<I>(iter: I) -> ::std::result::Result<Self, $crate::api::Error> where I: Iterator<Item = (String, $crate::api::raw::Relationship)> {
                 let mut rels = UpdateRelationships::default();
                 for (name, value) in iter {
                     $( if &name[..] == _name_rel!($rel, $count) {
@@ -329,20 +329,12 @@ macro_rules! _rel_methods {
 macro_rules! _fetch_rel {
     ($id:expr, $includes:expr, $includes_out:expr, $resource:ty, $rel:ty, one) => {
         if let Some(include) = $includes.iter().find(|include| include.is_of(_name_rel!($rel, one))) {
-            match <$resource as $crate::api::rel::raw::FetchOne<I, $rel>>::fetch_one($id, &include.transitive)? {
-                Some(response)  => {
-                    let identifier = $crate::api::raw::Identifier::from(&response.resource);
-                    $includes_out.push(response.resource.into());
-                    $includes_out.extend(response.includes);
-                    $crate::api::raw::RelationshipLinkage {
-                        linkage: Some($crate::api::raw::Relationship::One(Some(identifier))),
-                    }
-                }
-                None            => {
-                    $crate::api::raw::RelationshipLinkage {
-                        linkage: Some($crate::api::raw::Relationship::One(None)),
-                    }
-                }
+            let response =<$resource as $crate::api::rel::raw::FetchOne<I, $rel>>::fetch_one($id, &include.transitive)?;
+            let identifier = $crate::api::raw::Identifier::from(&response.resource);
+            $includes_out.push(response.resource.into());
+            $includes_out.extend(response.includes);
+            $crate::api::raw::RelationshipLinkage {
+                linkage: Some($crate::api::raw::Relationship::One(Some(identifier))),
             }
         } else {
             $crate::api::raw::RelationshipLinkage {
@@ -390,7 +382,7 @@ macro_rules! _link_rel {
                 return Err($crate::api::Error::BadRequest);
             }
             $crate::api::raw::Relationship::Many(ref identifiers)   => {
-                let rel_ids = identifiers.iter().map(|identifier| identifier.id.parse().or(Err($crate::api::Error::BadRequest))).collect::<Result<Vec<_>, _>>()?;
+                let rel_ids = identifiers.iter().map(|identifier| identifier.id.parse().or(Err($crate::api::Error::BadRequest))).collect::<::std::result::Result<::std::vec::Vec<_>, _>>()?;
                 <$resource as $crate::_internal::_MaybeReplaceLinks<$rel>>::replace_links($id, &rel_ids)?;
             }
         }

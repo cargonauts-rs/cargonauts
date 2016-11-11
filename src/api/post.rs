@@ -1,29 +1,36 @@
 use Deserialize;
-use api::{AsyncJob, Resource, Result, Entity};
+use api::{AsyncJob, Resource, Entity, Error};
 use api::raw::{RawUpdate, ResourceObject, RawFetch, NoRelationships};
 use _internal::_UpdateRels;
+use IntoFuture;
+use futures::Future;
 
 pub trait Post: Resource + Deserialize {
-    fn post(self) -> Result<Self>;
+    type PostFut: IntoFuture<Item = Self, Error = Error>;
+    fn post(self) -> Self::PostFut;
 }
 
 pub trait PostAsync: RawUpdate + Deserialize {
     type Job: AsyncJob<Self>;
-    fn post_async(self) -> Result<Self::Job>;
+    type PostAsyncFut: IntoFuture<Item = Self::Job, Error = Error>;
+    fn post_async(self) -> Self::PostAsyncFut;
 }
 
 pub trait RawPost: RawUpdate + Deserialize {
-    fn post(self, rels: <Self as RawUpdate>::Relationships) -> Result<PostResponse<Self>>;
+    type RawPostFut: IntoFuture<Item = PostResponse<Self>, Error = Error>;
+    fn post(self, rels: <Self as RawUpdate>::Relationships) -> Self::RawPostFut;
 }
 
 pub trait RawPostAsync: RawUpdate + Deserialize {
     type Job: AsyncJob<Self>;
-    fn post_async(self, rels: <Self as RawUpdate>::Relationships) -> Result<PostResponse<Self::Job>>;
+    type RawPostAsyncFut: IntoFuture<Item = PostResponse<Self::Job>, Error = Error>;
+    fn post_async(self, rels: <Self as RawUpdate>::Relationships) -> Self::RawPostAsyncFut;
 }
 
 impl<T> RawPost for T where T: Post + _UpdateRels {
-    fn post(self, rels: <T as RawUpdate>::Relationships) -> Result<PostResponse<T>> {
-        let entity = Entity::Resource(<Self as Post>::post(self)?);
+    type RawPostFut = Result<PostResponse<T>, Error>;
+    fn post(self, rels: <T as RawUpdate>::Relationships) -> Self::RawPostFut {
+        let entity = Entity::Resource(<Self as Post>::post(self).into_future().wait()?);
         let relationships = <T as _UpdateRels>::update_rels(&entity, rels)?;
         let resource = match entity {
             Entity::Resource(resource)  => resource,
@@ -41,8 +48,9 @@ impl<T> RawPost for T where T: Post + _UpdateRels {
 
 impl<T> RawPostAsync for T where T: PostAsync + _UpdateRels {
     type Job = <T as PostAsync>::Job;
-    fn post_async(self, rels: <Self as RawUpdate>::Relationships) -> Result<PostResponse<Self::Job>> {
-        let mut job = <Self as PostAsync>::post_async(self)?;
+    type RawPostAsyncFut = Result<PostResponse<Self::Job>, Error>;
+    fn post_async(self, rels: <Self as RawUpdate>::Relationships) -> Self::RawPostAsyncFut {
+        let mut job = <Self as PostAsync>::post_async(self).into_future().wait()?;
         job.cache_rels(rels)?;
         Ok(PostResponse {
             resource: ResourceObject {

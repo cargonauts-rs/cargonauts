@@ -1,4 +1,3 @@
-use std::result;
 use std::str::FromStr;
 
 mod alias;
@@ -34,8 +33,6 @@ pub enum Entity<T: Resource> {
     Id(T::Id),
     Resource(T),
 }
-
-pub type Result<T> = result::Result<T, Error>;
 
 impl Resource for () {
     type Id = String;

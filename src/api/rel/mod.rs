@@ -1,4 +1,5 @@
-use api::{Resource, Entity, Result};
+use api::{Resource, Entity, Error};
+use IntoFuture;
 
 mod fetch;
 mod delete;
@@ -32,33 +33,41 @@ impl<T: Resource> Relation for T {
 pub type RelationId<T> = <<T as Relation>::Resource as Resource>::Id;
 
 pub trait HasOne<T: Relation>: Resource {
-    fn has_one(entity: &Entity<Self>) -> Result<Option<RelationId<T>>>;
+    type HasOneFut: IntoFuture<Item = Option<RelationId<T>>, Error = Error>;
+    fn has_one(entity: &Entity<Self>) -> Self::HasOneFut;
 }
 
 pub trait HasMany<T: Relation>: Resource {
-    fn has_many(entity: &Entity<Self>) -> Result<Vec<RelationId<T>>>;
+    type HasManyFut: IntoFuture<Item = Vec<RelationId<T>>, Error = Error>;
+    fn has_many(entity: &Entity<Self>) -> Self::HasManyFut;
 }
 
 pub trait LinkOne<T: Relation>: HasOne<T> {
-    fn link_one(entity: &Entity<Self>, rel_id: &RelationId<T>) -> Result<()>;
+    type LinkOneFut: IntoFuture<Item = (), Error = Error>;
+    fn link_one(entity: &Entity<Self>, rel_id: &RelationId<T>) -> Self::LinkOneFut;
 }
 
 pub trait AppendLinks<T: Relation>: HasMany<T> {
-    fn append_links(entity: &Entity<Self>, rel_ids: &[RelationId<T>]) -> Result<()>;
+    type AppendLinksFut: IntoFuture<Item = (), Error = Error>;
+    fn append_links(entity: &Entity<Self>, rel_ids: &[RelationId<T>]) -> Self::AppendLinksFut;
 }
 
 pub trait ReplaceLinks<T: Relation>: HasMany<T> {
-    fn replace_links(entity: &Entity<Self>, rel_ids: &[RelationId<T>]) -> Result<()>;
+    type ReplaceLinksFut: IntoFuture<Item = (), Error = Error>;
+    fn replace_links(entity: &Entity<Self>, rel_ids: &[RelationId<T>]) -> Self::ReplaceLinksFut;
 }
 
 pub trait UnlinkOne<T: Relation>: HasOne<T> {
-    fn unlink_one(entity: &Entity<Self>) -> Result<()>;
+    type UnlinkOneFut: IntoFuture<Item = (), Error = Error>;
+    fn unlink_one(entity: &Entity<Self>) -> Self::UnlinkOneFut;
 }
 
 pub trait RemoveLinks<T: Relation>: HasMany<T> {
-    fn unlink_many(entity: &Entity<Self>, rel_ids: &[RelationId<T>]) -> Result<()>;
+    type RemoveLinksFut: IntoFuture<Item = (), Error = Error>;
+    fn remove_links(entity: &Entity<Self>, rel_ids: &[RelationId<T>]) -> Self::RemoveLinksFut;
 }
 
 pub trait ClearLinks<T: Relation>: HasMany<T> {
-    fn unlink_all(entity: &Entity<Self>) -> Result<()>;
+    type ClearLinksFut: IntoFuture<Item = (), Error = Error>;
+    fn clear_links(entity: &Entity<Self>) -> Self::ClearLinksFut;
 }

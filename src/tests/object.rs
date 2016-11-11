@@ -29,32 +29,37 @@ impl api::Resource for Object {
 }
 
 impl api::Get for Object {
-    fn get(id: &u32) -> api::Result<Object> {
+    type GetFut = Result<Object, api::Error>;
+    fn get(id: &u32) -> Self::GetFut {
         unimplemented!()
     }
 }
 
 impl api::Index for Object {
-    fn index() -> api::Result<Vec<Object>> {
+    type IndexFut = Result<Vec<Object>, api::Error>;
+    fn index() -> Self::IndexFut {
         unimplemented!()
     }
 }
 
 impl api::Post for Object {
-    fn post(self) -> api::Result<Object> {
+    type PostFut = Result<Object, api::Error>;
+    fn post(self) -> Self::PostFut {
         unimplemented!()
     }
 }
 
 impl api::Delete for Object {
-    fn delete(id: &u32) -> api::Result<()> {
+    type DeleteFut = Result<(), api::Error>;
+    fn delete(id: &u32) -> Self::DeleteFut {
         unimplemented!()
     }
 }
 
 impl api::Patch for Object {
     type Patch = ();
-    fn patch(id: &u32, patch: ()) -> api::Result<Object> {
+    type PatchFut = Result<Object, api::Error>;
+    fn patch(id: &u32, patch: ()) -> Self::PatchFut {
         unimplemented!()
     }
 }
