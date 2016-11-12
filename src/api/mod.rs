@@ -14,7 +14,7 @@ pub mod raw;
 pub mod rel;
 
 pub use self::alias::{GetAliased, AliasRequest};
-pub use self::async::AsyncJob;
+pub use self::async::{AsyncAction, AsyncJob};
 pub use self::error::Error;
 pub use self::get::Get;
 pub use self::delete::Delete;

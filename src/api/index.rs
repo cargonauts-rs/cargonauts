@@ -2,7 +2,7 @@ use itertools::Itertools;
 
 use api::sort::MaybeSort;
 use api::{Resource, Error, Entity};
-use api::raw::{Include, RawFetch, ResourceObject};
+use api::raw::{CollectionResponse, RawFetch, ResourceObject};
 use router::{IncludeQuery, SortQuery, Pagination};
 use _internal::_FetchRels;
 use IntoFuture;
@@ -19,12 +19,12 @@ pub trait Paginated: Index {
 }
 
 pub trait RawIndex<I>: RawFetch {
-    type RawIndexFut: IntoFuture<Item = IndexResponse<I, Self>, Error = Error>;
+    type RawIndexFut: IntoFuture<Item = CollectionResponse<I, Self>, Error = Error>;
     fn index(includes: &[IncludeQuery], sorts: &[SortQuery], pagination: &Option<Pagination>) -> Self::RawIndexFut;
 }
 
 impl<I, T> RawIndex<I> for T where T: Index + _FetchRels<I> {
-    type RawIndexFut = Result<IndexResponse<I, Self>, Error>;
+    type RawIndexFut = Result<CollectionResponse<I, Self>, Error>;
     default fn index(includes: &[IncludeQuery], sorts: &[SortQuery], pagination: &Option<Pagination>) -> Self::RawIndexFut {
         match pagination.is_none() {
             true    => raw_index(<T as Index>::index().into_future().wait()?, includes, sorts),
@@ -42,12 +42,7 @@ impl<I, T> RawIndex<I> for T where T: Paginated + _FetchRels<I> {
     }
 }
 
-pub struct IndexResponse<I, T: RawFetch> {
-    pub resources: Vec<ResourceObject<T>>,
-    pub includes: Vec<Include<I>>,
-}
-
-fn raw_index<I, T: _FetchRels<I>>(index: Vec<T>, includes: &[IncludeQuery], sorts: &[SortQuery]) -> Result<IndexResponse<I, T>, Error> {
+fn raw_index<I, T: _FetchRels<I>>(index: Vec<T>, includes: &[IncludeQuery], sorts: &[SortQuery]) -> Result<CollectionResponse<I, T>, Error> {
     let mut resources = vec![];
     let mut include_objects = vec![];
     for resource in index {
@@ -77,7 +72,7 @@ fn raw_index<I, T: _FetchRels<I>>(index: Vec<T>, includes: &[IncludeQuery], sort
     let includes = include_objects.into_iter()
         .unique_by(|include| (include.id.clone(), include.resource))
         .collect();
-    Ok(IndexResponse {
+    Ok(CollectionResponse {
         resources: resources,
         includes: includes,
     })

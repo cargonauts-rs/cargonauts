@@ -1,5 +1,5 @@
 use api::Error;
-use api::raw::{ResourceObject, Include, RawFetch, Relationship};
+use api::raw::{ResourceResponse, CollectionResponse, ResourceObject, Include, RawFetch, Relationship};
 use presenter::Presenter;
 use Serializer;
 use repr::{SerializeRepr, Represent, RepresentWith};
@@ -204,20 +204,20 @@ impl<R: Response, L: Linker, T: RawFetch + Represent> Presenter<T> for JsonApi<R
         }
     }
 
-    fn present_resource(mut self, resource: ResourceObject<T>, includes: Vec<Include<JsonApiInclude<R::Serializer>>>) -> R {
+    fn present_resource(mut self, response: ResourceResponse<Self::Include, T>) -> R {
         match {
             let (serializer, jsonapi) = self.split_up();
-            jsonapi.serialize_resource(serializer, &resource, &includes)
+            jsonapi.serialize_resource(serializer, &response.resource, &response.includes)
         } {
             Ok(())  => self.respond(Status::Ok),
             Err(_)  => self.respond(Status::BadRequest),
         }
     }
 
-    fn present_collection(mut self, resources: Vec<ResourceObject<T>>, includes: Vec<Include<JsonApiInclude<R::Serializer>>>) -> R {
+    fn present_collection(mut self, response: CollectionResponse<Self::Include, T>) -> R {
         match {
             let (serializer, jsonapi) = self.split_up();
-            jsonapi.serialize_collection(serializer, &resources, &includes) 
+            jsonapi.serialize_collection(serializer, &response.resources, &response.includes) 
         } {
             Ok(())  => self.respond(Status::Ok),
             Err(_)  => self.respond(Status::BadRequest),
