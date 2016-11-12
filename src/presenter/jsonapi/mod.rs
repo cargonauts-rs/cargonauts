@@ -170,15 +170,6 @@ impl<'a, L: Linker> JsonApiInner<'a, L> {
         }
     }
 
-    fn serialize_nil<S: Serializer>(self, serializer: &mut S, self_link: &str) -> Result<(), S::Error> {
-        let links = LinkObject {
-            self_link: Some(self_link),
-            related_link: None,
-        };
-        self.serialize_document(serializer, links, &())
-    }
-
-
     fn serialize_err<S: Serializer>(self, serializer: &mut S, error: &Error) -> Result<(), S::Error> {
         let mut state = serializer.serialize_map(Some(2))?;
         serializer.serialize_map_key(&mut state, "errors")?;
@@ -218,16 +209,6 @@ impl<R: Response, L: Linker, T: RawFetch + Represent> Presenter<T> for JsonApi<R
         match {
             let (serializer, jsonapi) = self.split_up();
             jsonapi.serialize_collection(serializer, &response.resources, &response.includes) 
-        } {
-            Ok(())  => self.respond(Status::Ok),
-            Err(_)  => self.respond(Status::BadRequest),
-        }
-    }
-
-    fn present_nil(mut self, self_link: &str) -> R {
-        match {
-            let (serializer, jsonapi) = self.split_up();
-            jsonapi.serialize_nil(serializer, self_link)
         } {
             Ok(())  => self.respond(Status::Ok),
             Err(_)  => self.respond(Status::BadRequest),

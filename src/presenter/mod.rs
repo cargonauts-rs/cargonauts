@@ -14,7 +14,6 @@ pub trait Presenter<T: RawFetch>: Sized {
     fn present_resource(self, response: ResourceResponse<Self::Include, T>) -> Self::Response;
     fn present_collection(self, response: CollectionResponse<Self::Include, T>) -> Self::Response;
     fn present_rel(self, rel: RelResponse<Self::Include>) -> Self::Response;
-    fn present_nil(self, self_link: &str) -> Self::Response;
     fn present_err(self, error: Error) -> Self::Response;
 
     fn try_present<R: Presentable<Self, T>>(self, result: Result<R, Error>) -> Self::Response {
