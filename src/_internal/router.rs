@@ -71,7 +71,6 @@ impl<'a, R: RouterTrait> Router<'a, R> {
             let id = try_status!(request.id.parse(), presenter);
             let patch = try_status!(json::from_reader(request.attributes), presenter);
             let rels = try_status!(<<T as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), presenter);
-            // TODO respond as accepted and set content location header
             presenter.try_present(T::patch_async(id, patch, rels).into_future().wait())
         });
     }
@@ -92,7 +91,6 @@ impl<'a, R: RouterTrait> Router<'a, R> {
             let presenter = P::prepare(None, linker.clone());
             let post = try_status!(json::from_reader(request.attributes), presenter);
             let rels = try_status!(<<T as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), presenter);
-            // TODO respond as accepted and set content location header
             presenter.try_present(T::post_async(post, rels).into_future().wait())
         });
     }

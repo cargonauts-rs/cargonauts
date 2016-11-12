@@ -63,6 +63,7 @@ pub trait Router {
 
 pub enum Status {
     Ok = 200,
+    Accepted,
     NoContent = 203,
     BadRequest = 400,
     Forbidden = 403,

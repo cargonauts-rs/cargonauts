@@ -1,6 +1,6 @@
 use api::raw::{ResourceResponse, CollectionResponse, JobResponse, RelResponse, RawFetch};
 use api::{AsyncAction, Error};
-use router::{Response, Linker};
+use router::{self, Response, Linker};
 
 mod jsonapi;
 
@@ -59,10 +59,13 @@ where
     T: AsyncAction,
 {
     fn present(self, presenter: P) -> P::Response {
-        presenter.present_resource(ResourceResponse {
+        let mut response = presenter.present_resource(ResourceResponse {
             resource: self.resource,
             includes: vec![],
-        })
+        });
+        response.set_status(router::Status::Accepted);
+        //TODO set location header
+        response
     }
 }
 
