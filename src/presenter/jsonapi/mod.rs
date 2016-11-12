@@ -1,5 +1,5 @@
 use api::Error;
-use api::raw::{ResourceResponse, CollectionResponse, ResourceObject, Include, RawFetch, Relationship};
+use api::raw::{ResourceResponse, CollectionResponse, RelResponse, ResourceObject, Include, RawFetch, Relationship};
 use presenter::Presenter;
 use Serializer;
 use repr::{SerializeRepr, Represent, RepresentWith};
@@ -234,10 +234,10 @@ impl<R: Response, L: Linker, T: RawFetch + Represent> Presenter<T> for JsonApi<R
         }
     }
 
-    fn present_rel(mut self, resource: &str, id: &str, name: &str, rel: Relationship, includes: Vec<Include<JsonApiInclude<R::Serializer>>>) -> R {
+    fn present_rel(mut self, response: RelResponse<Self::Include>) -> R {
         match {
             let (serializer, jsonapi) = self.split_up();
-            jsonapi.serialize_rel(serializer, resource, id, name, &rel, &includes)
+            jsonapi.serialize_rel(serializer, response.resource, &response.id, response.related, &response.rel, &response.includes)
         } {
             Ok(())  => self.respond(Status::Ok),
             Err(_)  => self.respond(Status::BadRequest),

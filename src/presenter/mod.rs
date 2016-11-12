@@ -1,4 +1,4 @@
-use api::raw::{ResourceResponse, CollectionResponse, JobResponse, RawFetch, Relationship, Include};
+use api::raw::{ResourceResponse, CollectionResponse, JobResponse, RelResponse, RawFetch};
 use api::{AsyncAction, Error};
 use router::{Response, Linker};
 
@@ -13,7 +13,7 @@ pub trait Presenter<T: RawFetch>: Sized {
     fn prepare(field_set: Option<Vec<String>>, linker: Self::Linker) -> Self;
     fn present_resource(self, response: ResourceResponse<Self::Include, T>) -> Self::Response;
     fn present_collection(self, response: CollectionResponse<Self::Include, T>) -> Self::Response;
-    fn present_rel(self, resource: &str, id: &str, name: &str, rel: Relationship, includes: Vec<Include<Self::Include>>) -> Self::Response;
+    fn present_rel(self, rel: RelResponse<Self::Include>) -> Self::Response;
     fn present_nil(self, self_link: &str) -> Self::Response;
     fn present_err(self, error: Error) -> Self::Response;
 
@@ -63,5 +63,15 @@ where
             resource: self.resource,
             includes: vec![],
         })
+    }
+}
+
+impl<P, T> Presentable<P, T> for RelResponse<P::Include>
+where
+    P: Presenter<T>,
+    T: RawFetch,
+{
+    fn present(self, presenter: P) -> P::Response {
+        presenter.present_rel(self)
     }
 }

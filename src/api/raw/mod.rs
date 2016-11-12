@@ -45,3 +45,11 @@ pub struct CollectionResponse<I, T: RawFetch> {
 pub struct JobResponse<T: AsyncAction> {
     pub resource: ResourceObject<T::Job>,
 }
+
+pub struct RelResponse<I> {
+    pub resource: &'static str,
+    pub related: &'static str,
+    pub id: String,
+    pub rel: Relationship,
+    pub includes: Vec<Include<I>>,
+}

@@ -138,13 +138,15 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         router.attach_fetch_rel(T::resource_plural(), Rel::to_one(), |request| {
             let presenter = P::prepare(None, linker.clone());
             let parsed_id = try_status!(request.id.parse(), presenter);
-            match T::has_one(&api::Entity::Id(parsed_id)).into_future().wait() {
-                Ok(rel)         => {
-                    let rel = raw::Relationship::One(rel.map(|id| raw::Identifier::new::<Rel::Resource>(&id)));
-                    presenter.present_rel(T::resource_plural(), &request.id, Rel::to_one(), rel, vec![])
+            presenter.try_present(T::has_one(&api::Entity::Id(parsed_id)).into_future().wait().map(move |rel| {
+                raw::RelResponse {
+                    resource: T::resource_plural(),
+                    related: Rel::to_one(),
+                    id: request.id,
+                    rel: raw::Relationship::One(rel.map(|id| raw::Identifier::new::<Rel::Resource>(&id))),
+                    includes: vec![],
                 }
-                Err(error)          => presenter.present_err(error),
-            }
+            }))
         });
     }
 
@@ -159,13 +161,15 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         router.attach_fetch_rel(T::resource_plural(), Rel::to_many(), |request| {
             let presenter = P::prepare(None, linker.clone());
             let parsed_id = try_status!(request.id.parse(), presenter);
-            match T::has_many(&api::Entity::Id(parsed_id)).into_future().wait() {
-                Ok(rel)         => {
-                    let rel = raw::Relationship::Many(rel.into_iter().map(|id| raw::Identifier::new::<Rel::Resource>(&id)).collect());
-                    presenter.present_rel(T::resource_plural(), &request.id, Rel::to_many(), rel, vec![])
+            presenter.try_present(T::has_many(&api::Entity::Id(parsed_id)).into_future().wait().map(move |rel| {
+                raw::RelResponse {
+                    resource: T::resource_plural(),
+                    related: Rel::to_one(),
+                    id: request.id,
+                    rel: raw::Relationship::Many(rel.into_iter().map(|id| raw::Identifier::new::<Rel::Resource>(&id)).collect()),
+                    includes: vec![],
                 }
-                Err(error)          => presenter.present_err(error),
-            }
+            }))
         });
     }
 
