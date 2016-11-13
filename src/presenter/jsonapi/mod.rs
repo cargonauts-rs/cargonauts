@@ -3,7 +3,7 @@ use api::raw::{ResourceResponse, CollectionResponse, RelResponse, ResourceObject
 use presenter::Presenter;
 use Serializer;
 use repr::{SerializeRepr, Represent, RepresentWith};
-use router::{Response, Status, Linker};
+use router::{Router, Response, Status, Linker};
 
 mod error;
 mod include;
@@ -182,20 +182,18 @@ impl<'a, L: Linker> JsonApiInner<'a, L> {
     }
 }
 
-impl<R: Response, L: Linker, T: RawFetch + Represent> Presenter<T> for JsonApi<R, L> {
-    type Response = R;
-    type Linker = L;
-    type Include = JsonApiInclude<R::Serializer>;
+impl<R: Router, T: RawFetch + Represent> Presenter<T, R> for JsonApi<R::Response, R::Linker> {
+    type Include = JsonApiInclude<<R::Response as Response>::Serializer>;
 
-    fn prepare(field_set: Option<Vec<String>>, linker: L) -> Self {
+    fn prepare(field_set: Option<Vec<String>>, linker: R::Linker) -> Self {
         JsonApi {
-            response: R::default(),
+            response: R::Response::default(),
             linker: linker,
             field_set: field_set,
         }
     }
 
-    fn present_resource(mut self, response: ResourceResponse<Self::Include, T>) -> R {
+    fn present_resource(mut self, response: ResourceResponse<Self::Include, T>) -> R::Response {
         match {
             let (serializer, jsonapi) = self.split_up();
             jsonapi.serialize_resource(serializer, &response.resource, &response.includes)
@@ -205,7 +203,7 @@ impl<R: Response, L: Linker, T: RawFetch + Represent> Presenter<T> for JsonApi<R
         }
     }
 
-    fn present_collection(mut self, response: CollectionResponse<Self::Include, T>) -> R {
+    fn present_collection(mut self, response: CollectionResponse<Self::Include, T>) -> R::Response {
         match {
             let (serializer, jsonapi) = self.split_up();
             jsonapi.serialize_collection(serializer, &response.resources, &response.includes) 
@@ -215,7 +213,7 @@ impl<R: Response, L: Linker, T: RawFetch + Represent> Presenter<T> for JsonApi<R
         }
     }
 
-    fn present_rel(mut self, response: RelResponse<Self::Include>) -> R {
+    fn present_rel(mut self, response: RelResponse<Self::Include>) -> R::Response {
         match {
             let (serializer, jsonapi) = self.split_up();
             jsonapi.serialize_rel(serializer, response.resource, &response.id, response.related, &response.rel, &response.includes)
@@ -225,7 +223,7 @@ impl<R: Response, L: Linker, T: RawFetch + Represent> Presenter<T> for JsonApi<R
         }
     }
 
-    fn present_err(mut self, error: Error) -> R {
+    fn present_err(mut self, error: Error) -> R::Response {
         match {
             let (serializer, jsonapi) = self.split_up();
             jsonapi.serialize_err(serializer, &error)
