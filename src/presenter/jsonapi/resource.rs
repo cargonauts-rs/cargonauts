@@ -3,16 +3,16 @@ use repr::{Represent, SerializeRepr};
 use presenter::jsonapi::links::LinkObject;
 use presenter::jsonapi::rels::RelsObject;
 use Serializer;
-use router::Linker;
+use router::MakeLinks;
 
-pub struct JsonApiResourceObject<'a, T: RawFetch, L: Linker + 'a> {
+pub struct JsonApiResourceObject<'a, T: RawFetch, L: MakeLinks + 'a> {
     pub resource: &'a ResourceObject<T>,
     pub linker: &'a L,
     pub id: &'a str,
     pub self_link: &'a str,
 }
 
-impl<'a, T: RawFetch + Represent, L: Linker> Represent for JsonApiResourceObject<'a, T, L> {
+impl<'a, T: RawFetch + Represent, L: MakeLinks> Represent for JsonApiResourceObject<'a, T, L> {
     fn repr<S: Serializer>(&self, serializer: &mut S, field_set: Option<&[String]>) -> Result<(), S::Error> {
         if self.resource.relationships.count() == 0 {
             let mut state = serializer.serialize_map(Some(4))?;
@@ -62,12 +62,12 @@ impl<'a, T: RawFetch + Represent, L: Linker> Represent for JsonApiResourceObject
     }
 }
 
-pub struct JsonApiCollectionObject<'a, T: RawFetch, L: Linker + 'a> {
+pub struct JsonApiCollectionObject<'a, T: RawFetch, L: MakeLinks + 'a> {
     pub resources: &'a [ResourceObject<T>],
     pub linker: &'a L,
 }
 
-impl<'a, T: RawFetch + Represent, L: Linker> Represent for JsonApiCollectionObject<'a, T, L> {
+impl<'a, T: RawFetch + Represent, L: MakeLinks> Represent for JsonApiCollectionObject<'a, T, L> {
     fn repr<S: Serializer>(&self, serializer: &mut S, field_set: Option<&[String]>) -> Result<(), S::Error> {
         let mut state = serializer.serialize_seq(Some(self.resources.len()))?;
         for resource in self.resources {

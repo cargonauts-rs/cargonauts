@@ -8,7 +8,7 @@ pub use self::jsonapi::JsonApi;
 
 pub trait Presenter<T: RawFetch, R: Router>: Sized {
     type Include;
-    fn prepare(field_set: Option<Vec<String>>, linker: R::Linker) -> Self;
+    fn prepare(field_set: Option<Vec<String>>, linker: R::LinkMaker) -> Self;
     fn present_resource(self, response: ResourceResponse<Self::Include, T>) -> R::Response;
     fn present_collection(self, response: CollectionResponse<Self::Include, T>) -> R::Response;
     fn present_rel(self, rel: RelResponse<Self::Include>) -> R::Response;

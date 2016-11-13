@@ -3,7 +3,7 @@ use presenter::ConvertInclude;
 use presenter::jsonapi::links::LinkObject;
 use presenter::jsonapi::rels::IncludeRelsObject;
 use repr::{RepresentWith, SerializeRepr};
-use router::Linker;
+use router::MakeLinks;
 use Serializer;
 
 pub struct JsonApiInclude<S: Serializer>(Box<RepresentWith<S>>);
@@ -14,12 +14,12 @@ impl<T: RepresentWith<S> + 'static, S: Serializer> ConvertInclude<T> for JsonApi
     }
 }
 
-struct IncludeObject<'a, S: Serializer + 'a, L: Linker + 'a> {
+struct IncludeObject<'a, S: Serializer + 'a, L: MakeLinks + 'a> {
     pub include: &'a Include<JsonApiInclude<S>>,
     pub linker: &'a L,
 }
 
-impl<'a, S: Serializer, L: Linker> RepresentWith<S> for IncludeObject<'a, S, L> {
+impl<'a, S: Serializer, L: MakeLinks> RepresentWith<S> for IncludeObject<'a, S, L> {
     fn repr_with(&self, serializer: &mut S, field_set: Option<&[String]>) -> Result<(), S::Error> {
         if let Some(relationships) = self.include.relationships.as_ref() {
             let mut state = serializer.serialize_map(Some(5))?;
@@ -68,12 +68,12 @@ impl<'a, S: Serializer, L: Linker> RepresentWith<S> for IncludeObject<'a, S, L> 
     }
 }
 
-pub struct IncludesObject<'a, S: Serializer + 'a, L: Linker + 'a> {
+pub struct IncludesObject<'a, S: Serializer + 'a, L: MakeLinks + 'a> {
     pub includes: &'a [Include<JsonApiInclude<S>>],
     pub linker: &'a L,
 }
 
-impl<'a, S: Serializer, L: Linker> RepresentWith<S> for IncludesObject<'a, S, L> {
+impl<'a, S: Serializer, L: MakeLinks> RepresentWith<S> for IncludesObject<'a, S, L> {
     fn repr_with(&self, serializer: &mut S, field_set: Option<&[String]>) -> Result<(), S::Error> {
         let mut state = serializer.serialize_seq(Some(self.includes.len()))?;
         for include in self.includes {

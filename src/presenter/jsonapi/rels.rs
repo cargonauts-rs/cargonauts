@@ -4,18 +4,18 @@ use api::raw::{FetchRelationships, RelationshipLinkage, Relationship};
 use presenter::jsonapi::linkage::{ToOneLinkage, ToManyLinkage};
 use presenter::jsonapi::links::LinkObject;
 use repr::Represent;
-use router::Linker;
+use router::MakeLinks;
 use Serialize;
 use Serializer;
 
-pub struct RelsObject<'a, R: FetchRelationships<'a>, L: Linker + 'a> {
+pub struct RelsObject<'a, R: FetchRelationships<'a>, L: MakeLinks + 'a> {
     pub resource: &'static str,
     pub id: &'a str,
     pub relationships: &'a R,
     pub linker: &'a L,
 }
 
-impl<'a, R, L> Represent for RelsObject<'a, R, L> where R: FetchRelationships<'a>, L: Linker {
+impl<'a, R, L> Represent for RelsObject<'a, R, L> where R: FetchRelationships<'a>, L: MakeLinks {
     fn repr<S: Serializer>(&self, serializer: &mut S, field_set: Option<&[String]>) -> Result<(), S::Error> {
         match field_set {
             Some(field_set) => {
@@ -53,14 +53,14 @@ impl<'a, R, L> Represent for RelsObject<'a, R, L> where R: FetchRelationships<'a
     }
 }
 
-pub struct IncludeRelsObject<'a, L: Linker + 'a> {
+pub struct IncludeRelsObject<'a, L: MakeLinks + 'a> {
     pub resource: &'static str,
     pub id: &'a str,
     pub relationships: &'a RefCell<Iterator<Item = (&'static str, RelationshipLinkage)>>,
     pub linker: &'a L,
 }
 
-impl<'a, L: Linker> Represent for IncludeRelsObject<'a, L> {
+impl<'a, L: MakeLinks> Represent for IncludeRelsObject<'a, L> {
     fn repr<S: Serializer>(&self, serializer: &mut S, field_set: Option<&[String]>) -> Result<(), S::Error> {
         let mut relationships = self.relationships.borrow_mut();
         match field_set {

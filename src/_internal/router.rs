@@ -21,14 +21,12 @@ macro_rules! try_status {
 
 pub struct Router<'a, R: RouterTrait + 'a> {
     router: &'a mut R,
-    linker: R::Linker,
 }
 
 impl<'a, R: RouterTrait> Router<'a, R> {
-    pub fn new(router: &'a mut R, linker: R::Linker) -> Router<'a, R> {
+    pub fn new(router: &'a mut R) -> Router<'a, R> {
         Router {
             router: router,
-            linker: linker,
         }
     }
 
@@ -37,9 +35,8 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         T: raw::RawGet<P::Include>,
         P: Presenter<T, R>,
     {
-        let Router { ref mut router, ref linker } = *self;
-        router.attach_get(T::resource_plural(), |request| {
-            let presenter = P::prepare(request.field_set, linker.clone());
+        self.router.attach_get(T::resource_plural(), |request, link_maker| {
+            let presenter = P::prepare(request.field_set, link_maker);
             let id = try_status!(request.id.parse(), presenter);
             presenter.try_present(T::get_id(id, &request.includes).into_future().wait())
         });
@@ -50,9 +47,8 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         T: raw::RawIndex<P::Include>,
         P: Presenter<T, R>,
     {
-        let Router { ref mut router, ref linker } = *self;
-        router.attach_index(T::resource_plural(), |request| {
-            let presenter = P::prepare(request.field_set, linker.clone());
+        self.router.attach_index(T::resource_plural(), |request, link_maker| {
+            let presenter = P::prepare(request.field_set, link_maker);
             presenter.try_present(T::index(&request.includes, &request.sort, &request.page).into_future().wait())
         });
     }
@@ -62,9 +58,8 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         T: raw::RawPatch<P::Include>,
         P: Presenter<T, R>,
     {
-        let Router { ref mut router, ref linker } = *self;
-        router.attach_patch(T::resource_plural(), |request| {
-            let presenter = P::prepare(request.field_set, linker.clone());
+        self.router.attach_patch(T::resource_plural(), |request, link_maker| {
+            let presenter = P::prepare(request.field_set, link_maker);
             let id = try_status!(request.id.parse(), presenter);
             let patch = try_status!(json::from_reader(request.attributes), presenter);
             let rels = try_status!(<<T as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), presenter);
@@ -77,9 +72,8 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         T: raw::RawPatchAsync,
         P: Presenter<T::Job, R>,
     {
-        let Router { ref mut router, ref linker } = *self;
-        router.attach_patch(T::resource_plural(), |request| {
-            let presenter = P::prepare(None, linker.clone());
+        self.router.attach_patch(T::resource_plural(), |request, link_maker| {
+            let presenter = P::prepare(None, link_maker);
             let id = try_status!(request.id.parse(), presenter);
             let patch = try_status!(json::from_reader(request.attributes), presenter);
             let rels = try_status!(<<T as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), presenter);
@@ -92,9 +86,8 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         T: raw::RawPost<P::Include>,
         P: Presenter<T, R>,
     {
-        let Router { ref mut router, ref linker } = *self;
-        router.attach_post(T::resource_plural(), |request| {
-            let presenter = P::prepare(request.field_set, linker.clone());
+        self.router.attach_post(T::resource_plural(), |request, link_maker| {
+            let presenter = P::prepare(request.field_set, link_maker);
             let post = try_status!(json::from_reader(request.attributes), presenter);
             let rels = try_status!(<<T as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), presenter);
             presenter.try_present(T::post(post, rels).into_future().wait())
@@ -106,9 +99,8 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         T: raw::RawPostAsync,
         P: Presenter<T::Job, R>,
     {
-        let Router { ref mut router, ref linker } = *self;
-        router.attach_post(T::resource_plural(), |request| {
-            let presenter = P::prepare(None, linker.clone());
+        self.router.attach_post(T::resource_plural(), |request, link_maker| {
+            let presenter = P::prepare(None, link_maker);
             let post = try_status!(json::from_reader(request.attributes), presenter);
             let rels = try_status!(<<T as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), presenter);
             presenter.try_present(T::post_async(post, rels).into_future().wait())
@@ -120,9 +112,8 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         T: api::Delete,
         P: Presenter<(), R>,
     {
-        let Router { ref mut router, ref linker } = *self;
-        router.attach_delete(T::resource_plural(), |id| {
-            let presenter = P::prepare(None, linker.clone());
+        self.router.attach_delete(T::resource_plural(), |id, link_maker| {
+            let presenter = P::prepare(None, link_maker);
             let id = try_status!(id.parse(), presenter);
             // TODO definitely wrong
             match T::delete(&id).into_future().wait() {
@@ -137,9 +128,8 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         T: raw::RawGetAliased<P::Include>,
         P: Presenter<T, R>,
     { 
-        let Router { ref mut router, ref linker } = *self;
-        router.attach_get_alias(route, |alias_request, get_request| {
-            let presenter = P::prepare(None, linker.clone());
+        self.router.attach_get_alias(route, |alias_request, get_request, link_maker| {
+            let presenter = P::prepare(None, link_maker);
             presenter.try_present(T::get(alias_request, &get_request.includes).into_future().wait())
         });
     }
@@ -151,14 +141,13 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         Rel::Resource: raw::RawFetch,
         P: Presenter<Rel::Resource, R>,
     {
-        let Router { ref mut router, ref linker } = *self;
-        router.attach_fetch_one(T::resource_plural(), Rel::to_one(), |request| {
-            let presenter = P::prepare(None, linker.clone());
+        self.router.attach_fetch_one(T::resource_plural(), Rel::to_one(), |request, link_maker| {
+            let presenter = P::prepare(None, link_maker);
             let id = try_status!(request.id.parse(), presenter);
             presenter.try_present(T::fetch_one(&api::Entity::Id(id), &request.includes).into_future().wait())
         });
-        router.attach_fetch_rel(T::resource_plural(), Rel::to_one(), |request| {
-            let presenter = P::prepare(None, linker.clone());
+        self.router.attach_fetch_rel(T::resource_plural(), Rel::to_one(), |request, link_maker| {
+            let presenter = P::prepare(None, link_maker);
             let parsed_id = try_status!(request.id.parse(), presenter);
             presenter.try_present(T::has_one(&api::Entity::Id(parsed_id)).into_future().wait().map(move |rel| {
                 raw::RelResponse {
@@ -179,14 +168,13 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         Rel::Resource: raw::RawFetch,
         P: Presenter<Rel::Resource, R>,
     {
-        let Router { ref mut router, ref linker } = *self;
-        router.attach_fetch_many(T::resource_plural(), Rel::to_many(), |request| {
-            let presenter = P::prepare(None, linker.clone());
+        self.router.attach_fetch_many(T::resource_plural(), Rel::to_many(), |request, link_maker| {
+            let presenter = P::prepare(None, link_maker);
             let id = try_status!(request.id.parse(), presenter);
             presenter.try_present(T::fetch_many(&api::Entity::Id(id), &request.includes).into_future().wait())
         });
-        router.attach_fetch_rel(T::resource_plural(), Rel::to_many(), |request| {
-            let presenter = P::prepare(None, linker.clone());
+        self.router.attach_fetch_rel(T::resource_plural(), Rel::to_many(), |request, link_maker| {
+            let presenter = P::prepare(None, link_maker);
             let parsed_id = try_status!(request.id.parse(), presenter);
             presenter.try_present(T::has_many(&api::Entity::Id(parsed_id)).into_future().wait().map(move |rel| {
                 raw::RelResponse {
@@ -206,9 +194,8 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         Rel: rel::Relation,
         P: Presenter<(), R>
     {
-        let Router { ref mut router, ref linker } = *self;
-        router.attach_delete_one(T::resource_plural(), Rel::to_one(), |id| {
-            let presenter = P::prepare(None, linker.clone());
+        self.router.attach_delete_one(T::resource_plural(), Rel::to_one(), |id, link_maker| {
+            let presenter = P::prepare(None, link_maker);
             let id = try_status!(id.parse(), presenter);
             // TODO definitely wrong
             match T::delete_one(&api::Entity::Id(id)).into_future().wait() {
@@ -216,8 +203,8 @@ impl<'a, R: RouterTrait> Router<'a, R> {
                 Err(error)  => presenter.present_err(error),
             }
         });
-        router.attach_delete_one_rel(T::resource_plural(), Rel::to_one(), |id| {
-            let presenter = P::prepare(None, linker.clone());
+        self.router.attach_delete_one_rel(T::resource_plural(), Rel::to_one(), |id, link_maker| {
+            let presenter = P::prepare(None, link_maker);
             let parsed_id = try_status!(id.parse(), presenter);
             match T::unlink_one(&api::Entity::Id(parsed_id)).into_future().wait() {
                 Ok(_)       => presenter.present_err(Error::NoContent),
@@ -232,9 +219,8 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         Rel: rel::Relation,
         P: Presenter<(), R>
     {
-        let Router { ref mut router, ref linker } = *self;
-        router.attach_clear_many(T::resource_plural(), Rel::to_many(), |id| {
-            let presenter = P::prepare(None, linker.clone());
+        self.router.attach_clear_many(T::resource_plural(), Rel::to_many(), |id, link_maker| {
+            let presenter = P::prepare(None, link_maker);
             let id = try_status!(id.parse(), presenter);
             // TODO definitely wrong
             match T::clear_many(&api::Entity::Id(id)).into_future().wait() {
@@ -242,8 +228,8 @@ impl<'a, R: RouterTrait> Router<'a, R> {
                 Err(error)  => presenter.present_err(error),
             }
         });
-        router.attach_clear_many_rel(T::resource_plural(), Rel::to_many(), |id| {
-            let presenter = P::prepare(None, linker.clone());
+        self.router.attach_clear_many_rel(T::resource_plural(), Rel::to_many(), |id, link_maker| {
+            let presenter = P::prepare(None, link_maker);
             let id = try_status!(id.parse(), presenter);
             // TODO definitely wrong
             match T::clear_links(&api::Entity::Id(id)).into_future().wait() {
@@ -259,9 +245,8 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         Rel: rel::Relation,
         P: Presenter<(), R>
     {
-        let Router { ref mut router, ref linker } = *self;
-        router.attach_remove_many(T::resource_plural(), Rel::to_many(), |id, rel_ids| {
-            let presenter = P::prepare(None, linker.clone());
+        self.router.attach_remove_many(T::resource_plural(), Rel::to_many(), |id, rel_ids, link_maker| {
+            let presenter = P::prepare(None, link_maker);
             let id = try_status!(id.parse(), presenter);
             let parsed_rel_ids = try_status!(rel_ids.iter().map(|id| id.parse()).collect::<Result<Vec<_>, _>>(), presenter);
             // TODO definitely wrong
@@ -270,8 +255,8 @@ impl<'a, R: RouterTrait> Router<'a, R> {
                 Err(error)  => presenter.present_err(error),
             }
         });
-        router.attach_remove_many_rel(T::resource_plural(), Rel::to_many(), |id, rel_ids| {
-            let presenter = P::prepare(None, linker.clone());
+        self.router.attach_remove_many_rel(T::resource_plural(), Rel::to_many(), |id, rel_ids, link_maker| {
+            let presenter = P::prepare(None, link_maker);
             let parsed_id = try_status!(id.parse(), presenter);
             let parsed_rel_ids = try_status!(rel_ids.iter().map(|id| id.parse()).collect::<Result<Vec<_>, _>>(), presenter);
             // TODO definitely wrong
@@ -289,9 +274,8 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         Rel::Resource: raw::RawUpdate,
         P: Presenter<Rel::Resource, R>,
     {
-        let Router { ref mut router, ref linker } = *self;
-        router.attach_patch_one(T::resource_plural(), Rel::to_one(), |request| {
-            let presenter = P::prepare(None, linker.clone());
+        self.router.attach_patch_one(T::resource_plural(), Rel::to_one(), |request, link_maker| {
+            let presenter = P::prepare(None, link_maker);
             let id = try_status!(request.id.parse(), presenter);
             let patch = try_status!(json::from_reader(request.attributes), presenter);
             let rels = try_status!(<<Rel::Resource as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), presenter);
@@ -306,16 +290,15 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         Rel::Resource: raw::RawUpdate + Deserialize,
         P: Presenter<Rel::Resource, R>
     {
-        let Router { ref mut router, ref linker } = *self;
-        router.attach_post_one(T::resource_plural(), Rel::to_one(), |id, request| {
-            let presenter = P::prepare(None, linker.clone());
+        self.router.attach_post_one(T::resource_plural(), Rel::to_one(), |id, request, link_maker| {
+            let presenter = P::prepare(None, link_maker);
             let id = try_status!(id.parse(), presenter);
             let post = try_status!(json::from_reader(request.attributes), presenter);
             let rels = try_status!(<<Rel::Resource as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), presenter);
             presenter.try_present(T::post_one(&api::Entity::Id(id), post, rels).into_future().wait())
         });
-        router.attach_link_one(T::resource_plural(), Rel::to_one(), |id, rel| {
-            let presenter = P::prepare(None, linker.clone());
+        self.router.attach_link_one(T::resource_plural(), Rel::to_one(), |id, rel, link_maker| {
+            let presenter = P::prepare(None, link_maker);
             let id = try_status!(id.parse(), presenter);
             let rel_id = match rel {
                 raw::Relationship::One(Some(identifier))  => {
@@ -340,16 +323,15 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         Rel::Resource: raw::RawUpdate + Deserialize,
         P: Presenter<Rel::Resource, R>
     {
-        let Router { ref mut router, ref linker } = *self;
-        router.attach_append_many(T::resource_plural(), Rel::to_many(), |id, request| {
-            let presenter = P::prepare(None, linker.clone());
+        self.router.attach_append_many(T::resource_plural(), Rel::to_many(), |id, request, link_maker| {
+            let presenter = P::prepare(None, link_maker);
             let id = try_status!(id.parse(), presenter);
             let post = try_status!(json::from_reader(request.attributes), presenter);
             let rels = try_status!(<<Rel::Resource as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), presenter);
             presenter.try_present(T::append(&api::Entity::Id(id), post, rels).into_future().wait())
         });
-        router.attach_append_link_many(T::resource_plural(), Rel::to_many(), |id, rel| {
-            let presenter = P::prepare(None, linker.clone());
+        self.router.attach_append_link_many(T::resource_plural(), Rel::to_many(), |id, rel, link_maker| {
+            let presenter = P::prepare(None, link_maker);
             let id = try_status!(id.parse(), presenter);
             let rel_ids: Vec<_> = match rel {
                 raw::Relationship::Many(identifiers)   => {

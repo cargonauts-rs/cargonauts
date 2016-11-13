@@ -68,90 +68,90 @@ impl MockRouter {
 
 impl Router for MockRouter {
     type Response = MockResponse;
-    type Linker = MockLinker;
+    type LinkMaker = MockLinker;
     fn attach_delete<F>(&mut self, resource: &'static str, _: F)
-            where F: Fn(String) -> Self::Response {
+            where F: Fn(String, Self::LinkMaker) -> Self::Response {
         self.register("delete", resource);
     }
     fn attach_get<F>(&mut self, resource: &'static str, _: F)
-            where F: Fn(GetRequest) -> Self::Response {
+            where F: Fn(GetRequest, MockLinker) -> Self::Response {
         self.register("get", resource);
     }
     fn attach_index<F>(&mut self, resource: &'static str, _: F)
-            where F: Fn(IndexRequest) -> Self::Response {
+            where F: Fn(IndexRequest, Self::LinkMaker) -> Self::Response {
         self.register("index", resource);
     }
     fn attach_patch<F>(&mut self, resource: &'static str, _: F)
-            where F: Fn(PatchRequest) -> Self::Response {
+            where F: Fn(PatchRequest, Self::LinkMaker) -> Self::Response {
         self.register("patch", resource);
     }
     fn attach_post<F>(&mut self, resource: &'static str, _: F)
-            where F: Fn(PostRequest) -> Self::Response {
+            where F: Fn(PostRequest, Self::LinkMaker) -> Self::Response {
         self.register("post", resource);
     }
     fn attach_fetch_one<F>(&mut self, resource: &'static str, relationship: &'static str, _: F)
-            where F: Fn(GetRequest) -> Self::Response {
+            where F: Fn(GetRequest, Self::LinkMaker) -> Self::Response {
         self.register_rel("fetch-many", resource, relationship);
     }
     fn attach_fetch_many<F>(&mut self, resource: &'static str, relationship: &'static str, _: F)
-            where F: Fn(GetRequest) -> Self::Response {
+            where F: Fn(GetRequest, Self::LinkMaker) -> Self::Response {
         self.register_rel("fetch-one", resource, relationship);
     }
     fn attach_fetch_rel<F>(&mut self, resource: &'static str, relationship: &'static str, _: F)
-            where F: Fn(FetchRelRequest) -> Self::Response {
+            where F: Fn(FetchRelRequest, Self::LinkMaker) -> Self::Response {
         self.register_rel("fetch-rel", resource, relationship);
     }
     fn attach_delete_one<F>(&mut self, resource: &'static str, relationship: &'static str, _: F)
-            where F: Fn(String) -> Self::Response {
+            where F: Fn(String, Self::LinkMaker) -> Self::Response {
         self.register_rel("delete-one", resource, relationship);
     }
     fn attach_remove_many<F>(&mut self, resource: &'static str, relationship: &'static str, _: F)
-            where F: Fn(String, Vec<String>) -> Self::Response {
+            where F: Fn(String, Vec<String>, Self::LinkMaker) -> Self::Response {
         self.register_rel("remove", resource, relationship);
     }
     fn attach_clear_many<F>(&mut self, resource: &'static str, relationship: &'static str, _: F)
-            where F: Fn(String) -> Self::Response {
+            where F: Fn(String, Self::LinkMaker) -> Self::Response {
         self.register_rel("clear", resource, relationship);
     }
     fn attach_delete_one_rel<F>(&mut self, resource: &'static str, relationship: &'static str, _: F)
-            where F: Fn(String) -> Self::Response {
+            where F: Fn(String, Self::LinkMaker) -> Self::Response {
         self.register_rel("delete-one-rel", resource, relationship);
     }
     fn attach_remove_many_rel<F>(&mut self, resource: &'static str, relationship: &'static str, _: F)
-            where F: Fn(String, Vec<String>) -> Self::Response {
+            where F: Fn(String, Vec<String>, Self::LinkMaker) -> Self::Response {
         self.register_rel("remove-links", resource, relationship);
     }
     fn attach_clear_many_rel<F>(&mut self, resource: &'static str, relationship: &'static str, _: F)
-            where F: Fn(String) -> Self::Response {
+            where F: Fn(String, Self::LinkMaker) -> Self::Response {
         self.register_rel("clear-links", resource, relationship);
     }
     fn attach_patch_one<F>(&mut self, resource: &'static str, relationship: &'static str, _: F)
-            where F: Fn(PatchRequest) -> Self::Response {
+            where F: Fn(PatchRequest, Self::LinkMaker) -> Self::Response {
         self.register_rel("patch-one", resource, relationship);
     }
     fn attach_post_one<F>(&mut self, resource: &'static str, relationship: &'static str, _: F)
-            where F: Fn(String, PostRequest) -> Self::Response {
+            where F: Fn(String, PostRequest, Self::LinkMaker) -> Self::Response {
         self.register_rel("post-one", resource, relationship);
     }
 
     fn attach_link_one<F>(&mut self, resource: &'static str, relationship: &'static str, _: F)
-            where F: Fn(String, Relationship) -> Self::Response {
+            where F: Fn(String, Relationship, Self::LinkMaker) -> Self::Response {
         self.register_rel("link-one", resource, relationship);
     }
     fn attach_append_link_many<F>(&mut self, resource: &'static str, relationship: &'static str, _: F)
-            where F: Fn(String, Relationship) -> Self::Response {
+            where F: Fn(String, Relationship, Self::LinkMaker) -> Self::Response {
         self.register_rel("append-links", resource, relationship);
     }
     fn attach_replace_link_many<F>(&mut self, resource: &'static str, relationship: &'static str, _: F)
-            where F: Fn(String, Relationship) -> Self::Response {
+            where F: Fn(String, Relationship, Self::LinkMaker) -> Self::Response {
         self.register_rel("replace-links", resource, relationship);
     }
     fn attach_append_many<F>(&mut self, resource: &'static str, relationship: &'static str, _: F)
-            where F: Fn(String, PostRequest) -> Self::Response {
+            where F: Fn(String, PostRequest, Self::LinkMaker) -> Self::Response {
         self.register_rel("append", resource, relationship);
     }
     fn attach_get_alias<F>(&mut self, alias: &'static str, _: F)
-            where F: Fn(AliasRequest, GetRequest) -> Self::Response {
+            where F: Fn(AliasRequest, GetRequest, Self::LinkMaker) -> Self::Response {
         self.register("alias-get", alias);
     }
 }
@@ -159,7 +159,7 @@ impl Router for MockRouter {
 #[derive(Copy, Clone)]
 pub struct MockLinker;
 
-impl Linker for MockLinker {
+impl MakeLinks for MockLinker {
     fn collection(&self, resource: &str) -> String {
         ["https://example.org", resource].join("/")
     }

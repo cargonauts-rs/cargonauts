@@ -3,7 +3,7 @@ use api::raw::{ResourceResponse, CollectionResponse, RelResponse, ResourceObject
 use presenter::Presenter;
 use Serializer;
 use repr::{SerializeRepr, Represent, RepresentWith};
-use router::{Router, Response, Status, Linker};
+use router::{Router, Response, Status, MakeLinks};
 
 mod error;
 mod include;
@@ -20,19 +20,19 @@ use self::linkage::{ToOneLinkage, ToManyLinkage};
 use self::links::LinkObject;
 use self::resource::{JsonApiResourceObject, JsonApiCollectionObject};
 
-pub struct JsonApi<R: Response, L: Linker> {
+pub struct JsonApi<R: Response, L: MakeLinks> {
     linker: L,
     response: R,
     field_set: Option<Vec<String>>,
 }
 
-struct JsonApiInner<'a, L: Linker + 'a> {
+struct JsonApiInner<'a, L: MakeLinks + 'a> {
     linker: &'a L,
     field_set: Option<&'a [String]>,
 }
 
 
-impl<R: Response, L: Linker> JsonApi<R, L> {
+impl<R: Response, L: MakeLinks> JsonApi<R, L> {
     fn respond(mut self, status: Status) -> R {
         self.response.set_status(status);
         self.response.set_content("application/vnd.api+json");
@@ -50,7 +50,7 @@ impl<R: Response, L: Linker> JsonApi<R, L> {
     }
 }
 
-impl<'a, L: Linker> JsonApiInner<'a, L> {
+impl<'a, L: MakeLinks> JsonApiInner<'a, L> {
     fn serialize_document<T, S>(self, serializer: &mut S, links: LinkObject, data: &T) -> Result<(), S::Error>
     where S: Serializer,
           T: RepresentWith<S> {
@@ -182,10 +182,10 @@ impl<'a, L: Linker> JsonApiInner<'a, L> {
     }
 }
 
-impl<R: Router, T: RawFetch + Represent> Presenter<T, R> for JsonApi<R::Response, R::Linker> {
+impl<R: Router, T: RawFetch + Represent> Presenter<T, R> for JsonApi<R::Response, R::LinkMaker> {
     type Include = JsonApiInclude<<R::Response as Response>::Serializer>;
 
-    fn prepare(field_set: Option<Vec<String>>, linker: R::Linker) -> Self {
+    fn prepare(field_set: Option<Vec<String>>, linker: R::LinkMaker) -> Self {
         JsonApi {
             response: R::Response::default(),
             linker: linker,

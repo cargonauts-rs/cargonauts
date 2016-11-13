@@ -16,49 +16,49 @@ pub use self::sort::SortQuery;
 
 pub trait Router {
     type Response: Response;
-    type Linker: Linker;
+    type LinkMaker: MakeLinks;
     fn attach_delete<F>(&mut self, resource: &'static str, f: F)
-        where F: Fn(String) -> Self::Response;
+        where F: Fn(String, Self::LinkMaker) -> Self::Response;
     fn attach_get<F>(&mut self, resource: &'static str, f: F)
-        where F: Fn(GetRequest) -> Self::Response;
+        where F: Fn(GetRequest, Self::LinkMaker) -> Self::Response;
     fn attach_index<F>(&mut self, resource: &'static str, f: F)
-        where F: Fn(IndexRequest) -> Self::Response;
+        where F: Fn(IndexRequest, Self::LinkMaker) -> Self::Response;
     fn attach_patch<F>(&mut self, resource: &'static str, f: F)
-        where F: Fn(PatchRequest) -> Self::Response;
+        where F: Fn(PatchRequest, Self::LinkMaker) -> Self::Response;
     fn attach_post<F>(&mut self, resource: &'static str, f: F)
-        where F: Fn(PostRequest) -> Self::Response;
+        where F: Fn(PostRequest, Self::LinkMaker) -> Self::Response;
     fn attach_fetch_one<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
-        where F: Fn(GetRequest) -> Self::Response;
+        where F: Fn(GetRequest, Self::LinkMaker) -> Self::Response;
     fn attach_fetch_many<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
-        where F: Fn(GetRequest) -> Self::Response;
+        where F: Fn(GetRequest, Self::LinkMaker) -> Self::Response;
     fn attach_fetch_rel<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
-        where F: Fn(FetchRelRequest) -> Self::Response;
+        where F: Fn(FetchRelRequest, Self::LinkMaker) -> Self::Response;
     fn attach_delete_one<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
-        where F: Fn(String) -> Self::Response;
+        where F: Fn(String, Self::LinkMaker) -> Self::Response;
     fn attach_delete_one_rel<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
-        where F: Fn(String) -> Self::Response;
+        where F: Fn(String, Self::LinkMaker) -> Self::Response;
     fn attach_remove_many<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
-        where F: Fn(String, Vec<String>) -> Self::Response;
+        where F: Fn(String, Vec<String>, Self::LinkMaker) -> Self::Response;
     fn attach_remove_many_rel<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
-        where F: Fn(String, Vec<String>) -> Self::Response;
+        where F: Fn(String, Vec<String>, Self::LinkMaker) -> Self::Response;
     fn attach_clear_many<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
-        where F: Fn(String) -> Self::Response;
+        where F: Fn(String, Self::LinkMaker) -> Self::Response;
     fn attach_clear_many_rel<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
-        where F: Fn(String) -> Self::Response;
+        where F: Fn(String, Self::LinkMaker) -> Self::Response;
     fn attach_patch_one<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
-        where F: Fn(PatchRequest) -> Self::Response;
+        where F: Fn(PatchRequest, Self::LinkMaker) -> Self::Response;
     fn attach_post_one<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
-        where F: Fn(String, PostRequest) -> Self::Response;
+        where F: Fn(String, PostRequest, Self::LinkMaker) -> Self::Response;
     fn attach_append_many<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
-        where F: Fn(String, PostRequest) -> Self::Response;
+        where F: Fn(String, PostRequest, Self::LinkMaker) -> Self::Response;
     fn attach_link_one<F>(&mut self, resource: &'static str, relationship: &'static str, _: F)
-        where F: Fn(String, Relationship) -> Self::Response;
+        where F: Fn(String, Relationship, Self::LinkMaker) -> Self::Response;
     fn attach_append_link_many<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
-        where F: Fn(String, Relationship) -> Self::Response;
+        where F: Fn(String, Relationship, Self::LinkMaker) -> Self::Response;
     fn attach_replace_link_many<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
-        where F: Fn(String, Relationship) -> Self::Response;
+        where F: Fn(String, Relationship, Self::LinkMaker) -> Self::Response;
     fn attach_get_alias<F>(&mut self, alias: &'static str, f: F)
-        where F: Fn(AliasRequest, GetRequest) -> Self::Response;
+        where F: Fn(AliasRequest, GetRequest, Self::LinkMaker) -> Self::Response;
 }
 
 pub enum Status {
@@ -79,14 +79,14 @@ pub trait Response: Default {
     fn serializer(&mut self) -> &mut Self::Serializer;
 }
 
-pub trait Linker: Clone {
+pub trait MakeLinks {
     fn collection(&self, resource: &str) -> String;
     fn resource(&self, resource: &str, id: &str) -> String;
     fn relationship(&self, resource: &str, id: &str, relation: &str) -> String;
     fn related_resource(&self, resource: &str, id: &str, relation: &str) -> String;
 }
 
-impl<'a, L: Linker> Linker for &'a L {
+impl<'a, L: MakeLinks> MakeLinks for &'a L {
     fn collection(&self, resource: &str) -> String {
         L::collection(self, resource)
     }
