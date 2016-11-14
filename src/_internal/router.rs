@@ -78,11 +78,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         {
             let presenter = P::prepare(None, link_maker);
             let id = try_status!(request.id.parse(), presenter);
-            // TODO definitely wrong
-            match T::delete(&id).into_future().wait() {
-                Ok(_)       => presenter.present_err(Error::NoContent),
-                Err(error)  => presenter.present_err(error.into()),
-            }
+            presenter.try_present(T::delete(&id).into_future().wait())
         }
         self.router.attach_delete(T::resource_plural(), delete::<R, T, P>);
     }
@@ -266,11 +262,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         {
             let presenter = P::prepare(None, link_maker);
             let id = try_status!(request.id.parse(), presenter);
-            // TODO definitely wrong
-            match T::delete_one(&api::Entity::Id(id)).into_future().wait() {
-                Ok(_)       => presenter.present_err(Error::NoContent),
-                Err(error)  => presenter.present_err(error),
-            }
+            presenter.try_present(T::delete_one(&api::Entity::Id(id)).into_future().wait())
         }
         fn delete_one_rel<R, T, Rel, P>(request: r::DeleteRequest, link_maker: R::LinkMaker) -> R::Response
         where
@@ -305,11 +297,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         {
             let presenter = P::prepare(None, link_maker);
             let id = try_status!(request.id.parse(), presenter);
-            // TODO definitely wrong
-            match T::clear_many(&api::Entity::Id(id)).into_future().wait() {
-                Ok(_)       => presenter.present_err(Error::NoContent),
-                Err(error)  => presenter.present_err(error),
-            }
+            presenter.try_present(T::clear_many(&api::Entity::Id(id)).into_future().wait())
         }
         fn clear_many_rel<R, T, Rel, P>(request: r::DeleteRequest, link_maker: R::LinkMaker) -> R::Response
         where
@@ -320,11 +308,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         {
             let presenter = P::prepare(None, link_maker);
             let id = try_status!(request.id.parse(), presenter);
-            // TODO definitely wrong
-            match T::clear_links(&api::Entity::Id(id)).into_future().wait() {
-                Ok(_)       => presenter.present_err(Error::NoContent),
-                Err(error)  => presenter.present_err(error),
-            }
+            presenter.try_present(T::clear_links(&api::Entity::Id(id)).into_future().wait())
         }
         self.router.attach_clear_many(T::resource_plural(), Rel::to_many(), clear_many::<R, T, Rel, P>);
         self.router.attach_clear_many_rel(T::resource_plural(), Rel::to_many(), clear_many_rel::<R, T, Rel, P>);
@@ -346,11 +330,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
             let presenter = P::prepare(None, link_maker);
             let id = try_status!(request.id.parse(), presenter);
             let parsed_rel_ids = try_status!(request.rel_ids.iter().map(|id| id.parse()).collect::<Result<Vec<_>, _>>(), presenter);
-            // TODO definitely wrong
-            match T::remove_many(&api::Entity::Id(id), &parsed_rel_ids).into_future().wait() {
-                Ok(_)       => presenter.present_err(Error::NoContent),
-                Err(error)  => presenter.present_err(error),
-            }
+            presenter.try_present(T::remove_many(&api::Entity::Id(id), &parsed_rel_ids).into_future().wait())
         }
         fn remove_many_rel<R, T, Rel, P>(request: r::RemoveManyRequest, link_maker: R::LinkMaker) -> R::Response
         where
@@ -362,11 +342,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
             let presenter = P::prepare(None, link_maker);
             let parsed_id = try_status!(request.id.parse(), presenter);
             let parsed_rel_ids = try_status!(request.rel_ids.iter().map(|id| id.parse()).collect::<Result<Vec<_>, _>>(), presenter);
-            // TODO definitely wrong
-            match T::remove_links(&api::Entity::Id(parsed_id), &parsed_rel_ids).into_future().wait() {
-                Ok(_)       => presenter.present_err(Error::NoContent),
-                Err(error)  => presenter.present_err(error),
-            }
+            presenter.try_present(T::remove_links(&api::Entity::Id(parsed_id), &parsed_rel_ids).into_future().wait())
         }
         self.router.attach_remove_many(T::resource_plural(), Rel::to_many(), remove_many::<R, T, Rel, P>);
         self.router.attach_remove_many_rel(T::resource_plural(), Rel::to_many(), remove_many_rel::<R, T, Rel, P>);

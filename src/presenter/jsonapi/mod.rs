@@ -213,6 +213,10 @@ impl<R: Router, T: RawFetch + Represent> Presenter<T, R> for JsonApi<R::Response
         }
     }
 
+    fn present_no_content(self) -> R::Response {
+        self.respond(Status::NoContent)
+    }
+
     fn present_rel(mut self, response: RelResponse<Self::Include>) -> R::Response {
         match {
             let (serializer, jsonapi) = self.split_up();

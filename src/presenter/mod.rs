@@ -13,6 +13,7 @@ pub trait Presenter<T: RawFetch, R: Router>: Sized {
     fn present_collection(self, response: CollectionResponse<Self::Include, T>) -> R::Response;
     fn present_rel(self, rel: RelResponse<Self::Include>) -> R::Response;
     fn present_err(self, error: Error) -> R::Response;
+    fn present_no_content(self) -> R::Response;
 
     fn try_present<X: Presentable<Self, T, R>>(self, result: Result<X, Error>) -> R::Response {
         match result {
@@ -28,6 +29,16 @@ pub trait ConvertInclude<T> {
 
 pub trait Presentable<P: Presenter<T, R>, T: RawFetch, R: Router> {
     fn present(self, presenter: P) -> R::Response;
+}
+
+impl<P, R> Presentable<P, (), R> for ()
+where
+    P: Presenter<(), R>,
+    R: Router,
+{
+    fn present(self, presenter: P) -> R::Response {
+        presenter.present_no_content()
+    }
 }
 
 impl<P, T, R> Presentable<P, T, R> for ResourceResponse<P::Include, T>
