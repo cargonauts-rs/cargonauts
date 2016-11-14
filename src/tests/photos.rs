@@ -129,16 +129,16 @@ fn it_compiles() { }
 
 #[test]
 fn it_has_attached_routes() {
-    use router::mock::{MockRouter, MockLinker};
+    use router::mock::MockRouter;
     
     const ME_ROUTES: &'static [&'static str] = &["alias-get"];
     const USERS_ROUTES: &'static [&'static str] = &["get", "patch"];
     const PHOTOS_ROUTES: &'static [&'static str] = &["get", "index", "post", "delete"];
-    const USERS_PHOTOS_ROUTES: &'static [&'static str] = &["fetch-one", "fetch-rel", "append", "append-links"];
-    const PHOTOS_USER_ROUTES: &'static [&'static str] = &["fetch-many", "fetch-rel"];
+    const USERS_PHOTOS_ROUTES: &'static [&'static str] = &["fetch-many", "fetch-rel", "append-many", "append-many-rel"];
+    const PHOTOS_USER_ROUTES: &'static [&'static str] = &["fetch-one", "fetch-rel"];
 
     let mut router = MockRouter::new();
-    attach_routes(&mut router, MockLinker);
+    attach_routes(&mut router);
 
     assert_eq!(&router.methods_for("me")[..], ME_ROUTES);
     assert_eq!(&router.methods_for("users")[..], USERS_ROUTES);

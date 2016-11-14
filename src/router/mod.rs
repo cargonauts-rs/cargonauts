@@ -17,48 +17,110 @@ pub use self::sort::SortQuery;
 pub trait Router {
     type Response: Response;
     type LinkMaker: MakeLinks;
-    fn attach_delete<F>(&mut self, resource: &'static str, f: F)
-        where F: Fn(String, Self::LinkMaker) -> Self::Response;
-    fn attach_get<F>(&mut self, resource: &'static str, f: F)
-        where F: Fn(GetRequest, Self::LinkMaker) -> Self::Response;
-    fn attach_index<F>(&mut self, resource: &'static str, f: F)
-        where F: Fn(IndexRequest, Self::LinkMaker) -> Self::Response;
-    fn attach_patch<F>(&mut self, resource: &'static str, f: F)
-        where F: Fn(PatchRequest, Self::LinkMaker) -> Self::Response;
-    fn attach_post<F>(&mut self, resource: &'static str, f: F)
-        where F: Fn(PostRequest, Self::LinkMaker) -> Self::Response;
-    fn attach_fetch_one<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
-        where F: Fn(GetRequest, Self::LinkMaker) -> Self::Response;
-    fn attach_fetch_many<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
-        where F: Fn(GetRequest, Self::LinkMaker) -> Self::Response;
-    fn attach_fetch_rel<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
-        where F: Fn(FetchRelRequest, Self::LinkMaker) -> Self::Response;
-    fn attach_delete_one<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
-        where F: Fn(String, Self::LinkMaker) -> Self::Response;
-    fn attach_delete_one_rel<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
-        where F: Fn(String, Self::LinkMaker) -> Self::Response;
-    fn attach_remove_many<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
-        where F: Fn(String, Vec<String>, Self::LinkMaker) -> Self::Response;
-    fn attach_remove_many_rel<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
-        where F: Fn(String, Vec<String>, Self::LinkMaker) -> Self::Response;
-    fn attach_clear_many<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
-        where F: Fn(String, Self::LinkMaker) -> Self::Response;
-    fn attach_clear_many_rel<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
-        where F: Fn(String, Self::LinkMaker) -> Self::Response;
-    fn attach_patch_one<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
-        where F: Fn(PatchRequest, Self::LinkMaker) -> Self::Response;
-    fn attach_post_one<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
-        where F: Fn(String, PostRequest, Self::LinkMaker) -> Self::Response;
-    fn attach_append_many<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
-        where F: Fn(String, PostRequest, Self::LinkMaker) -> Self::Response;
-    fn attach_link_one<F>(&mut self, resource: &'static str, relationship: &'static str, _: F)
-        where F: Fn(String, Relationship, Self::LinkMaker) -> Self::Response;
-    fn attach_append_link_many<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
-        where F: Fn(String, Relationship, Self::LinkMaker) -> Self::Response;
-    fn attach_replace_link_many<F>(&mut self, resource: &'static str, relationship: &'static str, f: F)
-        where F: Fn(String, Relationship, Self::LinkMaker) -> Self::Response;
-    fn attach_get_alias<F>(&mut self, alias: &'static str, f: F)
-        where F: Fn(AliasRequest, GetRequest, Self::LinkMaker) -> Self::Response;
+    fn attach_delete(&mut self,
+        resource: &'static str,
+        handler: fn(DeleteRequest, Self::LinkMaker) -> Self::Response,
+    );
+    fn attach_get(&mut self,
+        resource: &'static str,
+        handler: fn(GetRequest, Self::LinkMaker) -> Self::Response,
+    );
+    fn attach_index(&mut self,
+        resource: &'static str, 
+        handler: fn(IndexRequest, Self::LinkMaker) -> Self::Response,
+    );
+    fn attach_patch(&mut self,
+        resource: &'static str,
+        handler: fn(PatchRequest, Self::LinkMaker) -> Self::Response,
+    );
+    fn attach_post(&mut self,
+        resource: &'static str,
+        handler: fn(PostRequest, Self::LinkMaker) -> Self::Response,
+    );
+
+    fn attach_fetch_one(&mut self,
+        resource: &'static str,
+        relation: &'static str,
+        handler: fn(GetRequest, Self::LinkMaker) -> Self::Response,
+    );
+    fn attach_fetch_many(&mut self,
+        resource: &'static str,
+        relation: &'static str,
+        handler: fn(GetRequest, Self::LinkMaker) -> Self::Response,
+    );
+    fn attach_fetch_rel(&mut self,
+        resource: &'static str,
+        relation: &'static str,
+        handler: fn(FetchRelRequest, Self::LinkMaker) -> Self::Response,
+    );
+
+    fn attach_delete_one(&mut self,
+        resource: &'static str,
+        relation: &'static str,
+        handler: fn(DeleteRequest, Self::LinkMaker) -> Self::Response,
+    );
+    fn attach_clear_many(&mut self,
+        resource: &'static str,
+        relation: &'static str,
+        handler: fn(DeleteRequest, Self::LinkMaker) -> Self::Response,
+    );
+    fn attach_remove_many(&mut self,
+        resource: &'static str,
+        relation: &'static str,
+        handler: fn(RemoveManyRequest, Self::LinkMaker) -> Self::Response,
+    );
+    fn attach_delete_one_rel(&mut self,
+        resource: &'static str,
+        relation: &'static str,
+        handler: fn(DeleteRequest, Self::LinkMaker) -> Self::Response,
+    );
+    fn attach_clear_many_rel(&mut self,
+        resource: &'static str,
+        relation: &'static str,
+        handler: fn(DeleteRequest, Self::LinkMaker) -> Self::Response,
+    );
+    fn attach_remove_many_rel(&mut self,
+        resource: &'static str,
+        relation: &'static str,
+        handler: fn(RemoveManyRequest, Self::LinkMaker) -> Self::Response,
+    );
+
+    fn attach_post_one(&mut self,
+        resource: &'static str,
+        relation: &'static str,
+        handler: fn(PostOneRequest, Self::LinkMaker) -> Self::Response,
+    );
+    fn attach_patch_one(&mut self,
+        resource: &'static str,
+        relation: &'static str,
+        handler: fn(PatchRequest, Self::LinkMaker) -> Self::Response,
+    );
+    fn attach_append_many(&mut self,
+        resource: &'static str,
+        relation: &'static str,
+        handler: fn(PostManyRequest, Self::LinkMaker) -> Self::Response,
+    );
+    // TODO replace many
+    fn attach_update_one_rel(&mut self,
+        resource: &'static str,
+        relation: &'static str,
+        handler: fn(UpdateRelRequest, Self::LinkMaker) -> Self::Response,
+    );
+    fn attach_append_many_rel(&mut self,
+        resource: &'static str,
+        relation: &'static str,
+        handler: fn(UpdateRelRequest, Self::LinkMaker) -> Self::Response,
+    );
+    fn attach_replace_many_rel(&mut self,
+        resource: &'static str,
+        relation: &'static str,
+        handler: fn(UpdateRelRequest, Self::LinkMaker) -> Self::Response,
+    );
+
+    fn attach_get_alias(&mut self,
+        alias: &'static str,
+        handler: fn(AliasRequest, GetRequest, Self::LinkMaker) -> Self::Response,
+    );
 }
 
 pub enum Status {
@@ -114,11 +176,8 @@ pub struct IndexRequest {
     pub field_set: Option<Vec<String>>,
 }
 
-pub struct FetchRelRequest {
+pub struct DeleteRequest {
     pub id: String,
-    pub includes: Vec<IncludeQuery>,
-    pub relationship_route: String,
-    pub related_resource_route: String,
 }
 
 pub struct PatchRequest {
@@ -132,4 +191,36 @@ pub struct PostRequest {
     pub attributes: Box<Read>,
     pub relationships: BTreeMap<String, Relationship>,
     pub field_set: Option<Vec<String>>,
+}
+
+pub struct FetchRelRequest {
+    pub id: String,
+    pub includes: Vec<IncludeQuery>,
+    pub relationship_route: String,
+    pub related_resource_route: String,
+}
+
+pub struct RemoveManyRequest {
+    pub id: String,
+    pub rel_ids: Vec<String>,
+}
+
+pub struct PostOneRequest {
+    pub id: String,
+    pub attributes: Box<Read>,
+    pub relationships: BTreeMap<String, Relationship>,
+    pub field_set: Option<Vec<String>>,
+}
+
+pub struct PostManyRequest {
+    pub id: String,
+    pub attributes: Box<Read>,
+    pub relationships: BTreeMap<String, Relationship>,
+    pub field_set: Option<Vec<String>>,
+}
+
+pub struct UpdateRelRequest {
+    pub id: String,
+    pub field_set: Option<Vec<String>>,
+    pub rel: Relationship,
 }
