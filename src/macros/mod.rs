@@ -329,7 +329,7 @@ macro_rules! _rel_methods {
 macro_rules! _fetch_rel {
     ($id:expr, $includes:expr, $includes_out:expr, $resource:ty, $rel:ty, one) => {
         if let Some(include) = $includes.iter().find(|include| include.is_of(_name_rel!($rel, one))) {
-            let response =<$resource as $crate::api::rel::raw::FetchOne<I, $rel>>::fetch_one($id, &include.transitive)?;
+            let response =<$resource as $crate::api::rel::raw::GetOne<I, $rel>>::get_one($id, &include.transitive)?;
             let identifier = $crate::api::raw::Identifier::from(&response.resource);
             $includes_out.push(response.resource.into());
             $includes_out.extend(response.includes);
@@ -344,7 +344,7 @@ macro_rules! _fetch_rel {
     };
     ($id:expr, $includes:expr, $includes_out:expr, $resource:ty, $rel:ty, many) => {
         if let Some(include) = $includes.iter().find(|include| include.is_of(_name_rel!($rel, many))) {
-            let response = <$resource as $crate::api::rel::raw::FetchMany<I, $rel>>::fetch_many($id, &include.transitive)?;
+            let response = <$resource as $crate::api::rel::raw::IndexMany<I, $rel>>::index_many($id, &include.transitive)?;
             let identifiers = response.resources.iter().map($crate::api::raw::Identifier::from).collect();
             $includes_out.extend(response.resources.into_iter().map(Into::into));
             $includes_out.extend(response.includes);

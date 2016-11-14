@@ -5,17 +5,17 @@ use router::IncludeQuery;
 use IntoFuture;
 use futures::Future;
 
-pub trait FetchOne<I, T: Relation>: HasOne<T> where T::Resource: RawFetch {
-    type FetchOneFut: IntoFuture<Item = ResourceResponse<I, T::Resource>, Error = Error>;
-    fn fetch_one(entity: &Entity<Self>, includes: &[IncludeQuery]) -> Self::FetchOneFut;
+pub trait GetOne<I, T: Relation>: HasOne<T> where T::Resource: RawFetch {
+    type GetOneFut: IntoFuture<Item = ResourceResponse<I, T::Resource>, Error = Error>;
+    fn get_one(entity: &Entity<Self>, includes: &[IncludeQuery]) -> Self::GetOneFut;
 }
 
-impl<I, T, Rel> FetchOne<I, Rel> for T
+impl<I, T, Rel> GetOne<I, Rel> for T
 where T:                HasOne<Rel>,
       Rel:              Relation,
       Rel::Resource:    RawGet<I> {
-    type FetchOneFut = Result<ResourceResponse<I, Rel::Resource>, Error>;
-    fn fetch_one(entity: &Entity<Self>, includes: &[IncludeQuery]) -> Self::FetchOneFut {
+    type GetOneFut = Result<ResourceResponse<I, Rel::Resource>, Error>;
+    fn get_one(entity: &Entity<Self>, includes: &[IncludeQuery]) -> Self::GetOneFut {
         if let Some(id) = <T as HasOne<Rel>>::has_one(entity).into_future().wait()? {
             <Rel::Resource as RawGet<I>>::get_id(id, includes).into_future().wait()
         } else { Err(Error::NotFound) }
@@ -23,17 +23,17 @@ where T:                HasOne<Rel>,
     }
 }
 
-pub trait FetchMany<I, T: Relation>: HasMany<T> where T::Resource: RawFetch {
-    type FetchManyFut: IntoFuture<Item = CollectionResponse<I, T::Resource>, Error = Error>;
-    fn fetch_many(entity: &Entity<Self>, includes: &[IncludeQuery]) -> Self::FetchManyFut;
+pub trait IndexMany<I, T: Relation>: HasMany<T> where T::Resource: RawFetch {
+    type IndexManyFut: IntoFuture<Item = CollectionResponse<I, T::Resource>, Error = Error>;
+    fn index_many(entity: &Entity<Self>, includes: &[IncludeQuery]) -> Self::IndexManyFut;
 }
 
-impl<I, T, Rel> FetchMany<I, Rel> for T
+impl<I, T, Rel> IndexMany<I, Rel> for T
 where T:                HasMany<Rel>,
       Rel:              Relation,
       Rel::Resource:    RawGet<I> {
-    type FetchManyFut = Result<CollectionResponse<I, Rel::Resource>, Error>;
-    fn fetch_many(entity: &Entity<Self>, includes: &[IncludeQuery]) -> Self::FetchManyFut {
+    type IndexManyFut = Result<CollectionResponse<I, Rel::Resource>, Error>;
+    fn index_many(entity: &Entity<Self>, includes: &[IncludeQuery]) -> Self::IndexManyFut {
         let mut resources = vec![];
         let mut include_objects = vec![];
         for id in <T as HasMany<Rel>>::has_many(entity).into_future().wait()? {

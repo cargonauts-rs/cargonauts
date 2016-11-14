@@ -21,17 +21,17 @@ where T:             HasOne<Rel> + UnlinkOne<Rel>,
     }
 }
 
-pub trait Remove<T: Relation>: HasMany<T> + RemoveLinks<T> {
-    type RemoveFut: IntoFuture<Item = (), Error = Error>;
-    fn remove_many(entity: &Entity<Self>, rel_ids: &[RelationId<T>]) -> Self::RemoveFut;
+pub trait RemoveMany<T: Relation>: HasMany<T> + RemoveLinks<T> {
+    type RemoveManyFut: IntoFuture<Item = (), Error = Error>;
+    fn remove_many(entity: &Entity<Self>, rel_ids: &[RelationId<T>]) -> Self::RemoveManyFut;
 }
 
-impl<T, Rel> Remove<Rel> for T
+impl<T, Rel> RemoveMany<Rel> for T
 where T:             HasMany<Rel> + RemoveLinks<Rel>,
       Rel:           Relation,
       Rel::Resource: Delete {
-    type RemoveFut = Result<(), Error>;
-    fn remove_many(entity: &Entity<Self>, rel_ids: &[RelationId<Rel::Resource>]) -> Self::RemoveFut {
+    type RemoveManyFut = Result<(), Error>;
+    fn remove_many(entity: &Entity<Self>, rel_ids: &[RelationId<Rel::Resource>]) -> Self::RemoveManyFut {
         let rel_ids: Vec<_> = <T as HasMany<Rel>>::has_many(entity).into_future().wait()?.into_iter().filter(|id| rel_ids.contains(id)).collect();
         for id in &rel_ids {
             <Rel::Resource as Delete>::delete(id).into_future().wait()?;
@@ -40,17 +40,17 @@ where T:             HasMany<Rel> + RemoveLinks<Rel>,
     }
 }
 
-pub trait Clear<T: Relation>: HasMany<T> + ClearLinks<T> {
-    type ClearFut: IntoFuture<Item = (), Error = Error>;
-    fn clear_many(entity: &Entity<Self>) -> Self::ClearFut;
+pub trait ClearMany<T: Relation>: HasMany<T> + ClearLinks<T> {
+    type ClearManyFut: IntoFuture<Item = (), Error = Error>;
+    fn clear_many(entity: &Entity<Self>) -> Self::ClearManyFut;
 }
 
-impl<T, Rel> Clear<Rel> for T
+impl<T, Rel> ClearMany<Rel> for T
 where T:             HasMany<Rel> + ClearLinks<Rel>,
       Rel:           Relation,
       Rel::Resource: Delete {
-    type ClearFut = Result<(), Error>;
-    fn clear_many(entity: &Entity<Self>) -> Self::ClearFut {
+    type ClearManyFut = Result<(), Error>;
+    fn clear_many(entity: &Entity<Self>) -> Self::ClearManyFut {
         for id in <T as HasMany<Rel>>::has_many(entity).into_future().wait()? {
             <Rel::Resource as Delete>::delete(&id).into_future().wait()?;
         }

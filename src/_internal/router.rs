@@ -163,14 +163,14 @@ impl<'a, R: RouterTrait> Router<'a, R> {
 
     pub fn attach_fetch_one<T, Rel, P>(&mut self)
     where
-        T: rel::raw::FetchOne<P::Include, Rel>,
+        T: rel::raw::GetOne<P::Include, Rel>,
         Rel: rel::Relation,
         Rel::Resource: raw::RawFetch,
         P: Presenter<Rel::Resource, R>,
     {
         fn fetch_one<R, T, Rel, P>(request: r::GetRequest, link_maker: R::LinkMaker) -> R::Response
         where
-            T: rel::raw::FetchOne<P::Include, Rel>,
+            T: rel::raw::GetOne<P::Include, Rel>,
             Rel: rel::Relation,
             Rel::Resource: raw::RawFetch,
             P: Presenter<Rel::Resource, R>,
@@ -178,11 +178,11 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         {
             let presenter = P::prepare(None, link_maker);
             let id = try_status!(request.id.parse(), presenter);
-            presenter.try_present(T::fetch_one(&api::Entity::Id(id), &request.includes).into_future().wait())
+            presenter.try_present(T::get_one(&api::Entity::Id(id), &request.includes).into_future().wait())
         }
         fn fetch_one_rel<R, T, Rel, P>(request: r::FetchRelRequest, link_maker: R::LinkMaker) -> R::Response
         where
-            T: rel::raw::FetchOne<P::Include, Rel>,
+            T: rel::raw::GetOne<P::Include, Rel>,
             Rel: rel::Relation,
             Rel::Resource: raw::RawFetch,
             P: Presenter<Rel::Resource, R>,
@@ -206,14 +206,14 @@ impl<'a, R: RouterTrait> Router<'a, R> {
 
     pub fn attach_fetch_many<T, Rel, P>(&mut self)
     where
-        T: rel::raw::FetchMany<P::Include, Rel>,
+        T: rel::raw::IndexMany<P::Include, Rel>,
         Rel: rel::Relation,
         Rel::Resource: raw::RawFetch,
         P: Presenter<Rel::Resource, R>,
     {
         fn fetch_many<R, T, Rel, P>(request: r::GetRequest, link_maker: R::LinkMaker) -> R::Response
         where
-            T: rel::raw::FetchMany<P::Include, Rel>,
+            T: rel::raw::IndexMany<P::Include, Rel>,
             Rel: rel::Relation,
             Rel::Resource: raw::RawFetch,
             P: Presenter<Rel::Resource, R>,
@@ -221,11 +221,11 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         {
             let presenter = P::prepare(None, link_maker);
             let id = try_status!(request.id.parse(), presenter);
-            presenter.try_present(T::fetch_many(&api::Entity::Id(id), &request.includes).into_future().wait())
+            presenter.try_present(T::index_many(&api::Entity::Id(id), &request.includes).into_future().wait())
         }
         fn fetch_many_rel<R, T, Rel, P>(request: r::FetchRelRequest, link_maker: R::LinkMaker) -> R::Response
         where 
-            T: rel::raw::FetchMany<P::Include, Rel>,
+            T: rel::raw::IndexMany<P::Include, Rel>,
             Rel: rel::Relation,
             Rel::Resource: raw::RawFetch,
             P: Presenter<Rel::Resource, R>,
@@ -284,13 +284,13 @@ impl<'a, R: RouterTrait> Router<'a, R> {
 
     pub fn attach_clear_many<T, Rel, P>(&mut self)
     where
-        T: rel::raw::Clear<Rel>,
+        T: rel::raw::ClearMany<Rel>,
         Rel: rel::Relation,
         P: Presenter<(), R>,
     {
         fn clear_many<R, T, Rel, P>(request: r::DeleteRequest, link_maker: R::LinkMaker) -> R::Response
         where
-            T: rel::raw::Clear<Rel>,
+            T: rel::raw::ClearMany<Rel>,
             Rel: rel::Relation,
             P: Presenter<(), R>,
             R: RouterTrait,
@@ -301,7 +301,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         }
         fn clear_many_rel<R, T, Rel, P>(request: r::DeleteRequest, link_maker: R::LinkMaker) -> R::Response
         where
-            T: rel::raw::Clear<Rel>,
+            T: rel::raw::ClearMany<Rel>,
             Rel: rel::Relation,
             P: Presenter<(), R>,
             R: RouterTrait,
@@ -316,13 +316,13 @@ impl<'a, R: RouterTrait> Router<'a, R> {
 
     pub fn attach_remove_many<T, Rel, P>(&mut self)
     where
-        T: rel::raw::Remove<Rel>,
+        T: rel::raw::RemoveMany<Rel>,
         Rel: rel::Relation,
         P: Presenter<(), R>,
     {
         fn remove_many<R, T, Rel, P>(request: r::RemoveManyRequest, link_maker: R::LinkMaker) -> R::Response
         where
-            T: rel::raw::Remove<Rel>,
+            T: rel::raw::RemoveMany<Rel>,
             Rel: rel::Relation,
             P: Presenter<(), R>,
             R: RouterTrait,
@@ -334,7 +334,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         }
         fn remove_many_rel<R, T, Rel, P>(request: r::RemoveManyRequest, link_maker: R::LinkMaker) -> R::Response
         where
-            T: rel::raw::Remove<Rel>,
+            T: rel::raw::RemoveMany<Rel>,
             Rel: rel::Relation,
             P: Presenter<(), R>,
             R: RouterTrait,
@@ -440,7 +440,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
             let id = try_status!(request.id.parse(), presenter);
             let post = try_status!(json::from_reader(request.attributes), presenter);
             let rels = try_status!(<<Rel::Resource as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), presenter);
-            presenter.try_present(T::append(&api::Entity::Id(id), vec![(post, rels)]).into_future().wait())
+            presenter.try_present(T::append_many(&api::Entity::Id(id), vec![(post, rels)]).into_future().wait())
         }
         fn append_many_rel<R, T, Rel, P>(request: r::UpdateRelRequest, link_maker: R::LinkMaker) -> R::Response
         where
@@ -493,7 +493,7 @@ impl<'a, R: RouterTrait> Router<'a, R> {
             let id = try_status!(request.id.parse(), presenter);
             let post = try_status!(json::from_reader(request.attributes), presenter);
             let rels = try_status!(<<Rel::Resource as raw::RawUpdate>::Relationships as raw::UpdateRelationships>::from_iter(request.relationships.into_iter()), presenter);
-            presenter.try_present(T::replace(&api::Entity::Id(id), vec![(post, rels)]).into_future().wait())
+            presenter.try_present(T::replace_many(&api::Entity::Id(id), vec![(post, rels)]).into_future().wait())
         }
         fn replace_many_rel<R, T, Rel, P>(request: r::UpdateRelRequest, link_maker: R::LinkMaker) -> R::Response
         where

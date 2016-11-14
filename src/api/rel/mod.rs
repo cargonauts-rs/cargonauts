@@ -8,8 +8,8 @@ mod post;
 
 
 pub mod raw {
-    pub use api::rel::delete::{DeleteOne, Remove, Clear};
-    pub use api::rel::fetch::{FetchOne, FetchMany};
+    pub use api::rel::delete::{DeleteOne, RemoveMany, ClearMany};
+    pub use api::rel::fetch::{GetOne, IndexMany};
     pub use api::rel::patch::PatchOne;
     pub use api::rel::post::{PostOne, AppendMany, ReplaceMany};
 }

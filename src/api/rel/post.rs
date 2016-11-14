@@ -25,7 +25,7 @@ where T:                LinkOne<Rel>,
 
 pub trait AppendMany<I, Rel: Relation>: AppendLinks<Rel> where Rel::Resource: RawUpdate + Deserialize {
     type AppendManyFut: IntoFuture<Item = CollectionResponse<I, Rel::Resource>, Error = Error>;
-    fn append(entity: &Entity<Self>, post: Vec<(Rel::Resource, <Rel::Resource as RawUpdate>::Relationships)>) -> Self::AppendManyFut;
+    fn append_many(entity: &Entity<Self>, post: Vec<(Rel::Resource, <Rel::Resource as RawUpdate>::Relationships)>) -> Self::AppendManyFut;
 }
 
 impl<I, T, Rel> AppendMany<I, Rel> for T
@@ -34,7 +34,7 @@ where T:                AppendLinks<Rel>,
       Rel::Resource:    RawPost<I>,
 {
     type AppendManyFut = Result<CollectionResponse<I, Rel::Resource>, Error>;
-    fn append(entity: &Entity<Self>, post: Vec<(Rel::Resource, <Rel::Resource as RawUpdate>::Relationships)>) -> Self::AppendManyFut {
+    fn append_many(entity: &Entity<Self>, post: Vec<(Rel::Resource, <Rel::Resource as RawUpdate>::Relationships)>) -> Self::AppendManyFut {
         let mut resources = vec![];
         for (post, rels) in post {
             let response = RawPost::post(post, rels).into_future().wait()?;
@@ -51,7 +51,7 @@ where T:                AppendLinks<Rel>,
 
 pub trait ReplaceMany<I, Rel: Relation>: ReplaceLinks<Rel> where Rel::Resource: RawUpdate + Deserialize {
     type ReplaceManyFut: IntoFuture<Item = CollectionResponse<I, Rel::Resource>, Error = Error>;
-    fn replace(entity: &Entity<Self>, post: Vec<(Rel::Resource, <Rel::Resource as RawUpdate>::Relationships)>) -> Self::ReplaceManyFut;
+    fn replace_many(entity: &Entity<Self>, post: Vec<(Rel::Resource, <Rel::Resource as RawUpdate>::Relationships)>) -> Self::ReplaceManyFut;
 }
 
 impl<I, T, Rel> ReplaceMany<I, Rel> for T
@@ -61,7 +61,7 @@ where
     Rel::Resource: RawPost<I>,
 {
     type ReplaceManyFut = Result<CollectionResponse<I, Rel::Resource>, Error>;
-    fn replace(entity: &Entity<Self>, post: Vec<(Rel::Resource, <Rel::Resource as RawUpdate>::Relationships)>) -> Self::ReplaceManyFut {
+    fn replace_many(entity: &Entity<Self>, post: Vec<(Rel::Resource, <Rel::Resource as RawUpdate>::Relationships)>) -> Self::ReplaceManyFut {
         let mut resources = vec![];
         for (post, rels) in post {
             let response = RawPost::post(post, rels).into_future().wait()?;
