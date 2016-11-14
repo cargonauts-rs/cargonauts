@@ -100,7 +100,11 @@ pub trait Router {
         relation: &'static str,
         handler: fn(PostManyRequest, Self::LinkMaker) -> Self::Response,
     );
-    // TODO replace many
+    fn attach_replace_many(&mut self,
+        resource: &'static str,
+        relation: &'static str,
+        handler: fn(PostManyRequest, Self::LinkMaker) -> Self::Response,
+    );
     fn attach_update_one_rel(&mut self,
         resource: &'static str,
         relation: &'static str,

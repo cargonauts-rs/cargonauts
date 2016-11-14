@@ -166,7 +166,12 @@ impl Router for MockRouter {
         _: fn(PostManyRequest, Self::LinkMaker) -> Self::Response,
     ) { self.register_rel("append-many", resource, relation); }
 
-    // TODO replace many
+    fn attach_replace_many(&mut self,
+        resource: &'static str,
+        relation: &'static str,
+        _: fn(PostManyRequest, Self::LinkMaker) -> Self::Response,
+    ) { self.register_rel("replace-many", resource, relation); }
+
 
     fn attach_update_one_rel(&mut self,
         resource: &'static str,
