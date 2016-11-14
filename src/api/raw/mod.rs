@@ -5,8 +5,8 @@ mod relationship;
 pub use api::alias::RawGetAliased;
 pub use api::get::RawGet;
 pub use api::index::RawIndex;
-pub use api::patch::{RawPatch, RawPatchAsync};
-pub use api::post::{RawPost, RawPostAsync};
+pub use api::patch::RawPatch;
+pub use api::post::RawPost;
 
 pub use self::identifier::Identifier;
 pub use self::include::Include;

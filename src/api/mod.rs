@@ -1,7 +1,6 @@
 use std::str::FromStr;
 
 mod alias;
-mod async;
 mod error;
 mod get;
 mod delete;
@@ -10,6 +9,7 @@ mod patch;
 mod post;
 mod sort;
 
+pub mod async;
 pub mod raw;
 pub mod rel;
 
@@ -19,8 +19,8 @@ pub use self::error::Error;
 pub use self::get::Get;
 pub use self::delete::Delete;
 pub use self::index::Index;
-pub use self::patch::{Patch, PatchAsync};
-pub use self::post::{Post, PostAsync};
+pub use self::patch::Patch;
+pub use self::post::Post;
 
 pub trait Resource: Sized + 'static {
     type Id: ToString + FromStr + PartialEq + Clone;

@@ -1,6 +1,7 @@
 use json;
 
 use api::{self, Error};
+use api::async;
 use api::rel;
 use api::raw;
 use router::{self as r, Router as RouterTrait};
@@ -105,12 +106,12 @@ impl<'a, R: RouterTrait> Router<'a, R> {
 
     pub fn attach_patch_async<T, P>(&mut self)
     where
-        T: raw::RawPatchAsync,
+        T: async::raw::RawPatchAsync,
         P: Presenter<T::Job, R>,
     {
         fn patch_async<R, T, P>(request: r::PatchRequest, link_maker: R::LinkMaker) -> R::Response
         where
-            T: raw::RawPatchAsync,
+            T: async::raw::RawPatchAsync,
             P: Presenter<T::Job, R>,
             R: RouterTrait,
         {
@@ -144,12 +145,12 @@ impl<'a, R: RouterTrait> Router<'a, R> {
 
     pub fn attach_post_async<T, P>(&mut self)
     where
-        T: raw::RawPostAsync,
+        T: async::raw::RawPostAsync,
         P: Presenter<T::Job, R>,
     {
         fn post_async<R, T, P>(request: r::PostRequest, link_maker: R::LinkMaker) -> R::Response
         where
-            T: raw::RawPostAsync,
+            T: async::raw::RawPostAsync,
             P: Presenter<T::Job, R>,
             R: RouterTrait,
         {
