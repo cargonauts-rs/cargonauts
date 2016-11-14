@@ -69,11 +69,6 @@ impl Router for MockRouter {
     type Response = MockResponse;
     type LinkMaker = MockLinker;
 
-    fn attach_delete(&mut self,
-        resource: &'static str,
-        _: fn(DeleteRequest, Self::LinkMaker) -> Self::Response,
-    ) { self.register("delete", resource); }
-
     fn attach_get(&mut self,
         resource: &'static str,
         _: fn(GetRequest, Self::LinkMaker) -> Self::Response,
@@ -83,6 +78,21 @@ impl Router for MockRouter {
         resource: &'static str, 
         _: fn(IndexRequest, Self::LinkMaker) -> Self::Response,
     ) { self.register("index", resource); }
+
+    fn attach_delete(&mut self,
+        resource: &'static str,
+        _: fn(DeleteRequest, Self::LinkMaker) -> Self::Response,
+    ) { self.register("delete", resource); }
+
+    fn attach_clear(&mut self,
+        resource: &'static str,
+        _: fn(Self::LinkMaker) -> Self::Response,
+    ) { self.register("clear", resource); }
+
+    fn attach_remove(&mut self,
+        resource: &'static str,
+        _: fn(RemoveRequest, Self::LinkMaker) -> Self::Response
+    ) { self.register("remove", resource); }
 
     fn attach_patch(&mut self,
         resource: &'static str,

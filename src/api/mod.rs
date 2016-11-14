@@ -2,25 +2,30 @@ use std::str::FromStr;
 
 mod alias;
 mod error;
+mod sort;
+
+mod clear;
 mod get;
 mod delete;
 mod index;
 mod patch;
 mod post;
-mod sort;
+mod remove;
 
 pub mod async;
 pub mod raw;
 pub mod rel;
 
 pub use self::alias::{GetAliased, AliasRequest};
-pub use self::async::{AsyncAction, AsyncJob};
 pub use self::error::Error;
+
+pub use self::clear::Clear;
 pub use self::get::Get;
 pub use self::delete::Delete;
 pub use self::index::Index;
 pub use self::patch::Patch;
 pub use self::post::Post;
+pub use self::remove::Remove;
 
 pub trait Resource: Sized + 'static {
     type Id: ToString + FromStr + PartialEq + Clone;

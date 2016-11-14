@@ -84,6 +84,41 @@ impl<'a, R: RouterTrait> Router<'a, R> {
         self.router.attach_delete(T::resource_plural(), delete::<R, T, P>);
     }
 
+    pub fn attach_clear<T, P>(&mut self)
+    where
+        T: api::Clear,
+        P: Presenter<(), R>,
+    {
+        fn clear<R, T, P>(link_maker: R::LinkMaker) -> R::Response
+        where
+            T: api::Clear,
+            P: Presenter<(), R>,
+            R: RouterTrait,
+        {
+            let presenter = P::prepare(None, link_maker);
+            presenter.try_present(T::clear().into_future().wait())
+        }
+        self.router.attach_clear(T::resource_plural(), clear::<R, T, P>);
+    }
+
+    pub fn attach_remove<T, P>(&mut self)
+    where
+        T: api::Remove,
+        P: Presenter<(), R>,
+    {
+        fn remove<R, T, P>(request: r::RemoveRequest, link_maker: R::LinkMaker) -> R::Response
+        where
+            T: api::Remove,
+            P: Presenter<(), R>,
+            R: RouterTrait,
+        {
+            let presenter = P::prepare(None, link_maker);
+            let ids: Vec<_> = try_status!(request.ids.iter().map(|id| id.parse()).collect::<Result<Vec<_>, _>>(), presenter);
+            presenter.try_present(T::remove(&ids).into_future().wait())
+        }
+        self.router.attach_remove(T::resource_plural(), remove::<R, T, P>);
+    }
+
     pub fn attach_patch<T, P>(&mut self)
     where
         T: raw::RawPatch<P::Include>,

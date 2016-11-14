@@ -1,7 +1,8 @@
 use Deserialize;
 use api::async::{AsyncAction, AsyncJob};
+use api::async::raw::JobResponse;
 use api::{Resource, Error};
-use api::raw::{JobResponse, RawUpdate, ResourceObject, NoRelationships};
+use api::raw::{RawUpdate, ResourceObject, NoRelationships};
 use _internal::_UpdateRels;
 use IntoFuture;
 use futures::Future;

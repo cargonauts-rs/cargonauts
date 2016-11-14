@@ -17,10 +17,6 @@ pub use self::sort::SortQuery;
 pub trait Router {
     type Response: Response;
     type LinkMaker: MakeLinks;
-    fn attach_delete(&mut self,
-        resource: &'static str,
-        handler: fn(DeleteRequest, Self::LinkMaker) -> Self::Response,
-    );
     fn attach_get(&mut self,
         resource: &'static str,
         handler: fn(GetRequest, Self::LinkMaker) -> Self::Response,
@@ -28,6 +24,18 @@ pub trait Router {
     fn attach_index(&mut self,
         resource: &'static str, 
         handler: fn(IndexRequest, Self::LinkMaker) -> Self::Response,
+    );
+    fn attach_delete(&mut self,
+        resource: &'static str,
+        handler: fn(DeleteRequest, Self::LinkMaker) -> Self::Response,
+    );
+    fn attach_clear(&mut self,
+        resource: &'static str,
+        handler: fn(Self::LinkMaker) -> Self::Response,
+    );
+    fn attach_remove(&mut self,
+        resource: &'static str,
+        handler: fn(RemoveRequest, Self::LinkMaker) -> Self::Response,
     );
     fn attach_patch(&mut self,
         resource: &'static str,
@@ -182,6 +190,10 @@ pub struct IndexRequest {
 
 pub struct DeleteRequest {
     pub id: String,
+}
+
+pub struct RemoveRequest {
+    pub ids: Vec<String>,
 }
 
 pub struct PatchRequest {

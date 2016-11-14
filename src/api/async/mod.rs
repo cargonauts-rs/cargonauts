@@ -10,6 +10,13 @@ pub use self::post::PostAsync;
 pub mod raw {
     pub use api::async::patch::RawPatchAsync;
     pub use api::async::post::RawPostAsync;
+
+    use api::async::AsyncAction;
+    use api::raw::ResourceObject;
+
+    pub struct JobResponse<T: AsyncAction> {
+        pub resource: ResourceObject<T::Job>,
+    }
 }
 
 pub trait AsyncJob<T>: RawFetch<Relationships = NoRelationships> where T: RawUpdate {

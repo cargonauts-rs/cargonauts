@@ -1,5 +1,7 @@
-use api::raw::{ResourceResponse, CollectionResponse, JobResponse, RelResponse, RawFetch};
-use api::{AsyncAction, Error};
+use api::raw::{ResourceResponse, CollectionResponse, RelResponse, RawFetch};
+use api::Error;
+use api::async::AsyncAction;
+use api::async::raw::JobResponse;
 use router::{self, Response, Router};
 
 mod jsonapi;

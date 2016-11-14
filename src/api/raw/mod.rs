@@ -12,7 +12,7 @@ pub use self::identifier::Identifier;
 pub use self::include::Include;
 pub use self::relationship::{Relationship, RelationshipLinkage, FetchRelationships, UpdateRelationships, NoRelationships};
 
-use api::{Resource, AsyncAction};
+use api::Resource;
 
 pub trait RawFetch: Resource {
     type Relationships: for<'a> FetchRelationships<'a>;
@@ -40,10 +40,6 @@ pub struct ResourceResponse<I, T: RawFetch> {
 pub struct CollectionResponse<I, T: RawFetch> {
     pub resources: Vec<ResourceObject<T>>,
     pub includes: Vec<Include<I>>,
-}
-
-pub struct JobResponse<T: AsyncAction> {
-    pub resource: ResourceObject<T::Job>,
 }
 
 pub struct RelResponse<I> {
