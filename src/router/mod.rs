@@ -45,6 +45,14 @@ pub trait Router {
         resource: &'static str,
         handler: fn(PostRequest, Self::LinkMaker) -> Self::Response,
     );
+    fn attach_append(&mut self,
+        resource: &'static str,
+        handler: fn(MultiPostRequest, Self::LinkMaker) -> Self::Response,
+    );
+    fn attach_replace(&mut self,
+        resource: &'static str,
+        handler: fn(MultiPostRequest, Self::LinkMaker) -> Self::Response,
+    );
 
     fn attach_fetch_one(&mut self,
         resource: &'static str,
@@ -206,6 +214,12 @@ pub struct PatchRequest {
 pub struct PostRequest {
     pub attributes: Box<Read>,
     pub relationships: BTreeMap<String, Relationship>,
+    pub field_set: Option<Vec<String>>,
+}
+
+pub struct MultiPostRequest {
+    pub attributes: Vec<Box<Read>>,
+    pub relationships: Vec<BTreeMap<String, Relationship>>,
     pub field_set: Option<Vec<String>>,
 }
 

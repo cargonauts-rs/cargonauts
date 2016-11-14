@@ -8,7 +8,7 @@ routes! {
         has many Photo: [fetch, append];
         alias [get] as "me";
     }
-    resource Photo: [get, index, post, delete] {
+    resource Photo: [get, index, post, delete, append] {
         has one User: [fetch];
     }
 }
@@ -117,6 +117,13 @@ impl api::Post for Photo {
     }
 }
 
+impl api::Append for Photo {
+    type AppendFut = Result<Vec<Photo>, api::Error>;
+    fn append(photos: Vec<Self>) -> Self::AppendFut {
+        unimplemented!()
+    }
+}
+
 impl api::rel::HasOne<User> for Photo {
     type HasOneFut = Result<Option<u32>, api::Error>;
     fn has_one(entity: &api::Entity<Photo>) -> Self::HasOneFut {
@@ -133,7 +140,7 @@ fn it_has_attached_routes() {
     
     const ME_ROUTES: &'static [&'static str] = &["alias-get"];
     const USERS_ROUTES: &'static [&'static str] = &["get", "patch"];
-    const PHOTOS_ROUTES: &'static [&'static str] = &["get", "index", "post", "delete"];
+    const PHOTOS_ROUTES: &'static [&'static str] = &["get", "index", "post", "delete", "append"];
     const USERS_PHOTOS_ROUTES: &'static [&'static str] = &["fetch-many", "fetch-rel", "append-many", "append-many-rel"];
     const PHOTOS_USER_ROUTES: &'static [&'static str] = &["fetch-one", "fetch-rel"];
 

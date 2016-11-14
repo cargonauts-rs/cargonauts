@@ -200,6 +200,20 @@ macro_rules! _methods {
     ($router:expr, $resource:ty, [delete]) => {
         $router.attach_delete::<$resource, $crate::presenter::JsonApi<T::Response, T::LinkMaker>>();
     };
+    ($router:expr, $resource:ty, [clear, $($method:ident),*]) => {
+        $router.attach_clear::<$resource, $crate::presenter::JsonApi<T::Response, T::LinkMaker>>();
+        _methods!($router, $resource, [$($method),*])
+    };
+    ($router:expr, $resource:ty, [clear]) => {
+        $router.attach_clear::<$resource, $crate::presenter::JsonApi<T::Response, T::LinkMaker>>();
+    };
+    ($router:expr, $resource:ty, [remove, $($method:ident),*]) => {
+        $router.attach_remove::<$resource, $crate::presenter::JsonApi<T::Response, T::LinkMaker>>();
+        _methods!($router, $resource, [$($method),*])
+    };
+    ($router:expr, $resource:ty, [remove]) => {
+        $router.attach_remove::<$resource, $crate::presenter::JsonApi<T::Response, T::LinkMaker>>();
+    };
     ($router:expr, $resource:ty, [get, $($method:ident),*]) => {
         $router.attach_get::<$resource, $crate::presenter::JsonApi<T::Response, T::LinkMaker>>();
         _methods!($router, $resource, [$($method),*]);
@@ -241,6 +255,20 @@ macro_rules! _methods {
     };
     ($router:expr, $resource:ty, [post-async]) => {
         $router.attach_post_async::<$resource, $crate::presenter::JsonApi<T::Response, T::LinkMaker>>();
+    };
+    ($router:expr, $resource:ty, [append, $($method:ident),*]) => {
+        $router.attach_append::<$resource, $crate::presenter::JsonApi<T::Response, T::LinkMaker>>();
+        _methods!($router, $resource, [$($method),*])
+    };
+    ($router:expr, $resource:ty, [append]) => {
+        $router.attach_append::<$resource, $crate::presenter::JsonApi<T::Response, T::LinkMaker>>();
+    };
+    ($router:expr, $resource:ty, [replace, $($method:ident),*]) => {
+        $router.attach_replace::<$resource, $crate::presenter::JsonApi<T::Response, T::LinkMaker>>();
+        _methods!($router, $resource, [$($method),*])
+    };
+    ($router:expr, $resource:ty, [replace]) => {
+        $router.attach_replace::<$resource, $crate::presenter::JsonApi<T::Response, T::LinkMaker>>();
     };
     ($router:expr, $resource:ty, []) => {
     };

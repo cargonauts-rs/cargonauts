@@ -104,6 +104,16 @@ impl Router for MockRouter {
         _: fn(PostRequest, Self::LinkMaker) -> Self::Response,
     ) { self.register("post", resource); }
 
+    fn attach_append(&mut self,
+        resource: &'static str,
+        _: fn(MultiPostRequest, Self::LinkMaker) -> Self::Response,
+    ) { self.register("append", resource); }
+
+    fn attach_replace(&mut self,
+        resource: &'static str,
+        _: fn(MultiPostRequest, Self::LinkMaker) -> Self::Response,
+    ) { self.register("replace", resource); }
+
     fn attach_fetch_one(&mut self,
         resource: &'static str,
         relation: &'static str,

@@ -3,10 +3,13 @@ mod include;
 mod relationship;
 
 pub use api::alias::RawGetAliased;
+
+pub use api::append::RawAppend;
 pub use api::get::RawGet;
 pub use api::index::RawIndex;
 pub use api::patch::RawPatch;
 pub use api::post::RawPost;
+pub use api::replace::RawReplace;
 
 pub use self::identifier::Identifier;
 pub use self::include::Include;
