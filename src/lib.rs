@@ -1,5 +1,6 @@
 #![feature(specialization)]
 
+extern crate io_adapter;
 extern crate futures;
 extern crate itertools;
 extern crate serde;
@@ -14,8 +15,9 @@ pub mod router;
 mod macros;
 pub mod _internal;
 
-pub use serde::{Deserialize, Deserializer, Serialize, SerializeTo, Serializer};
+pub use io_adapter::WriteAdapter;
 pub use futures::IntoFuture;
+pub use serde::{Deserialize, Deserializer, Serialize, SerializeTo, Serializer};
 
 #[cfg(test)]
 mod tests;

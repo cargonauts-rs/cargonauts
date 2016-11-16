@@ -1,4 +1,4 @@
-use json;
+use std::io::{self, Write};
 use router::*;
 use api::AliasRequest;
 
@@ -241,8 +241,15 @@ impl MakeLinks for MockLinker {
 pub struct MockResponse;
 
 impl Response for MockResponse {
-    type Serializer = json::value::Serializer;
     fn set_status(&mut self, _: Status) { unimplemented!() }
     fn set_content(&mut self, _: &str) { unimplemented!() }
-    fn serializer(&mut self) -> &mut Self::Serializer { unimplemented!() }
+}
+
+impl Write for MockResponse {
+    fn write(&mut self, _: &[u8]) -> io::Result<usize> {
+        unimplemented!()
+    }
+    fn flush(&mut self) -> io::Result<()> {
+        unimplemented!()
+    }
 }

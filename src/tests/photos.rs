@@ -136,7 +136,8 @@ fn it_compiles() { }
 
 #[test]
 fn it_has_attached_routes() {
-    use router::mock::MockRouter;
+    use json::Serializer;
+    use router::mock::{MockRouter, MockResponse};
     
     const ME_ROUTES: &'static [&'static str] = &["alias-get"];
     const USERS_ROUTES: &'static [&'static str] = &["get", "patch"];
@@ -145,7 +146,7 @@ fn it_has_attached_routes() {
     const PHOTOS_USER_ROUTES: &'static [&'static str] = &["fetch-one", "fetch-rel"];
 
     let mut router = MockRouter::new();
-    attach_routes(&mut router);
+    attach_routes::<_, Serializer<MockResponse>>(&mut router);
 
     assert_eq!(&router.methods_for("me")[..], ME_ROUTES);
     assert_eq!(&router.methods_for("users")[..], USERS_ROUTES);

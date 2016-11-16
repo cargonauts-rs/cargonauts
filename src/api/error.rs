@@ -14,9 +14,9 @@ pub enum Error {
     InternalError,
 }
 
-impl From<Error> for Status {
-    fn from(error: Error) -> Status {
-        match error {
+impl Error {
+    pub fn status(&self) -> Status {
+        match *self {
             BadRequest      => Status::BadRequest,
             Forbidden       => Status::Forbidden,
             Conflict        => Status::Conflict,

@@ -1,9 +1,9 @@
 use std::collections::BTreeMap;
 use std::io::Read;
+use std::io::Write;
 
 use api::AliasRequest;
 use api::raw::Relationship;
-use Serializer;
 
 pub mod mock;
 mod include;
@@ -154,11 +154,9 @@ pub enum Status {
     InternalError = 500,
 }
 
-pub trait Response: Default {
-    type Serializer: Serializer;
+pub trait Response: Default + Write {
     fn set_status(&mut self, status: Status);
     fn set_content(&mut self, content_type: &str);
-    fn serializer(&mut self) -> &mut Self::Serializer;
 }
 
 pub trait MakeLinks {

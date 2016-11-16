@@ -1,5 +1,8 @@
+use io_adapter::WriteAdapter;
+use std::marker::PhantomData;
+
 use api::Error;
-use api::raw::{ResourceResponse, CollectionResponse, RelResponse, ResourceObject, Include, RawFetch, Relationship};
+use api::raw::{ResourceResponse, CollectionResponse, RelResponse, RawFetch, Relationship};
 use presenter::Presenter;
 use Serializer;
 use repr::{SerializeRepr, Represent, RepresentWith};
@@ -20,149 +23,139 @@ use self::linkage::{ToOneLinkage, ToManyLinkage};
 use self::links::LinkObject;
 use self::resource::{JsonApiResourceObject, JsonApiCollectionObject};
 
-pub struct JsonApi<R: Response, L: MakeLinks> {
-    linker: L,
-    response: R,
+pub struct JsonApi<R: Router, S: Serializer + WriteAdapter<R::Response>> {
+    link_maker: R::LinkMaker,
     field_set: Option<Vec<String>>,
+    _spoopy: PhantomData<S>,
 }
 
-struct JsonApiInner<'a, L: MakeLinks + 'a> {
-    linker: &'a L,
-    field_set: Option<&'a [String]>,
-}
-
-
-impl<R: Response, L: MakeLinks> JsonApi<R, L> {
-    fn respond(mut self, status: Status) -> R {
-        self.response.set_status(status);
-        self.response.set_content("application/vnd.api+json");
-        self.response
+impl<R, S> JsonApi<R, S>
+where
+    R: Router,
+    S: Serializer + WriteAdapter<R::Response>,
+{
+    fn respond<F>(self, status: Status, f: F) -> R::Response
+    where
+        F: FnOnce(Self, &mut S) -> Result<(), S::Error>
+    {
+        let mut response = R::Response::default();
+        response.set_status(status);
+        response.set_content("application/vnd.api+json");
+        let mut serializer = S::wrap(response);
+        f(self, &mut serializer).unwrap();
+        serializer.into_inner()
     }
 
-    fn split_up(&mut self) -> (&mut R::Serializer, JsonApiInner<L>) {
-        let JsonApi { ref mut response, ref field_set, ref linker } = *self;
-        let serializer = response.serializer();
-        let inner = JsonApiInner {
-            linker: linker,
-            field_set: field_set.as_ref().map(|f| &f[..]),
-        };
-        (serializer, inner)
-    }
-}
-
-impl<'a, L: MakeLinks> JsonApiInner<'a, L> {
-    fn serialize_document<T, S>(self, serializer: &mut S, links: LinkObject, data: &T) -> Result<(), S::Error>
-    where S: Serializer,
-          T: RepresentWith<S> {
+    fn serialize_document<T>(&self, serializer: &mut S, links: LinkObject, data: &T) -> Result<(), S::Error>
+    where T: RepresentWith<S> {
         let mut state = serializer.serialize_map(Some(3))?;
         serializer.serialize_map_key(&mut state, "links")?;
         serializer.serialize_map_value(&mut state, links)?;
         serializer.serialize_map_key(&mut state, "data")?;
         serializer.serialize_map_value(&mut state, SerializeRepr {
             repr: data,
-            field_set: self.field_set,
+            field_set: self.field_set.as_ref().map(|s| &s[..]),
         })?;
         serializer.serialize_map_key(&mut state, "jsonapi")?;
         serializer.serialize_map_value(&mut state, JsonApiObject)?;
         serializer.serialize_map_end(state)
     }
 
-    fn serialize_compound_document<T, S>(self, serializer: &mut S, links: LinkObject, data: &T, includes: IncludesObject<S, L>) -> Result<(), S::Error>
-    where S: Serializer,
-          T: RepresentWith<S> {
+    fn serialize_compound_document<T>(&self, serializer: &mut S, links: LinkObject, data: &T, includes: IncludesObject<S, R::LinkMaker>) -> Result<(), S::Error>
+    where T: RepresentWith<S> {
         let mut state = serializer.serialize_map(Some(4))?;
         serializer.serialize_map_key(&mut state, "links")?;
         serializer.serialize_map_value(&mut state, links)?;
         serializer.serialize_map_key(&mut state, "data")?;
         serializer.serialize_map_value(&mut state, SerializeRepr {
             repr: data,
-            field_set: self.field_set,
+            field_set: self.field_set.as_ref().map(|s| &s[..]),
         })?;
         serializer.serialize_map_key(&mut state, "includes")?;
         serializer.serialize_map_value(&mut state, SerializeRepr {
             repr: &includes,
-            field_set: self.field_set,
+            field_set: self.field_set.as_ref().map(|s| &s[..]),
         })?;
         serializer.serialize_map_key(&mut state, "jsonapi")?;
         serializer.serialize_map_value(&mut state, JsonApiObject)?;
         serializer.serialize_map_end(state)
     }
 
-    fn serialize_resource<T, S>(self, serializer: &mut S, resource: &ResourceObject<T>, includes: &[Include<JsonApiInclude<S>>]) -> Result<(), S::Error>
-    where T: RawFetch + Represent, S: Serializer {
-        let id = resource.id.to_string();
-        let self_link = self.linker.resource(T::resource_plural(), &id);
+    fn serialize_resource<T>(self, serializer: &mut S, response: ResourceResponse<JsonApiInclude<S>, T>) -> Result<(), S::Error>
+    where T: RawFetch + Represent {
+        let id = response.resource.id.to_string();
+        let self_link = self.link_maker.resource(T::resource_plural(), &id);
         let links = LinkObject {
             self_link: Some(&self_link),
             related_link: None,
         };
         let resource = JsonApiResourceObject {
-            resource: resource,
-            linker: self.linker,
+            resource: &response.resource,
+            linker: &self.link_maker,
             id: &id,
             self_link: &self_link,
         };
-        if includes.is_empty() {
+        if response.includes.is_empty() {
             self.serialize_document(serializer, links, &resource)
         } else {
             let includes = IncludesObject {
-                includes: includes,
-                linker: self.linker,
+                includes: &response.includes,
+                linker: &self.link_maker,
             };
             self.serialize_compound_document(serializer, links, &resource, includes)
         }
     }
 
-    fn serialize_collection<T, S>(self, serializer: &mut S, resources: &[ResourceObject<T>], includes: &[Include<JsonApiInclude<S>>]) -> Result<(), S::Error>
-    where T: RawFetch + Represent, S: Serializer {
-        let self_link = self.linker.collection(T::resource_plural());
+    fn serialize_collection<T>(self, serializer: &mut S, response: CollectionResponse<JsonApiInclude<S>, T>) -> Result<(), S::Error>
+    where T: RawFetch + Represent {
+        let self_link = self.link_maker.collection(T::resource_plural());
         let links = LinkObject {
             self_link: Some(&self_link),
             related_link: None,
         };
         let collection = JsonApiCollectionObject {
-            resources: resources,
-            linker: self.linker,
+            resources: &response.resources,
+            linker: &self.link_maker,
         };
-        if includes.is_empty() {
+        if response.includes.is_empty() {
             self.serialize_document(serializer, links, &collection)
         } else {
             let includes = IncludesObject {
-                includes: includes,
-                linker: self.linker,
+                includes: &response.includes,
+                linker: &self.link_maker,
             };
             self.serialize_compound_document(serializer, links, &collection, includes)
         }
     }
 
-    fn serialize_rel<S: Serializer>(self, serializer: &mut S, resource: &str, id: &str, name: &str, rel: &Relationship, includes: &[Include<JsonApiInclude<S>>]) -> Result<(),S::Error> {
-        let self_link = self.linker.relationship(resource, id, name);
-        let related_link = self.linker.related_resource(resource, id, name);
+    fn serialize_rel(self, serializer: &mut S, response: RelResponse<JsonApiInclude<S>>) -> Result<(), S::Error> {
+        let self_link = self.link_maker.relationship(&response.resource, &response.id, response.related);
+        let related_link = self.link_maker.related_resource(&response.resource, &response.id, response.related);
         let links = LinkObject {
             self_link: Some(&self_link),
             related_link: Some(&related_link),
         };
-        match *rel {
+        match response.rel {
             Relationship::One(ref identifier)   => {
                 let linkage = ToOneLinkage(identifier);
-                if includes.is_empty() {
+                if response.includes.is_empty() {
                     self.serialize_document(serializer, links, &linkage)
                 } else {
                     let includes = IncludesObject {
-                        includes: includes,
-                        linker: self.linker,
+                        includes: &response.includes,
+                        linker: &self.link_maker,
                     };
                     self.serialize_compound_document(serializer, links, &linkage, includes)
                 }
             }
             Relationship::Many(ref identifiers) => {
                 let linkage = ToManyLinkage(identifiers);
-                if includes.is_empty() {
+                if response.includes.is_empty() {
                     self.serialize_document(serializer, links, &linkage)
                 } else {
                     let includes = IncludesObject {
-                        includes: includes,
-                        linker: self.linker,
+                        includes: &response.includes,
+                        linker: &self.link_maker,
                     };
                     self.serialize_compound_document(serializer, links, &linkage, includes)
                 }
@@ -170,11 +163,11 @@ impl<'a, L: MakeLinks> JsonApiInner<'a, L> {
         }
     }
 
-    fn serialize_err<S: Serializer>(self, serializer: &mut S, error: &Error) -> Result<(), S::Error> {
+    fn serialize_err(self, serializer: &mut S, error: Error) -> Result<(), S::Error> {
         let mut state = serializer.serialize_map(Some(2))?;
         serializer.serialize_map_key(&mut state, "errors")?;
         serializer.serialize_map_value(&mut state, ErrorObject {
-            status: error,
+            status: &error,
         })?;
         serializer.serialize_map_key(&mut state, "jsonapi")?;
         serializer.serialize_map_value(&mut state, JsonApiObject)?;
@@ -182,58 +175,39 @@ impl<'a, L: MakeLinks> JsonApiInner<'a, L> {
     }
 }
 
-impl<R: Router, T: RawFetch + Represent> Presenter<T, R> for JsonApi<R::Response, R::LinkMaker> {
-    type Include = JsonApiInclude<<R::Response as Response>::Serializer>;
+impl<T, R, S> Presenter<T, R> for JsonApi<R, S>
+where
+    T: RawFetch + Represent,
+    R: Router,
+    S: Serializer + WriteAdapter<R::Response>,
+{
+    type Include = JsonApiInclude<S>;
 
-    fn prepare(field_set: Option<Vec<String>>, linker: R::LinkMaker) -> Self {
+    fn prepare(field_set: Option<Vec<String>>, link_maker: R::LinkMaker) -> Self {
         JsonApi {
-            response: R::Response::default(),
-            linker: linker,
+            link_maker: link_maker,
             field_set: field_set,
+            _spoopy: PhantomData,
         }
     }
 
-    fn present_resource(mut self, response: ResourceResponse<Self::Include, T>) -> R::Response {
-        match {
-            let (serializer, jsonapi) = self.split_up();
-            jsonapi.serialize_resource(serializer, &response.resource, &response.includes)
-        } {
-            Ok(())  => self.respond(Status::Ok),
-            Err(_)  => self.respond(Status::BadRequest),
-        }
+    fn present_resource(self, response: ResourceResponse<Self::Include, T>) -> R::Response {
+        self.respond(Status::Ok, |jsonapi, serializer| jsonapi.serialize_resource(serializer, response))
     }
 
-    fn present_collection(mut self, response: CollectionResponse<Self::Include, T>) -> R::Response {
-        match {
-            let (serializer, jsonapi) = self.split_up();
-            jsonapi.serialize_collection(serializer, &response.resources, &response.includes) 
-        } {
-            Ok(())  => self.respond(Status::Ok),
-            Err(_)  => self.respond(Status::BadRequest),
-        }
+    fn present_collection(self, response: CollectionResponse<Self::Include, T>) -> R::Response {
+        self.respond(Status::Ok, |jsonapi, serializer| jsonapi.serialize_collection(serializer, response))
+    }
+
+    fn present_rel(self, response: RelResponse<Self::Include>) -> R::Response {
+        self.respond(Status::Ok, |jsonapi, serializer| jsonapi.serialize_rel(serializer, response))
     }
 
     fn present_no_content(self) -> R::Response {
-        self.respond(Status::NoContent)
+        self.respond(Status::NoContent, |_, _| Ok(()))
     }
 
-    fn present_rel(mut self, response: RelResponse<Self::Include>) -> R::Response {
-        match {
-            let (serializer, jsonapi) = self.split_up();
-            jsonapi.serialize_rel(serializer, response.resource, &response.id, response.related, &response.rel, &response.includes)
-        } {
-            Ok(())  => self.respond(Status::Ok),
-            Err(_)  => self.respond(Status::BadRequest),
-        }
-    }
-
-    fn present_err(mut self, error: Error) -> R::Response {
-        match {
-            let (serializer, jsonapi) = self.split_up();
-            jsonapi.serialize_err(serializer, &error)
-        } {
-            Ok(())  => self.respond(error.into()),
-            Err(_)  => self.respond(Status::InternalError),
-        }
+    fn present_err(self, error: Error) -> R::Response {
+        self.respond(error.status(), |jsonapi, serializer| jsonapi.serialize_err(serializer, error))
     }
 }
