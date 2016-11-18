@@ -1,28 +1,35 @@
-use Deserialize;
 use api::{Resource, Error, Entity};
-use api::raw::{ResourceResponse, RawUpdate, ResourceObject};
+use api::raw::{ResourceResponse, RawReceived, RawUpdate, ResourceObject};
 use _internal::_UpdateRels;
 use IntoFuture;
 use futures::Future;
 
 pub trait Patch: Resource {
-    type Patch: Deserialize;
+    type Patch;
     type PatchFut: IntoFuture<Item = Self, Error = Error>;
     fn patch(id: &Self::Id, patch: Self::Patch) -> Self::PatchFut;
 }
 
-pub trait RawPatch<I>: RawUpdate {
-    type Patch: Deserialize;
+pub trait RawHasPatch<Synchronicity>: RawUpdate {
+    type Patch;
+}
+
+pub trait RawPatch<I>: RawHasPatch<Synchronous> {
     type RawPatchFut: IntoFuture<Item = ResourceResponse<I, Self>, Error = Error>;
-    fn patch(id: Self::Id, patch: Self::Patch, rels: <Self as RawUpdate>::Relationships) -> Self::RawPatchFut;
+    fn patch(id: Self::Id, received: RawReceived<Self, Self::Patch>) -> Self::RawPatchFut;
+}
+
+pub struct Synchronous;
+
+impl<T> RawHasPatch<Synchronous> for T where T: Patch + _UpdateRels {
+    type Patch = <T as Patch>::Patch;
 }
 
 impl<I, T> RawPatch<I> for T where T: Patch + _UpdateRels {
-    type Patch = <Self as Patch>::Patch;
     type RawPatchFut = Result<ResourceResponse<I, Self>, Error>;
-    fn patch(id: Self::Id, patch: Self::Patch, rels: <Self as RawUpdate>::Relationships) -> Self::RawPatchFut {
-        let entity = Entity::Resource(<T as Patch>::patch(&id, patch).into_future().wait()?);
-        let relationships = <T as _UpdateRels>::update_rels(&entity, rels)?;
+    fn patch(id: Self::Id, received: RawReceived<Self, Self::Patch>) -> Self::RawPatchFut {
+        let entity = Entity::Resource(<T as Patch>::patch(&id, received.attributes).into_future().wait()?);
+        let relationships = <T as _UpdateRels>::update_rels(&entity, received.relationships)?;
         let resource = match entity {
             Entity::Resource(resource)  => resource,
             _                           => unreachable!()

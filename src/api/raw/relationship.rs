@@ -3,7 +3,6 @@ use std::collections::btree_map::Iter as BTreeMapIter;
 use std::collections::hash_map::Iter as HashMapIter;
 use std::iter::{self, Empty, Map};
 
-use api::Error;
 use api::raw::Identifier;
 
 #[derive(Clone, Eq, PartialEq, Debug, Default)]
@@ -23,10 +22,16 @@ pub trait FetchRelationships<'a>: IntoIterator<Item = (&'static str, Relationshi
     fn count(&self) -> usize;
 }
 
-pub trait UpdateRelationships: Sized {
-    fn from_iter<I>(iter: I) -> Result<Self, Error> where I: Iterator<Item = (String, Relationship)>;
+pub trait UpdateRelationships: Default {
+    fn add_relationship(&mut self, name: String, rel: Relationship) -> Result<(), RelationshipError>;
 }
 
+pub enum RelationshipError {
+    NoSuchRelationship,
+    RelationshipAddedTwice,
+}
+
+#[derive(Default, Copy, Clone, PartialEq, Eq, Debug)]
 pub struct NoRelationships;
 
 impl IntoIterator for NoRelationships {
@@ -51,12 +56,8 @@ impl<'a> FetchRelationships<'a> for NoRelationships {
 }
 
 impl UpdateRelationships for NoRelationships {
-    fn from_iter<I>(mut iter: I) -> Result<Self, Error> where I: Iterator<Item = (String, Relationship)> {
-        if let None = iter.next() {
-            Ok(NoRelationships)
-        } else {
-            Err(Error::Conflict)
-        }
+    fn add_relationship(&mut self, _: String, _: Relationship) -> Result<(), RelationshipError> {
+        Err(RelationshipError::NoSuchRelationship)
     }
 }
 
@@ -74,8 +75,11 @@ impl<'a> FetchRelationships<'a> for BTreeMap<&'static str, RelationshipLinkage> 
 }
 
 impl UpdateRelationships for BTreeMap<String, Relationship> {
-    fn from_iter<I>(iter: I) -> Result<Self, Error> where I: Iterator<Item = (String, Relationship)> {
-        Ok(iter.collect())
+    fn add_relationship(&mut self, name: String, rel: Relationship) -> Result<(), RelationshipError> {
+        match self.insert(name, rel) {
+            Some(_) => Err(RelationshipError::RelationshipAddedTwice),
+            None    => Ok(())
+        }
     }
 }
 
@@ -93,8 +97,11 @@ impl<'a> FetchRelationships<'a> for HashMap<&'static str, RelationshipLinkage> {
 }
 
 impl UpdateRelationships for HashMap<String, Relationship> {
-    fn from_iter<I>(iter: I) -> Result<Self, Error> where I: Iterator<Item = (String, Relationship)> {
-        Ok(iter.collect())
+    fn add_relationship(&mut self, name: String, rel: Relationship) -> Result<(), RelationshipError> {
+        match self.insert(name, rel) {
+            Some(_) => Err(RelationshipError::RelationshipAddedTwice),
+            None    => Ok(())
+        }
     }
 }
 

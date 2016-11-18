@@ -1,9 +1,7 @@
-use std::collections::BTreeMap;
 use std::io::Read;
 use std::io::Write;
 
 use api::AliasRequest;
-use api::raw::Relationship;
 
 pub mod mock;
 mod include;
@@ -203,29 +201,24 @@ pub struct RemoveRequest {
 }
 
 pub struct PatchRequest {
-    pub attributes: Box<Read>,
-    pub relationships: BTreeMap<String, Relationship>,
     pub id: String,
     pub field_set: Option<Vec<String>>,
+    pub body: Box<Read>,
 }
 
 pub struct PostRequest {
-    pub attributes: Box<Read>,
-    pub relationships: BTreeMap<String, Relationship>,
     pub field_set: Option<Vec<String>>,
+    pub body: Box<Read>,
 }
 
 pub struct MultiPostRequest {
-    pub attributes: Vec<Box<Read>>,
-    pub relationships: Vec<BTreeMap<String, Relationship>>,
     pub field_set: Option<Vec<String>>,
+    pub body: Box<Read>,
 }
 
 pub struct FetchRelRequest {
     pub id: String,
     pub includes: Vec<IncludeQuery>,
-    pub relationship_route: String,
-    pub related_resource_route: String,
 }
 
 pub struct RemoveManyRequest {
@@ -235,20 +228,18 @@ pub struct RemoveManyRequest {
 
 pub struct PostOneRequest {
     pub id: String,
-    pub attributes: Box<Read>,
-    pub relationships: BTreeMap<String, Relationship>,
     pub field_set: Option<Vec<String>>,
+    pub body: Box<Read>,
 }
 
 pub struct PostManyRequest {
     pub id: String,
-    pub attributes: Box<Read>,
-    pub relationships: BTreeMap<String, Relationship>,
     pub field_set: Option<Vec<String>>,
+    pub body: Box<Read>,
 }
 
 pub struct UpdateRelRequest {
     pub id: String,
     pub field_set: Option<Vec<String>>,
-    pub rel: Relationship,
+    pub body: Box<Read>,
 }

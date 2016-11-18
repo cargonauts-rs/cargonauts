@@ -112,7 +112,7 @@ impl api::Index for Photo {
 
 impl api::Post for Photo {
     type PostFut = Result<Photo, api::Error>;
-    fn post(self) -> Self::PostFut {
+    fn post(_: Self) -> Self::PostFut {
         unimplemented!()
     }
 }
@@ -136,8 +136,7 @@ fn it_compiles() { }
 
 #[test]
 fn it_has_attached_routes() {
-    use json::Serializer;
-    use router::mock::{MockRouter, MockResponse};
+    use router::mock::MockRouter;
     
     const ME_ROUTES: &'static [&'static str] = &["alias-get"];
     const USERS_ROUTES: &'static [&'static str] = &["get", "patch"];
@@ -146,7 +145,7 @@ fn it_has_attached_routes() {
     const PHOTOS_USER_ROUTES: &'static [&'static str] = &["fetch-one", "fetch-rel"];
 
     let mut router = MockRouter::new();
-    attach_routes::<_, Serializer<MockResponse>>(&mut router);
+    attach_routes(&mut router);
 
     assert_eq!(&router.methods_for("me")[..], ME_ROUTES);
     assert_eq!(&router.methods_for("users")[..], USERS_ROUTES);

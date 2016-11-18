@@ -8,7 +8,7 @@ pub use self::patch::PatchAsync;
 pub use self::post::PostAsync;
 
 pub mod raw {
-    pub use api::async::patch::RawPatchAsync;
+    pub use api::async::patch::{RawPatchAsync, Asynchronous};
     pub use api::async::post::RawPostAsync;
 
     use api::async::AsyncAction;

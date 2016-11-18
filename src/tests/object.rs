@@ -44,7 +44,7 @@ impl api::Index for Object {
 
 impl api::Post for Object {
     type PostFut = Result<Object, api::Error>;
-    fn post(self) -> Self::PostFut {
+    fn post(_: Self) -> Self::PostFut {
         unimplemented!()
     }
 }
@@ -69,13 +69,12 @@ fn it_compiles() { }
 
 #[test]
 fn it_has_attached_routes() {
-    use json::Serializer;
-    use router::mock::{MockRouter, MockResponse};
+    use router::mock::MockRouter;
     
     const ROUTES: &'static [&'static str] = &["get", "index", "post", "patch", "delete"];
 
     let mut router = MockRouter::new();
-    attach_routes::<_, Serializer<MockResponse>>(&mut router);
+    attach_routes(&mut router);
 
     assert_eq!(&router.methods_for("objects")[..], ROUTES);
 }

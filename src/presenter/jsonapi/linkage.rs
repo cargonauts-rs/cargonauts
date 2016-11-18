@@ -52,21 +52,23 @@ impl<'a> Serialize for IdentifierObject<'a> {
         serializer.serialize_map_key(&mut state, "id")?;
         serializer.serialize_map_value(&mut state, &self.0.id)?;
         serializer.serialize_map_key(&mut state, "type")?;
-        serializer.serialize_map_value(&mut state, self.0.resource)?;
+        serializer.serialize_map_value(&mut state, &self.0.resource)?;
         serializer.serialize_map_end(state)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use api::raw::Identifier;
+    use std::borrow::Cow;
     use std::collections::BTreeMap;
+
+    use api::raw::Identifier;
     use json::to_value;
 
     #[test]
     fn serialize_identifier() {
         let identifier = Identifier {
-            resource: "identified",
+            resource: Cow::Borrowed("identified"),
             id: String::from("101"),
         };
         let expected = {

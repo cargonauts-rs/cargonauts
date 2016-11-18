@@ -7,13 +7,13 @@ pub use api::alias::RawGetAliased;
 pub use api::append::RawAppend;
 pub use api::get::RawGet;
 pub use api::index::RawIndex;
-pub use api::patch::RawPatch;
+pub use api::patch::{RawHasPatch, RawPatch, Synchronous};
 pub use api::post::RawPost;
 pub use api::replace::RawReplace;
 
 pub use self::identifier::Identifier;
 pub use self::include::Include;
-pub use self::relationship::{Relationship, RelationshipLinkage, FetchRelationships, UpdateRelationships, NoRelationships};
+pub use self::relationship::{Relationship, RelationshipLinkage, FetchRelationships, UpdateRelationships, NoRelationships, RelationshipError};
 
 use api::Resource;
 
@@ -34,6 +34,12 @@ pub struct ResourceObject<T: RawFetch> {
 impl RawFetch for () {
     type Relationships = NoRelationships;
 }
+
+pub struct RawReceived<T: RawUpdate, A> {
+    pub attributes: A,
+    pub relationships: <T as RawUpdate>::Relationships,
+}
+
 
 pub struct ResourceResponse<I, T: RawFetch> {
     pub resource: ResourceObject<T>,

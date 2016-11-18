@@ -1,13 +1,12 @@
 use api::{Entity, Error};
-use api::raw::{RawPost, RawAppend, ResourceResponse, CollectionResponse, RawUpdate};
+use api::raw::{RawPost, RawAppend, RawReceived, ResourceResponse, CollectionResponse, RawUpdate};
 use api::rel::{Relation, LinkOne, AppendLinks, ReplaceLinks};
-use Deserialize;
 use IntoFuture;
 use futures::Future;
 
-pub trait PostOne<I, Rel: Relation>: LinkOne<Rel> where Rel::Resource: RawUpdate + Deserialize {
+pub trait PostOne<I, Rel: Relation>: LinkOne<Rel> where Rel::Resource: RawUpdate {
     type PostOneFut: IntoFuture<Item = ResourceResponse<I, Rel::Resource>, Error = Error>;
-    fn post_one(entity: &Entity<Self>, post: Rel::Resource, rels: <Rel::Resource as RawUpdate>::Relationships) -> Self::PostOneFut;
+    fn post_one(entity: &Entity<Self>, received: RawReceived<Rel::Resource, Rel::Resource>) -> Self::PostOneFut;
 }
 
 impl<I, T, Rel> PostOne<I, Rel> for T
@@ -16,16 +15,16 @@ where T:                LinkOne<Rel>,
       Rel::Resource:    RawPost<I>,
 {
     type PostOneFut = Result<ResourceResponse<I, Rel::Resource>, Error>;
-    fn post_one(entity: &Entity<Self>, post: Rel::Resource, rels: <Rel::Resource as RawUpdate>::Relationships) -> Self::PostOneFut {
-        let response = RawPost::post(post, rels).into_future().wait()?;
+    fn post_one(entity: &Entity<Self>, received: RawReceived<Rel::Resource, Rel::Resource>) -> Self::PostOneFut {
+        let response = RawPost::post(received).into_future().wait()?;
         <T as LinkOne<Rel>>::link_one(entity, &response.resource.id).into_future().wait()?;
         Ok(response)
     }
 }
 
-pub trait AppendMany<I, Rel: Relation>: AppendLinks<Rel> where Rel::Resource: RawUpdate + Deserialize {
+pub trait AppendMany<I, Rel: Relation>: AppendLinks<Rel> where Rel::Resource: RawUpdate {
     type AppendManyFut: IntoFuture<Item = CollectionResponse<I, Rel::Resource>, Error = Error>;
-    fn append_many(entity: &Entity<Self>, data: Vec<Rel::Resource>, rels: Vec<<Rel::Resource as RawUpdate>::Relationships>) -> Self::AppendManyFut;
+    fn append_many(entity: &Entity<Self>, received: Vec<RawReceived<Rel::Resource, Rel::Resource>>) -> Self::AppendManyFut;
 }
 
 impl<I, T, Rel> AppendMany<I, Rel> for T
@@ -34,17 +33,17 @@ where T:                AppendLinks<Rel>,
       Rel::Resource:    RawAppend<I>,
 {
     type AppendManyFut = Result<CollectionResponse<I, Rel::Resource>, Error>;
-    fn append_many(entity: &Entity<Self>, data: Vec<Rel::Resource>, rels: Vec<<Rel::Resource as RawUpdate>::Relationships>) -> Self::AppendManyFut {
-        let response = RawAppend::append(data, rels).into_future().wait()?;
+    fn append_many(entity: &Entity<Self>, received: Vec<RawReceived<Rel::Resource, Rel::Resource>>) -> Self::AppendManyFut {
+        let response = RawAppend::append(received).into_future().wait()?;
         let ids = response.resources.iter().map(|resource| resource.id.clone()).collect::<Vec<_>>();
         <T as AppendLinks<Rel>>::append_links(entity, &ids).into_future().wait()?;
         Ok(response)
     }
 }
 
-pub trait ReplaceMany<I, Rel: Relation>: ReplaceLinks<Rel> where Rel::Resource: RawUpdate + Deserialize {
+pub trait ReplaceMany<I, Rel: Relation>: ReplaceLinks<Rel> where Rel::Resource: RawUpdate {
     type ReplaceManyFut: IntoFuture<Item = CollectionResponse<I, Rel::Resource>, Error = Error>;
-    fn replace_many(entity: &Entity<Self>, data: Vec<Rel::Resource>, rels: Vec<<Rel::Resource as RawUpdate>::Relationships>) -> Self::ReplaceManyFut;
+    fn replace_many(entity: &Entity<Self>, received: Vec<RawReceived<Rel::Resource, Rel::Resource>>) -> Self::ReplaceManyFut;
 }
 
 impl<I, T, Rel> ReplaceMany<I, Rel> for T
@@ -54,8 +53,8 @@ where
     Rel::Resource: RawAppend<I>,
 {
     type ReplaceManyFut = Result<CollectionResponse<I, Rel::Resource>, Error>;
-    fn replace_many(entity: &Entity<Self>, data: Vec<Rel::Resource>, rels: Vec<<Rel::Resource as RawUpdate>::Relationships>) -> Self::ReplaceManyFut {
-        let response = RawAppend::append(data, rels).into_future().wait()?;
+    fn replace_many(entity: &Entity<Self>, received: Vec<RawReceived<Rel::Resource, Rel::Resource>>) -> Self::ReplaceManyFut {
+        let response = RawAppend::append(received).into_future().wait()?;
         let ids = response.resources.iter().map(|resource| resource.id.clone()).collect::<Vec<_>>();
         <T as ReplaceLinks<Rel>>::replace_links(entity, &ids).into_future().wait()?;
         Ok(response)

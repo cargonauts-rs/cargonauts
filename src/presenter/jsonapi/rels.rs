@@ -129,8 +129,10 @@ impl<'a> Serialize for ReprRel<'a> {
 
 #[cfg(test)]
 mod tests {
-    use api::raw::{Identifier, Relationship, RelationshipLinkage};
+    use std::borrow::Cow;
     use std::collections::BTreeMap;
+
+    use api::raw::{Identifier, Relationship, RelationshipLinkage};
     use json::to_value;
     use json::Value;
 
@@ -180,7 +182,7 @@ mod tests {
             resource_link: "https://example.org/api/base/1/relation",
             relationship: &RelationshipLinkage {
                 linkage: Some(Relationship::One(Some(Identifier {
-                    resource: "related",
+                    resource: Cow::Borrowed("related"),
                     id: String::from("2"),
                 }))),
             },
@@ -227,7 +229,7 @@ mod tests {
             resource_link: "https://example.org/api/base/1/relation",
             relationship: &RelationshipLinkage {
                 linkage: Some(Relationship::Many(vec![Identifier {
-                    resource: "related",
+                    resource: Cow::Borrowed("related"),
                     id: String::from("2"),
                 }])),
             },
