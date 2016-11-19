@@ -492,18 +492,18 @@ impl<'a, R: Router> _Router<'a, R> {
                 Ok(rel) => rel,
                 Err(_)  => return (<P as Presenter<(), R>>::present_err(presenter, Error::Conflict)),
             };
-            let rel_id = match identifier {
+            match identifier {
                 Some(identifier)    => {
-                    match identifier.id.parse() {
+                    let rel_id = match identifier.id.parse() {
                         Ok(id)  => id,
                         Err(_)  => return (<P as Presenter<(), R>>::present_err(presenter, Error::Conflict)),
-                    }
-                },
-                None                => {
-                    unimplemented!()
+                    };
+                    presenter.try_present(T::link_one(&api::Entity::Id(id), &rel_id).into_future().wait())
                 }
-            };
-            presenter.try_present(T::link_one(&api::Entity::Id(id), &rel_id).into_future().wait())
+                None                => {
+                    presenter.try_present(T::unlink_one(&api::Entity::Id(id)).into_future().wait())
+                }
+            }
         }
         self.router.attach_post_one(T::resource_plural(), Rel::to_one(), post_one::<R, T, Rel, P, C>);
         self.router.attach_update_one_rel(T::resource_plural(), Rel::to_one(), post_one_rel::<R, T, Rel, P, C>);

@@ -1,16 +1,16 @@
 use api::{Entity, Error};
 use api::raw::{RawPost, RawAppend, RawReceived, ResourceResponse, CollectionResponse, RawUpdate};
-use api::rel::{ToOne, ToMany, LinkOne, AppendLinks, ReplaceLinks};
+use api::rel::{ToOne, ToMany, LinkOne, UnlinkOne, AppendLinks, ReplaceLinks};
 use IntoFuture;
 use futures::Future;
 
-pub trait PostOne<I, Rel: ToOne>: LinkOne<Rel> where Rel::Resource: RawUpdate {
+pub trait PostOne<I, Rel: ToOne>: LinkOne<Rel> + UnlinkOne<Rel> where Rel::Resource: RawUpdate {
     type PostOneFut: IntoFuture<Item = ResourceResponse<I, Rel::Resource>, Error = Error>;
     fn post_one(entity: &Entity<Self>, received: RawReceived<Rel::Resource, Rel::Resource>) -> Self::PostOneFut;
 }
 
 impl<I, T, Rel> PostOne<I, Rel> for T
-where T:                LinkOne<Rel>,
+where T:                LinkOne<Rel> + UnlinkOne<Rel>,
       Rel:              ToOne,
       Rel::Resource:    RawPost<I>,
 {
