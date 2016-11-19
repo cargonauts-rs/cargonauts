@@ -13,52 +13,34 @@ pub trait Get: Resource {
 }
 
 pub trait RawGet<I>: RawFetch {
-    type GetIdFut: IntoFuture<Item = ResourceResponse<I, Self>, Error = Error>;
-    type GetResourceFut: IntoFuture<Item = ResourceResponse<I, Self>, Error = Error>;
-    fn get_id(id: Self::Id, includes: &[IncludeQuery]) -> Self::GetIdFut;
-    fn get_resource(resource: Self, includes: &[IncludeQuery]) -> Self::GetResourceFut;
+    type RawGetFut: IntoFuture<Item = ResourceResponse<I, Self>, Error = Error>;
+    fn get(id: Self::Id, includes: &[IncludeQuery]) -> Self::RawGetFut;
 }
 
 impl<I, T> RawGet<I> for T where T: Get + _FetchRels<I> {
-    type GetIdFut = Result<ResourceResponse<I, T>, Error>;
-    type GetResourceFut = Result<ResourceResponse<I, T>, Error>;
-    fn get_id(id: Self::Id, includes: &[IncludeQuery]) -> Self::GetIdFut {
-        let entity = Entity::Resource(<T as Get>::get(&id).into_future().wait()?);
-        let (rels, includes) = <T as _FetchRels<I>>::rels(&entity, &includes)?;
-        let includes = includes.into_iter()
-            .unique_by(|include| (include.id.clone(), include.resource))
-            .collect();
-        let resource = match entity {
-            Entity::Resource(resource)  => resource,
-            _                           => unreachable!()
-        };
-        Ok(ResourceResponse {
-            resource: ResourceObject {
-                id: id,
-                attributes: resource,
-                relationships: rels,
-            },
-            includes: includes,
-        })
+    type RawGetFut = Result<ResourceResponse<I, T>, Error>;
+    fn get(id: Self::Id, includes: &[IncludeQuery]) -> Self::RawGetFut {
+        let resource = <T as Get>::get(&id).into_future().wait()?;
+        raw_get(id, resource, includes)
     }
-    fn get_resource(resource: Self, includes: &[IncludeQuery]) -> Self::GetResourceFut {
-        let id = resource.id();
-        let entity = Entity::Resource(resource);
-        let (rels, includes) = <T as _FetchRels<I>>::rels(&entity, &includes)?;
-        let includes = includes.into_iter()
-            .unique_by(|include| (include.id.clone(), include.resource))
-            .collect();
-        let resource = match entity {
-            Entity::Resource(resource)  => resource,
-            _                           => unreachable!()
-        };
-        Ok(ResourceResponse {
-            resource: ResourceObject {
-                id: id,
-                attributes: resource,
-                relationships: rels,
-            },
-            includes: includes,
-        })
-    }
+}
+
+pub fn raw_get<I, T: _FetchRels<I>>(id: T::Id, resource: T, includes: &[IncludeQuery]) -> Result<ResourceResponse<I, T>, Error> {
+    let entity = Entity::Resource(resource);
+    let (rels, includes) = <T as _FetchRels<I>>::rels(&entity, &includes)?;
+    let includes = includes.into_iter()
+        .unique_by(|include| (include.id.clone(), include.resource))
+        .collect();
+    let resource = match entity {
+        Entity::Resource(resource)  => resource,
+        _                           => unreachable!()
+    };
+    Ok(ResourceResponse {
+        resource: ResourceObject {
+            id: id,
+            attributes: resource,
+            relationships: rels,
+        },
+        includes: includes,
+    })
 }

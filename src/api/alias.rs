@@ -1,6 +1,9 @@
-use api::{Resource, Entity, Error};
-use api::raw::{RawFetch, RawGet, ResourceResponse};
-use router::IncludeQuery;
+use api::{Get, Index, Error};
+use api::index::raw_index;
+use api::get::raw_get;
+use api::raw::{RawFetch, ResourceResponse, CollectionResponse};
+use router::{IncludeQuery, SortQuery};
+use _internal::_FetchRels;
 use futures::Future;
 use IntoFuture;
 
@@ -8,8 +11,8 @@ pub struct AliasRequest {
     pub alias: &'static str,
 }
 
-pub trait GetAliased: Resource {
-    type GetAliasedFut: IntoFuture<Item = Entity<Self>, Error = Error>;
+pub trait GetAliased: Get {
+    type GetAliasedFut: IntoFuture<Item = Self, Error = Error>;
     fn get(request: AliasRequest) -> Self::GetAliasedFut;
 }
 
@@ -18,13 +21,28 @@ pub trait RawGetAliased<I>: RawFetch {
     fn get(request: AliasRequest, includes: &[IncludeQuery]) -> Self::RawGetAliasedFut;
 }
 
-impl<I, T> RawGetAliased<I> for T where T: GetAliased + RawGet<I> {
+impl<I, T> RawGetAliased<I> for T where T: GetAliased + _FetchRels<I> {
     type RawGetAliasedFut = Result<ResourceResponse<I, Self>, Error>;
     fn get(request: AliasRequest, includes: &[IncludeQuery]) -> Self::RawGetAliasedFut {
-        let entity = <T as GetAliased>::get(request).into_future().wait()?;
-        match entity {
-            Entity::Id(id)              => <T as RawGet<I>>::get_id(id, includes).into_future().wait(),
-            Entity::Resource(resource)  => <T as RawGet<I>>::get_resource(resource, includes).into_future().wait(),
-        }
+        let resource = <T as GetAliased>::get(request).into_future().wait()?;
+        raw_get(resource.id(), resource, includes)
+    }
+}
+
+pub trait IndexAliased: Index {
+    type IndexAliasedFut: IntoFuture<Item = Vec<Self>, Error = Error>;
+    fn index(request: AliasRequest) -> Self::IndexAliasedFut;
+}
+
+pub trait RawIndexAliased<I>: RawFetch {
+    type RawIndexAliasedFut: IntoFuture<Item = CollectionResponse<I, Self>, Error = Error>;
+    fn index(request: AliasRequest, includes: &[IncludeQuery], sorts: &[SortQuery]) -> Self::RawIndexAliasedFut;
+}
+
+impl<I, T> RawIndexAliased<I> for T where T: IndexAliased + _FetchRels<I> {
+    type RawIndexAliasedFut = Result<CollectionResponse<I, Self>, Error>;
+    fn index(request: AliasRequest, includes: &[IncludeQuery], sorts: &[SortQuery]) -> Self::RawIndexAliasedFut {
+        let collection = <T as IndexAliased>::index(request).into_future().wait()?;
+        raw_index(collection, includes, sorts)
     }
 }

@@ -289,6 +289,15 @@ macro_rules! _alias {
     ($router:expr, $resource:ty, $route:expr, [get]) => {
         $router.attach_get_alias::<$resource, $crate::presenter::JsonApi<T, S<T::Response>>>($route);
     };
+    ($router:expr, $resource:ty, $route:expr, [index, $($method:ident),*]) => {
+        $router.attach_index_alias::<$resource, $crate::presenter::JsonApi<T, S<T::Response>>>($route);
+        _alias!($router, $resource, $route, [$($method:ident),*]);
+    };
+    ($router:expr, $resource:ty, $route:expr, [index]) => {
+        $router.attach_index_alias::<$resource, $crate::presenter::JsonApi<T, S<T::Response>>>($route);
+    };
+    ($router:expr, $resource:ty, []) => {
+    };
 }
 
 #[macro_export]

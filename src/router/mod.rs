@@ -139,6 +139,11 @@ pub trait Router {
         alias: &'static str,
         handler: fn(AliasRequest, GetRequest, Self::LinkMaker) -> Self::Response,
     );
+
+    fn attach_index_alias(&mut self,
+        alias: &'static str,
+        handler: fn(AliasRequest, IndexRequest, Self::LinkMaker) -> Self::Response,
+    );
 }
 
 pub enum Status {

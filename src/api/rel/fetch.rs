@@ -17,7 +17,7 @@ where T:                HasOne<Rel>,
     type GetOneFut = Result<ResourceResponse<I, Rel::Resource>, Error>;
     fn get_one(entity: &Entity<Self>, includes: &[IncludeQuery]) -> Self::GetOneFut {
         if let Some(id) = <T as HasOne<Rel>>::has_one(entity).into_future().wait()? {
-            <Rel::Resource as RawGet<I>>::get_id(id, includes).into_future().wait()
+            <Rel::Resource as RawGet<I>>::get(id, includes).into_future().wait()
         } else { Err(Error::NotFound) }
         
     }
@@ -37,7 +37,7 @@ where T:                HasMany<Rel>,
         let mut resources = vec![];
         let mut include_objects = vec![];
         for id in <T as HasMany<Rel>>::has_many(entity).into_future().wait()? {
-            let response = <Rel::Resource as RawGet<I>>::get_id(id, includes).into_future().wait()?;
+            let response = <Rel::Resource as RawGet<I>>::get(id, includes).into_future().wait()?;
             resources.push(response.resource);
             include_objects.extend(response.includes);
         }

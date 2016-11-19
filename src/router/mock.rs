@@ -215,6 +215,11 @@ impl Router for MockRouter {
         alias: &'static str,
         _: fn(AliasRequest, GetRequest, Self::LinkMaker) -> Self::Response,
     ) { self.register("alias-get", alias); }
+
+    fn attach_index_alias(&mut self,
+        alias: &'static str,
+        _: fn(AliasRequest, IndexRequest, Self::LinkMaker) -> Self::Response,
+    ) { self.register("alias-index", alias); }
 }
 
 #[derive(Copy, Clone)]

@@ -2,7 +2,7 @@ mod identifier;
 mod include;
 mod relationship;
 
-pub use api::alias::RawGetAliased;
+pub use api::alias::{RawGetAliased, RawIndexAliased};
 
 pub use api::append::RawAppend;
 pub use api::get::RawGet;

@@ -46,7 +46,7 @@ impl<'a, R: Router> _Router<'a, R> {
         {
             let presenter = P::prepare(request.field_set, link_maker);
             let id = try_status!(request.id.parse(), presenter);
-            presenter.try_present(T::get_id(id, &request.includes).into_future().wait())
+            presenter.try_present(T::get(id, &request.includes).into_future().wait())
         }
         self.router.attach_get(T::resource_plural(), get::<R, T, P>);
     }
@@ -636,5 +636,23 @@ impl<'a, R: Router> _Router<'a, R> {
             presenter.try_present(T::get(alias_request, &get_request.includes).into_future().wait())
         }
         self.router.attach_get_alias(route, get_aliased::<R, T, P>);
+    }
+
+    pub fn attach_index_aliased<T, P>(&mut self, route: &'static str)
+    where
+        T: raw::RawIndexAliased<P::Include>,
+        P: Presenter<T, R>,
+    {
+        fn index_aliased<R, T, P>(alias_request: api::AliasRequest, index_request: r::IndexRequest, link_maker: R::LinkMaker) -> R::Response
+        where
+            T: raw::RawIndexAliased<P::Include>,
+            P: Presenter<T, R>,
+            R: Router,
+        {
+            let presenter = P::prepare(None, link_maker);
+            presenter.try_present(T::index(alias_request, &index_request.includes, &index_request.sort).into_future().wait())
+        }
+
+        self.router.attach_index_alias(route, index_aliased::<R, T, P>)
     }
 }

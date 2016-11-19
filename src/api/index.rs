@@ -42,7 +42,7 @@ impl<I, T> RawIndex<I> for T where T: Paginated + _FetchRels<I> {
     }
 }
 
-fn raw_index<I, T: _FetchRels<I>>(index: Vec<T>, includes: &[IncludeQuery], sorts: &[SortQuery]) -> Result<CollectionResponse<I, T>, Error> {
+pub fn raw_index<I, T: _FetchRels<I>>(index: Vec<T>, includes: &[IncludeQuery], sorts: &[SortQuery]) -> Result<CollectionResponse<I, T>, Error> {
     let mut resources = vec![];
     let mut include_objects = vec![];
     for resource in index {

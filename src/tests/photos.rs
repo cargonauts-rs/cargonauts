@@ -14,7 +14,7 @@ routes! {
 }
 
 impl api::GetAliased for User {
-    type GetAliasedFut = Result<api::Entity<Self>, api::Error>;
+    type GetAliasedFut = Result<Self, api::Error>;
     fn get(request: api::AliasRequest) -> Self::GetAliasedFut {
         unimplemented!()
     }

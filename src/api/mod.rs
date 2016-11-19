@@ -18,7 +18,7 @@ pub mod async;
 pub mod raw;
 pub mod rel;
 
-pub use self::alias::{GetAliased, AliasRequest};
+pub use self::alias::{GetAliased, IndexAliased, AliasRequest};
 pub use self::error::Error;
 
 pub use self::append::Append;
