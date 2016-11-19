@@ -488,19 +488,19 @@ impl<'a, R: Router> _Router<'a, R> {
                 Ok(id)  => id,
                 Err(_)  => return (<P as Presenter<(), R>>::present_err(presenter, Error::Conflict)),
             };
-            let rel = match C::wrap(request.body).receive_rel::<Rel>() {
+            let identifier = match C::wrap(request.body).receive_to_one::<Rel>() {
                 Ok(rel) => rel,
                 Err(_)  => return (<P as Presenter<(), R>>::present_err(presenter, Error::Conflict)),
             };
-            let rel_id = match rel {
-                raw::Relationship::One(Some(identifier))  => {
+            let rel_id = match identifier {
+                Some(identifier)    => {
                     match identifier.id.parse() {
                         Ok(id)  => id,
                         Err(_)  => return (<P as Presenter<(), R>>::present_err(presenter, Error::Conflict)),
                     }
                 },
-                _                                   => {
-                    return (<P as Presenter<(), R>>::present_err(presenter, Error::BadRequest));
+                None                => {
+                    unimplemented!()
                 }
             };
             presenter.try_present(T::link_one(&api::Entity::Id(id), &rel_id).into_future().wait())
@@ -545,24 +545,19 @@ impl<'a, R: Router> _Router<'a, R> {
                 Ok(id)  => id,
                 Err(_)  => return (<P as Presenter<(), R>>::present_err(presenter, Error::Conflict)),
             };
-            let rel = match C::wrap(request.body).receive_rel::<Rel>() {
+            let identifiers = match C::wrap(request.body).receive_to_many::<Rel>() {
                 Ok(rel) => rel,
                 Err(_)  => return (<P as Presenter<(), R>>::present_err(presenter, Error::Conflict)),
             };
-            let rel_ids: Vec<_> = match rel {
-                raw::Relationship::Many(identifiers)   => {
-                    let mut ids = vec![];
-                    for identifier in identifiers {
-                        match identifier.id.parse() {
-                            Ok(id)  => ids.push(id),
-                            Err(_)  => return (<P as Presenter<(), R>>::present_err(presenter, Error::Conflict)),
-                        }
+            let rel_ids: Vec<_> = {
+                let mut ids = vec![];
+                for identifier in identifiers {
+                    match identifier.id.parse() {
+                        Ok(id)  => ids.push(id),
+                        Err(_)  => return (<P as Presenter<(), R>>::present_err(presenter, Error::Conflict)),
                     }
-                    ids
                 }
-                _                                       => {
-                    return (<P as Presenter<(), R>>::present_err(presenter, Error::BadRequest));
-                }
+                ids
             };
             presenter.try_present(T::append_links(&api::Entity::Id(id), &rel_ids).into_future().wait())
         }
@@ -606,24 +601,19 @@ impl<'a, R: Router> _Router<'a, R> {
                 Ok(id)  => id,
                 Err(_)  => return (<P as Presenter<(), R>>::present_err(presenter, Error::Conflict)),
             };
-            let rel = match C::wrap(request.body).receive_rel::<Rel>() {
+            let identifiers = match C::wrap(request.body).receive_to_many::<Rel>() {
                 Ok(rel) => rel,
                 Err(_)  => return (<P as Presenter<(), R>>::present_err(presenter, Error::Conflict)),
             };
-            let rel_ids: Vec<_> = match rel {
-                raw::Relationship::Many(identifiers)   => {
-                    let mut ids = vec![];
-                    for identifier in identifiers {
-                        match identifier.id.parse() {
-                            Ok(id)  => ids.push(id),
-                            Err(_)  => return (<P as Presenter<(), R>>::present_err(presenter, Error::Conflict)),
-                        }
+            let rel_ids: Vec<_> = {
+                let mut ids = vec![];
+                for identifier in identifiers {
+                    match identifier.id.parse() {
+                        Ok(id)  => ids.push(id),
+                        Err(_)  => return (<P as Presenter<(), R>>::present_err(presenter, Error::Conflict)),
                     }
-                    ids
                 }
-                _                                       => {
-                    return (<P as Presenter<(), R>>::present_err(presenter, Error::BadRequest));
-                }
+                ids
             };
             presenter.try_present(T::replace_links(&api::Entity::Id(id), &rel_ids).into_future().wait())
         }

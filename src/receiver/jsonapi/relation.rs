@@ -50,6 +50,70 @@ impl<T> Visitor for RelationshipVisitor<T> {
     }
 }
 
+pub struct ToOneDocument<T>(pub Option<Identifier>, PhantomData<T>);
+
+impl<T> Deserialize for ToOneDocument<T> {
+    fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
+        let inner: JsonApiToOne<T> = deserializer.deserialize_map(ObjectVisitor(PhantomData))?;
+        Ok(ToOneDocument(inner.0, PhantomData))
+    }
+}
+
+pub struct JsonApiToOne<T>(pub Option<Identifier>, PhantomData<T>);
+
+impl<T> Deserialize for JsonApiToOne<T> {
+    fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
+        deserializer.deserialize_map(ToOneVisitor(PhantomData))
+    }
+}
+
+struct ToOneVisitor<T>(PhantomData<T>);
+
+impl<T> Visitor for ToOneVisitor<T> {
+    type Value = JsonApiToOne<T>;
+
+    fn visit_unit<E>(&mut self) -> Result<JsonApiToOne<T>, E> {
+        Ok(JsonApiToOne(None, PhantomData))
+    }
+
+
+    fn visit_map<V: MapVisitor>(&mut self, visitor: V) -> Result<JsonApiToOne<T>, V::Error> {
+        let identifier = IdentifierVisitor::<T>(PhantomData).visit_map(visitor)?;
+        Ok(JsonApiToOne(Some(identifier.0), PhantomData))
+    }
+}
+
+pub struct ToManyDocument<T>(pub Vec<Identifier>, PhantomData<T>);
+
+impl<T> Deserialize for ToManyDocument<T> {
+    fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
+        let inner: JsonApiToMany<T> = deserializer.deserialize_map(ObjectVisitor(PhantomData))?;
+        Ok(ToManyDocument(inner.0, PhantomData))
+    }
+}
+
+pub struct JsonApiToMany<T>(pub Vec<Identifier>, PhantomData<T>);
+
+impl<T> Deserialize for JsonApiToMany<T> {
+    fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
+        deserializer.deserialize_map(ToManyVisitor(PhantomData))
+    }
+}
+
+struct ToManyVisitor<T>(PhantomData<T>);
+
+impl<T> Visitor for ToManyVisitor<T> {
+    type Value = JsonApiToMany<T>;
+
+    fn visit_seq<V: SeqVisitor>(&mut self, visitor: V) -> Result<JsonApiToMany<T>, V::Error> {
+        let mut vec_visitor = VecVisitor::new();
+        let vector: Vec<JsonApiIdentifier<T>> = vec_visitor.visit_seq(visitor)?;
+        let vector = vector.into_iter().map(|x| x.0).collect();
+        Ok(JsonApiToMany(vector, PhantomData))
+    }
+}
+
+
 pub struct JsonApiIdentifier<T>(pub Identifier, PhantomData<T>);
 
 impl<T> Deserialize for JsonApiIdentifier<T> {

@@ -3,7 +3,7 @@ mod relation;
 mod resource;
 
 use self::collection::CollectionDocument;
-use self::relation::RelationshipDocument;
+use self::relation::{ToOneDocument, ToManyDocument};
 use self::resource::ResourceDocument;
 
 use std::io::Read;
@@ -11,8 +11,8 @@ use std::marker::PhantomData;
 use io_adapter::ReadAdapter;
 
 use api::Error;
-use api::raw::{RawUpdate, RawHasPatch, RawReceived, Relationship};
-use api::rel::Relation;
+use api::raw::{RawUpdate, RawHasPatch, RawReceived, Identifier};
+use api::rel::{ToOne, ToMany};
 use serde::de::{self, Visitor, MapVisitor};
 use Deserialize;
 use Deserializer;
@@ -54,8 +54,11 @@ where
         CollectionDocument::deserialize(&mut self.deserializer).map(|x| x.0).or(Err(Error::BadRequest))
     }
 
-    fn receive_rel<Rel: Relation>(mut self) -> Result<Relationship, Error> {
-        RelationshipDocument::<Rel>::deserialize(&mut self.deserializer).map(|x| x.0).or(Err(Error::BadRequest))
+    fn receive_to_one<Rel: ToOne>(mut self) -> Result<Option<Identifier>, Error> {
+        ToOneDocument::<Rel>::deserialize(&mut self.deserializer).map(|x| x.0).or(Err(Error::BadRequest))
+    }
+    fn receive_to_many<Rel: ToMany>(mut self) -> Result<Vec<Identifier>, Error> {
+        ToManyDocument::<Rel>::deserialize(&mut self.deserializer).map(|x| x.0).or(Err(Error::BadRequest))
     }
 }
 
