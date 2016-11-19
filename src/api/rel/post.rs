@@ -1,17 +1,17 @@
 use api::{Entity, Error};
 use api::raw::{RawPost, RawAppend, RawReceived, ResourceResponse, CollectionResponse, RawUpdate};
-use api::rel::{Relation, LinkOne, AppendLinks, ReplaceLinks};
+use api::rel::{ToOne, ToMany, LinkOne, AppendLinks, ReplaceLinks};
 use IntoFuture;
 use futures::Future;
 
-pub trait PostOne<I, Rel: Relation>: LinkOne<Rel> where Rel::Resource: RawUpdate {
+pub trait PostOne<I, Rel: ToOne>: LinkOne<Rel> where Rel::Resource: RawUpdate {
     type PostOneFut: IntoFuture<Item = ResourceResponse<I, Rel::Resource>, Error = Error>;
     fn post_one(entity: &Entity<Self>, received: RawReceived<Rel::Resource, Rel::Resource>) -> Self::PostOneFut;
 }
 
 impl<I, T, Rel> PostOne<I, Rel> for T
 where T:                LinkOne<Rel>,
-      Rel:              Relation,
+      Rel:              ToOne,
       Rel::Resource:    RawPost<I>,
 {
     type PostOneFut = Result<ResourceResponse<I, Rel::Resource>, Error>;
@@ -22,14 +22,14 @@ where T:                LinkOne<Rel>,
     }
 }
 
-pub trait AppendMany<I, Rel: Relation>: AppendLinks<Rel> where Rel::Resource: RawUpdate {
+pub trait AppendMany<I, Rel: ToMany>: AppendLinks<Rel> where Rel::Resource: RawUpdate {
     type AppendManyFut: IntoFuture<Item = CollectionResponse<I, Rel::Resource>, Error = Error>;
     fn append_many(entity: &Entity<Self>, received: Vec<RawReceived<Rel::Resource, Rel::Resource>>) -> Self::AppendManyFut;
 }
 
 impl<I, T, Rel> AppendMany<I, Rel> for T
 where T:                AppendLinks<Rel>,
-      Rel:              Relation,
+      Rel:              ToMany,
       Rel::Resource:    RawAppend<I>,
 {
     type AppendManyFut = Result<CollectionResponse<I, Rel::Resource>, Error>;
@@ -41,7 +41,7 @@ where T:                AppendLinks<Rel>,
     }
 }
 
-pub trait ReplaceMany<I, Rel: Relation>: ReplaceLinks<Rel> where Rel::Resource: RawUpdate {
+pub trait ReplaceMany<I, Rel: ToMany>: ReplaceLinks<Rel> where Rel::Resource: RawUpdate {
     type ReplaceManyFut: IntoFuture<Item = CollectionResponse<I, Rel::Resource>, Error = Error>;
     fn replace_many(entity: &Entity<Self>, received: Vec<RawReceived<Rel::Resource, Rel::Resource>>) -> Self::ReplaceManyFut;
 }
@@ -49,7 +49,7 @@ pub trait ReplaceMany<I, Rel: Relation>: ReplaceLinks<Rel> where Rel::Resource: 
 impl<I, T, Rel> ReplaceMany<I, Rel> for T
 where
     T: ReplaceLinks<Rel>,
-    Rel: Relation,
+    Rel: ToMany,
     Rel::Resource: RawAppend<I>,
 {
     type ReplaceManyFut = Result<CollectionResponse<I, Rel::Resource>, Error>;

@@ -1,16 +1,16 @@
 use api::{Error, Delete, Entity, Remove};
-use api::rel::{Relation, HasOne, HasMany, UnlinkOne, RemoveLinks, ClearLinks, RelationId};
+use api::rel::{ToOne, ToMany, HasOne, HasMany, UnlinkOne, RemoveLinks, ClearLinks, RelationId};
 use futures::Future;
 use IntoFuture;
 
-pub trait DeleteOne<T: Relation>: HasOne<T> + UnlinkOne<T> {
+pub trait DeleteOne<T: ToOne>: HasOne<T> + UnlinkOne<T> {
     type DeleteOneFut: IntoFuture<Item = (), Error = Error>;
     fn delete_one(entity: &Entity<Self>) -> Self::DeleteOneFut;
 }
 
 impl<T, Rel> DeleteOne<Rel> for T
 where T:             HasOne<Rel> + UnlinkOne<Rel>,
-      Rel:           Relation,
+      Rel:           ToOne,
       Rel::Resource: Delete {
     type DeleteOneFut = Result<(), Error>;
     fn delete_one(entity: &Entity<Self>) -> Self::DeleteOneFut {
@@ -21,14 +21,14 @@ where T:             HasOne<Rel> + UnlinkOne<Rel>,
     }
 }
 
-pub trait RemoveMany<T: Relation>: HasMany<T> + RemoveLinks<T> {
+pub trait RemoveMany<T: ToMany>: HasMany<T> + RemoveLinks<T> {
     type RemoveManyFut: IntoFuture<Item = (), Error = Error>;
     fn remove_many(entity: &Entity<Self>, rel_ids: &[RelationId<T>]) -> Self::RemoveManyFut;
 }
 
 impl<T, Rel> RemoveMany<Rel> for T
 where T:             HasMany<Rel> + RemoveLinks<Rel>,
-      Rel:           Relation,
+      Rel:           ToMany,
       Rel::Resource: Remove {
     type RemoveManyFut = Result<(), Error>;
     fn remove_many(entity: &Entity<Self>, rel_ids: &[RelationId<Rel::Resource>]) -> Self::RemoveManyFut {
@@ -38,14 +38,14 @@ where T:             HasMany<Rel> + RemoveLinks<Rel>,
     }
 }
 
-pub trait ClearMany<T: Relation>: HasMany<T> + ClearLinks<T> {
+pub trait ClearMany<T: ToMany>: HasMany<T> + ClearLinks<T> {
     type ClearManyFut: IntoFuture<Item = (), Error = Error>;
     fn clear_many(entity: &Entity<Self>) -> Self::ClearManyFut;
 }
 
 impl<T, Rel> ClearMany<Rel> for T
 where T:             HasMany<Rel> + ClearLinks<Rel>,
-      Rel:           Relation,
+      Rel:           ToMany,
       Rel::Resource: Remove {
     type ClearManyFut = Result<(), Error>;
     fn clear_many(entity: &Entity<Self>) -> Self::ClearManyFut {

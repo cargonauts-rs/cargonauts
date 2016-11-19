@@ -1,12 +1,30 @@
 #[macro_export]
-/// DSL for constructing a Relation type.
-macro_rules! relation {
-    ($rel:ident: $resource:ident as $to_one:expr, $to_many:expr) => {
+/// DSL for constructing a ToOne type.
+macro_rules! to_one {
+    ($rel:ident => $resource:ident as $to_one:expr) => {
         struct $rel;
 
         impl $crate::api::rel::Relation for $rel {
             type Resource = $resource;
+        }
+
+        impl $crate::api::rel::ToOne for $rel {
             fn to_one() -> &'static str { $to_one }
+        }
+    };
+}
+
+#[macro_export]
+/// DSL for constructing a ToMany type.
+macro_rules! to_many {
+    ($rel:ident => $resource:ident as $to_many:expr) => {
+        struct $rel;
+
+        impl $crate::api::rel::Relation for $rel {
+            type Resource = $resource;
+        }
+
+        impl $crate::api::rel::ToMany for $rel {
             fn to_many() -> &'static str { $to_many }
         }
     };
@@ -15,7 +33,7 @@ macro_rules! relation {
 #[cfg(test)]
 mod tests {
     use api::Resource;
-    use api::rel::Relation;
+    use api::rel::{Relation, ToOne, ToMany};
     use repr;
 
     #[derive(Copy, Clone)]
@@ -32,7 +50,9 @@ mod tests {
         fn resource_plural() -> &'static str { "users" }
     }
 
-    relation!(Author: User as "author", "authors");
+    to_one!(Author => User as "author");
+
+    to_many!(Authors => User as "authors");
 
     fn assert_rel_to_resource<T: Relation<Resource = U>, U: Resource>() { }
 
@@ -40,7 +60,12 @@ mod tests {
     fn author_is_rel_to_user() {
         assert_rel_to_resource::<Author, User>();
         assert_eq!(Author::to_one(), "author");
-        assert_eq!(Author::to_many(), "authors");
+    }
+
+    #[test]
+    fn authors_is_rel_to_user() {
+        assert_rel_to_resource::<Authors, User>();
+        assert_eq!(Authors::to_many(), "authors");
     }
 }
 

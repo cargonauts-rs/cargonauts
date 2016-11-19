@@ -426,10 +426,10 @@ macro_rules! _link_rel {
 #[macro_export]
 macro_rules! _name_rel {
     ($rel:ty, one) => {
-        <$rel as $crate::api::rel::Relation>::to_one()
+        <$rel as $crate::api::rel::ToOne>::to_one()
     };
     ($rel:ty, many) => {
-        <$rel as $crate::api::rel::Relation>::to_many()
+        <$rel as $crate::api::rel::ToMany>::to_many()
     };
 }
 

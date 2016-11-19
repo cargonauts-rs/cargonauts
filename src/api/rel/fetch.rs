@@ -1,18 +1,18 @@
 use api::{Entity, Error};
 use api::raw::{RawFetch, ResourceResponse, CollectionResponse, RawGet};
-use api::rel::{Relation, HasOne, HasMany};
+use api::rel::{ToOne, ToMany, HasOne, HasMany};
 use router::IncludeQuery;
 use IntoFuture;
 use futures::Future;
 
-pub trait GetOne<I, T: Relation>: HasOne<T> where T::Resource: RawFetch {
+pub trait GetOne<I, T: ToOne>: HasOne<T> where T::Resource: RawFetch {
     type GetOneFut: IntoFuture<Item = ResourceResponse<I, T::Resource>, Error = Error>;
     fn get_one(entity: &Entity<Self>, includes: &[IncludeQuery]) -> Self::GetOneFut;
 }
 
 impl<I, T, Rel> GetOne<I, Rel> for T
 where T:                HasOne<Rel>,
-      Rel:              Relation,
+      Rel:              ToOne,
       Rel::Resource:    RawGet<I> {
     type GetOneFut = Result<ResourceResponse<I, Rel::Resource>, Error>;
     fn get_one(entity: &Entity<Self>, includes: &[IncludeQuery]) -> Self::GetOneFut {
@@ -23,14 +23,14 @@ where T:                HasOne<Rel>,
     }
 }
 
-pub trait IndexMany<I, T: Relation>: HasMany<T> where T::Resource: RawFetch {
+pub trait IndexMany<I, T: ToMany>: HasMany<T> where T::Resource: RawFetch {
     type IndexManyFut: IntoFuture<Item = CollectionResponse<I, T::Resource>, Error = Error>;
     fn index_many(entity: &Entity<Self>, includes: &[IncludeQuery]) -> Self::IndexManyFut;
 }
 
 impl<I, T, Rel> IndexMany<I, Rel> for T
 where T:                HasMany<Rel>,
-      Rel:              Relation,
+      Rel:              ToMany,
       Rel::Resource:    RawGet<I> {
     type IndexManyFut = Result<CollectionResponse<I, Rel::Resource>, Error>;
     fn index_many(entity: &Entity<Self>, includes: &[IncludeQuery]) -> Self::IndexManyFut {

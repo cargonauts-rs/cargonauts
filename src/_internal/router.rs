@@ -246,14 +246,14 @@ impl<'a, R: Router> _Router<'a, R> {
     pub fn attach_fetch_one<T, Rel, P>(&mut self)
     where
         T: rel::raw::GetOne<P::Include, Rel>,
-        Rel: rel::Relation,
+        Rel: rel::ToOne,
         Rel::Resource: raw::RawFetch,
         P: Presenter<Rel::Resource, R>,
     {
         fn fetch_one<R, T, Rel, P>(request: r::GetRequest, link_maker: R::LinkMaker) -> R::Response
         where
             T: rel::raw::GetOne<P::Include, Rel>,
-            Rel: rel::Relation,
+            Rel: rel::ToOne,
             Rel::Resource: raw::RawFetch,
             P: Presenter<Rel::Resource, R>,
             R: Router,
@@ -265,7 +265,7 @@ impl<'a, R: Router> _Router<'a, R> {
         fn fetch_one_rel<R, T, Rel, P>(request: r::FetchRelRequest, link_maker: R::LinkMaker) -> R::Response
         where
             T: rel::raw::GetOne<P::Include, Rel>,
-            Rel: rel::Relation,
+            Rel: rel::ToOne,
             Rel::Resource: raw::RawFetch,
             P: Presenter<Rel::Resource, R>,
             R: Router,
@@ -289,14 +289,14 @@ impl<'a, R: Router> _Router<'a, R> {
     pub fn attach_fetch_many<T, Rel, P>(&mut self)
     where
         T: rel::raw::IndexMany<P::Include, Rel>,
-        Rel: rel::Relation,
+        Rel: rel::ToMany,
         Rel::Resource: raw::RawFetch,
         P: Presenter<Rel::Resource, R>,
     {
         fn fetch_many<R, T, Rel, P>(request: r::GetRequest, link_maker: R::LinkMaker) -> R::Response
         where
             T: rel::raw::IndexMany<P::Include, Rel>,
-            Rel: rel::Relation,
+            Rel: rel::ToMany,
             Rel::Resource: raw::RawFetch,
             P: Presenter<Rel::Resource, R>,
             R: Router,
@@ -308,7 +308,7 @@ impl<'a, R: Router> _Router<'a, R> {
         fn fetch_many_rel<R, T, Rel, P>(request: r::FetchRelRequest, link_maker: R::LinkMaker) -> R::Response
         where 
             T: rel::raw::IndexMany<P::Include, Rel>,
-            Rel: rel::Relation,
+            Rel: rel::ToMany,
             Rel::Resource: raw::RawFetch,
             P: Presenter<Rel::Resource, R>,
             R: Router,
@@ -318,7 +318,7 @@ impl<'a, R: Router> _Router<'a, R> {
             presenter.try_present(T::has_many(&api::Entity::Id(parsed_id)).into_future().wait().map(move |rel| {
                 raw::RelResponse {
                     resource: T::resource_plural(),
-                    related: Rel::to_one(),
+                    related: Rel::to_many(),
                     id: request.id,
                     rel: raw::Relationship::Many(rel.into_iter().map(|id| raw::Identifier::new::<Rel::Resource>(&id)).collect()),
                     includes: vec![],
@@ -332,13 +332,13 @@ impl<'a, R: Router> _Router<'a, R> {
     pub fn attach_delete_one<T, Rel, P>(&mut self)
     where
         T: rel::raw::DeleteOne<Rel>,
-        Rel: rel::Relation,
+        Rel: rel::ToOne,
         P: Presenter<(), R>,
     {
         fn delete_one<R, T, Rel, P>(request: r::DeleteRequest, link_maker: R::LinkMaker) -> R::Response
         where
             T: rel::raw::DeleteOne<Rel>,
-            Rel: rel::Relation,
+            Rel: rel::ToOne,
             P: Presenter<(), R>,
             R: Router,
         {
@@ -349,7 +349,7 @@ impl<'a, R: Router> _Router<'a, R> {
         fn delete_one_rel<R, T, Rel, P>(request: r::DeleteRequest, link_maker: R::LinkMaker) -> R::Response
         where
             T: rel::raw::DeleteOne<Rel>,
-            Rel: rel::Relation,
+            Rel: rel::ToOne,
             P: Presenter<(), R>,
             R: Router,
         {
@@ -364,13 +364,13 @@ impl<'a, R: Router> _Router<'a, R> {
     pub fn attach_clear_many<T, Rel, P>(&mut self)
     where
         T: rel::raw::ClearMany<Rel>,
-        Rel: rel::Relation,
+        Rel: rel::ToMany,
         P: Presenter<(), R>,
     {
         fn clear_many<R, T, Rel, P>(request: r::DeleteRequest, link_maker: R::LinkMaker) -> R::Response
         where
             T: rel::raw::ClearMany<Rel>,
-            Rel: rel::Relation,
+            Rel: rel::ToMany,
             P: Presenter<(), R>,
             R: Router,
         {
@@ -381,7 +381,7 @@ impl<'a, R: Router> _Router<'a, R> {
         fn clear_many_rel<R, T, Rel, P>(request: r::DeleteRequest, link_maker: R::LinkMaker) -> R::Response
         where
             T: rel::raw::ClearMany<Rel>,
-            Rel: rel::Relation,
+            Rel: rel::ToMany,
             P: Presenter<(), R>,
             R: Router,
         {
@@ -396,13 +396,13 @@ impl<'a, R: Router> _Router<'a, R> {
     pub fn attach_remove_many<T, Rel, P>(&mut self)
     where
         T: rel::raw::RemoveMany<Rel>,
-        Rel: rel::Relation,
+        Rel: rel::ToMany,
         P: Presenter<(), R>,
     {
         fn remove_many<R, T, Rel, P>(request: r::RemoveManyRequest, link_maker: R::LinkMaker) -> R::Response
         where
             T: rel::raw::RemoveMany<Rel>,
-            Rel: rel::Relation,
+            Rel: rel::ToMany,
             P: Presenter<(), R>,
             R: Router,
         {
@@ -414,7 +414,7 @@ impl<'a, R: Router> _Router<'a, R> {
         fn remove_many_rel<R, T, Rel, P>(request: r::RemoveManyRequest, link_maker: R::LinkMaker) -> R::Response
         where
             T: rel::raw::RemoveMany<Rel>,
-            Rel: rel::Relation,
+            Rel: rel::ToMany,
             P: Presenter<(), R>,
             R: Router,
         {
@@ -430,7 +430,7 @@ impl<'a, R: Router> _Router<'a, R> {
     pub fn attach_patch_one<T, Rel, P, C>(&mut self)
     where
         T: rel::raw::PatchOne<P::Include, Rel>,
-        Rel: rel::Relation,
+        Rel: rel::ToOne,
         Rel::Resource: raw::RawHasPatch<raw::Synchronous>,
         P: Presenter<Rel::Resource, R>,
         C: PatchReceiver<Rel::Resource, Box<Read>, raw::Synchronous>,
@@ -439,7 +439,7 @@ impl<'a, R: Router> _Router<'a, R> {
         where
             R: Router,
             T: rel::raw::PatchOne<P::Include, Rel>,
-            Rel: rel::Relation,
+            Rel: rel::ToOne,
             Rel::Resource: raw::RawHasPatch<raw::Synchronous>,
             P: Presenter<Rel::Resource, R>,
             C: PatchReceiver<Rel::Resource, Box<Read>, raw::Synchronous>,
@@ -455,7 +455,7 @@ impl<'a, R: Router> _Router<'a, R> {
     pub fn attach_post_one<T, Rel, P, C>(&mut self)
     where
         T: rel::raw::PostOne<<P as Presenter<Rel::Resource, R>>::Include, Rel>,
-        Rel: rel::Relation,
+        Rel: rel::ToOne,
         Rel::Resource: raw::RawUpdate + Deserialize,
         P: Presenter<Rel::Resource, R> + Presenter<(), R>,
         C: Receiver<Rel::Resource, Box<Read>>,
@@ -464,7 +464,7 @@ impl<'a, R: Router> _Router<'a, R> {
         where
             R: Router,
             T: rel::raw::PostOne<P::Include, Rel>,
-            Rel: rel::Relation,
+            Rel: rel::ToOne,
             Rel::Resource: raw::RawUpdate + Deserialize,
             P: Presenter<Rel::Resource, R>,
             C: Receiver<Rel::Resource, Box<Read>>,
@@ -478,7 +478,7 @@ impl<'a, R: Router> _Router<'a, R> {
         where
             R: Router,
             T: rel::raw::PostOne<<P as Presenter<Rel::Resource, R>>::Include, Rel>,
-            Rel: rel::Relation,
+            Rel: rel::ToOne,
             Rel::Resource: raw::RawUpdate + Deserialize,
             P: Presenter<Rel::Resource, R> + Presenter<(), R>,
             C: Receiver<Rel::Resource, Box<Read>>,
@@ -512,7 +512,7 @@ impl<'a, R: Router> _Router<'a, R> {
     pub fn attach_append_many<T, Rel, P, C>(&mut self)
     where
         T: rel::raw::AppendMany<<P as Presenter<Rel::Resource, R>>::Include, Rel>,
-        Rel: rel::Relation,
+        Rel: rel::ToMany,
         Rel::Resource: raw::RawUpdate + Deserialize,
         P: Presenter<Rel::Resource, R> + Presenter<(), R>,
         C: Receiver<Rel::Resource, Box<Read>>,
@@ -521,7 +521,7 @@ impl<'a, R: Router> _Router<'a, R> {
         where
             R: Router,
             T: rel::raw::AppendMany<P::Include, Rel>,
-            Rel: rel::Relation,
+            Rel: rel::ToMany,
             Rel::Resource: raw::RawUpdate + Deserialize,
             P: Presenter<Rel::Resource, R>,
             C: Receiver<Rel::Resource, Box<Read>>,
@@ -535,7 +535,7 @@ impl<'a, R: Router> _Router<'a, R> {
         where
             R: Router,
             T: rel::raw::AppendMany<<P as Presenter<Rel::Resource, R>>::Include, Rel>,
-            Rel: rel::Relation,
+            Rel: rel::ToMany,
             Rel::Resource: raw::RawUpdate + Deserialize,
             P: Presenter<Rel::Resource, R> + Presenter<(), R>,
             C: Receiver<Rel::Resource, Box<Read>>,
@@ -573,7 +573,7 @@ impl<'a, R: Router> _Router<'a, R> {
     pub fn attach_replace_many<T, Rel, P, C>(&mut self)
     where
         T: rel::raw::ReplaceMany<<P as Presenter<Rel::Resource, R>>::Include, Rel>,
-        Rel: rel::Relation,
+        Rel: rel::ToMany,
         Rel::Resource: raw::RawUpdate + Deserialize,
         P: Presenter<Rel::Resource, R> + Presenter<(), R>,
         C: Receiver<Rel::Resource, Box<Read>>,
@@ -582,7 +582,7 @@ impl<'a, R: Router> _Router<'a, R> {
         where
             R: Router,
             T: rel::raw::ReplaceMany<P::Include, Rel>,
-            Rel: rel::Relation,
+            Rel: rel::ToMany,
             Rel::Resource: raw::RawUpdate + Deserialize,
             P: Presenter<Rel::Resource, R>,
             C: Receiver<Rel::Resource, Box<Read>>,
@@ -596,7 +596,7 @@ impl<'a, R: Router> _Router<'a, R> {
         where
             R: Router,
             T: rel::raw::ReplaceMany<<P as Presenter<Rel::Resource, R>>::Include, Rel>,
-            Rel: rel::Relation,
+            Rel: rel::ToMany,
             Rel::Resource: raw::RawUpdate + Deserialize,
             P: Presenter<Rel::Resource, R> + Presenter<(), R>,
             C: Receiver<Rel::Resource, Box<Read>>,
