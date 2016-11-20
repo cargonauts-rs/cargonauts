@@ -1,6 +1,9 @@
 #[macro_use]
 mod relation;
 
+#[macro_use]
+mod resource;
+
 /// The entry point for the routes DSL, which defines the endpoints of your API.
 #[macro_export]
 macro_rules! routes {
