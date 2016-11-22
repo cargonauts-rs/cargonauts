@@ -1,11 +1,9 @@
-use std::io::Read;
-
 use api::{self, Resource};
 use api::async;
 use api::raw;
 use api::rel::{self, ToOne, ToMany};
 use presenter::Presenter;
-use receiver::{Receiver, PatchReceiver};
+use receiver::{Receiver, PatchReceiver, IdReceiver};
 use router::Router;
 use _internal::_Router;
 
@@ -77,20 +75,21 @@ where
     }
 }
 
-pub trait _MaybeRemove<P, R: Router>: Resource {
+pub trait _MaybeRemove<P, C, R: Router>: Resource {
     fn attach(_: &mut _Router<R>) { }
 }
 
-impl<T: Resource, P, R: Router> _MaybeRemove<P, R> for T { }
+impl<T: Resource, P, C, R: Router> _MaybeRemove<P, C, R> for T { }
 
-impl<T, P, R> _MaybeRemove<P, R> for T
+impl<T, P, C, R> _MaybeRemove<P, C, R> for T
 where
     T: api::Remove,
     P: Presenter<(), R>,
+    C: IdReceiver<T, R::Request>,
     R: Router,
 {
     fn attach(router: &mut _Router<R>) {
-        router.attach_remove::<T, P>();
+        router.attach_remove::<T, P, C>();
     }
 }
 
@@ -104,7 +103,7 @@ impl<T, P, C, R> _MaybePatch<P, C, R> for T
 where
     T: raw::RawPatch<P::Include>,
     P: Presenter<T, R>,
-    C: PatchReceiver<T, Box<Read>, raw::Synchronous>,
+    C: PatchReceiver<T, R::Request, raw::Synchronous>,
     R: Router,
 {
     fn attach(router: &mut _Router<R>) {
@@ -122,7 +121,7 @@ impl<T, P, C, R> _MaybePatchAsync<P, C, R> for T
 where
     T: async::raw::RawPatchAsync,
     P: Presenter<T::Job, R>,
-    C: PatchReceiver<T, Box<Read>, async::raw::Asynchronous>,
+    C: PatchReceiver<T, R::Request, async::raw::Asynchronous>,
     R: Router,
 {
     fn attach(router: &mut _Router<R>) {
@@ -140,7 +139,7 @@ impl<T, P, C, R> _MaybePost<P, C, R> for T
 where
     T: raw::RawPost<P::Include>,
     P: Presenter<T, R>,
-    C: Receiver<T, Box<Read>>,
+    C: Receiver<T, R::Request>,
     R: Router,
 {
     fn attach(router: &mut _Router<R>) {
@@ -159,7 +158,7 @@ impl<T, P, C, R> _MaybePostAsync<P, C, R> for T
 where
     T: async::raw::RawPostAsync,
     P: Presenter<T::Job, R>,
-    C: Receiver<T, Box<Read>>,
+    C: Receiver<T, R::Request>,
     R: Router,
 {
     fn attach(router: &mut _Router<R>) {
@@ -177,7 +176,7 @@ impl<T, P, C, R> _MaybeAppend<P, C, R> for T
 where
     T: raw::RawAppend<P::Include>,
     P: Presenter<T, R>,
-    C: Receiver<T, Box<Read>>,
+    C: Receiver<T, R::Request>,
     R: Router,
 {
     fn attach(router: &mut _Router<R>) {
@@ -195,7 +194,7 @@ impl<T, P, C, R> _MaybeReplace<P, C, R> for T
 where
     T: raw::RawReplace<P::Include>,
     P: Presenter<T, R>,
-    C: Receiver<T, Box<Read>>,
+    C: Receiver<T, R::Request>,
     R: Router,
 {
     fn attach(router: &mut _Router<R>) {
@@ -277,21 +276,22 @@ where
     }
 }
 
-pub trait _MaybeRemoveMany<Rel: ToMany, P, R: Router>: Resource {
+pub trait _MaybeRemoveMany<Rel: ToMany, P, C, R: Router>: Resource {
     fn attach(_: &mut _Router<R>) { }
 }
 
-impl<T: Resource, Rel: ToMany, P, R: Router> _MaybeRemoveMany<Rel, P, R> for T { }
+impl<T: Resource, Rel: ToMany, P, C, R: Router> _MaybeRemoveMany<Rel, P, C, R> for T { }
 
-impl<T, Rel, P, R> _MaybeRemoveMany<Rel, P, R> for T
+impl<T, Rel, P, C, R> _MaybeRemoveMany<Rel, P, C, R> for T
 where
     T: rel::raw::RemoveMany<Rel>,
     Rel: ToMany,
     P: Presenter<(), R>,
+    C: IdReceiver<Rel::Resource, R::Request>,
     R: Router,
 {
     fn attach(router: &mut _Router<R>) {
-        router.attach_remove_many::<T, Rel, P>();
+        router.attach_remove_many::<T, Rel, P, C>();
     }
 }
 
@@ -307,7 +307,7 @@ where
     Rel: ToOne,
     Rel::Resource: raw::RawHasPatch<raw::Synchronous>,
     P: Presenter<Rel::Resource, R>,
-    C: PatchReceiver<Rel::Resource, Box<Read>, raw::Synchronous>,
+    C: PatchReceiver<Rel::Resource, R::Request, raw::Synchronous>,
     R: Router,
 {
     fn attach(router: &mut _Router<R>) {
@@ -327,7 +327,7 @@ where
     Rel: ToOne,
     Rel::Resource: raw::RawUpdate,
     P: Presenter<Rel::Resource, R> + Presenter<(), R>,
-    C: Receiver<Rel::Resource, Box<Read>>,
+    C: Receiver<Rel::Resource, R::Request>,
     R: Router,
 {
     fn attach(router: &mut _Router<R>) {
@@ -347,7 +347,7 @@ where
     Rel: ToMany,
     Rel::Resource: raw::RawUpdate,
     P: Presenter<Rel::Resource, R> + Presenter<(), R>,
-    C: Receiver<Rel::Resource, Box<Read>>,
+    C: Receiver<Rel::Resource, R::Request>,
     R: Router,
 {
     fn attach(router: &mut _Router<R>) {
@@ -367,7 +367,7 @@ where
     Rel: ToMany,
     Rel::Resource: raw::RawUpdate,
     P: Presenter<Rel::Resource, R> + Presenter<(), R>,
-    C: Receiver<Rel::Resource, Box<Read>>,
+    C: Receiver<Rel::Resource, R::Request>,
     R: Router,
 {
     fn attach(router: &mut _Router<R>) {

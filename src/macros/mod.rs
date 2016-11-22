@@ -14,8 +14,8 @@ macro_rules! routes {
         {
             type S<T> = $crate::json::Serializer<T>;
             type P<T, R> = $crate::presenter::JsonApi<T, S<R>>;
-            type D = $crate::json::Deserializer<::std::io::Bytes<Box<::std::io::Read>>>;
-            type C = $crate::receiver::JsonApi<D, Box<::std::io::Read>>;
+            type D<T> = $crate::json::Deserializer<::std::io::Bytes<T>>;
+            type C<T> = $crate::receiver::JsonApi<D<T>, T>;
 
             let mut router = $crate::_internal::_Router::new(router);
             $({ _resource!(router, $resource
@@ -210,11 +210,11 @@ macro_rules! _methods {
         <$resource as $crate::_internal::_MaybeIndex<P<T, T::Response>, T>>::attach(&mut $router);
         <$resource as $crate::_internal::_MaybeDelete<P<T, T::Response>, T>>::attach(&mut $router);
         <$resource as $crate::_internal::_MaybeClear<P<T, T::Response>, T>>::attach(&mut $router);
-        <$resource as $crate::_internal::_MaybeRemove<P<T, T::Response>, T>>::attach(&mut $router);
-        <$resource as $crate::_internal::_MaybePatch<P<T, T::Response>, C, T>>::attach(&mut $router);
-        <$resource as $crate::_internal::_MaybePost<P<T, T::Response>, C, T>>::attach(&mut $router);
-        <$resource as $crate::_internal::_MaybeAppend<P<T, T::Response>, C, T>>::attach(&mut $router);
-        <$resource as $crate::_internal::_MaybeReplace<P<T, T::Response>, C, T>>::attach(&mut $router);
+        <$resource as $crate::_internal::_MaybeRemove<P<T, T::Response>, C<T::Request>, T>>::attach(&mut $router);
+        <$resource as $crate::_internal::_MaybePatch<P<T, T::Response>, C<T::Request>, T>>::attach(&mut $router);
+        <$resource as $crate::_internal::_MaybePost<P<T, T::Response>, C<T::Request>, T>>::attach(&mut $router);
+        <$resource as $crate::_internal::_MaybeAppend<P<T, T::Response>, C<T::Request>, T>>::attach(&mut $router);
+        <$resource as $crate::_internal::_MaybeReplace<P<T, T::Response>, C<T::Request>, T>>::attach(&mut $router);
     };
 }
 
@@ -223,15 +223,15 @@ macro_rules! _rel_methods {
     ($router:expr, $resource:ty, one $rel:ty) => {
         <$resource as $crate::_internal::_MaybeGetOne<$rel, P<T, T::Response>, T>>::attach(&mut $router);
         <$resource as $crate::_internal::_MaybeDeleteOne<$rel, P<T, T::Response>, T>>::attach(&mut $router);
-        <$resource as $crate::_internal::_MaybePatchOne<$rel, P<T, T::Response>, C, T>>::attach(&mut $router);
-        <$resource as $crate::_internal::_MaybePostOne<$rel, P<T, T::Response>, C, T>>::attach(&mut $router);
+        <$resource as $crate::_internal::_MaybePatchOne<$rel, P<T, T::Response>, C<T::Request>, T>>::attach(&mut $router);
+        <$resource as $crate::_internal::_MaybePostOne<$rel, P<T, T::Response>, C<T::Request>, T>>::attach(&mut $router);
     };
     ($router:expr, $resource:ty, many $rel:ty) => {
         <$resource as $crate::_internal::_MaybeIndexMany<$rel, P<T, T::Response>, T>>::attach(&mut $router);
         <$resource as $crate::_internal::_MaybeClearMany<$rel, P<T, T::Response>, T>>::attach(&mut $router);
-        <$resource as $crate::_internal::_MaybeRemoveMany<$rel, P<T, T::Response>, T>>::attach(&mut $router);
-        <$resource as $crate::_internal::_MaybeAppendMany<$rel, P<T, T::Response>, C, T>>::attach(&mut $router);
-        <$resource as $crate::_internal::_MaybeReplaceMany<$rel, P<T, T::Response>, C, T>>::attach(&mut $router);
+        <$resource as $crate::_internal::_MaybeRemoveMany<$rel, P<T, T::Response>, C<T::Request>, T>>::attach(&mut $router);
+        <$resource as $crate::_internal::_MaybeAppendMany<$rel, P<T, T::Response>, C<T::Request>, T>>::attach(&mut $router);
+        <$resource as $crate::_internal::_MaybeReplaceMany<$rel, P<T, T::Response>, C<T::Request>, T>>::attach(&mut $router);
     };
 }
 

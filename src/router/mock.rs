@@ -1,4 +1,4 @@
-use std::io::{self, Write};
+use std::io::{self, Read, Write};
 use router::*;
 use api::AliasRequest;
 
@@ -66,159 +66,160 @@ impl MockRouter {
 }
 
 impl Router for MockRouter {
+    type Request = MockRequest;
     type Response = MockResponse;
     type LinkMaker = MockLinker;
 
     fn attach_get(&mut self,
         resource: &'static str,
-        _: fn(GetRequest, Self::LinkMaker) -> Self::Response,
+        _: fn(Self::Request, Self::LinkMaker) -> Self::Response,
     ) { self.register("get", resource); }
 
     fn attach_index(&mut self,
         resource: &'static str, 
-        _: fn(IndexRequest, Self::LinkMaker) -> Self::Response,
+        _: fn(Self::Request, Self::LinkMaker) -> Self::Response,
     ) { self.register("index", resource); }
 
     fn attach_delete(&mut self,
         resource: &'static str,
-        _: fn(DeleteRequest, Self::LinkMaker) -> Self::Response,
+        _: fn(Self::Request, Self::LinkMaker) -> Self::Response,
     ) { self.register("delete", resource); }
 
     fn attach_clear(&mut self,
         resource: &'static str,
-        _: fn(Self::LinkMaker) -> Self::Response,
+        _: fn(Self::Request, Self::LinkMaker) -> Self::Response,
     ) { self.register("clear", resource); }
 
     fn attach_remove(&mut self,
         resource: &'static str,
-        _: fn(RemoveRequest, Self::LinkMaker) -> Self::Response
+        _: fn(Self::Request, Self::LinkMaker) -> Self::Response
     ) { self.register("remove", resource); }
 
     fn attach_patch(&mut self,
         resource: &'static str,
-        _: fn(PatchRequest, Self::LinkMaker) -> Self::Response,
+        _: fn(Self::Request, Self::LinkMaker) -> Self::Response,
     ) { self.register("patch", resource); }
 
     fn attach_post(&mut self,
         resource: &'static str,
-        _: fn(PostRequest, Self::LinkMaker) -> Self::Response,
+        _: fn(Self::Request, Self::LinkMaker) -> Self::Response,
     ) { self.register("post", resource); }
 
     fn attach_append(&mut self,
         resource: &'static str,
-        _: fn(MultiPostRequest, Self::LinkMaker) -> Self::Response,
+        _: fn(Self::Request, Self::LinkMaker) -> Self::Response,
     ) { self.register("append", resource); }
 
     fn attach_replace(&mut self,
         resource: &'static str,
-        _: fn(MultiPostRequest, Self::LinkMaker) -> Self::Response,
+        _: fn(Self::Request, Self::LinkMaker) -> Self::Response,
     ) { self.register("replace", resource); }
 
     fn attach_fetch_one(&mut self,
         resource: &'static str,
         relation: &'static str,
-        _: fn(GetRequest, Self::LinkMaker) -> Self::Response,
+        _: fn(Self::Request, Self::LinkMaker) -> Self::Response,
     ) { self.register_rel("fetch-one", resource, relation); }
 
     fn attach_fetch_many(&mut self,
         resource: &'static str,
         relation: &'static str,
-        _: fn(GetRequest, Self::LinkMaker) -> Self::Response,
+        _: fn(Self::Request, Self::LinkMaker) -> Self::Response,
     ) { self.register_rel("fetch-many", resource, relation); }
 
     fn attach_fetch_rel(&mut self,
         resource: &'static str,
         relation: &'static str,
-        _: fn(FetchRelRequest, Self::LinkMaker) -> Self::Response,
+        _: fn(Self::Request, Self::LinkMaker) -> Self::Response,
     ) { self.register_rel("fetch-rel", resource, relation); }
 
     fn attach_delete_one(&mut self,
         resource: &'static str,
         relation: &'static str,
-        _: fn(DeleteRequest, Self::LinkMaker) -> Self::Response,
+        _: fn(Self::Request, Self::LinkMaker) -> Self::Response,
     ) { self.register_rel("delete-one", resource, relation); }
 
     fn attach_clear_many(&mut self,
         resource: &'static str,
         relation: &'static str,
-        _: fn(DeleteRequest, Self::LinkMaker) -> Self::Response,
+        _: fn(Self::Request, Self::LinkMaker) -> Self::Response,
     ) { self.register_rel("clear-many", resource, relation); }
 
     fn attach_remove_many(&mut self,
         resource: &'static str,
         relation: &'static str,
-        _: fn(RemoveManyRequest, Self::LinkMaker) -> Self::Response,
+        _: fn(Self::Request, Self::LinkMaker) -> Self::Response,
     ) { self.register_rel("remove-many", resource, relation); }
 
     fn attach_delete_one_rel(&mut self,
         resource: &'static str,
         relation: &'static str,
-        _: fn(DeleteRequest, Self::LinkMaker) -> Self::Response,
+        _: fn(Self::Request, Self::LinkMaker) -> Self::Response,
     ) { self.register_rel("delete-one-rel", resource, relation); }
 
     fn attach_clear_many_rel(&mut self,
         resource: &'static str,
         relation: &'static str,
-        _: fn(DeleteRequest, Self::LinkMaker) -> Self::Response,
+        _: fn(Self::Request, Self::LinkMaker) -> Self::Response,
     ) { self.register_rel("clear-many-rel", resource, relation); }
 
     fn attach_remove_many_rel(&mut self,
         resource: &'static str,
         relation: &'static str,
-        _: fn(RemoveManyRequest, Self::LinkMaker) -> Self::Response,
+        _: fn(Self::Request, Self::LinkMaker) -> Self::Response,
     ) { self.register_rel("remove-many-rel", resource, relation); }
 
     fn attach_post_one(&mut self,
         resource: &'static str,
         relation: &'static str,
-        _: fn(PostOneRequest, Self::LinkMaker) -> Self::Response,
+        _: fn(Self::Request, Self::LinkMaker) -> Self::Response,
     ) { self.register_rel("post-one", resource, relation); }
 
     fn attach_patch_one(&mut self,
         resource: &'static str,
         relation: &'static str,
-        _: fn(PatchRequest, Self::LinkMaker) -> Self::Response,
+        _: fn(Self::Request, Self::LinkMaker) -> Self::Response,
     ) { self.register_rel("patch-one", resource, relation); }
 
     fn attach_append_many(&mut self,
         resource: &'static str,
         relation: &'static str,
-        _: fn(PostManyRequest, Self::LinkMaker) -> Self::Response,
+        _: fn(Self::Request, Self::LinkMaker) -> Self::Response,
     ) { self.register_rel("append-many", resource, relation); }
 
     fn attach_replace_many(&mut self,
         resource: &'static str,
         relation: &'static str,
-        _: fn(PostManyRequest, Self::LinkMaker) -> Self::Response,
+        _: fn(Self::Request, Self::LinkMaker) -> Self::Response,
     ) { self.register_rel("replace-many", resource, relation); }
 
 
     fn attach_update_one_rel(&mut self,
         resource: &'static str,
         relation: &'static str,
-        _: fn(UpdateRelRequest, Self::LinkMaker) -> Self::Response,
+        _: fn(Self::Request, Self::LinkMaker) -> Self::Response,
     ) { self.register_rel("post-one-rel", resource, relation); }
 
     fn attach_append_many_rel(&mut self,
         resource: &'static str,
         relation: &'static str,
-        _: fn(UpdateRelRequest, Self::LinkMaker) -> Self::Response,
+        _: fn(Self::Request, Self::LinkMaker) -> Self::Response,
     ) { self.register_rel("append-many-rel", resource, relation); }
 
     fn attach_replace_many_rel(&mut self,
         resource: &'static str,
         relation: &'static str,
-        _: fn(UpdateRelRequest, Self::LinkMaker) -> Self::Response,
+        _: fn(Self::Request, Self::LinkMaker) -> Self::Response,
     ) { self.register_rel("replace-many-rel", resource, relation); }
 
     fn attach_get_alias(&mut self,
         alias: &'static str,
-        _: fn(AliasRequest, GetRequest, Self::LinkMaker) -> Self::Response,
+        _: fn(AliasRequest, Self::Request, Self::LinkMaker) -> Self::Response,
     ) { self.register("alias-get", alias); }
 
     fn attach_index_alias(&mut self,
         alias: &'static str,
-        _: fn(AliasRequest, IndexRequest, Self::LinkMaker) -> Self::Response,
+        _: fn(AliasRequest, Self::Request, Self::LinkMaker) -> Self::Response,
     ) { self.register("alias-index", alias); }
 }
 
@@ -242,6 +243,18 @@ impl MakeLinks for MockLinker {
     }
 }
 
+pub struct MockRequest;
+
+impl Request for MockRequest {
+    fn id(&self) -> &str { unimplemented!() }
+    fn resource_options(&self) -> ResourceOptions { unimplemented!() }
+    fn collection_options(&self) -> CollectionOptions { unimplemented!() }
+}
+
+impl Read for MockRequest {
+    fn read(&mut self, _: &mut [u8]) -> io::Result<usize> { unimplemented!() }
+}
+
 #[derive(Default)]
 pub struct MockResponse;
 
@@ -251,10 +264,6 @@ impl Response for MockResponse {
 }
 
 impl Write for MockResponse {
-    fn write(&mut self, _: &[u8]) -> io::Result<usize> {
-        unimplemented!()
-    }
-    fn flush(&mut self) -> io::Result<()> {
-        unimplemented!()
-    }
+    fn write(&mut self, _: &[u8]) -> io::Result<usize> { unimplemented!() }
+    fn flush(&mut self) -> io::Result<()> { unimplemented!() }
 }
