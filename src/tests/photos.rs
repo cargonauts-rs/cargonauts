@@ -4,11 +4,11 @@ use api;
 use repr;
 
 routes! {
-    resource User: [get, patch] {
+    resource User {
         has many Photo: [fetch, append];
         alias [get] as "me";
     }
-    resource Photo: [get, index, post, delete, append] {
+    resource Photo {
         has one User: [fetch];
     }
 }
@@ -140,7 +140,7 @@ fn it_has_attached_routes() {
     
     const ME_ROUTES: &'static [&'static str] = &["alias-get"];
     const USERS_ROUTES: &'static [&'static str] = &["get", "patch"];
-    const PHOTOS_ROUTES: &'static [&'static str] = &["get", "index", "post", "delete", "append"];
+    const PHOTOS_ROUTES: &'static [&'static str] = &["get", "index", "delete", "post", "append"];
     const USERS_PHOTOS_ROUTES: &'static [&'static str] = &["fetch-many", "fetch-rel", "append-many", "append-many-rel"];
     const PHOTOS_USER_ROUTES: &'static [&'static str] = &["fetch-one", "fetch-rel"];
 

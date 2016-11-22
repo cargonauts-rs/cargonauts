@@ -4,7 +4,7 @@ use api;
 use repr;
 
 routes! {
-    resource Object: [get, index, post, patch, delete] { }
+    resource Object { }
 }
 
 pub struct Object;
@@ -71,7 +71,7 @@ fn it_compiles() { }
 fn it_has_attached_routes() {
     use router::mock::MockRouter;
     
-    const ROUTES: &'static [&'static str] = &["get", "index", "post", "patch", "delete"];
+    const ROUTES: &'static [&'static str] = &["get", "index", "delete", "patch", "post"];
 
     let mut router = MockRouter::new();
     attach_routes(&mut router);
