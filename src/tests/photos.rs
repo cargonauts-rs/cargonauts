@@ -6,7 +6,7 @@ use repr;
 routes! {
     resource User {
         has many Photo;
-        alias [get] as "me";
+        alias get as "me";
     }
     resource Photo {
         has one User;
