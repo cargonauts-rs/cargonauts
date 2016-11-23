@@ -4,7 +4,7 @@ use api::{self, Error};
 use api::async;
 use api::rel;
 use api::raw;
-use router::{Request, Router};
+use router::{Request, Router, ResourceRoute, Method};
 use futures::{IntoFuture, Future};
 use receiver::{Receiver, IdReceiver, PatchReceiver};
 use presenter::Presenter;
@@ -47,7 +47,10 @@ impl<'a, R: Router> _Router<'a, R> {
             let id = try_status!(request.id().parse(), presenter);
             presenter.try_present(T::get(id, options.includes).into_future().wait())
         }
-        self.router.attach_get(T::resource_plural(), get::<R, T, P>);
+        self.router.attach_resource(T::resource_plural(), ResourceRoute {
+            method: Method::Get,
+            relation: None,
+        }, get::<R, T, P>);
     }
 
     pub fn attach_index<T, P>(&mut self)
@@ -65,7 +68,10 @@ impl<'a, R: Router> _Router<'a, R> {
             let presenter = P::prepare(options.field_set, link_maker);
             presenter.try_present(T::index(options.includes, options.sort, options.page).into_future().wait())
         }
-        self.router.attach_index(T::resource_plural(), index::<R, T, P>);
+        self.router.attach_resource(T::resource_plural(), ResourceRoute {
+            method: Method::Index,
+            relation: None,
+        }, index::<R, T, P>);
     }
 
     pub fn attach_delete<T, P>(&mut self)
@@ -83,7 +89,10 @@ impl<'a, R: Router> _Router<'a, R> {
             let id = try_status!(request.id().parse(), presenter);
             presenter.try_present(T::delete(&id).into_future().wait())
         }
-        self.router.attach_delete(T::resource_plural(), delete::<R, T, P>);
+        self.router.attach_resource(T::resource_plural(), ResourceRoute {
+            method: Method::Delete,
+            relation: None,
+        }, delete::<R, T, P>);
     }
 
     pub fn attach_clear<T, P>(&mut self)
@@ -100,7 +109,10 @@ impl<'a, R: Router> _Router<'a, R> {
             let presenter = P::prepare(None, link_maker);
             presenter.try_present(T::clear().into_future().wait())
         }
-        self.router.attach_clear(T::resource_plural(), clear::<R, T, P>);
+        self.router.attach_resource(T::resource_plural(), ResourceRoute {
+            method: Method::Clear,
+            relation: None,
+        }, clear::<R, T, P>);
     }
 
     pub fn attach_remove<T, P, C>(&mut self)
@@ -120,7 +132,10 @@ impl<'a, R: Router> _Router<'a, R> {
             let ids = try_status!(C::receive_ids(request), presenter);
             presenter.try_present(T::remove(&ids).into_future().wait())
         }
-        self.router.attach_remove(T::resource_plural(), remove::<R, T, P, C>);
+        self.router.attach_resource(T::resource_plural(), ResourceRoute {
+            method: Method::Remove,
+            relation: None,
+        }, remove::<R, T, P, C>);
     }
 
     pub fn attach_patch<T, P, C>(&mut self)
@@ -142,7 +157,10 @@ impl<'a, R: Router> _Router<'a, R> {
             let received = try_status!(C::receive_patch(request), presenter);
             presenter.try_present(T::patch(id, received).into_future().wait())
         }
-        self.router.attach_patch(T::resource_plural(), patch::<R, T, P, C>);
+        self.router.attach_resource(T::resource_plural(), ResourceRoute {
+            method: Method::Patch,
+            relation: None,
+        }, patch::<R, T, P, C>);
     }
 
     pub fn attach_patch_async<T, P, C>(&mut self)
@@ -163,7 +181,10 @@ impl<'a, R: Router> _Router<'a, R> {
             let received = try_status!(C::receive_patch(request), presenter);
             presenter.try_present(T::patch_async(id, received).into_future().wait())
         }
-        self.router.attach_patch(T::resource_plural(), patch_async::<R, T, P, C>);
+        self.router.attach_resource(T::resource_plural(), ResourceRoute {
+            method: Method::Patch,
+            relation: None,
+        }, patch_async::<R, T, P, C>);
     }
 
     pub fn attach_post<T, P, C>(&mut self)
@@ -184,7 +205,10 @@ impl<'a, R: Router> _Router<'a, R> {
             let received = try_status!(C::receive_resource(request), presenter);
             presenter.try_present(T::post(received).into_future().wait())
         }
-        self.router.attach_post(T::resource_plural(), post::<R, T, P, C>);
+        self.router.attach_resource(T::resource_plural(), ResourceRoute {
+            method: Method::Post,
+            relation: None,
+        }, post::<R, T, P, C>);
     }
 
     pub fn attach_post_async<T, P, C>(&mut self)
@@ -204,7 +228,10 @@ impl<'a, R: Router> _Router<'a, R> {
             let received = try_status!(C::receive_resource(request), presenter);
             presenter.try_present(T::post_async(received).into_future().wait())
         }
-        self.router.attach_post(T::resource_plural(), post_async::<R, T, P, C>);
+        self.router.attach_resource(T::resource_plural(), ResourceRoute {
+            method: Method::Post,
+            relation: None,
+        }, post_async::<R, T, P, C>);
     }
 
     pub fn attach_append<T, P, C>(&mut self)
@@ -225,7 +252,10 @@ impl<'a, R: Router> _Router<'a, R> {
             let received = try_status!(C::receive_collection(request), presenter);
             presenter.try_present(T::append(received).into_future().wait())
         }
-        self.router.attach_append(T::resource_plural(), append::<R, T, P, C>);
+        self.router.attach_resource(T::resource_plural(), ResourceRoute {
+            method: Method::Append,
+            relation: None,
+        }, append::<R, T, P, C>);
     }
 
     pub fn attach_replace<T, P, C>(&mut self)
@@ -246,7 +276,10 @@ impl<'a, R: Router> _Router<'a, R> {
             let received = try_status!(C::receive_collection(request), presenter);
             presenter.try_present(T::replace(received).into_future().wait())
         }
-        self.router.attach_replace(T::resource_plural(), replace::<R, T, P, C>);
+        self.router.attach_resource(T::resource_plural(), ResourceRoute {
+            method: Method::Replace,
+            relation: None,
+        }, replace::<R, T, P, C>);
     }
 
     pub fn attach_fetch_one<T, Rel, P>(&mut self)
@@ -290,8 +323,14 @@ impl<'a, R: Router> _Router<'a, R> {
                 }
             }))
         }
-        self.router.attach_fetch_one(T::resource_plural(), Rel::to_one(), fetch_one::<R, T, Rel, P>);
-        self.router.attach_fetch_rel(T::resource_plural(), Rel::to_one(), fetch_one_rel::<R, T, Rel, P>);
+        self.router.attach_resource(T::resource_plural(), ResourceRoute {
+            method: Method::Get,
+            relation: Some((Rel::to_one(), false)),
+        }, fetch_one::<R, T, Rel, P>);
+        self.router.attach_resource(T::resource_plural(), ResourceRoute {
+            method: Method::Get,
+            relation: Some((Rel::to_one(), true))
+        }, fetch_one_rel::<R, T, Rel, P>);
     }
 
     pub fn attach_fetch_many<T, Rel, P>(&mut self)
@@ -335,8 +374,14 @@ impl<'a, R: Router> _Router<'a, R> {
                 }
             }))
         }
-        self.router.attach_fetch_many(T::resource_plural(), Rel::to_many(), fetch_many::<R, T, Rel, P>);
-        self.router.attach_fetch_rel(T::resource_plural(), Rel::to_many(), fetch_many_rel::<R, T, Rel, P>);
+        self.router.attach_resource(T::resource_plural(), ResourceRoute {
+            method: Method::Index,
+            relation: Some((Rel::to_many(), false))
+        }, fetch_many::<R, T, Rel, P>);
+        self.router.attach_resource(T::resource_plural(), ResourceRoute {
+            method: Method::Index,
+            relation: Some((Rel::to_many(), true))
+        }, fetch_many_rel::<R, T, Rel, P>);
     }
 
     pub fn attach_delete_one<T, Rel, P>(&mut self)
@@ -367,8 +412,14 @@ impl<'a, R: Router> _Router<'a, R> {
             let parsed_id = try_status!(request.id().parse(), presenter);
             presenter.try_present(T::unlink_one(&api::Entity::Id(parsed_id)).into_future().wait())
         }
-        self.router.attach_delete_one(T::resource_plural(), Rel::to_one(), delete_one::<R, T, Rel, P>);
-        self.router.attach_delete_one_rel(T::resource_plural(), Rel::to_one(), delete_one_rel::<R, T, Rel, P>)
+        self.router.attach_resource(T::resource_plural(), ResourceRoute {
+            method: Method::Delete,
+            relation: Some((Rel::to_one(), false))
+        }, delete_one::<R, T, Rel, P>);
+        self.router.attach_resource(T::resource_plural(), ResourceRoute {
+            method: Method::Delete,
+            relation: Some((Rel::to_one(), true))
+        }, delete_one_rel::<R, T, Rel, P>)
     }
 
     pub fn attach_clear_many<T, Rel, P>(&mut self)
@@ -399,8 +450,14 @@ impl<'a, R: Router> _Router<'a, R> {
             let id = try_status!(request.id().parse(), presenter);
             presenter.try_present(T::clear_links(&api::Entity::Id(id)).into_future().wait())
         }
-        self.router.attach_clear_many(T::resource_plural(), Rel::to_many(), clear_many::<R, T, Rel, P>);
-        self.router.attach_clear_many_rel(T::resource_plural(), Rel::to_many(), clear_many_rel::<R, T, Rel, P>);
+        self.router.attach_resource(T::resource_plural(), ResourceRoute {
+            method: Method::Clear,
+            relation: Some((Rel::to_many(), true)),
+        }, clear_many::<R, T, Rel, P>);
+        self.router.attach_resource(T::resource_plural(), ResourceRoute {
+            method: Method::Clear,
+            relation: Some((Rel::to_many(), false)),
+        }, clear_many_rel::<R, T, Rel, P>);
     }
 
     pub fn attach_remove_many<T, Rel, P, C>(&mut self)
@@ -436,8 +493,14 @@ impl<'a, R: Router> _Router<'a, R> {
             let parsed_rel_ids = try_status!(C::receive_ids(request), presenter);
             presenter.try_present(T::remove_links(&api::Entity::Id(parsed_id), &parsed_rel_ids).into_future().wait())
         }
-        self.router.attach_remove_many(T::resource_plural(), Rel::to_many(), remove_many::<R, T, Rel, P, C>);
-        self.router.attach_remove_many_rel(T::resource_plural(), Rel::to_many(), remove_many_rel::<R, T, Rel, P, C>);
+        self.router.attach_resource(T::resource_plural(), ResourceRoute {
+            method: Method::Remove,
+            relation: Some((Rel::to_many(), false))
+        }, remove_many::<R, T, Rel, P, C>);
+        self.router.attach_resource(T::resource_plural(), ResourceRoute {
+            method: Method::Remove,
+            relation: Some((Rel::to_many(), true))
+        }, remove_many_rel::<R, T, Rel, P, C>);
     }
 
     pub fn attach_patch_one<T, Rel, P, C>(&mut self)
@@ -463,7 +526,10 @@ impl<'a, R: Router> _Router<'a, R> {
             let received = try_status!(C::receive_patch(request), presenter);
             presenter.try_present(T::patch_one(&api::Entity::Id(id), received).into_future().wait())
         }
-        self.router.attach_patch_one(T::resource_plural(), Rel::to_one(), patch_one::<R, T, Rel, P, C>);
+        self.router.attach_resource(T::resource_plural(), ResourceRoute {
+            method: Method::Patch,
+            relation: Some((Rel::to_one(), false))
+        }, patch_one::<R, T, Rel, P, C>);
     }
 
     pub fn attach_post_one<T, Rel, P, C>(&mut self)
@@ -521,8 +587,14 @@ impl<'a, R: Router> _Router<'a, R> {
                 }
             }
         }
-        self.router.attach_post_one(T::resource_plural(), Rel::to_one(), post_one::<R, T, Rel, P, C>);
-        self.router.attach_update_one_rel(T::resource_plural(), Rel::to_one(), post_one_rel::<R, T, Rel, P, C>);
+        self.router.attach_resource(T::resource_plural(), ResourceRoute {
+            method: Method::Post,
+            relation: Some((Rel::to_one(), false))
+        }, post_one::<R, T, Rel, P, C>);
+        self.router.attach_resource(T::resource_plural(), ResourceRoute {
+            method: Method::Post,
+            relation: Some((Rel::to_one(), true))
+        }, post_one_rel::<R, T, Rel, P, C>);
     }
 
     pub fn attach_append_many<T, Rel, P, C>(&mut self)
@@ -578,8 +650,14 @@ impl<'a, R: Router> _Router<'a, R> {
             };
             presenter.try_present(T::append_links(&api::Entity::Id(id), &rel_ids).into_future().wait())
         }
-        self.router.attach_append_many(T::resource_plural(), Rel::to_many(), append_many::<R, T, Rel, P, C>);
-        self.router.attach_append_many_rel(T::resource_plural(), Rel::to_many(), append_many_rel::<R, T, Rel, P, C>);
+        self.router.attach_resource(T::resource_plural(), ResourceRoute {
+            method: Method::Append,
+            relation: Some((Rel::to_many(), false))
+        }, append_many::<R, T, Rel, P, C>);
+        self.router.attach_resource(T::resource_plural(), ResourceRoute {
+            method: Method::Append,
+            relation: Some((Rel::to_many(), true))
+        }, append_many_rel::<R, T, Rel, P, C>);
     }
 
     pub fn attach_replace_many<T, Rel, P, C>(&mut self)
@@ -636,8 +714,14 @@ impl<'a, R: Router> _Router<'a, R> {
             };
             presenter.try_present(T::replace_links(&api::Entity::Id(id), &rel_ids).into_future().wait())
         }
-        self.router.attach_replace_many(T::resource_plural(), Rel::to_many(), replace_many::<R, T, Rel, P, C>);
-        self.router.attach_replace_many_rel(T::resource_plural(), Rel::to_many(), replace_many_rel::<R, T, Rel, P, C>);
+        self.router.attach_resource(T::resource_plural(), ResourceRoute {
+            method: Method::Replace,
+            relation: Some((Rel::to_many(), false))
+        }, replace_many::<R, T, Rel, P, C>);
+        self.router.attach_resource(T::resource_plural(), ResourceRoute {
+            method: Method::Replace,
+            relation: Some((Rel::to_many(), true))
+        }, replace_many_rel::<R, T, Rel, P, C>);
     }
 
     pub fn attach_get_alias<T, P>(&mut self, route: &'static str)
@@ -645,17 +729,17 @@ impl<'a, R: Router> _Router<'a, R> {
         T: raw::RawGetAliased<P::Include>,
         P: Presenter<T, R>,
     { 
-        fn get_aliased<R, T, P>(alias_request: api::AliasRequest, get_request: R::Request, link_maker: R::LinkMaker) -> R::Response
+        fn get_aliased<R, T, P>(request: R::Request, link_maker: R::LinkMaker) -> R::Response
         where
             T: raw::RawGetAliased<P::Include>,
             P: Presenter<T, R>,
             R: Router,
         {
-            let options = get_request.resource_options();
+            let options = request.resource_options();
             let presenter = P::prepare(options.field_set, link_maker);
-            presenter.try_present(T::get(alias_request, options.includes).into_future().wait())
+            presenter.try_present(T::get(request.alias_info(), options.includes).into_future().wait())
         }
-        self.router.attach_get_alias(route, get_aliased::<R, T, P>);
+        self.router.attach_alias(route, Method::Get, get_aliased::<R, T, P>);
     }
 
     pub fn attach_index_aliased<T, P>(&mut self, route: &'static str)
@@ -663,17 +747,16 @@ impl<'a, R: Router> _Router<'a, R> {
         T: raw::RawIndexAliased<P::Include>,
         P: Presenter<T, R>,
     {
-        fn index_aliased<R, T, P>(alias_request: api::AliasRequest, index_request: R::Request, link_maker: R::LinkMaker) -> R::Response
+        fn index_aliased<R, T, P>(request: R::Request, link_maker: R::LinkMaker) -> R::Response
         where
             T: raw::RawIndexAliased<P::Include>,
             P: Presenter<T, R>,
             R: Router,
         {
-            let options = index_request.collection_options();
+            let options = request.collection_options();
             let presenter = P::prepare(options.field_set, link_maker);
-            presenter.try_present(T::index(alias_request, options.includes, options.sort).into_future().wait())
+            presenter.try_present(T::index(request.alias_info(), options.includes, options.sort).into_future().wait())
         }
-
-        self.router.attach_index_alias(route, index_aliased::<R, T, P>)
+        self.router.attach_alias(route, Method::Index, index_aliased::<R, T, P>);
     }
 }

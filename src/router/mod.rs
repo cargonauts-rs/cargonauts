@@ -14,137 +14,39 @@ pub use self::sort::SortQuery;
 
 pub trait Router {
     type Request: Request;
-    type Response: Response;
+    type Response: Response + 'static;
     type LinkMaker: MakeLinks;
-    fn attach_get(&mut self,
+
+    fn attach_resource(&mut self,
         resource: &'static str,
-        handler: fn(Self::Request, Self::LinkMaker) -> Self::Response,
-    );
-    fn attach_index(&mut self,
-        resource: &'static str, 
-        handler: fn(Self::Request, Self::LinkMaker) -> Self::Response,
-    );
-    fn attach_delete(&mut self,
-        resource: &'static str,
-        handler: fn(Self::Request, Self::LinkMaker) -> Self::Response,
-    );
-    fn attach_clear(&mut self,
-        resource: &'static str,
-        handler: fn(Self::Request, Self::LinkMaker) -> Self::Response,
-    );
-    fn attach_remove(&mut self,
-        resource: &'static str,
-        handler: fn(Self::Request, Self::LinkMaker) -> Self::Response,
-    );
-    fn attach_patch(&mut self,
-        resource: &'static str,
-        handler: fn(Self::Request, Self::LinkMaker) -> Self::Response,
-    );
-    fn attach_post(&mut self,
-        resource: &'static str,
-        handler: fn(Self::Request, Self::LinkMaker) -> Self::Response,
-    );
-    fn attach_append(&mut self,
-        resource: &'static str,
-        handler: fn(Self::Request, Self::LinkMaker) -> Self::Response,
-    );
-    fn attach_replace(&mut self,
-        resource: &'static str,
+        route: ResourceRoute,
         handler: fn(Self::Request, Self::LinkMaker) -> Self::Response,
     );
 
-    fn attach_fetch_one(&mut self,
-        resource: &'static str,
-        relation: &'static str,
-        handler: fn(Self::Request, Self::LinkMaker) -> Self::Response,
-    );
-    fn attach_fetch_many(&mut self,
-        resource: &'static str,
-        relation: &'static str,
-        handler: fn(Self::Request, Self::LinkMaker) -> Self::Response,
-    );
-    fn attach_fetch_rel(&mut self,
-        resource: &'static str,
-        relation: &'static str,
-        handler: fn(Self::Request, Self::LinkMaker) -> Self::Response,
-    );
-
-    fn attach_delete_one(&mut self,
-        resource: &'static str,
-        relation: &'static str,
-        handler: fn(Self::Request, Self::LinkMaker) -> Self::Response,
-    );
-    fn attach_clear_many(&mut self,
-        resource: &'static str,
-        relation: &'static str,
-        handler: fn(Self::Request, Self::LinkMaker) -> Self::Response,
-    );
-    fn attach_remove_many(&mut self,
-        resource: &'static str,
-        relation: &'static str,
-        handler: fn(Self::Request, Self::LinkMaker) -> Self::Response,
-    );
-    fn attach_delete_one_rel(&mut self,
-        resource: &'static str,
-        relation: &'static str,
-        handler: fn(Self::Request, Self::LinkMaker) -> Self::Response,
-    );
-    fn attach_clear_many_rel(&mut self,
-        resource: &'static str,
-        relation: &'static str,
-        handler: fn(Self::Request, Self::LinkMaker) -> Self::Response,
-    );
-    fn attach_remove_many_rel(&mut self,
-        resource: &'static str,
-        relation: &'static str,
-        handler: fn(Self::Request, Self::LinkMaker) -> Self::Response,
-    );
-
-    fn attach_post_one(&mut self,
-        resource: &'static str,
-        relation: &'static str,
-        handler: fn(Self::Request, Self::LinkMaker) -> Self::Response,
-    );
-    fn attach_patch_one(&mut self,
-        resource: &'static str,
-        relation: &'static str,
-        handler: fn(Self::Request, Self::LinkMaker) -> Self::Response,
-    );
-    fn attach_append_many(&mut self,
-        resource: &'static str,
-        relation: &'static str,
-        handler: fn(Self::Request, Self::LinkMaker) -> Self::Response,
-    );
-    fn attach_replace_many(&mut self,
-        resource: &'static str,
-        relation: &'static str,
-        handler: fn(Self::Request, Self::LinkMaker) -> Self::Response,
-    );
-    fn attach_update_one_rel(&mut self,
-        resource: &'static str,
-        relation: &'static str,
-        handler: fn(Self::Request, Self::LinkMaker) -> Self::Response,
-    );
-    fn attach_append_many_rel(&mut self,
-        resource: &'static str,
-        relation: &'static str,
-        handler: fn(Self::Request, Self::LinkMaker) -> Self::Response,
-    );
-    fn attach_replace_many_rel(&mut self,
-        resource: &'static str,
-        relation: &'static str,
-        handler: fn(Self::Request, Self::LinkMaker) -> Self::Response,
-    );
-
-    fn attach_get_alias(&mut self,
+    fn attach_alias(&mut self,
         alias: &'static str,
-        handler: fn(AliasRequest, Self::Request, Self::LinkMaker) -> Self::Response,
+        method: Method,
+        handler: fn(Self::Request, Self::LinkMaker) -> Self::Response,
     );
+}
 
-    fn attach_index_alias(&mut self,
-        alias: &'static str,
-        handler: fn(AliasRequest, Self::Request, Self::LinkMaker) -> Self::Response,
-    );
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+pub enum Method {
+    Get,
+    Patch,
+    Post,
+    Delete,
+    Index,
+    Append,
+    Replace,
+    Clear,
+    Remove,
+}
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+pub struct ResourceRoute {
+    pub method: Method,
+    pub relation: Option<(&'static str, bool)>,
 }
 
 pub enum Status {
@@ -198,7 +100,9 @@ pub struct CollectionOptions {
 }
 
 pub trait Request: Read {
+    fn endpoint(&self) -> &str;
     fn id(&self) -> &str;
     fn resource_options(&self) -> ResourceOptions;
     fn collection_options(&self) -> CollectionOptions;
+    fn alias_info(&self) -> AliasRequest;
 }

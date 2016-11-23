@@ -38,7 +38,7 @@ macro_rules! _resource {
             type Relationships = $crate::api::raw::NoRelationships;
         }
 
-        impl<I> $crate::_internal::_FetchRels<I> for $resource {
+        impl<I: 'static> $crate::_internal::_FetchRels<I> for $resource {
             fn rels(_: &$crate::api::Entity<Self>, _: &[$crate::router::IncludeQuery]) -> ::std::result::Result<(Self::Relationships, Vec<$crate::api::raw::Include<I>>), $crate::api::Error> {
                 Ok(($crate::api::raw::NoRelationships, vec![]))
             }
@@ -63,7 +63,7 @@ macro_rules! _resource {
             type Relationships = UpdateRelationships;
         }
 
-        impl<I> $crate::_internal::_FetchRels<I> for $resource where
+        impl<I: 'static> $crate::_internal::_FetchRels<I> for $resource where
             I: $crate::presenter::ConvertInclude<$resource>,
         $(
             I: $crate::presenter::ConvertInclude<<$rel as $crate::api::rel::Relation>::Resource>,
@@ -249,7 +249,8 @@ macro_rules! _alias {
 macro_rules! _fetch_rel {
     ($id:expr, $includes:expr, $includes_out:expr, $resource:ty, $rel:ty, one) => {
         if let Some(include) = $includes.iter().find(|include| include.is_of(_name_rel!($rel, one))) {
-            let response =<$resource as $crate::api::rel::raw::GetOne<I, $rel>>::get_one($id, &include.transitive)?;
+            use $crate::{IntoFuture, Future};
+            let response = <$resource as $crate::api::rel::raw::GetOne<I, $rel>>::get_one($id, include.transitive.clone()).into_future().wait()?;
             let identifier = $crate::api::raw::Identifier::from(&response.resource);
             $includes_out.push(response.resource.into());
             $includes_out.extend(response.includes);
@@ -264,7 +265,8 @@ macro_rules! _fetch_rel {
     };
     ($id:expr, $includes:expr, $includes_out:expr, $resource:ty, $rel:ty, many) => {
         if let Some(include) = $includes.iter().find(|include| include.is_of(_name_rel!($rel, many))) {
-            let response = <$resource as $crate::api::rel::raw::IndexMany<I, $rel>>::index_many($id, &include.transitive)?;
+            use $crate::{IntoFuture, Future};
+            let response = <$resource as $crate::api::rel::raw::IndexMany<I, $rel>>::index_many($id, include.transitive.clone()).into_future().wait()?;
             let identifiers = response.resources.iter().map($crate::api::raw::Identifier::from).collect();
             $includes_out.extend(response.resources.into_iter().map(Into::into));
             $includes_out.extend(response.includes);

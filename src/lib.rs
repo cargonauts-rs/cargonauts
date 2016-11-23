@@ -24,7 +24,7 @@ mod macros;
 pub mod _internal;
 
 pub use io_adapter::{ReadAdapter, WriteAdapter};
-pub use futures::IntoFuture;
+pub use futures::{IntoFuture, Future};
 pub use serde::{Deserialize, Deserializer, Serialize, SerializeTo, Serializer};
 
 #[cfg(test)]

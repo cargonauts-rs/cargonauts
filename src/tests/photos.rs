@@ -141,8 +141,8 @@ fn it_has_attached_routes() {
     const ME_ROUTES: &'static [&'static str] = &["alias-get"];
     const USERS_ROUTES: &'static [&'static str] = &["get", "patch"];
     const PHOTOS_ROUTES: &'static [&'static str] = &["get", "index", "delete", "post", "append"];
-    const USERS_PHOTOS_ROUTES: &'static [&'static str] = &["fetch-many", "fetch-rel", "append-many", "append-many-rel"];
-    const PHOTOS_USER_ROUTES: &'static [&'static str] = &["fetch-one", "fetch-rel", "patch-one"];
+    const USERS_PHOTOS_ROUTES: &'static [&'static str] = &["index-many", "index-rel", "append-many", "append-rel"];
+    const PHOTOS_USER_ROUTES: &'static [&'static str] = &["get-one", "get-rel", "patch-one"];
 
     let mut router = MockRouter::new();
     attach_routes(&mut router);
