@@ -6,7 +6,6 @@ use api::async;
 use api::rel;
 use api::raw;
 use router::{self as r, Router};
-use Deserialize;
 use futures::{IntoFuture, Future};
 use receiver::{Receiver, PatchReceiver};
 use presenter::Presenter;
@@ -456,7 +455,7 @@ impl<'a, R: Router> _Router<'a, R> {
     where
         T: rel::raw::PostOne<<P as Presenter<Rel::Resource, R>>::Include, Rel>,
         Rel: rel::ToOne,
-        Rel::Resource: raw::RawUpdate + Deserialize,
+        Rel::Resource: raw::RawUpdate,
         P: Presenter<Rel::Resource, R> + Presenter<(), R>,
         C: Receiver<Rel::Resource, Box<Read>>,
     {
@@ -465,7 +464,7 @@ impl<'a, R: Router> _Router<'a, R> {
             R: Router,
             T: rel::raw::PostOne<P::Include, Rel>,
             Rel: rel::ToOne,
-            Rel::Resource: raw::RawUpdate + Deserialize,
+            Rel::Resource: raw::RawUpdate,
             P: Presenter<Rel::Resource, R>,
             C: Receiver<Rel::Resource, Box<Read>>,
         {
@@ -479,7 +478,7 @@ impl<'a, R: Router> _Router<'a, R> {
             R: Router,
             T: rel::raw::PostOne<<P as Presenter<Rel::Resource, R>>::Include, Rel>,
             Rel: rel::ToOne,
-            Rel::Resource: raw::RawUpdate + Deserialize,
+            Rel::Resource: raw::RawUpdate,
             P: Presenter<Rel::Resource, R> + Presenter<(), R>,
             C: Receiver<Rel::Resource, Box<Read>>,
         {
@@ -513,7 +512,7 @@ impl<'a, R: Router> _Router<'a, R> {
     where
         T: rel::raw::AppendMany<<P as Presenter<Rel::Resource, R>>::Include, Rel>,
         Rel: rel::ToMany,
-        Rel::Resource: raw::RawUpdate + Deserialize,
+        Rel::Resource: raw::RawUpdate,
         P: Presenter<Rel::Resource, R> + Presenter<(), R>,
         C: Receiver<Rel::Resource, Box<Read>>,
     {
@@ -522,7 +521,7 @@ impl<'a, R: Router> _Router<'a, R> {
             R: Router,
             T: rel::raw::AppendMany<P::Include, Rel>,
             Rel: rel::ToMany,
-            Rel::Resource: raw::RawUpdate + Deserialize,
+            Rel::Resource: raw::RawUpdate,
             P: Presenter<Rel::Resource, R>,
             C: Receiver<Rel::Resource, Box<Read>>,
         {
@@ -536,7 +535,7 @@ impl<'a, R: Router> _Router<'a, R> {
             R: Router,
             T: rel::raw::AppendMany<<P as Presenter<Rel::Resource, R>>::Include, Rel>,
             Rel: rel::ToMany,
-            Rel::Resource: raw::RawUpdate + Deserialize,
+            Rel::Resource: raw::RawUpdate,
             P: Presenter<Rel::Resource, R> + Presenter<(), R>,
             C: Receiver<Rel::Resource, Box<Read>>,
         {
@@ -569,7 +568,7 @@ impl<'a, R: Router> _Router<'a, R> {
     where
         T: rel::raw::ReplaceMany<<P as Presenter<Rel::Resource, R>>::Include, Rel>,
         Rel: rel::ToMany,
-        Rel::Resource: raw::RawUpdate + Deserialize,
+        Rel::Resource: raw::RawUpdate,
         P: Presenter<Rel::Resource, R> + Presenter<(), R>,
         C: Receiver<Rel::Resource, Box<Read>>,
     {
@@ -578,7 +577,7 @@ impl<'a, R: Router> _Router<'a, R> {
             R: Router,
             T: rel::raw::ReplaceMany<P::Include, Rel>,
             Rel: rel::ToMany,
-            Rel::Resource: raw::RawUpdate + Deserialize,
+            Rel::Resource: raw::RawUpdate,
             P: Presenter<Rel::Resource, R>,
             C: Receiver<Rel::Resource, Box<Read>>,
         {
@@ -592,7 +591,7 @@ impl<'a, R: Router> _Router<'a, R> {
             R: Router,
             T: rel::raw::ReplaceMany<<P as Presenter<Rel::Resource, R>>::Include, Rel>,
             Rel: rel::ToMany,
-            Rel::Resource: raw::RawUpdate + Deserialize,
+            Rel::Resource: raw::RawUpdate,
             P: Presenter<Rel::Resource, R> + Presenter<(), R>,
             C: Receiver<Rel::Resource, Box<Read>>,
         {

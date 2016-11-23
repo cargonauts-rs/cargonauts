@@ -7,7 +7,7 @@ mod resource;
 /// The entry point for the routes DSL, which defines the endpoints of your API.
 #[macro_export]
 macro_rules! routes {
-    {$(resource $resource:ident { $(has $count:ident $rel:ident : [$($rel_method:ident),*];)* $(alias [$($alias_method:ident),*] as $route:expr;)*})*} => {
+    {$(resource $resource:ident { $(has $count:ident $rel:ident;)* $(alias [$($alias_method:ident),*] as $route:expr;)*})*} => {
         pub fn attach_routes<T>(router: &mut T)
         where
             T: $crate::router::Router,
@@ -19,7 +19,7 @@ macro_rules! routes {
 
             let mut router = $crate::_internal::_Router::new(router);
             $({ _resource!(router, $resource
-                          { $($count $rel: [$($rel_method),*];)* }
+                          { $($count $rel;)* }
                           { $($route => [$($alias_method),*];)* }
             );})*
         }
@@ -54,7 +54,7 @@ macro_rules! _resource {
 
 
     };
-    ($router:expr, $resource:ty { $($count:ident $rel:ident : [$($rel_method:ident),*];)* } {$($route:expr => [$($alias_method:ident),*];)*}) => {
+    ($router:expr, $resource:ty { $($count:ident $rel:ident;)* } {$($route:expr => [$($alias_method:ident),*];)*}) => {
         impl $crate::api::raw::RawFetch for $resource {
             type Relationships = Relationships;
         }
@@ -198,7 +198,7 @@ macro_rules! _resource {
 
         _methods!($router, $resource);
         $(_alias!($router, $resource, $route, [$($alias_method),*]);)*
-        $(_rel_methods!($router, $resource, $count $rel [$($rel_method),*]);)*
+        $(_rel_methods!($router, $resource, $count $rel);)*
     };
 }
 
@@ -215,6 +215,23 @@ macro_rules! _methods {
         <$resource as $crate::_internal::_MaybePost<P<T, T::Response>, C, T>>::attach(&mut $router);
         <$resource as $crate::_internal::_MaybeAppend<P<T, T::Response>, C, T>>::attach(&mut $router);
         <$resource as $crate::_internal::_MaybeReplace<P<T, T::Response>, C, T>>::attach(&mut $router);
+    };
+}
+
+#[macro_export]
+macro_rules! _rel_methods {
+    ($router:expr, $resource:ty, one $rel:ty) => {
+        <$resource as $crate::_internal::_MaybeGetOne<$rel, P<T, T::Response>, T>>::attach(&mut $router);
+        <$resource as $crate::_internal::_MaybeDeleteOne<$rel, P<T, T::Response>, T>>::attach(&mut $router);
+        <$resource as $crate::_internal::_MaybePatchOne<$rel, P<T, T::Response>, C, T>>::attach(&mut $router);
+        <$resource as $crate::_internal::_MaybePostOne<$rel, P<T, T::Response>, C, T>>::attach(&mut $router);
+    };
+    ($router:expr, $resource:ty, many $rel:ty) => {
+        <$resource as $crate::_internal::_MaybeIndexMany<$rel, P<T, T::Response>, T>>::attach(&mut $router);
+        <$resource as $crate::_internal::_MaybeClearMany<$rel, P<T, T::Response>, T>>::attach(&mut $router);
+        <$resource as $crate::_internal::_MaybeRemoveMany<$rel, P<T, T::Response>, T>>::attach(&mut $router);
+        <$resource as $crate::_internal::_MaybeAppendMany<$rel, P<T, T::Response>, C, T>>::attach(&mut $router);
+        <$resource as $crate::_internal::_MaybeReplaceMany<$rel, P<T, T::Response>, C, T>>::attach(&mut $router);
     };
 }
 
@@ -236,74 +253,6 @@ macro_rules! _alias {
     };
     ($router:expr, $resource:ty, []) => {
     };
-}
-
-#[macro_export]
-macro_rules! _rel_methods {
-    ($router:expr, $resource:ty, one $rel:ident [fetch, $($method:ident),*])  => {
-        $router.attach_fetch_one::<$resource, $rel, $crate::presenter::JsonApi<T, S<T::Response>>>();
-        _rel_methods!($router, $resource, one $rel [$($method),*]);
-    };
-    ($router:expr, $resource:ty, one $rel:ident [fetch])  => {
-        $router.attach_fetch_one::<$resource, $rel, $crate::presenter::JsonApi<T, S<T::Response>>>();
-    };
-    ($router:expr, $resource:ty, one $rel:ident [post, $($method:ident),*])  => {
-        $router.attach_post_one::<$resource, $rel, $crate::presenter::JsonApi<T, S<T::Response>>, $crate::receiver::JsonApi<D, Box<::std::io::Read>>>();
-        _rel_methods!($router, $resource, one $rel [$($method),*]);
-    };
-    ($router:expr, $resource:ty, one $rel:ident [post])  => {
-        $router.attach_post_one::<$resource, $rel, $crate::presenter::JsonApi<T, S<T::Response>>, $crate::receiver::JsonApi<D, Box<::std::io::Read>>>();
-    };
-    ($router:expr, $resource:ty, one $rel:ident [patch, $($method:ident),*])  => {
-        $router.attach_patch_one::<$resource, $rel, $crate::presenter::JsonApi<T, S<T::Response>>, $crate::receiver::JsonApi<D, Box<::std::io::Read>>>();
-        _rel_methods!($router, $resource, one $rel [$($method),*]);
-    };
-    ($router:expr, $resource:ty, one $rel:ident [patch])  => {
-        $router.attach_patch_one::<$resource, $rel, $crate::presenter::JsonApi<T, S<T::Response>>, $crate::receiver::JsonApi<D, Box<::std::io::Read>>>();
-    };
-    ($router:expr, $resource:ty, one $rel:ident [delete, $($method:ident),*])  => {
-        $router.attach_delete_one::<$resource, $rel, $crate::presenter::JsonApi<T, S<T::Response>>>();
-        _rel_methods!($router, $resource, one $rel [$($method),*]);
-    };
-    ($router:expr, $resource:ty, one $rel:ident [delete])  => {
-        $router.attach_delete_one::<$resource, $rel, $crate::presenter::JsonApi<T, S<T::Response>>>();
-    };
-    ($router:expr, $resource:ty, many $rel:ident [fetch, $($method:ident),*])  => {
-        $router.attach_fetch_many::<$resource, $rel, $crate::presenter::JsonApi<T, S<T::Response>>>();
-        _rel_methods!($router, $resource, many $rel [$($method),*]);
-    };
-    ($router:expr, $resource:ty, many $rel:ident [fetch])  => {
-        $router.attach_fetch_many::<$resource, $rel, $crate::presenter::JsonApi<T, S<T::Response>>>();
-    };
-    ($router:expr, $resource:ty, many $rel:ident [append, $($method:ident),*])  => {
-        $router.attach_append_many::<$resource, $rel, $crate::presenter::JsonApi<T, S<T::Response>>, $crate::receiver::JsonApi<D, Box<::std::io::Read>>>();
-        _rel_methods!($router, $resource, many $rel [$($method),*]);
-    };
-    ($router:expr, $resource:ty, many $rel:ident [append])  => {
-        $router.attach_append_many::<$resource, $rel, $crate::presenter::JsonApi<T, S<T::Response>>, $crate::receiver::JsonApi<D, Box<::std::io::Read>>>();
-    };
-    ($router:expr, $resource:ty, many $rel:ident [replace, $($method:ident),*])  => {
-        $router.attach_replace_many::<$resource, $rel, $crate::presenter::JsonApi<T, S<T::Response>>, $crate::receiver::JsonApi<D, Box<::std::io::Read>>>();
-        _rel_methods!($router, $resource, many $rel [$($method),*]);
-    };
-    ($router:expr, $resource:ty, many $rel:ident [replace])  => {
-        $router.attach_replace_many::<$resource, $rel, $crate::presenter::JsonApi<T, S<T::Response>>, $crate::receiver::JsonApi<D, Box<::std::io::Read>>>();
-    };
-    ($router:expr, $resource:ty, many $rel:ident [remove, $($method:ident),*])  => {
-        $router.attach_remove_many::<$resource, $rel, $crate::presenter::JsonApi<T, S<T::Response>>>();
-        _rel_methods!($router, $resource, many $rel [$($method),*]);
-    };
-    ($router:expr, $resource:ty, many $rel:ident [remove])  => {
-        $router.attach_remove_many::<$resource, $rel, $crate::presenter::JsonApi<T, S<T::Response>>>();
-    };
-    ($router:expr, $resource:ty, many $rel:ident [clear, $($method:ident),*])  => {
-        $router.attach_clear_many::<$resource, $rel, $crate::presenter::JsonApi<T, S<T::Response>>>();
-        _rel_methods!($router, $resource, many $rel [$($method),*]);
-    };
-    ($router:expr, $resource:ty, many $rel:ident [clear])  => {
-        $router.attach_clear_many::<$resource, $rel, $crate::presenter::JsonApi<T, S<T::Response>>>();
-    };
-    ($router:expr, $resource:ty, $count:ident $rel:ident [])  => {};
 }
 
 #[macro_export]

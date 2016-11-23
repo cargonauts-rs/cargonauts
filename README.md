@@ -26,7 +26,7 @@ routes! {
         has one User;
         has many Comment;
     }
-    resource Comment: [index, put] {
+    resource Comment {
         has one User;
         has one Post;
     }

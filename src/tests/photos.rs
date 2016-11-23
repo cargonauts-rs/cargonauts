@@ -5,11 +5,11 @@ use repr;
 
 routes! {
     resource User {
-        has many Photo: [fetch, append];
+        has many Photo;
         alias [get] as "me";
     }
     resource Photo {
-        has one User: [fetch];
+        has one User;
     }
 }
 
@@ -142,10 +142,11 @@ fn it_has_attached_routes() {
     const USERS_ROUTES: &'static [&'static str] = &["get", "patch"];
     const PHOTOS_ROUTES: &'static [&'static str] = &["get", "index", "delete", "post", "append"];
     const USERS_PHOTOS_ROUTES: &'static [&'static str] = &["fetch-many", "fetch-rel", "append-many", "append-many-rel"];
-    const PHOTOS_USER_ROUTES: &'static [&'static str] = &["fetch-one", "fetch-rel"];
+    const PHOTOS_USER_ROUTES: &'static [&'static str] = &["fetch-one", "fetch-rel", "patch-one"];
 
     let mut router = MockRouter::new();
     attach_routes(&mut router);
+
 
     assert_eq!(&router.methods_for("me")[..], ME_ROUTES);
     assert_eq!(&router.methods_for("users")[..], USERS_ROUTES);
