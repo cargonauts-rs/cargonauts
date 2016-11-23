@@ -44,12 +44,12 @@ impl<T: Resource> ToMany for T {
 pub type RelationId<T> = <<T as Relation>::Resource as Resource>::Id;
 
 pub trait HasOne<T: ToOne>: Resource {
-    type HasOneFut: IntoFuture<Item = Option<RelationId<T>>, Error = Error>;
+    type HasOneFut: IntoFuture<Item = Option<RelationId<T>>, Error = Error> + 'static;
     fn has_one(entity: &Entity<Self>) -> Self::HasOneFut;
 }
 
 pub trait HasMany<T: ToMany>: Resource {
-    type HasManyFut: IntoFuture<Item = Vec<RelationId<T>>, Error = Error>;
+    type HasManyFut: IntoFuture<Item = Vec<RelationId<T>>, Error = Error> + 'static;
     fn has_many(entity: &Entity<Self>) -> Self::HasManyFut;
 }
 

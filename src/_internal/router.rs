@@ -45,7 +45,7 @@ impl<'a, R: Router> _Router<'a, R> {
             let options = request.resource_options();
             let presenter = P::prepare(options.field_set, link_maker);
             let id = try_status!(request.id().parse(), presenter);
-            presenter.try_present(T::get(id, &options.includes).into_future().wait())
+            presenter.try_present(T::get(id, options.includes).into_future().wait())
         }
         self.router.attach_get(T::resource_plural(), get::<R, T, P>);
     }
@@ -63,7 +63,7 @@ impl<'a, R: Router> _Router<'a, R> {
         {
             let options = request.collection_options();
             let presenter = P::prepare(options.field_set, link_maker);
-            presenter.try_present(T::index(&options.includes, &options.sort, &options.page).into_future().wait())
+            presenter.try_present(T::index(options.includes, options.sort, options.page).into_future().wait())
         }
         self.router.attach_index(T::resource_plural(), index::<R, T, P>);
     }
@@ -267,7 +267,7 @@ impl<'a, R: Router> _Router<'a, R> {
             let options = request.resource_options();
             let presenter = P::prepare(options.field_set, link_maker);
             let id = try_status!(request.id().parse(), presenter);
-            presenter.try_present(T::get_one(&api::Entity::Id(id), &options.includes).into_future().wait())
+            presenter.try_present(T::get_one(&api::Entity::Id(id), options.includes).into_future().wait())
         }
         fn fetch_one_rel<R, T, Rel, P>(request: R::Request, link_maker: R::LinkMaker) -> R::Response
         where
@@ -312,7 +312,7 @@ impl<'a, R: Router> _Router<'a, R> {
             let options = request.collection_options();
             let presenter = P::prepare(options.field_set, link_maker);
             let id = try_status!(request.id().parse(), presenter);
-            presenter.try_present(T::index_many(&api::Entity::Id(id), &options.includes).into_future().wait())
+            presenter.try_present(T::index_many(&api::Entity::Id(id), options.includes).into_future().wait())
         }
         fn fetch_many_rel<R, T, Rel, P>(request: R::Request, link_maker: R::LinkMaker) -> R::Response
         where 
@@ -653,7 +653,7 @@ impl<'a, R: Router> _Router<'a, R> {
         {
             let options = get_request.resource_options();
             let presenter = P::prepare(options.field_set, link_maker);
-            presenter.try_present(T::get(alias_request, &options.includes).into_future().wait())
+            presenter.try_present(T::get(alias_request, options.includes).into_future().wait())
         }
         self.router.attach_get_alias(route, get_aliased::<R, T, P>);
     }
@@ -671,7 +671,7 @@ impl<'a, R: Router> _Router<'a, R> {
         {
             let options = index_request.collection_options();
             let presenter = P::prepare(options.field_set, link_maker);
-            presenter.try_present(T::index(alias_request, &options.includes, &options.sort).into_future().wait())
+            presenter.try_present(T::index(alias_request, options.includes, options.sort).into_future().wait())
         }
 
         self.router.attach_index_alias(route, index_aliased::<R, T, P>)

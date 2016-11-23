@@ -14,27 +14,29 @@ pub trait RawAppend<I>: RawUpdate {
     fn append(received: Vec<RawReceived<Self, Self>>) -> Self::RawAppendFut;
 }
 
-impl<I, T> RawAppend<I> for T where T: Append + _UpdateRels {
-    type RawAppendFut = Result<CollectionResponse<I, T>, Error>;
+impl<I, T> RawAppend<I> for T where T: Append + _UpdateRels, I: 'static {
+    type RawAppendFut = Box<Future<Item = CollectionResponse<I, T>, Error = Error>>;
     fn append(received: Vec<RawReceived<Self, Self>>) -> Self::RawAppendFut {
         let (data, rels) = split(received.into_iter().map(|r| (r.attributes, r.relationships)));
-        let mut resources = vec![];
-        for (resource, rels) in <Self as Append>::append(data).into_future().wait()?.into_iter().zip(rels) {
-            let entity = Entity::Resource(resource);
-            let relationships = <T as _UpdateRels>::update_rels(&entity, rels)?;
-            match entity {
-                Entity::Resource(resource)  => resources.push(ResourceObject {
-                    id: resource.id(),
-                    attributes: resource,
-                    relationships: relationships,
-                }),
-                _                           => unreachable!()
+        Box::new(<Self as Append>::append(data).into_future().and_then(move |data| {
+            let mut resources = vec![];
+            for (resource, rels) in data.into_iter().zip(rels) {
+                let entity = Entity::Resource(resource);
+                let relationships = <T as _UpdateRels>::update_rels(&entity, rels)?;
+                match entity {
+                    Entity::Resource(resource)  => resources.push(ResourceObject {
+                        id: resource.id(),
+                        attributes: resource,
+                        relationships: relationships,
+                    }),
+                    _                           => unreachable!()
+                }
             }
-        }
-        Ok(CollectionResponse {
-            resources: resources,
-            includes: vec![],
-        })
+            Ok(CollectionResponse {
+                resources: resources,
+                includes: vec![],
+            })
+        }))
     }
 }
 

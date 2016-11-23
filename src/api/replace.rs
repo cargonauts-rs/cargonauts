@@ -10,31 +10,33 @@ pub trait Replace: Resource {
 }
 
 pub trait RawReplace<I>: RawUpdate {
-    type RawReplaceFut: IntoFuture<Item = CollectionResponse<I, Self>, Error = Error>;
+    type RawReplaceFut: Future<Item = CollectionResponse<I, Self>, Error = Error>;
     fn replace(received: Vec<RawReceived<Self, Self>>) -> Self::RawReplaceFut;
 }
 
-impl<I, T> RawReplace<I> for T where T: Replace + _UpdateRels {
-    type RawReplaceFut = Result<CollectionResponse<I, T>, Error>;
+impl<I, T> RawReplace<I> for T where T: Replace + _UpdateRels, I: 'static {
+    type RawReplaceFut = Box<Future<Item = CollectionResponse<I, T>, Error = Error>>;
     fn replace(received: Vec<RawReceived<Self, Self>>) -> Self::RawReplaceFut {
         let (data, rels) = split(received.into_iter().map(|r| (r.attributes, r.relationships)));
-        let mut resources = vec![];
-        for (resource, rels) in <Self as Replace>::replace(data).into_future().wait()?.into_iter().zip(rels) {
-            let entity = Entity::Resource(resource);
-            let relationships = <T as _UpdateRels>::update_rels(&entity, rels)?;
-            match entity {
-                Entity::Resource(resource)  => resources.push(ResourceObject {
-                    id: resource.id(),
-                    attributes: resource,
-                    relationships: relationships,
-                }),
-                _                           => unreachable!()
+        Box::new(<Self as Replace>::replace(data).into_future().and_then(move |data| {
+            let mut resources = vec![];
+            for (resource, rels) in data.into_iter().zip(rels) {
+                let entity = Entity::Resource(resource);
+                let relationships = <T as _UpdateRels>::update_rels(&entity, rels)?;
+                match entity {
+                    Entity::Resource(resource)  => resources.push(ResourceObject {
+                        id: resource.id(),
+                        attributes: resource,
+                        relationships: relationships,
+                    }),
+                    _                           => unreachable!()
+                }
             }
-        }
-        Ok(CollectionResponse {
-            resources: resources,
-            includes: vec![],
-        })
+            Ok(CollectionResponse {
+                resources: resources,
+                includes: vec![],
+            })
+        }))
     }
 }
 

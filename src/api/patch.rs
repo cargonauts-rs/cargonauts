@@ -15,7 +15,7 @@ pub trait RawHasPatch<Synchronicity>: RawUpdate {
 }
 
 pub trait RawPatch<I>: RawHasPatch<Synchronous> {
-    type RawPatchFut: IntoFuture<Item = ResourceResponse<I, Self>, Error = Error>;
+    type RawPatchFut: Future<Item = ResourceResponse<I, Self>, Error = Error>;
     fn patch(id: Self::Id, received: RawReceived<Self, Self::Patch>) -> Self::RawPatchFut;
 }
 
@@ -25,22 +25,26 @@ impl<T> RawHasPatch<Synchronous> for T where T: Patch + _UpdateRels {
     type Patch = <T as Patch>::Patch;
 }
 
-impl<I, T> RawPatch<I> for T where T: Patch + _UpdateRels {
-    type RawPatchFut = Result<ResourceResponse<I, Self>, Error>;
+impl<I, T> RawPatch<I> for T where T: Patch + _UpdateRels, I: 'static {
+    type RawPatchFut = Box<Future<Item = ResourceResponse<I, Self>, Error = Error>>;
     fn patch(id: Self::Id, received: RawReceived<Self, Self::Patch>) -> Self::RawPatchFut {
-        let entity = Entity::Resource(<T as Patch>::patch(&id, received.attributes).into_future().wait()?);
-        let relationships = <T as _UpdateRels>::update_rels(&entity, received.relationships)?;
-        let resource = match entity {
-            Entity::Resource(resource)  => resource,
-            _                           => unreachable!()
-        };
-        Ok(ResourceResponse {
-            resource: ResourceObject {
-                id: resource.id(),
-                attributes: resource,
-                relationships: relationships,
-            },
-            includes: vec![],
-        })
+        let RawReceived { attributes, relationships } = received;
+        Box::new(<T as Patch>::patch(&id, attributes).into_future().and_then(move |resource| {
+            let entity = Entity::Resource(resource);
+            <T as _UpdateRels>::update_rels(&entity, relationships).map(move |relationships| {
+                let resource = match entity {
+                    Entity::Resource(resource)  => resource,
+                    _                           => unreachable!()
+                };
+                ResourceResponse {
+                    resource: ResourceObject {
+                        id: resource.id(),
+                        attributes: resource,
+                        relationships: relationships,
+                    },
+                    includes: vec![],
+                }
+            })
+        }))
     }
 }

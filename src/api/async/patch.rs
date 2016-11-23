@@ -13,7 +13,7 @@ pub trait PatchAsync: AsyncAction + RawUpdate {
 }
 
 pub trait RawPatchAsync: RawHasPatch<Asynchronous> + AsyncAction + RawUpdate {
-    type RawPatchAsyncFut: IntoFuture<Item = JobResponse<Self>, Error = Error>;
+    type RawPatchAsyncFut: Future<Item = JobResponse<Self>, Error = Error>;
     fn patch_async(id: Self::Id, received: RawReceived<Self, Self::Patch>) -> Self::RawPatchAsyncFut;
 }
 
@@ -24,16 +24,18 @@ impl<T> RawHasPatch<Asynchronous> for T where T: PatchAsync + _UpdateRels {
 }
 
 impl<T> RawPatchAsync for T where T: PatchAsync + _UpdateRels {
-    type RawPatchAsyncFut = Result<JobResponse<Self>, Error>;
+    type RawPatchAsyncFut = Box<Future<Item = JobResponse<Self>, Error = Error>>;
     fn patch_async(id: Self::Id, received: RawReceived<Self, Self::Patch>) -> Self::RawPatchAsyncFut {
-        let mut job = <Self as PatchAsync>::patch_async(&id, received.attributes).into_future().wait()?;
-        job.cache_rels(received.relationships)?;
-        Ok(JobResponse {
-            resource: ResourceObject {
-                id: job.id(),
-                attributes: job,
-                relationships: NoRelationships,
-            },
-        })
+        let RawReceived { attributes, relationships } = received;
+        Box::new(<Self as PatchAsync>::patch_async(&id, attributes).into_future().and_then(|mut job| {
+            job.cache_rels(relationships)?;
+            Ok(JobResponse {
+                resource: ResourceObject {
+                    id: job.id(),
+                    attributes: job,
+                    relationships: NoRelationships,
+                },
+            })
+        }))
     }
 }

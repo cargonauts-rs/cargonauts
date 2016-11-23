@@ -10,26 +10,30 @@ pub trait Post: Resource {
 }
 
 pub trait RawPost<I>: RawUpdate {
-    type RawPostFut: IntoFuture<Item = ResourceResponse<I, Self>, Error = Error>;
+    type RawPostFut: Future<Item = ResourceResponse<I, Self>, Error = Error>;
     fn post(received: RawReceived<Self, Self>) -> Self::RawPostFut;
 }
 
-impl<I, T> RawPost<I> for T where T: Post + _UpdateRels {
-    type RawPostFut = Result<ResourceResponse<I, T>, Error>;
+impl<I, T> RawPost<I> for T where T: Post + _UpdateRels, I: 'static {
+    type RawPostFut = Box<Future<Item = ResourceResponse<I, T>, Error = Error>>;
     fn post(received: RawReceived<Self, Self>) -> Self::RawPostFut {
-        let entity = Entity::Resource(<Self as Post>::post(received.attributes).into_future().wait()?);
-        let relationships = <T as _UpdateRels>::update_rels(&entity, received.relationships)?;
-        let resource = match entity {
-            Entity::Resource(resource)  => resource,
-            _                           => unreachable!()
-        };
-        Ok(ResourceResponse {
-            resource: ResourceObject {
-                id: resource.id(),
-                attributes: resource,
-                relationships: relationships,
-            },
-            includes: vec![],
-        })
+        let RawReceived { attributes, relationships } = received;
+        Box::new(<Self as Post>::post(attributes).into_future().and_then(move |resource| {
+            let entity = Entity::Resource(resource);
+            <T as _UpdateRels>::update_rels(&entity, relationships).map(move |relationships| {
+                let resource = match entity {
+                    Entity::Resource(resource)  => resource,
+                    _                           => unreachable!()
+                };
+                ResourceResponse {
+                    resource: ResourceObject {
+                        id: resource.id(),
+                        attributes: resource,
+                        relationships: relationships,
+                    },
+                    includes: vec![],
+                }
+            })
+        }))
     }
 }
