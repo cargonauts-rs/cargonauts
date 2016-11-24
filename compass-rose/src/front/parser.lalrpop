@@ -1,0 +1,51 @@
+use front::ast::*;
+
+grammar;
+
+Method: Method = {
+    <"get">     => Method::Get,
+    <"patch">   => Method::Patch,
+    <"post">    => Method::Post,
+    <"delete">  => Method::Delete,
+    <"index">   => Method::Index,
+    <"append">  => Method::Append,
+    <"replace"> => Method::Replace,
+    <"remove">  => Method::Remove,
+    <"clear">   => Method::Clear,
+};
+
+Alias: Alias = {
+    "alias" <m:Method> "as" <s:Ident> => Alias {
+        method: m,
+        route: s.to_owned(),
+    }
+};
+
+Ident: String = {
+    <s:r"[a-zA-Z][a-zA-Z0-9]*"> => s.to_owned(),
+};
+
+RelVariance: RelVariance = {
+    <"one">     => RelVariance::One,
+    <"many">    => RelVariance::Many,
+};
+
+Relation: Relation = {
+    "has" <v:RelVariance> <s:Ident> => Relation {
+        variance: v,
+        relation: s,
+    }
+};
+
+ResourceAttr: ResourceAttr = {
+    <a:Alias>       => ResourceAttr::Alias(a),
+    <r:Relation>    => ResourceAttr::Relation(r),
+};
+
+ResourceAttrs: Vec<ResourceAttr> = <attrs:(<ResourceAttr> ";")*> => attrs;
+
+Resource: Resource = {
+    "resource" <r:Ident> "{" <a:ResourceAttrs> "}"  => Resource { resource: r, attrs: a }
+};
+
+pub routes: Routes = <resources:(<Resource>)*> => Routes { resources: resources };
