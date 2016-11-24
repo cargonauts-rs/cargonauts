@@ -72,7 +72,7 @@ impl Router for MockRouter {
 
     fn attach_resource(&mut self,
         resource: &'static str,
-        route: ResourceRoute,
+        route: ResourceRoute<'static>,
         _: fn(Self::Request, Self::LinkMaker) -> Self::Response,
     ) {
         match (route.method, route.relation) {
@@ -150,6 +150,8 @@ pub struct MockRequest;
 impl Request for MockRequest {
     fn endpoint(&self) -> &str { unimplemented!() }
     fn id(&self) -> &str { unimplemented!() }
+    fn relation(&self) -> Option<(&str, bool)> { unimplemented!() }
+    fn method(&self) -> Method { unimplemented!() }
     fn resource_options(&self) -> ResourceOptions { unimplemented!() }
     fn collection_options(&self) -> CollectionOptions { unimplemented!() }
     fn alias_info(&self) -> AliasRequest { unimplemented!() }

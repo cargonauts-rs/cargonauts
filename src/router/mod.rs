@@ -4,6 +4,7 @@ use std::io::Write;
 use api::AliasRequest;
 
 pub mod mock;
+pub mod default;
 mod include;
 mod page;
 mod sort;
@@ -19,7 +20,7 @@ pub trait Router {
 
     fn attach_resource(&mut self,
         resource: &'static str,
-        route: ResourceRoute,
+        route: ResourceRoute<'static>,
         handler: fn(Self::Request, Self::LinkMaker) -> Self::Response,
     );
 
@@ -44,9 +45,9 @@ pub enum Method {
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
-pub struct ResourceRoute {
+pub struct ResourceRoute<'a> {
     pub method: Method,
-    pub relation: Option<(&'static str, bool)>,
+    pub relation: Option<(&'a str, bool)>,
 }
 
 pub enum Status {
@@ -102,6 +103,8 @@ pub struct CollectionOptions {
 pub trait Request: Read {
     fn endpoint(&self) -> &str;
     fn id(&self) -> &str;
+    fn method(&self) -> Method;
+    fn relation(&self) -> Option<(&str, bool)>;
     fn resource_options(&self) -> ResourceOptions;
     fn collection_options(&self) -> CollectionOptions;
     fn alias_info(&self) -> AliasRequest;
