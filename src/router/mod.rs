@@ -1,5 +1,6 @@
 use std::io::Read;
 use std::io::Write;
+use Future;
 
 use api::AliasRequest;
 
@@ -13,21 +14,21 @@ pub use self::include::IncludeQuery;
 pub use self::page::Pagination;
 pub use self::sort::SortQuery;
 
-pub trait Router {
-    type Request: Request;
+pub trait Router: 'static {
+    type Request: Request + 'static;
     type Response: Response + 'static;
     type LinkMaker: MakeLinks;
 
     fn attach_resource(&mut self,
         resource: &'static str,
         route: ResourceRoute<'static>,
-        handler: fn(Self::Request, Self::LinkMaker) -> Self::Response,
+        handler: fn(Self::Request, Self::LinkMaker) -> Box<Future<Item = Self::Response, Error = ()>>
     );
 
     fn attach_alias(&mut self,
         alias: &'static str,
         method: Method,
-        handler: fn(Self::Request, Self::LinkMaker) -> Self::Response,
+        handler: fn(Self::Request, Self::LinkMaker) -> Box<Future<Item = Self::Response, Error = ()>>
     );
 }
 

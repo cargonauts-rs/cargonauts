@@ -5,7 +5,7 @@ use futures::Future;
 use IntoFuture;
 
 pub trait PatchOne<I, T: ToOne>: HasOne<T> where T::Resource: RawHasPatch<Synchronous> {
-    type PatchOneFut: Future<Item = ResourceResponse<I, T::Resource>, Error = Error>;
+    type PatchOneFut: Future<Item = ResourceResponse<I, T::Resource>, Error = Error> + 'static;
     fn patch_one(entity: &Entity<Self>, received: RawReceived<T::Resource, <T::Resource as RawHasPatch<Synchronous>>::Patch>) -> Self::PatchOneFut;
 }
 

@@ -3,13 +3,15 @@ use api::Error;
 use api::async::AsyncAction;
 use api::async::raw::JobResponse;
 use router::{self, Response, Router};
+use Future;
+use IntoFuture;
 
 mod jsonapi;
 
 pub use self::jsonapi::JsonApi;
 
-pub trait Presenter<T: RawFetch, R: Router>: Sized {
-    type Include;
+pub trait Presenter<T: RawFetch, R: Router>: Sized + 'static {
+    type Include: 'static;
     fn prepare(field_set: Option<Vec<String>>, linker: R::LinkMaker) -> Self;
     fn present_resource(self, response: ResourceResponse<Self::Include, T>) -> R::Response;
     fn present_collection(self, response: CollectionResponse<Self::Include, T>) -> R::Response;
@@ -17,11 +19,16 @@ pub trait Presenter<T: RawFetch, R: Router>: Sized {
     fn present_err(self, error: Error) -> R::Response;
     fn present_no_content(self) -> R::Response;
 
-    fn try_present<X: Presentable<Self, T, R>>(self, result: Result<X, Error>) -> R::Response {
-        match result {
-            Ok(response)    => response.present(self),
-            Err(error)      => self.present_err(error),
-        }
+    fn try_present<F, X>(self, presentable: F) -> Box<Future<Item = R::Response, Error = ()>>
+    where
+        F: IntoFuture<Item = X, Error = Error>,
+        F::Future: 'static,
+        X: Presentable<Self, T, R>,
+    {
+        Box::new(presentable.into_future().then(|result| match result {
+            Ok(response)    => Ok(response.present(self)),
+            Err(error)      => Ok(self.present_err(error)),
+        }))
     }
 }
 

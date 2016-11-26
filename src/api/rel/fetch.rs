@@ -7,7 +7,7 @@ use futures::Future;
 use futures::stream::{self, Stream};
 
 pub trait GetOne<I, T: ToOne>: HasOne<T> where T::Resource: RawFetch {
-    type GetOneFut: Future<Item = ResourceResponse<I, T::Resource>, Error = Error>;
+    type GetOneFut: Future<Item = ResourceResponse<I, T::Resource>, Error = Error> + 'static;
     fn get_one(entity: &Entity<Self>, includes: Vec<IncludeQuery>) -> Self::GetOneFut;
 }
 
@@ -27,7 +27,7 @@ where T:                HasOne<Rel>,
 }
 
 pub trait IndexMany<I, T: ToMany>: HasMany<T> where T::Resource: RawFetch {
-    type IndexManyFut: Future<Item = CollectionResponse<I, T::Resource>, Error = Error>;
+    type IndexManyFut: Future<Item = CollectionResponse<I, T::Resource>, Error = Error> + 'static;
     fn index_many(entity: &Entity<Self>, includes: Vec<IncludeQuery>) -> Self::IndexManyFut;
 }
 

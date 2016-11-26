@@ -1,9 +1,10 @@
 use std::collections::HashMap;
 
+use Future;
 use router::{Router, ResourceRoute, Method, Request, Response, MakeLinks};
 
-pub trait Server {
-    type Request: Request;
+pub trait Server: 'static {
+    type Request: Request + 'static;
     type Response: Response + 'static;
     type LinkMaker: MakeLinks;
     
@@ -12,7 +13,7 @@ pub trait Server {
 
 enum Endpoint<S: Server> {
     Resource(ResourceRoutes<S>),
-    Alias(Method, fn(S::Request, S::LinkMaker) -> S::Response),
+    Alias(Method, fn(S::Request, S::LinkMaker) -> Box<Future<Item = S::Response, Error = ()>>),
 }
 
 impl<S: Server> Endpoint<S> {
@@ -24,7 +25,7 @@ impl<S: Server> Endpoint<S> {
 }
 
 struct ResourceRoutes<S: Server> {
-    routes: HashMap<ResourceRoute<'static>, fn(S::Request, S::LinkMaker) -> S::Response>,
+    routes: HashMap<ResourceRoute<'static>, fn(S::Request, S::LinkMaker) -> Box<Future<Item = S::Response, Error = ()>>>,
 }
 
 pub struct DefaultRouter<S: Server> {
@@ -32,7 +33,7 @@ pub struct DefaultRouter<S: Server> {
 }
 
 impl<S: Server> DefaultRouter<S> {
-    pub fn lookup(&self, request: &S::Request) -> Option<fn(S::Request, S::LinkMaker) -> S::Response> {
+    pub fn lookup(&self, request: &S::Request) -> Option<fn(S::Request, S::LinkMaker) -> Box<Future<Item = S::Response, Error = ()>>> {
         self.endpoints.get(request.endpoint()).and_then(|endpoint| {
             match *endpoint {
                 Endpoint::Resource(ref resource_routes)     => {
@@ -60,7 +61,7 @@ impl<S: Server> Router for DefaultRouter<S> {
     fn attach_resource(&mut self,
         resource: &'static str,
         route: ResourceRoute<'static>,
-        handler: fn(Self::Request, Self::LinkMaker) -> Self::Response,
+        handler: fn(Self::Request, Self::LinkMaker) -> Box<Future<Item = Self::Response, Error = ()>>
     ) {
         match *self.endpoints.entry(resource).or_insert_with(Endpoint::new_resource) {
             Endpoint::Resource(ref mut resource_routes) => {
@@ -75,7 +76,7 @@ impl<S: Server> Router for DefaultRouter<S> {
     fn attach_alias(&mut self,
         alias: &'static str,
         method: Method,
-        handler: fn(Self::Request, Self::LinkMaker) -> Self::Response,
+        handler: fn(Self::Request, Self::LinkMaker) -> Box<Future<Item = Self::Response, Error = ()>>
     ) {
         if self.endpoints.insert(alias, Endpoint::Alias(method, handler)).is_some() {
             panic!("alias attached twice: {}, {:?}", alias, method);

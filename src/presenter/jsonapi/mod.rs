@@ -178,8 +178,8 @@ where
 impl<T, R, S> Presenter<T, R> for JsonApi<R, S>
 where
     T: RawFetch + Represent,
-    R: Router,
-    S: Serializer + WriteAdapter<R::Response>,
+    R: Router + 'static,
+    S: Serializer + WriteAdapter<R::Response> + 'static,
 {
     type Include = JsonApiInclude<S>;
 

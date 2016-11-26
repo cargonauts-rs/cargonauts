@@ -1,6 +1,7 @@
 use std::io::{self, Read, Write};
 use router::*;
 use api::AliasRequest;
+use Future;
 
 pub struct MockRouter {
     routes: Vec<MockRoute>,
@@ -73,7 +74,7 @@ impl Router for MockRouter {
     fn attach_resource(&mut self,
         resource: &'static str,
         route: ResourceRoute<'static>,
-        _: fn(Self::Request, Self::LinkMaker) -> Self::Response,
+        _: fn(Self::Request, Self::LinkMaker) -> Box<Future<Item = Self::Response, Error = ()>>
     ) {
         match (route.method, route.relation) {
             (Method::Get, None)                     => self.register("get", resource),
@@ -109,7 +110,7 @@ impl Router for MockRouter {
     fn attach_alias(&mut self,
         alias: &'static str,
         method: Method,
-        _: fn(Self::Request, Self::LinkMaker) -> Self::Response,
+        _: fn(Self::Request, Self::LinkMaker) -> Box<Future<Item = Self::Response, Error = ()>>
     ) {
         match method {
             Method::Get     => self.register("alias-get", alias),

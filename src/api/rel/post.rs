@@ -5,7 +5,7 @@ use IntoFuture;
 use futures::Future;
 
 pub trait PostOne<I, Rel: ToOne>: LinkOne<Rel> + UnlinkOne<Rel> where Rel::Resource: RawUpdate {
-    type PostOneFut: Future<Item = ResourceResponse<I, Rel::Resource>, Error = Error>;
+    type PostOneFut: Future<Item = ResourceResponse<I, Rel::Resource>, Error = Error> + 'static;
     fn post_one(entity: Entity<Self>, received: RawReceived<Rel::Resource, Rel::Resource>) -> Self::PostOneFut;
 }
 
@@ -24,7 +24,7 @@ where T:                LinkOne<Rel> + UnlinkOne<Rel>,
 }
 
 pub trait AppendMany<I, Rel: ToMany>: AppendLinks<Rel> where Rel::Resource: RawUpdate {
-    type AppendManyFut: Future<Item = CollectionResponse<I, Rel::Resource>, Error = Error>;
+    type AppendManyFut: Future<Item = CollectionResponse<I, Rel::Resource>, Error = Error> + 'static;
     fn append_many(entity: Entity<Self>, received: Vec<RawReceived<Rel::Resource, Rel::Resource>>) -> Self::AppendManyFut;
 }
 
@@ -44,7 +44,7 @@ where T:                AppendLinks<Rel>,
 }
 
 pub trait ReplaceMany<I, Rel: ToMany>: ReplaceLinks<Rel> where Rel::Resource: RawUpdate {
-    type ReplaceManyFut: Future<Item = CollectionResponse<I, Rel::Resource>, Error = Error>;
+    type ReplaceManyFut: Future<Item = CollectionResponse<I, Rel::Resource>, Error = Error> + 'static;
     fn replace_many(entity: Entity<Self>, received: Vec<RawReceived<Rel::Resource, Rel::Resource>>) -> Self::ReplaceManyFut;
 }
 

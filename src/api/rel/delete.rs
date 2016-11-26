@@ -4,7 +4,7 @@ use futures::Future;
 use IntoFuture;
 
 pub trait DeleteOne<T: ToOne>: UnlinkOne<T> {
-    type DeleteOneFut: Future<Item = (), Error = Error>;
+    type DeleteOneFut: Future<Item = (), Error = Error> + 'static;
     fn delete_one(entity: &Entity<Self>) -> Self::DeleteOneFut;
 }
 
@@ -25,7 +25,7 @@ where T:             UnlinkOne<Rel>,
 }
 
 pub trait RemoveMany<T: ToMany>: RemoveLinks<T> {
-    type RemoveManyFut: IntoFuture<Item = (), Error = Error>;
+    type RemoveManyFut: IntoFuture<Item = (), Error = Error> + 'static;
     fn remove_many(entity: &Entity<Self>, rel_ids: &[RelationId<T>]) -> Self::RemoveManyFut;
 }
 
@@ -42,7 +42,7 @@ where T:             RemoveLinks<Rel>,
 }
 
 pub trait ClearMany<T: ToMany>: ClearLinks<T> {
-    type ClearManyFut: IntoFuture<Item = (), Error = Error>;
+    type ClearManyFut: IntoFuture<Item = (), Error = Error> + 'static;
     fn clear_many(entity: &Entity<Self>) -> Self::ClearManyFut;
 }
 
