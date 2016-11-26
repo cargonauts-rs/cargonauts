@@ -1,5 +1,5 @@
 use api::{Resource, Error, Entity};
-use api::raw::{ResourceResponse, RawReceived, RawUpdate, ResourceObject};
+use api::raw::{ResourceResponse, RawReceived, RawResource, ResourceObject};
 use _internal::_UpdateRels;
 use IntoFuture;
 use futures::Future;
@@ -10,7 +10,7 @@ pub trait Patch: Resource {
     fn patch(id: &Self::Id, patch: Self::Patch) -> Self::PatchFut;
 }
 
-pub trait RawHasPatch<Synchronicity>: RawUpdate {
+pub trait RawHasPatch<Synchronicity>: RawResource {
     type Patch;
 }
 

@@ -212,7 +212,7 @@ impl<T, Rel, P, R> _MaybeGetOne<Rel, P, R> for T
 where
     T: rel::raw::GetOne<P::Include, Rel>,
     Rel: ToOne,
-    Rel::Resource: raw::RawFetch,
+    Rel::Resource: raw::RawResource,
     P: Presenter<Rel::Resource, R>,
     R: Router,
 {
@@ -231,7 +231,7 @@ impl<T, Rel, P, R> _MaybeIndexMany<Rel, P, R> for T
 where
     T: rel::raw::IndexMany<P::Include, Rel>,
     Rel: ToMany,
-    Rel::Resource: raw::RawFetch,
+    Rel::Resource: raw::RawResource,
     P: Presenter<Rel::Resource, R>,
     R: Router,
 {
@@ -325,7 +325,7 @@ impl<T, Rel, C, P, R> _MaybePostOne<Rel, P, C, R> for T
 where
     T: rel::raw::PostOne<<P as Presenter<Rel::Resource, R>>::Include, Rel>,
     Rel: ToOne,
-    Rel::Resource: raw::RawUpdate,
+    Rel::Resource: raw::RawResource,
     P: Presenter<Rel::Resource, R> + Presenter<(), R>,
     C: Receiver<Rel::Resource, R::Request>,
     R: Router,
@@ -345,7 +345,7 @@ impl<T, Rel, C, P, R> _MaybeAppendMany<Rel, P, C, R> for T
 where
     T: rel::raw::AppendMany<<P as Presenter<Rel::Resource, R>>::Include, Rel>,
     Rel: ToMany,
-    Rel::Resource: raw::RawUpdate,
+    Rel::Resource: raw::RawResource,
     P: Presenter<Rel::Resource, R> + Presenter<(), R>,
     C: Receiver<Rel::Resource, R::Request>,
     R: Router,
@@ -365,7 +365,7 @@ impl<T, Rel, C, P, R> _MaybeReplaceMany<Rel, P, C, R> for T
 where
     T: rel::raw::ReplaceMany<<P as Presenter<Rel::Resource, R>>::Include, Rel>,
     Rel: ToMany,
-    Rel::Resource: raw::RawUpdate,
+    Rel::Resource: raw::RawResource,
     P: Presenter<Rel::Resource, R> + Presenter<(), R>,
     C: Receiver<Rel::Resource, R::Request>,
     R: Router,

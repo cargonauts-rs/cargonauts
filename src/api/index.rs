@@ -2,7 +2,7 @@ use itertools::Itertools;
 
 use api::sort::MaybeSort;
 use api::{Resource, Error, Entity};
-use api::raw::{CollectionResponse, RawFetch, ResourceObject};
+use api::raw::{CollectionResponse, RawResource, ResourceObject};
 use router::{IncludeQuery, SortQuery, Pagination};
 use _internal::_FetchRels;
 use IntoFuture;
@@ -18,7 +18,7 @@ pub trait Paginated: Index {
     fn paginated_index(pagination: Pagination) -> Self::PaginatedFut;
 }
 
-pub trait RawIndex<I>: RawFetch {
+pub trait RawIndex<I>: RawResource {
     type RawIndexFut: Future<Item = CollectionResponse<I, Self>, Error = Error>;
     fn index(includes: Vec<IncludeQuery>, sorts: Vec<SortQuery>, pagination: Option<Pagination>) -> Self::RawIndexFut;
 }

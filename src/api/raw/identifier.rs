@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
 use api::Resource;
-use api::raw::{ResourceObject, RawFetch};
+use api::raw::{ResourceObject, RawResource};
 
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub struct Identifier {
@@ -27,7 +27,7 @@ impl<'a, T: Resource + 'a> From<&'a T> for Identifier {
     }
 }
 
-impl<'a, T: RawFetch> From<&'a ResourceObject<T>> for Identifier {
+impl<'a, T: RawResource> From<&'a ResourceObject<T>> for Identifier {
     fn from(resource: &'a ResourceObject<T>) -> Identifier {
         Identifier {
             resource: Cow::Borrowed(T::resource()),

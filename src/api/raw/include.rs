@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 
-use api::raw::{RawFetch, FetchRelationships, ResourceObject, RelationshipLinkage};
+use api::raw::{RawResource, FetchRelationships, ResourceObject, RelationshipLinkage};
 use presenter::ConvertInclude;
 
 pub struct Include<I> {
@@ -11,7 +11,7 @@ pub struct Include<I> {
 }
 
 impl<T, I> From<ResourceObject<T>> for Include<I>
-where T: RawFetch,
+where T: RawResource,
       I: ConvertInclude<T> {
     fn from(resource: ResourceObject<T>) -> Include<I> {
         if resource.relationships.count() == 0 {

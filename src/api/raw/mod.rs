@@ -17,41 +17,39 @@ pub use self::relationship::{Relationship, RelationshipLinkage, FetchRelationshi
 
 use api::Resource;
 
-pub trait RawFetch: Resource {
-    type Relationships: for<'a> FetchRelationships<'a>;
+pub trait RawResource: Resource {
+    type FetchRels: for<'a> FetchRelationships<'a>;
+    type UpdateRels: UpdateRelationships;
 }
 
-pub trait RawUpdate: RawFetch {
-    type Relationships: UpdateRelationships;
-}
-
-pub struct ResourceObject<T: RawFetch> {
+pub struct ResourceObject<T: RawResource> {
     pub id: <T as Resource>::Id,
     pub attributes: T,
-    pub relationships: <T as RawFetch>::Relationships,
+    pub relationships: T::FetchRels,
 }
 
-impl RawFetch for () {
-    type Relationships = NoRelationships;
+impl RawResource for () {
+    type FetchRels = NoRelationships;
+    type UpdateRels = NoRelationships;
 }
 
-pub struct RawReceived<T: RawUpdate, A> {
+pub struct RawReceived<T: RawResource, A> {
     pub attributes: A,
-    pub relationships: <T as RawUpdate>::Relationships,
+    pub relationships: T::UpdateRels,
 }
 
 
-pub struct ResourceResponse<I, T: RawFetch> {
+pub struct ResourceResponse<I, T: RawResource> {
     pub resource: ResourceObject<T>,
     pub includes: Vec<Include<I>>,
 }
 
-pub struct CollectionResponse<I, T: RawFetch> {
+pub struct CollectionResponse<I, T: RawResource> {
     pub resources: Vec<ResourceObject<T>>,
     pub includes: Vec<Include<I>>,
 }
 
-impl<I, T: RawFetch> Default for CollectionResponse<I, T> {
+impl<I, T: RawResource> Default for CollectionResponse<I, T> {
     fn default() -> CollectionResponse<I, T> {
         CollectionResponse {
             resources: vec![],

@@ -1,17 +1,17 @@
 use std::marker::PhantomData;
 use serde::de::{self, Visitor, MapVisitor};
 
-use api::raw::{RawUpdate, RawReceived, UpdateRelationships, RelationshipError};
+use api::raw::{RawResource, RawReceived, UpdateRelationships, RelationshipError};
 use receiver::jsonapi::ObjectVisitor;
 use receiver::jsonapi::relation::RelationshipDocument;
 use Deserialize;
 use Deserializer;
 
-pub struct ResourceDocument<T: RawUpdate, A: Deserialize>(pub RawReceived<T, A>);
+pub struct ResourceDocument<T: RawResource, A: Deserialize>(pub RawReceived<T, A>);
 
 impl<T, A> Deserialize for ResourceDocument<T, A>
 where
-    T: RawUpdate,
+    T: RawResource,
     A: Deserialize,
 {
     fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
@@ -20,11 +20,11 @@ where
     }
 }
 
-pub struct JsonApiResource<T: RawUpdate, A: Deserialize>(pub RawReceived<T, A>);
+pub struct JsonApiResource<T: RawResource, A: Deserialize>(pub RawReceived<T, A>);
 
 impl<T, A> Deserialize for JsonApiResource<T, A>
 where
-    T: RawUpdate,
+    T: RawResource,
     A: Deserialize,
 {
     fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
@@ -36,7 +36,7 @@ struct ResourceVisitor<T, A>(PhantomData<(T, A)>);
 
 impl<T, A> Visitor for ResourceVisitor<T, A>
 where
-    T: RawUpdate,
+    T: RawResource,
     A: Deserialize,
 {
     type Value = JsonApiResource<T, A>;
@@ -157,29 +157,29 @@ where
     }
 }
 
-fn visit_resource_type<T: RawUpdate, V: MapVisitor>(visitor: &mut V) -> Result<bool, V::Error> {
+fn visit_resource_type<T: RawResource, V: MapVisitor>(visitor: &mut V) -> Result<bool, V::Error> {
     visitor.visit_value::<String>().map(|resource_type| resource_type == T::resource())
 }
 
-fn visit_rels<T: RawUpdate, V: MapVisitor>(visitor: &mut V) -> Result<<T as RawUpdate>::Relationships, V::Error> {
+fn visit_rels<T: RawResource, V: MapVisitor>(visitor: &mut V) -> Result<T::UpdateRels, V::Error> {
     visitor.visit_value::<JsonApiRelationships<T>>().map(|rels| rels.0)
 }
 
-struct JsonApiRelationships<T: RawUpdate>(<T as RawUpdate>::Relationships);
+struct JsonApiRelationships<T: RawResource>(T::UpdateRels);
 
-impl<T: RawUpdate> Deserialize for JsonApiRelationships<T> {
+impl<T: RawResource> Deserialize for JsonApiRelationships<T> {
     fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
         deserializer.deserialize_map(RelationshipsVisitor(PhantomData))
     }
 }
 
-struct RelationshipsVisitor<T: RawUpdate>(PhantomData<T>);
+struct RelationshipsVisitor<T: RawResource>(PhantomData<T>);
 
-impl<T: RawUpdate> Visitor for RelationshipsVisitor<T> {
+impl<T: RawResource> Visitor for RelationshipsVisitor<T> {
     type Value = JsonApiRelationships<T>;
 
     fn visit_map<V: MapVisitor>(&mut self, mut visitor: V) -> Result<JsonApiRelationships<T>, V::Error> {
-        let mut rels = <T as RawUpdate>::Relationships::default();
+        let mut rels = <T as RawResource>::UpdateRels::default();
         while let Some(key) = visitor.visit_key::<String>()? {
             let relationship = visitor.visit_value::<RelationshipDocument<()>>()?;
             match rels.add_relationship(key, relationship.0) {

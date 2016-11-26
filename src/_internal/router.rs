@@ -286,14 +286,14 @@ impl<'a, R: Router> _Router<'a, R> {
     where
         T: rel::raw::GetOne<P::Include, Rel>,
         Rel: rel::ToOne,
-        Rel::Resource: raw::RawFetch,
+        Rel::Resource: raw::RawResource,
         P: Presenter<Rel::Resource, R>,
     {
         fn fetch_one<R, T, Rel, P>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>
         where
             T: rel::raw::GetOne<P::Include, Rel>,
             Rel: rel::ToOne,
-            Rel::Resource: raw::RawFetch,
+            Rel::Resource: raw::RawResource,
             P: Presenter<Rel::Resource, R>,
             R: Router,
         {
@@ -306,7 +306,7 @@ impl<'a, R: Router> _Router<'a, R> {
         where
             T: rel::raw::GetOne<P::Include, Rel>,
             Rel: rel::ToOne,
-            Rel::Resource: raw::RawFetch,
+            Rel::Resource: raw::RawResource,
             P: Presenter<Rel::Resource, R>,
             R: Router,
         {
@@ -337,14 +337,14 @@ impl<'a, R: Router> _Router<'a, R> {
     where
         T: rel::raw::IndexMany<P::Include, Rel>,
         Rel: rel::ToMany,
-        Rel::Resource: raw::RawFetch,
+        Rel::Resource: raw::RawResource,
         P: Presenter<Rel::Resource, R>,
     {
         fn fetch_many<R, T, Rel, P>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>
         where
             T: rel::raw::IndexMany<P::Include, Rel>,
             Rel: rel::ToMany,
-            Rel::Resource: raw::RawFetch,
+            Rel::Resource: raw::RawResource,
             P: Presenter<Rel::Resource, R>,
             R: Router,
         {
@@ -357,7 +357,7 @@ impl<'a, R: Router> _Router<'a, R> {
         where 
             T: rel::raw::IndexMany<P::Include, Rel>,
             Rel: rel::ToMany,
-            Rel::Resource: raw::RawFetch,
+            Rel::Resource: raw::RawResource,
             P: Presenter<Rel::Resource, R>,
             R: Router,
         {
@@ -536,7 +536,7 @@ impl<'a, R: Router> _Router<'a, R> {
     where
         T: rel::raw::PostOne<<P as Presenter<Rel::Resource, R>>::Include, Rel>,
         Rel: rel::ToOne,
-        Rel::Resource: raw::RawUpdate,
+        Rel::Resource: raw::RawResource,
         P: Presenter<Rel::Resource, R> + Presenter<(), R>,
         C: Receiver<Rel::Resource, R::Request>,
     {
@@ -545,7 +545,7 @@ impl<'a, R: Router> _Router<'a, R> {
             R: Router,
             T: rel::raw::PostOne<P::Include, Rel>,
             Rel: rel::ToOne,
-            Rel::Resource: raw::RawUpdate,
+            Rel::Resource: raw::RawResource,
             P: Presenter<Rel::Resource, R>,
             C: Receiver<Rel::Resource, R::Request>,
         {
@@ -560,7 +560,7 @@ impl<'a, R: Router> _Router<'a, R> {
             R: Router,
             T: rel::raw::PostOne<<P as Presenter<Rel::Resource, R>>::Include, Rel>,
             Rel: rel::ToOne,
-            Rel::Resource: raw::RawUpdate,
+            Rel::Resource: raw::RawResource,
             P: Presenter<Rel::Resource, R> + Presenter<(), R>,
             C: Receiver<Rel::Resource, R::Request>,
         {
@@ -601,7 +601,7 @@ impl<'a, R: Router> _Router<'a, R> {
     where
         T: rel::raw::AppendMany<<P as Presenter<Rel::Resource, R>>::Include, Rel>,
         Rel: rel::ToMany,
-        Rel::Resource: raw::RawUpdate,
+        Rel::Resource: raw::RawResource,
         P: Presenter<Rel::Resource, R> + Presenter<(), R>,
         C: Receiver<Rel::Resource, R::Request>,
     {
@@ -610,7 +610,7 @@ impl<'a, R: Router> _Router<'a, R> {
             R: Router,
             T: rel::raw::AppendMany<P::Include, Rel>,
             Rel: rel::ToMany,
-            Rel::Resource: raw::RawUpdate,
+            Rel::Resource: raw::RawResource,
             P: Presenter<Rel::Resource, R>,
             C: Receiver<Rel::Resource, R::Request>,
         {
@@ -625,7 +625,7 @@ impl<'a, R: Router> _Router<'a, R> {
             R: Router,
             T: rel::raw::AppendMany<<P as Presenter<Rel::Resource, R>>::Include, Rel>,
             Rel: rel::ToMany,
-            Rel::Resource: raw::RawUpdate,
+            Rel::Resource: raw::RawResource,
             P: Presenter<Rel::Resource, R> + Presenter<(), R>,
             C: Receiver<Rel::Resource, R::Request>,
         {
@@ -664,7 +664,7 @@ impl<'a, R: Router> _Router<'a, R> {
     where
         T: rel::raw::ReplaceMany<<P as Presenter<Rel::Resource, R>>::Include, Rel>,
         Rel: rel::ToMany,
-        Rel::Resource: raw::RawUpdate,
+        Rel::Resource: raw::RawResource,
         P: Presenter<Rel::Resource, R> + Presenter<(), R>,
         C: Receiver<Rel::Resource, R::Request>,
     {
@@ -673,7 +673,7 @@ impl<'a, R: Router> _Router<'a, R> {
             R: Router,
             T: rel::raw::ReplaceMany<P::Include, Rel>,
             Rel: rel::ToMany,
-            Rel::Resource: raw::RawUpdate,
+            Rel::Resource: raw::RawResource,
             P: Presenter<Rel::Resource, R>,
             C: Receiver<Rel::Resource, R::Request>,
         {
@@ -688,7 +688,7 @@ impl<'a, R: Router> _Router<'a, R> {
             R: Router,
             T: rel::raw::ReplaceMany<<P as Presenter<Rel::Resource, R>>::Include, Rel>,
             Rel: rel::ToMany,
-            Rel::Resource: raw::RawUpdate,
+            Rel::Resource: raw::RawResource,
             P: Presenter<Rel::Resource, R> + Presenter<(), R>,
             C: Receiver<Rel::Resource, R::Request>,
         {

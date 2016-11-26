@@ -11,7 +11,7 @@ use std::marker::PhantomData;
 use io_adapter::ReadAdapter;
 
 use api::Error;
-use api::raw::{RawUpdate, RawHasPatch, RawReceived, Identifier};
+use api::raw::{RawResource, RawHasPatch, RawReceived, Identifier};
 use api::rel::{ToOne, ToMany};
 use serde::de::{self, Visitor, MapVisitor};
 use Deserialize;
@@ -25,7 +25,7 @@ pub struct JsonApi<D: Deserializer, R: Read> {
 
 impl<T, R, D> Receiver<T, R> for JsonApi<D, R>
 where
-    T: RawUpdate + Deserialize,
+    T: RawResource + Deserialize,
     R: Request,
     D: Deserializer + ReadAdapter<R>,
 {

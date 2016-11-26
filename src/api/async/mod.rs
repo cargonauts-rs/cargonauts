@@ -1,5 +1,5 @@
 use api::Error;
-use api::raw::{RawFetch, RawUpdate, NoRelationships};
+use api::raw::{RawResource, NoRelationships};
 
 mod patch;
 mod post;
@@ -19,10 +19,10 @@ pub mod raw {
     }
 }
 
-pub trait AsyncJob<T>: RawFetch<Relationships = NoRelationships> where T: RawUpdate {
-    fn cache_rels(&mut self, rels: <T as RawUpdate>::Relationships) -> Result<(), Error>;
+pub trait AsyncJob<T: RawResource>: RawResource<FetchRels = NoRelationships, UpdateRels = NoRelationships> {
+    fn cache_rels(&mut self, rels: T::UpdateRels) -> Result<(), Error>;
 }
 
-pub trait AsyncAction: RawUpdate {
+pub trait AsyncAction: RawResource {
     type Job: AsyncJob<Self>;
 }

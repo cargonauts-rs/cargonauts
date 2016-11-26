@@ -1,17 +1,17 @@
 use api::async::{AsyncAction, AsyncJob};
 use api::async::raw::JobResponse;
 use api::{Resource, Error};
-use api::raw::{RawUpdate, RawReceived, ResourceObject, NoRelationships};
+use api::raw::{RawResource, RawReceived, ResourceObject, NoRelationships};
 use _internal::_UpdateRels;
 use IntoFuture;
 use futures::Future;
 
-pub trait PostAsync: AsyncAction + RawUpdate {
+pub trait PostAsync: AsyncAction + Resource {
     type PostAsyncFut: IntoFuture<Item = Self::Job, Error = Error>;
     fn post_async(data: Self) -> Self::PostAsyncFut;
 }
 
-pub trait RawPostAsync: AsyncAction + RawUpdate {
+pub trait RawPostAsync: AsyncAction + RawResource {
     type RawPostAsyncFut: Future<Item = JobResponse<Self>, Error = Error>;
     fn post_async(received: RawReceived<Self, Self>) -> Self::RawPostAsyncFut;
 }

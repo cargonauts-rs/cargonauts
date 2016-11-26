@@ -1,5 +1,5 @@
 use api::{Resource, Entity, Error};
-use api::raw::{RawUpdate, RawReceived, CollectionResponse, ResourceObject};
+use api::raw::{RawResource, RawReceived, CollectionResponse, ResourceObject};
 use _internal::_UpdateRels;
 use IntoFuture;
 use futures::Future;
@@ -10,7 +10,7 @@ pub trait Append: Resource {
     fn append(data: Vec<Self>) -> Self::AppendFut;
 }
 
-pub trait RawAppend<I>: RawUpdate {
+pub trait RawAppend<I>: RawResource {
     type RawAppendFut: IntoFuture<Item = CollectionResponse<I, Self>, Error = Error>;
     fn append(received: Vec<RawReceived<Self, Self>>) -> Self::RawAppendFut;
 }

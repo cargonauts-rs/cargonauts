@@ -1,5 +1,5 @@
 use api::{Resource, Entity, Error};
-use api::raw::{RawUpdate, RawReceived, ResourceResponse, ResourceObject};
+use api::raw::{RawResource, RawReceived, ResourceResponse, ResourceObject};
 use _internal::_UpdateRels;
 use IntoFuture;
 use futures::Future;
@@ -9,7 +9,7 @@ pub trait Post: Resource {
     fn post(data: Self) -> Self::PostFut;
 }
 
-pub trait RawPost<I>: RawUpdate {
+pub trait RawPost<I>: RawResource {
     type RawPostFut: Future<Item = ResourceResponse<I, Self>, Error = Error>;
     fn post(received: RawReceived<Self, Self>) -> Self::RawPostFut;
 }

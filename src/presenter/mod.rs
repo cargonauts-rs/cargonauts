@@ -1,4 +1,4 @@
-use api::raw::{ResourceResponse, CollectionResponse, RelResponse, RawFetch};
+use api::raw::{RawResource, ResourceResponse, CollectionResponse, RelResponse};
 use api::Error;
 use api::async::AsyncAction;
 use api::async::raw::JobResponse;
@@ -10,7 +10,7 @@ mod jsonapi;
 
 pub use self::jsonapi::JsonApi;
 
-pub trait Presenter<T: RawFetch, R: Router>: Sized + 'static {
+pub trait Presenter<T: RawResource, R: Router>: Sized + 'static {
     type Include: 'static;
     fn prepare(field_set: Option<Vec<String>>, linker: R::LinkMaker) -> Self;
     fn present_resource(self, response: ResourceResponse<Self::Include, T>) -> R::Response;
@@ -36,7 +36,7 @@ pub trait ConvertInclude<T> {
     fn convert(attributes: T) -> Self;
 }
 
-pub trait Presentable<P: Presenter<T, R>, T: RawFetch, R: Router> {
+pub trait Presentable<P: Presenter<T, R>, T: RawResource, R: Router> {
     fn present(self, presenter: P) -> R::Response;
 }
 
@@ -53,7 +53,7 @@ where
 impl<P, T, R> Presentable<P, T, R> for ResourceResponse<P::Include, T>
 where
     P: Presenter<T, R>,
-    T: RawFetch,
+    T: RawResource,
     R: Router,
 {
     fn present(self, presenter: P) -> R::Response {
@@ -64,7 +64,7 @@ where
 impl<P, T, R> Presentable<P, T, R> for CollectionResponse<P::Include, T>
 where
     P: Presenter<T, R>,
-    T: RawFetch,
+    T: RawResource,
     R: Router,
 {
     fn present(self, presenter: P) -> R::Response {
@@ -92,7 +92,7 @@ where
 impl<P, T, R> Presentable<P, T, R> for RelResponse<P::Include>
 where
     P: Presenter<T, R>,
-    T: RawFetch,
+    T: RawResource,
     R: Router,
 {
     fn present(self, presenter: P) -> R::Response {

@@ -2,7 +2,7 @@ use io_adapter::WriteAdapter;
 use std::marker::PhantomData;
 
 use api::Error;
-use api::raw::{ResourceResponse, CollectionResponse, RelResponse, RawFetch, Relationship};
+use api::raw::{RawResource, ResourceResponse, CollectionResponse, RelResponse, Relationship};
 use presenter::Presenter;
 use Serializer;
 use repr::{SerializeRepr, Represent, RepresentWith};
@@ -82,7 +82,7 @@ where
     }
 
     fn serialize_resource<T>(self, serializer: &mut S, response: ResourceResponse<JsonApiInclude<S>, T>) -> Result<(), S::Error>
-    where T: RawFetch + Represent {
+    where T: RawResource + Represent {
         let id = response.resource.id.to_string();
         let self_link = self.link_maker.resource(T::resource_plural(), &id);
         let links = LinkObject {
@@ -107,7 +107,7 @@ where
     }
 
     fn serialize_collection<T>(self, serializer: &mut S, response: CollectionResponse<JsonApiInclude<S>, T>) -> Result<(), S::Error>
-    where T: RawFetch + Represent {
+    where T: RawResource + Represent {
         let self_link = self.link_maker.collection(T::resource_plural());
         let links = LinkObject {
             self_link: Some(&self_link),
@@ -177,7 +177,7 @@ where
 
 impl<T, R, S> Presenter<T, R> for JsonApi<R, S>
 where
-    T: RawFetch + Represent,
+    T: RawResource + Represent,
     R: Router + 'static,
     S: Serializer + WriteAdapter<R::Response> + 'static,
 {

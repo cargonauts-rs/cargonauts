@@ -1,5 +1,5 @@
 use api::{Resource, Entity, Error};
-use api::raw::{RawUpdate, RawReceived, CollectionResponse, ResourceObject};
+use api::raw::{RawResource, RawReceived, CollectionResponse, ResourceObject};
 use _internal::_UpdateRels;
 use IntoFuture;
 use futures::Future;
@@ -10,7 +10,7 @@ pub trait Replace: Resource {
     fn replace(data: Vec<Self>) -> Self::ReplaceFut;
 }
 
-pub trait RawReplace<I>: RawUpdate {
+pub trait RawReplace<I>: RawResource {
     type RawReplaceFut: Future<Item = CollectionResponse<I, Self>, Error = Error>;
     fn replace(received: Vec<RawReceived<Self, Self>>) -> Self::RawReplaceFut;
 }

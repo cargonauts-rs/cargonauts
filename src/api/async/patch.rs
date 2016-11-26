@@ -1,18 +1,18 @@
 use api::async::{AsyncAction, AsyncJob};
 use api::async::raw::JobResponse;
 use api::{Resource, Error};
-use api::raw::{RawUpdate, RawHasPatch, RawReceived, ResourceObject, NoRelationships};
+use api::raw::{RawResource, RawHasPatch, RawReceived, ResourceObject, NoRelationships};
 use _internal::_UpdateRels;
 use IntoFuture;
 use futures::Future;
 
-pub trait PatchAsync: AsyncAction + RawUpdate {
+pub trait PatchAsync: AsyncAction + Resource {
     type Patch;
     type PatchAsyncFut: IntoFuture<Item = Self::Job, Error = Error>;
     fn patch_async(id: &Self::Id, patch: Self::Patch) -> Self::PatchAsyncFut;
 }
 
-pub trait RawPatchAsync: RawHasPatch<Asynchronous> + AsyncAction + RawUpdate {
+pub trait RawPatchAsync: RawHasPatch<Asynchronous> + AsyncAction + RawResource {
     type RawPatchAsyncFut: Future<Item = JobResponse<Self>, Error = Error>;
     fn patch_async(id: Self::Id, received: RawReceived<Self, Self::Patch>) -> Self::RawPatchAsyncFut;
 }

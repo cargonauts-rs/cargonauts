@@ -1,17 +1,17 @@
 use std::marker::PhantomData;
 use serde::de::impls::VecVisitor;
 
-use api::raw::{RawUpdate, RawReceived};
+use api::raw::{RawResource, RawReceived};
 use receiver::jsonapi::ObjectVisitor;
 use receiver::jsonapi::resource::JsonApiResource;
 use Deserialize;
 use Deserializer;
 
-pub struct CollectionDocument<T: RawUpdate, A: Deserialize>(pub Vec<RawReceived<T, A>>);
+pub struct CollectionDocument<T: RawResource, A: Deserialize>(pub Vec<RawReceived<T, A>>);
 
 impl<T, A> Deserialize for CollectionDocument<T, A>
 where
-    T: RawUpdate,
+    T: RawResource,
     A: Deserialize,
 {
     fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
@@ -20,11 +20,11 @@ where
     }
 }
 
-struct JsonApiCollection<T: RawUpdate, A: Deserialize>(Vec<RawReceived<T, A>>);
+struct JsonApiCollection<T: RawResource, A: Deserialize>(Vec<RawReceived<T, A>>);
 
 impl<T, A> Deserialize for JsonApiCollection<T, A>
 where
-    T: RawUpdate,
+    T: RawResource,
     A: Deserialize,
 {
     fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {

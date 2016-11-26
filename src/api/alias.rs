@@ -1,7 +1,7 @@
 use api::{Get, Index, Error};
 use api::index::raw_index;
 use api::get::raw_get;
-use api::raw::{RawFetch, ResourceResponse, CollectionResponse};
+use api::raw::{RawResource, ResourceResponse, CollectionResponse};
 use router::{IncludeQuery, SortQuery};
 use _internal::_FetchRels;
 use futures::Future;
@@ -16,7 +16,7 @@ pub trait GetAliased: Get {
     fn get(request: AliasRequest) -> Self::GetAliasedFut;
 }
 
-pub trait RawGetAliased<I>: RawFetch {
+pub trait RawGetAliased<I>: RawResource {
     type RawGetAliasedFut: IntoFuture<Item = ResourceResponse<I, Self>, Error = Error>;
     fn get(request: AliasRequest, includes: Vec<IncludeQuery>) -> Self::RawGetAliasedFut;
 }
@@ -35,7 +35,7 @@ pub trait IndexAliased: Index {
     fn index(request: AliasRequest) -> Self::IndexAliasedFut;
 }
 
-pub trait RawIndexAliased<I>: RawFetch {
+pub trait RawIndexAliased<I>: RawResource {
     type RawIndexAliasedFut: IntoFuture<Item = CollectionResponse<I, Self>, Error = Error>;
     fn index(request: AliasRequest, includes: Vec<IncludeQuery>, sorts: Vec<SortQuery>) -> Self::RawIndexAliasedFut;
 }

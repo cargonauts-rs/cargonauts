@@ -1,5 +1,5 @@
 use api::{Resource, Error};
-use api::raw::{RawUpdate, RawHasPatch, RawReceived, Identifier};
+use api::raw::{RawResource, RawHasPatch, RawReceived, Identifier};
 use api::rel::{ToOne, ToMany};
 use router::Request;
 
@@ -7,7 +7,7 @@ mod jsonapi;
 
 pub use self::jsonapi::JsonApi;
 
-pub trait Receiver<T: RawUpdate, R: Request> {
+pub trait Receiver<T: RawResource, R: Request> {
     fn receive_resource(request: R) -> Result<RawReceived<T, T>, Error>;
     fn receive_collection(request: R) -> Result<Vec<RawReceived<T, T>>, Error>;
     fn receive_to_one<Rel: ToOne>(request: R) -> Result<Option<Identifier>, Error>;

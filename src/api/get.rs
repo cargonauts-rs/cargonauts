@@ -1,7 +1,7 @@
 use itertools::Itertools;
 
 use api::{Resource, Error, Entity};
-use api::raw::{ResourceResponse, RawFetch, ResourceObject};
+use api::raw::{ResourceResponse, RawResource, ResourceObject};
 use router::IncludeQuery;
 use _internal::_FetchRels;
 use IntoFuture;
@@ -12,7 +12,7 @@ pub trait Get: Resource {
     fn get(id: &Self::Id) -> Self::GetFut;
 }
 
-pub trait RawGet<I>: RawFetch {
+pub trait RawGet<I>: RawResource {
     type RawGetFut: Future<Item = ResourceResponse<I, Self>, Error = Error>;
     fn get(id: Self::Id, includes: Vec<IncludeQuery>) -> Self::RawGetFut;
 }

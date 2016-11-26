@@ -1,17 +1,16 @@
-use api::raw::{RawFetch, RawUpdate, Include};
+use api::raw::{RawResource, Include};
 use api::{Resource, Entity, Error};
 use api::rel::{ToOne, ToMany, LinkOne, UnlinkOne, ReplaceLinks, HasOne, HasMany, RelationId};
 use router::IncludeQuery;
 use IntoFuture;
 use futures::Future;
 
-pub trait _FetchRels<I>: RawFetch {
-    fn rels(entity: &Entity<Self>, includes: &[IncludeQuery]) -> Result<(Self::Relationships, Vec<Include<I>>), Error>;
+pub trait _FetchRels<I>: RawResource {
+    fn rels(entity: &Entity<Self>, includes: &[IncludeQuery]) -> Result<(Self::FetchRels, Vec<Include<I>>), Error>;
 }
 
-pub trait _UpdateRels: RawUpdate {
-    fn update_rels(entity: &Entity<Self>, rels: <Self as RawUpdate>::Relationships)
-        -> Result<<Self as RawFetch>::Relationships, Error>;
+pub trait _UpdateRels: RawResource {
+    fn update_rels(entity: &Entity<Self>, rels: Self::UpdateRels) -> Result<Self::FetchRels, Error>;
 }
 
 pub trait _MaybeLinkOne<T: ToOne>: Resource {
