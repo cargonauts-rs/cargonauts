@@ -3,6 +3,7 @@ use api::raw::{RawUpdate, RawReceived, CollectionResponse, ResourceObject};
 use _internal::_UpdateRels;
 use IntoFuture;
 use futures::Future;
+use futures::stream::{self, Stream};
 
 pub trait Replace: Resource {
     type ReplaceFut: IntoFuture<Item = Vec<Self>, Error = Error>;
@@ -19,22 +20,19 @@ impl<I, T> RawReplace<I> for T where T: Replace + _UpdateRels, I: 'static {
     fn replace(received: Vec<RawReceived<Self, Self>>) -> Self::RawReplaceFut {
         let (data, rels) = split(received.into_iter().map(|r| (r.attributes, r.relationships)));
         Box::new(<Self as Replace>::replace(data).into_future().and_then(move |data| {
-            let mut resources = vec![];
-            for (resource, rels) in data.into_iter().zip(rels) {
+            stream::iter(data.into_iter().zip(rels).map(Ok)).and_then(move |(resource, rels)| {
                 let entity = Entity::Resource(resource);
-                let relationships = <T as _UpdateRels>::update_rels(&entity, rels)?;
+                <T as _UpdateRels>::update_rels(&entity, rels).into_future().join(Ok(entity))
+            }).fold(CollectionResponse::default(), |mut response, (rels, entity)| {
                 match entity {
-                    Entity::Resource(resource)  => resources.push(ResourceObject {
+                    Entity::Resource(resource)  => response.resources.push(ResourceObject {
                         id: resource.id(),
                         attributes: resource,
-                        relationships: relationships,
+                        relationships: rels,
                     }),
                     _                           => unreachable!()
                 }
-            }
-            Ok(CollectionResponse {
-                resources: resources,
-                includes: vec![],
+                Ok(response)
             })
         }))
     }

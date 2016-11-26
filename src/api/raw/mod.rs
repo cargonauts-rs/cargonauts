@@ -51,6 +51,15 @@ pub struct CollectionResponse<I, T: RawFetch> {
     pub includes: Vec<Include<I>>,
 }
 
+impl<I, T: RawFetch> Default for CollectionResponse<I, T> {
+    fn default() -> CollectionResponse<I, T> {
+        CollectionResponse {
+            resources: vec![],
+            includes: vec![],
+        }
+    }
+}
+
 pub struct RelResponse<I> {
     pub resource: &'static str,
     pub related: &'static str,

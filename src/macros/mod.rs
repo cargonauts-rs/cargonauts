@@ -286,12 +286,14 @@ macro_rules! _link_rel {
     ($id:expr, $rel_obj:expr, $resource:ty, $rel:ty, one)   => {
         match $rel_obj {
             $crate::api::raw::Relationship::One(Some(ref identifier)) => {
+                use $crate::{IntoFuture, Future};
                 let rel_id = identifier.id.parse().or(Err($crate::api::Error::BadRequest))?;
-                <$resource as $crate::_internal::_MaybeLinkOne<$rel>>::link_one($id, &rel_id)?;
+                <$resource as $crate::_internal::_MaybeLinkOne<$rel>>::link_one($id, &rel_id).into_future().wait()?;
 
             }
             $crate::api::raw::Relationship::One(None)           => {
-                <$resource as $crate::_internal::_MaybeUnlinkOne<$rel>>::unlink_one($id)?;
+                use $crate::{IntoFuture, Future};
+                <$resource as $crate::_internal::_MaybeUnlinkOne<$rel>>::unlink_one($id).into_future().wait()?;
             }
             $crate::api::raw::Relationship::Many(_)             => {
                 return Err($crate::api::Error::BadRequest);
@@ -304,8 +306,9 @@ macro_rules! _link_rel {
                 return Err($crate::api::Error::BadRequest);
             }
             $crate::api::raw::Relationship::Many(ref identifiers)   => {
+                use $crate::{IntoFuture, Future};
                 let rel_ids = identifiers.iter().map(|identifier| identifier.id.parse().or(Err($crate::api::Error::BadRequest))).collect::<::std::result::Result<::std::vec::Vec<_>, _>>()?;
-                <$resource as $crate::_internal::_MaybeReplaceLinks<$rel>>::replace_links($id, &rel_ids)?;
+                <$resource as $crate::_internal::_MaybeReplaceLinks<$rel>>::replace_links($id, &rel_ids).into_future().wait()?;
             }
         }
     };

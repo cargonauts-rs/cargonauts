@@ -4,6 +4,7 @@ use api::rel::{ToOne, ToMany, HasOne, HasMany};
 use router::IncludeQuery;
 use IntoFuture;
 use futures::Future;
+use futures::stream::{self, Stream};
 
 pub trait GetOne<I, T: ToOne>: HasOne<T> where T::Resource: RawFetch {
     type GetOneFut: Future<Item = ResourceResponse<I, T::Resource>, Error = Error>;
@@ -38,16 +39,12 @@ where T:                HasMany<Rel>,
     type IndexManyFut = Box<Future<Item = CollectionResponse<I, Rel::Resource>, Error = Error>>;
     fn index_many(entity: &Entity<Self>, includes: Vec<IncludeQuery>) -> Self::IndexManyFut {
         Box::new(<T as HasMany<Rel>>::has_many(entity).into_future().and_then(move |ids| {
-            let mut resources = vec![];
-            let mut include_objects = vec![];
-            for id in ids {
-                let response = <Rel::Resource as RawGet<I>>::get(id, includes.clone()).into_future().wait()?;
-                resources.push(response.resource);
-                include_objects.extend(response.includes);
-            }
-            Ok(CollectionResponse {
-                resources: resources,
-                includes: include_objects,
+            stream::iter(ids.into_iter().map(Ok)).and_then(move |id| {
+                <Rel::Resource as RawGet<I>>::get(id, includes.clone())
+            }).fold(CollectionResponse::default(), |mut response, resource| {
+                response.resources.push(resource.resource);
+                response.includes.extend(resource.includes);
+                Ok(response)
             })
         }))
     }

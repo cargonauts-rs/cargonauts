@@ -410,7 +410,7 @@ impl<'a, R: Router> _Router<'a, R> {
         {
             let presenter = P::prepare(None, link_maker);
             let parsed_id = try_status!(request.id().parse(), presenter);
-            presenter.try_present(T::unlink_one(&api::Entity::Id(parsed_id)).into_future().wait())
+            presenter.try_present(T::unlink_one(&api::Entity::Id(parsed_id)).into_future().wait().map(|_| ()))
         }
         self.router.attach_resource(T::resource_plural(), ResourceRoute {
             method: Method::Delete,
@@ -448,7 +448,7 @@ impl<'a, R: Router> _Router<'a, R> {
         {
             let presenter = P::prepare(None, link_maker);
             let id = try_status!(request.id().parse(), presenter);
-            presenter.try_present(T::clear_links(&api::Entity::Id(id)).into_future().wait())
+            presenter.try_present(T::clear_links(&api::Entity::Id(id)).into_future().wait().map(|_| ()))
         }
         self.router.attach_resource(T::resource_plural(), ResourceRoute {
             method: Method::Clear,
@@ -491,7 +491,7 @@ impl<'a, R: Router> _Router<'a, R> {
             let presenter = P::prepare(None, link_maker);
             let parsed_id = try_status!(request.id().parse(), presenter);
             let parsed_rel_ids = try_status!(C::receive_ids(request), presenter);
-            presenter.try_present(T::remove_links(&api::Entity::Id(parsed_id), &parsed_rel_ids).into_future().wait())
+            presenter.try_present(T::remove_links(&api::Entity::Id(parsed_id), &parsed_rel_ids).into_future().wait().map(|_| ()))
         }
         self.router.attach_resource(T::resource_plural(), ResourceRoute {
             method: Method::Remove,
@@ -553,7 +553,7 @@ impl<'a, R: Router> _Router<'a, R> {
             let presenter = P::prepare(options.field_set, link_maker);
             let id = try_status!(request.id().parse(), presenter);
             let received = try_status!(C::receive_resource(request), presenter);
-            presenter.try_present(T::post_one(&api::Entity::Id(id), received).into_future().wait())
+            presenter.try_present(T::post_one(api::Entity::Id(id), received).into_future().wait())
         }
         fn post_one_rel<R, T, Rel, P, C>(request: R::Request, link_maker: R::LinkMaker) -> R::Response
         where
@@ -583,7 +583,7 @@ impl<'a, R: Router> _Router<'a, R> {
                     presenter.try_present(T::link_one(&api::Entity::Id(id), &rel_id).into_future().wait())
                 }
                 None                => {
-                    presenter.try_present(T::unlink_one(&api::Entity::Id(id)).into_future().wait())
+                    presenter.try_present(T::unlink_one(&api::Entity::Id(id)).into_future().wait().map(|_| ()))
                 }
             }
         }
@@ -618,7 +618,7 @@ impl<'a, R: Router> _Router<'a, R> {
             let presenter = P::prepare(options.field_set, link_maker);
             let id = try_status!(request.id().parse(), presenter);
             let received = try_status!(C::receive_collection(request), presenter);
-            presenter.try_present(T::append_many(&api::Entity::Id(id), received).into_future().wait())
+            presenter.try_present(T::append_many(api::Entity::Id(id), received).into_future().wait())
         }
         fn append_many_rel<R, T, Rel, P, C>(request: R::Request, link_maker: R::LinkMaker) -> R::Response
         where
@@ -681,7 +681,7 @@ impl<'a, R: Router> _Router<'a, R> {
             let presenter = P::prepare(options.field_set, link_maker);
             let id = try_status!(request.id().parse(), presenter);
             let received = try_status!(C::receive_collection(request), presenter);
-            presenter.try_present(T::replace_many(&api::Entity::Id(id), received).into_future().wait())
+            presenter.try_present(T::replace_many(api::Entity::Id(id), received).into_future().wait())
         }
         fn replace_many_rel<R, T, Rel, P, C>(request: R::Request, link_maker: R::LinkMaker) -> R::Response
         where
