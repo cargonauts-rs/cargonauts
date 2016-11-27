@@ -220,7 +220,6 @@ macro_rules! _rel_methods {
     };
     ($router:expr, $resource:ty, many $rel:ty) => {
         <$resource as $crate::_internal::_MaybeIndexMany<$rel, P<T, T::Response>, T>>::attach(&mut $router);
-        <$resource as $crate::_internal::_MaybeClearMany<$rel, P<T, T::Response>, T>>::attach(&mut $router);
         <$resource as $crate::_internal::_MaybeRemoveMany<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach(&mut $router);
         <$resource as $crate::_internal::_MaybeAppendMany<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach(&mut $router);
         <$resource as $crate::_internal::_MaybeReplaceMany<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach(&mut $router);

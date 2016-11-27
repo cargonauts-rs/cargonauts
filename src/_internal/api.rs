@@ -223,24 +223,6 @@ where
     }
 }
 
-pub trait _MaybeClearMany<Rel: ToMany, P, R: Router>: Resource {
-    fn attach(_: &mut _Router<R>) { }
-}
-
-impl<T: Resource, Rel: ToMany, P, R: Router> _MaybeClearMany<Rel, P, R> for T { }
-
-impl<T, Rel, P, R> _MaybeClearMany<Rel, P, R> for T
-where
-    T: rel::raw::ClearMany<Rel>,
-    Rel: ToMany,
-    P: Presenter<(), R>,
-    R: Router,
-{
-    fn attach(router: &mut _Router<R>) {
-        router.attach_clear_many::<T, Rel, P>();
-    }
-}
-
 pub trait _MaybeRemoveMany<Rel: ToMany, P, C, R: Router>: Resource {
     fn attach(_: &mut _Router<R>) { }
 }

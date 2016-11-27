@@ -1,5 +1,5 @@
 use api::{Error, Delete, Entity, Remove};
-use api::rel::{ToOne, ToMany, UnlinkOne, RemoveLinks, ClearLinks, RelationId};
+use api::rel::{ToOne, ToMany, UnlinkOne, RemoveLinks, RelationId};
 use futures::Future;
 use IntoFuture;
 
@@ -36,23 +36,6 @@ where T:             RemoveLinks<Rel>,
     type RemoveManyFut = Box<Future<Item = (), Error = Error>>;
     fn remove_many(entity: &Entity<Self>, rel_ids: &[RelationId<Rel::Resource>]) -> Self::RemoveManyFut {
         Box::new(<T as RemoveLinks<Rel>>::remove_links(entity, rel_ids).into_future().and_then(|rel_ids| {
-            <Rel::Resource as Remove>::remove(&rel_ids)
-        }))
-    }
-}
-
-pub trait ClearMany<T: ToMany>: ClearLinks<T> {
-    type ClearManyFut: IntoFuture<Item = (), Error = Error> + 'static;
-    fn clear_many(entity: &Entity<Self>) -> Self::ClearManyFut;
-}
-
-impl<T, Rel> ClearMany<Rel> for T
-where T:             ClearLinks<Rel>,
-      Rel:           ToMany,
-      Rel::Resource: Remove {
-    type ClearManyFut = Box<Future<Item = (), Error = Error>>;
-    fn clear_many(entity: &Entity<Self>) -> Self::ClearManyFut {
-        Box::new(<T as ClearLinks<Rel>>::clear_links(entity).into_future().and_then(|rel_ids| {
             <Rel::Resource as Remove>::remove(&rel_ids)
         }))
     }

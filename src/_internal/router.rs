@@ -415,50 +415,6 @@ impl<'a, R: Router> _Router<'a, R> {
         }, delete_one_rel::<R, T, Rel, P>)
     }
 
-    pub fn attach_clear_many<T, Rel, P>(&mut self)
-    where
-        T: rel::raw::ClearMany<Rel>,
-        Rel: rel::ToMany,
-        P: Presenter<(), R>,
-    {
-        fn clear_many<R, T, Rel, P>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>
-        where
-            T: rel::raw::ClearMany<Rel>,
-            Rel: rel::ToMany,
-            P: Presenter<(), R>,
-            R: Router,
-        {
-            let presenter = P::prepare(None, link_maker);
-            let id = match request.id() {
-                Some(id)    => try_status!(id.parse(), presenter),
-                None        => try_status!(Err(()), presenter),
-            };
-            presenter.try_present(T::clear_many(&api::Entity::Id(id)))
-        }
-        fn clear_many_rel<R, T, Rel, P>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>
-        where
-            T: rel::raw::ClearMany<Rel>,
-            Rel: rel::ToMany,
-            P: Presenter<(), R>,
-            R: Router,
-        {
-            let presenter = P::prepare(None, link_maker);
-            let id = match request.id() {
-                Some(id)    => try_status!(id.parse(), presenter),
-                None        => try_status!(Err(()), presenter),
-            };
-            presenter.try_present(T::clear_links(&api::Entity::Id(id)).into_future().map(|_| ()))
-        }
-        self.router.attach_resource(T::resource_plural(), ResourceRoute {
-            method: Method::Clear,
-            relation: Some((Rel::to_many(), true)),
-        }, clear_many::<R, T, Rel, P>);
-        self.router.attach_resource(T::resource_plural(), ResourceRoute {
-            method: Method::Clear,
-            relation: Some((Rel::to_many(), false)),
-        }, clear_many_rel::<R, T, Rel, P>);
-    }
-
     pub fn attach_remove_many<T, Rel, P, C>(&mut self)
     where
         T: rel::raw::RemoveMany<Rel>,
