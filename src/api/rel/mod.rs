@@ -10,7 +10,7 @@ pub mod raw {
     pub use api::rel::delete::{DeleteOne, RemoveMany};
     pub use api::rel::fetch::{GetOne, IndexMany};
     pub use api::rel::patch::PatchOne;
-    pub use api::rel::post::{PostOne, AppendMany, ReplaceMany};
+    pub use api::rel::post::{AppendMany, ReplaceMany};
 }
 
 pub trait Relation {

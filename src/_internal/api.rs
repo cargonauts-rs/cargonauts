@@ -263,15 +263,15 @@ where
     }
 }
 
-pub trait _MaybePostOne<Rel: ToOne, P, C, R: Router>: Resource {
+pub trait _MaybeReplaceOne<Rel: ToOne, P, C, R: Router>: Resource {
     fn attach(_: &mut _Router<R>) { }
 }
 
-impl<T: Resource, Rel: ToOne, C, P, R: Router> _MaybePostOne<Rel, P, C, R> for T { }
+impl<T: Resource, Rel: ToOne, C, P, R: Router> _MaybeReplaceOne<Rel, P, C, R> for T { }
 
-impl<T, Rel, C, P, R> _MaybePostOne<Rel, P, C, R> for T
+impl<T, Rel, C, P, R> _MaybeReplaceOne<Rel, P, C, R> for T
 where
-    T: rel::raw::PostOne<<P as Presenter<Rel::Resource, R>>::Include, Rel>,
+    T: rel::LinkOne<Rel> + rel::UnlinkOne<Rel>,
     Rel: ToOne,
     Rel::Resource: raw::RawResource,
     P: Presenter<Rel::Resource, R> + Presenter<(), R>,
@@ -279,7 +279,7 @@ where
     R: Router,
 {
     fn attach(router: &mut _Router<R>) {
-        router.attach_post_one::<T, Rel, P, C>();
+        router.attach_replace_one::<T, Rel, P, C>();
     }
 }
 

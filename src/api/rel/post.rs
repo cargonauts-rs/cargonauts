@@ -1,27 +1,8 @@
 use api::{Entity, Error};
-use api::raw::{RawPost, RawReceived, ResourceResponse, CollectionResponse, RawResource};
-use api::rel::{ToOne, ToMany, LinkOne, UnlinkOne, AppendLinks, ReplaceLinks};
+use api::raw::{RawPost, RawReceived, CollectionResponse, RawResource};
+use api::rel::{ToMany, AppendLinks, ReplaceLinks};
 use IntoFuture;
 use futures::Future;
-
-pub trait PostOne<I, Rel: ToOne>: LinkOne<Rel> + UnlinkOne<Rel> where Rel::Resource: RawResource {
-    type PostOneFut: Future<Item = ResourceResponse<I, Rel::Resource>, Error = Error> + 'static;
-    fn post_one(entity: Entity<Self>, received: RawReceived<Rel::Resource, Rel::Resource>) -> Self::PostOneFut;
-}
-
-impl<I, T, Rel> PostOne<I, Rel> for T
-where T:                LinkOne<Rel> + UnlinkOne<Rel>,
-      Rel:              ToOne,
-      Rel::Resource:    RawPost<I>,
-      I:                'static,
-{
-    type PostOneFut = Box<Future<Item = ResourceResponse<I, Rel::Resource>, Error = Error>>;
-    fn post_one(entity: Entity<Self>, received: RawReceived<Rel::Resource, Rel::Resource>) -> Self::PostOneFut {
-        Box::new(RawPost::post(received).into_future().and_then(move |response| {
-            <T as LinkOne<Rel>>::link_one(&entity, &response.resource.id).into_future().map(|_| response)
-        }))
-    }
-}
 
 pub trait AppendMany<I, Rel: ToMany>: AppendLinks<Rel> where Rel::Resource: RawResource {
     type AppendManyFut: Future<Item = CollectionResponse<I, Rel::Resource>, Error = Error> + 'static;

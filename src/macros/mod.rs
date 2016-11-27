@@ -216,7 +216,7 @@ macro_rules! _rel_methods {
         <$resource as $crate::_internal::_MaybeGetOne<$rel, P<T, T::Response>, T>>::attach(&mut $router);
         <$resource as $crate::_internal::_MaybeDeleteOne<$rel, P<T, T::Response>, T>>::attach(&mut $router);
         <$resource as $crate::_internal::_MaybePatchOne<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach(&mut $router);
-        <$resource as $crate::_internal::_MaybePostOne<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach(&mut $router);
+        <$resource as $crate::_internal::_MaybeReplaceOne<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach(&mut $router);
     };
     ($router:expr, $resource:ty, many $rel:ty) => {
         <$resource as $crate::_internal::_MaybeIndexMany<$rel, P<T, T::Response>, T>>::attach(&mut $router);

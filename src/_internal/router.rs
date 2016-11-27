@@ -501,36 +501,18 @@ impl<'a, R: Router> _Router<'a, R> {
         }, patch_one::<R, T, Rel, P, C>);
     }
 
-    pub fn attach_post_one<T, Rel, P, C>(&mut self)
+    pub fn attach_replace_one<T, Rel, P, C>(&mut self)
     where
-        T: rel::raw::PostOne<<P as Presenter<Rel::Resource, R>>::Include, Rel>,
+        T: rel::LinkOne<Rel> + rel::UnlinkOne<Rel>,
         Rel: rel::ToOne,
         Rel::Resource: raw::RawResource,
         P: Presenter<Rel::Resource, R> + Presenter<(), R>,
         C: Receiver<Rel::Resource, R::Request>,
     {
-        fn post_one<R, T, Rel, P, C>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>
+        fn replace_one<R, T, Rel, P, C>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>
         where
             R: Router,
-            T: rel::raw::PostOne<P::Include, Rel>,
-            Rel: rel::ToOne,
-            Rel::Resource: raw::RawResource,
-            P: Presenter<Rel::Resource, R>,
-            C: Receiver<Rel::Resource, R::Request>,
-        {
-            let options = request.resource_options();
-            let presenter = P::prepare(options.field_set, link_maker);
-            let id = match request.id() {
-                Some(id)    => try_status!(id.parse(), presenter),
-                None        => try_status!(Err(()), presenter),
-            };
-            let received = try_status!(C::receive_resource(request), presenter);
-            presenter.try_present(T::post_one(api::Entity::Id(id), received))
-        }
-        fn post_one_rel<R, T, Rel, P, C>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>
-        where
-            R: Router,
-            T: rel::raw::PostOne<<P as Presenter<Rel::Resource, R>>::Include, Rel>,
+            T: rel::LinkOne<Rel> + rel::UnlinkOne<Rel>,
             Rel: rel::ToOne,
             Rel::Resource: raw::RawResource,
             P: Presenter<Rel::Resource, R> + Presenter<(), R>,
@@ -563,13 +545,9 @@ impl<'a, R: Router> _Router<'a, R> {
             }
         }
         self.router.attach_resource(T::resource_plural(), ResourceRoute {
-            method: Method::Post,
-            relation: Some((Rel::to_one(), false))
-        }, post_one::<R, T, Rel, P, C>);
-        self.router.attach_resource(T::resource_plural(), ResourceRoute {
-            method: Method::Post,
+            method: Method::Patch,
             relation: Some((Rel::to_one(), true))
-        }, post_one_rel::<R, T, Rel, P, C>);
+        }, replace_one::<R, T, Rel, P, C>);
     }
 
     pub fn attach_append_many<T, Rel, P, C>(&mut self)
