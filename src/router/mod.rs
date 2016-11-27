@@ -39,10 +39,10 @@ pub enum Method {
     Post,
     Delete,
     Index,
-    Append,
     Replace,
     Clear,
     Remove,
+    Append,
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]

@@ -58,23 +58,6 @@ where
     }
 }
 
-pub trait _MaybeClear<P, R: Router>: Resource {
-    fn attach(_: &mut _Router<R>) { }
-}
-
-impl<T: Resource, P, R: Router> _MaybeClear<P, R> for T { }
-
-impl<T, P, R> _MaybeClear<P, R> for T
-where
-    T: api::Clear,
-    P: Presenter<(), R>,
-    R: Router,
-{
-    fn attach(router: &mut _Router<R>) {
-        router.attach_clear::<T, P>();
-    }
-}
-
 pub trait _MaybeRemove<P, C, R: Router>: Resource {
     fn attach(_: &mut _Router<R>) { }
 }
@@ -163,24 +146,6 @@ where
 {
     fn attach(router: &mut _Router<R>) {
         router.attach_post_async::<T, P, C>();
-    }
-}
-
-pub trait _MaybeAppend<P, C, R: Router>: Resource {
-    fn attach(_: &mut _Router<R>) { }
-}
-
-impl<T: Resource, P, C, R: Router> _MaybeAppend<P, C, R> for T { }
-
-impl<T, P, C, R> _MaybeAppend<P, C, R> for T
-where
-    T: raw::RawAppend<P::Include>,
-    P: Presenter<T, R>,
-    C: Receiver<T, R::Request>,
-    R: Router,
-{
-    fn attach(router: &mut _Router<R>) {
-        router.attach_append::<T, P, C>();
     }
 }
 

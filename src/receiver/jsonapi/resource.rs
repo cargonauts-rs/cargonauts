@@ -32,7 +32,7 @@ where
     }
 }
 
-struct ResourceVisitor<T, A>(PhantomData<(T, A)>);
+pub struct ResourceVisitor<T, A>(pub PhantomData<(T, A)>);
 
 impl<T, A> Visitor for ResourceVisitor<T, A>
 where

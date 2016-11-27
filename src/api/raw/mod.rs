@@ -4,7 +4,6 @@ mod relationship;
 
 pub use api::alias::{RawGetAliased, RawIndexAliased};
 
-pub use api::append::RawAppend;
 pub use api::get::RawGet;
 pub use api::index::RawIndex;
 pub use api::patch::{RawHasPatch, RawPatch, Synchronous};

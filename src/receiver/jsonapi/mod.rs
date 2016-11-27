@@ -1,8 +1,10 @@
 mod collection;
+mod post;
 mod relation;
 mod resource;
 
 use self::collection::CollectionDocument;
+use self::post::PostDocument;
 use self::relation::{ToOneDocument, ToManyDocument};
 use self::resource::ResourceDocument;
 
@@ -16,7 +18,7 @@ use api::rel::{ToOne, ToMany};
 use serde::de::{self, Visitor, MapVisitor};
 use Deserialize;
 use Deserializer;
-use receiver::{Receiver, PatchReceiver};
+use receiver::{Receiver, PatchReceiver, Post};
 use router::Request;
 
 pub struct JsonApi<D: Deserializer, R: Read> {
@@ -29,6 +31,11 @@ where
     R: Request,
     D: Deserializer + ReadAdapter<R>,
 {
+    fn receive_post(request: R) -> Result<Post<T>, Error> {
+        let mut deserializer = D::wrap(request);
+        PostDocument::deserialize(&mut deserializer).map(|x| x.0).or(Err(Error::BadRequest))
+    }
+
     fn receive_resource(request: R) -> Result<RawReceived<T, T>, Error> {
         let mut deserializer = D::wrap(request);
         ResourceDocument::deserialize(&mut deserializer).map(|x| x.0).or(Err(Error::BadRequest))

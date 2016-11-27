@@ -4,8 +4,6 @@ mod alias;
 mod error;
 mod sort;
 
-mod append;
-mod clear;
 mod get;
 mod delete;
 mod index;
@@ -21,8 +19,6 @@ pub mod rel;
 pub use self::alias::{GetAliased, IndexAliased, AliasRequest};
 pub use self::error::Error;
 
-pub use self::append::Append;
-pub use self::clear::Clear;
 pub use self::get::Get;
 pub use self::delete::Delete;
 pub use self::index::Index;

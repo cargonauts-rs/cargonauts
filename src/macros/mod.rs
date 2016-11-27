@@ -203,11 +203,9 @@ macro_rules! _methods {
         <$resource as $crate::_internal::_MaybeGet<P<T, T::Response>, T>>::attach(&mut $router);
         <$resource as $crate::_internal::_MaybeIndex<P<T, T::Response>, T>>::attach(&mut $router);
         <$resource as $crate::_internal::_MaybeDelete<P<T, T::Response>, T>>::attach(&mut $router);
-        <$resource as $crate::_internal::_MaybeClear<P<T, T::Response>, T>>::attach(&mut $router);
         <$resource as $crate::_internal::_MaybeRemove<P<T, T::Response>, C<T::Request>, T>>::attach(&mut $router);
         <$resource as $crate::_internal::_MaybePatch<P<T, T::Response>, C<T::Request>, T>>::attach(&mut $router);
         <$resource as $crate::_internal::_MaybePost<P<T, T::Response>, C<T::Request>, T>>::attach(&mut $router);
-        <$resource as $crate::_internal::_MaybeAppend<P<T, T::Response>, C<T::Request>, T>>::attach(&mut $router);
         <$resource as $crate::_internal::_MaybeReplace<P<T, T::Response>, C<T::Request>, T>>::attach(&mut $router);
     };
 }

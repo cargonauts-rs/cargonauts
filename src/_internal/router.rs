@@ -6,7 +6,7 @@ use api::rel;
 use api::raw;
 use router::{Request, Router, ResourceRoute, Method};
 use futures::{IntoFuture, Future};
-use receiver::{Receiver, IdReceiver, PatchReceiver};
+use receiver::{Receiver, IdReceiver, PatchReceiver, Post};
 use presenter::Presenter;
 
 macro_rules! try_status {
@@ -93,26 +93,6 @@ impl<'a, R: Router> _Router<'a, R> {
             method: Method::Delete,
             relation: None,
         }, delete::<R, T, P>);
-    }
-
-    pub fn attach_clear<T, P>(&mut self)
-    where
-        T: api::Clear,
-        P: Presenter<(), R>,
-    {
-        fn clear<R, T, P>(_: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>
-        where
-            T: api::Clear,
-            P: Presenter<(), R>,
-            R: Router,
-        {
-            let presenter = P::prepare(None, link_maker);
-            presenter.try_present(T::clear())
-        }
-        self.router.attach_resource(T::resource_plural(), ResourceRoute {
-            method: Method::Clear,
-            relation: None,
-        }, clear::<R, T, P>);
     }
 
     pub fn attach_remove<T, P, C>(&mut self)
@@ -202,8 +182,11 @@ impl<'a, R: Router> _Router<'a, R> {
         {
             let options = request.resource_options();
             let presenter = P::prepare(options.field_set, link_maker);
-            let received = try_status!(C::receive_resource(request), presenter);
-            presenter.try_present(T::post(received))
+            let received = try_status!(C::receive_post(request), presenter);
+            match received {
+                Post::One(data)     => presenter.try_present(T::post(data)),
+                Post::Many(data)    => presenter.try_present(T::append(data)),
+            }
         }
         self.router.attach_resource(T::resource_plural(), ResourceRoute {
             method: Method::Post,
@@ -225,37 +208,16 @@ impl<'a, R: Router> _Router<'a, R> {
             C: Receiver<T, R::Request>,
         {
             let presenter = P::prepare(None, link_maker);
-            let received = try_status!(C::receive_resource(request), presenter);
-            presenter.try_present(T::post_async(received))
+            let received = try_status!(C::receive_post(request), presenter);
+            match received {
+                Post::One(data)     => presenter.try_present(T::post_async(data)),
+                Post::Many(_)       => Box::new(Ok(presenter.present_err(Error::BadRequest)).into_future()),
+            }
         }
         self.router.attach_resource(T::resource_plural(), ResourceRoute {
             method: Method::Post,
             relation: None,
         }, post_async::<R, T, P, C>);
-    }
-
-    pub fn attach_append<T, P, C>(&mut self)
-    where
-        T: raw::RawAppend<P::Include>,
-        P: Presenter<T, R>,
-        C: Receiver<T, R::Request>,
-    {
-        fn append<R, T, P, C>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>
-        where
-            R: Router,
-            T: raw::RawAppend<P::Include>,
-            P: Presenter<T, R>,
-            C: Receiver<T, R::Request>,
-        {
-            let options = request.collection_options();
-            let presenter = P::prepare(options.field_set, link_maker);
-            let received = try_status!(C::receive_collection(request), presenter);
-            presenter.try_present(T::append(received))
-        }
-        self.router.attach_resource(T::resource_plural(), ResourceRoute {
-            method: Method::Append,
-            relation: None,
-        }, append::<R, T, P, C>);
     }
 
     pub fn attach_replace<T, P, C>(&mut self)

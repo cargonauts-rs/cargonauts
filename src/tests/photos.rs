@@ -117,13 +117,6 @@ impl api::Post for Photo {
     }
 }
 
-impl api::Append for Photo {
-    type AppendFut = Result<Vec<Photo>, api::Error>;
-    fn append(photos: Vec<Self>) -> Self::AppendFut {
-        unimplemented!()
-    }
-}
-
 impl api::rel::HasOne<User> for Photo {
     type HasOneFut = Result<Option<u32>, api::Error>;
     fn has_one(entity: &api::Entity<Photo>) -> Self::HasOneFut {
@@ -140,7 +133,7 @@ fn it_has_attached_routes() {
     
     const ME_ROUTES: &'static [&'static str] = &["alias-get"];
     const USERS_ROUTES: &'static [&'static str] = &["get", "patch"];
-    const PHOTOS_ROUTES: &'static [&'static str] = &["get", "index", "delete", "post", "append"];
+    const PHOTOS_ROUTES: &'static [&'static str] = &["get", "index", "delete", "post"];
     const USERS_PHOTOS_ROUTES: &'static [&'static str] = &["index-many", "index-rel", "append-many", "append-rel"];
     const PHOTOS_USER_ROUTES: &'static [&'static str] = &["get-one", "get-rel", "patch-one"];
 

@@ -1,5 +1,5 @@
 use api::{Entity, Error};
-use api::raw::{RawPost, RawAppend, RawReceived, ResourceResponse, CollectionResponse, RawResource};
+use api::raw::{RawPost, RawReceived, ResourceResponse, CollectionResponse, RawResource};
 use api::rel::{ToOne, ToMany, LinkOne, UnlinkOne, AppendLinks, ReplaceLinks};
 use IntoFuture;
 use futures::Future;
@@ -31,12 +31,12 @@ pub trait AppendMany<I, Rel: ToMany>: AppendLinks<Rel> where Rel::Resource: RawR
 impl<I, T, Rel> AppendMany<I, Rel> for T
 where T:                AppendLinks<Rel>,
       Rel:              ToMany,
-      Rel::Resource:    RawAppend<I>,
+      Rel::Resource:    RawPost<I>,
       I:                'static,
 {
     type AppendManyFut = Box<Future<Item = CollectionResponse<I, Rel::Resource>, Error = Error>>;
     fn append_many(entity: Entity<Self>, received: Vec<RawReceived<Rel::Resource, Rel::Resource>>) -> Self::AppendManyFut {
-        Box::new(RawAppend::append(received).into_future().and_then(move |response| {
+        Box::new(RawPost::append(received).into_future().and_then(move |response| {
             let ids = response.resources.iter().map(|resource| resource.id.clone()).collect::<Vec<_>>();
             <T as AppendLinks<Rel>>::append_links(&entity, &ids).into_future().map(|_| response)
         }))
@@ -52,12 +52,12 @@ impl<I, T, Rel> ReplaceMany<I, Rel> for T
 where
     T: ReplaceLinks<Rel>,
     Rel: ToMany,
-    Rel::Resource: RawAppend<I>,
+    Rel::Resource: RawPost<I>,
     I: 'static,
 {
     type ReplaceManyFut = Box<Future<Item = CollectionResponse<I, Rel::Resource>, Error = Error>>;
     fn replace_many(entity: Entity<Self>, received: Vec<RawReceived<Rel::Resource, Rel::Resource>>) -> Self::ReplaceManyFut {
-        Box::new(RawAppend::append(received).into_future().and_then(move |response| {
+        Box::new(RawPost::append(received).into_future().and_then(move |response| {
             let ids = response.resources.iter().map(|resource| resource.id.clone()).collect::<Vec<_>>();
             <T as ReplaceLinks<Rel>>::replace_links(&entity, &ids).into_future().map(|_| response)
         }))
