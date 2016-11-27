@@ -149,6 +149,7 @@ impl MakeLinks for MockLinker {
 pub struct MockRequest;
 
 impl Request for MockRequest {
+    type Body = Box<Read>;
     fn endpoint(&self) -> &str { unimplemented!() }
     fn id(&self) -> Option<&str> { unimplemented!() }
     fn relation(&self) -> Option<(&str, bool)> { unimplemented!() }
@@ -156,10 +157,7 @@ impl Request for MockRequest {
     fn resource_options(&self) -> ResourceOptions { unimplemented!() }
     fn collection_options(&self) -> CollectionOptions { unimplemented!() }
     fn alias_info(&self) -> AliasRequest { unimplemented!() }
-}
-
-impl Read for MockRequest {
-    fn read(&mut self, _: &mut [u8]) -> io::Result<usize> { unimplemented!() }
+    fn body(self) -> Self::Body { unimplemented!() }
 }
 
 #[derive(Default)]

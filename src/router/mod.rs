@@ -101,7 +101,8 @@ pub struct CollectionOptions {
     pub field_set: Option<Vec<String>>,
 }
 
-pub trait Request: Read {
+pub trait Request {
+    type Body: Read;
     fn endpoint(&self) -> &str;
     fn id(&self) -> Option<&str>;
     fn method(&self) -> Method;
@@ -109,4 +110,5 @@ pub trait Request: Read {
     fn resource_options(&self) -> ResourceOptions;
     fn collection_options(&self) -> CollectionOptions;
     fn alias_info(&self) -> AliasRequest;
+    fn body(self) -> Self::Body;
 }

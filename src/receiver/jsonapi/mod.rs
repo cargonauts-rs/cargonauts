@@ -27,51 +27,51 @@ pub struct JsonApi<D: Deserializer, R: Read> {
     _spoopy: PhantomData<(D, R)>,
 }
 
-impl<T, R, D> Receiver<T, R> for JsonApi<D, R>
+impl<T, R, D> Receiver<T, R> for JsonApi<D, R::Body>
 where
     T: RawResource + Deserialize,
     R: Request,
-    D: Deserializer + ReadAdapter<R>,
+    D: Deserializer + ReadAdapter<R::Body>,
 {
     fn receive_post(request: R) -> Result<Post<T>, Error> {
-        let mut deserializer = D::wrap(request);
+        let mut deserializer = D::wrap(request.body());
         PostDocument::deserialize(&mut deserializer).map(|x| x.0).or(Err(Error::BadRequest))
     }
 
     fn receive_resource(request: R) -> Result<RawReceived<T, T>, Error> {
-        let mut deserializer = D::wrap(request);
+        let mut deserializer = D::wrap(request.body());
         ResourceDocument::deserialize(&mut deserializer).map(|x| x.0).or(Err(Error::BadRequest))
     }
 
     fn receive_collection(request: R) -> Result<Vec<RawReceived<T, T>>, Error> {
-        let mut deserializer = D::wrap(request);
+        let mut deserializer = D::wrap(request.body());
         CollectionDocument::deserialize(&mut deserializer).map(|x| x.0).or(Err(Error::BadRequest))
     }
 
     fn receive_to_one<Rel: ToOne>(request: R) -> Result<Option<Identifier>, Error> {
-        let mut deserializer = D::wrap(request);
+        let mut deserializer = D::wrap(request.body());
         ToOneDocument::<Rel>::deserialize(&mut deserializer).map(|x| x.0).or(Err(Error::BadRequest))
     }
     fn receive_to_many<Rel: ToMany>(request: R) -> Result<Vec<Identifier>, Error> {
-        let mut deserializer = D::wrap(request);
+        let mut deserializer = D::wrap(request.body());
         ToManyDocument::<Rel>::deserialize(&mut deserializer).map(|x| x.0).or(Err(Error::BadRequest))
     }
 
     fn receive_identifiers(request: R) -> Result<Vec<Identifier>, Error> {
-        let mut deserializer = D::wrap(request);
+        let mut deserializer = D::wrap(request.body());
         IdentifiersDocument::<T>::deserialize(&mut deserializer).map(|x| x.0).or(Err(Error::BadRequest))
     }
 }
 
-impl<T, R, D, X> PatchReceiver<T, R, X> for JsonApi<D, R>
+impl<T, R, D, X> PatchReceiver<T, R, X> for JsonApi<D, R::Body>
 where
     T: RawHasPatch<X>,
     T::Patch: Deserialize,
     R: Request,
-    D: Deserializer + ReadAdapter<R>,
+    D: Deserializer + ReadAdapter<R::Body>,
 {
     fn receive_patch(request: R) -> Result<RawReceived<T, T::Patch>, Error> {
-        let mut deserializer = D::wrap(request);
+        let mut deserializer = D::wrap(request.body());
         ResourceDocument::deserialize(&mut deserializer).map(|x| x.0).or(Err(Error::BadRequest))
     }
 }

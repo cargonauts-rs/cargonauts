@@ -29,5 +29,3 @@ pub use serde::{Deserialize, Deserializer, Serialize, SerializeTo, Serializer};
 
 #[cfg(test)]
 mod tests;
-
-//mod hyper;
