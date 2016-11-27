@@ -44,7 +44,10 @@ impl<'a, R: Router> _Router<'a, R> {
         {
             let options = request.resource_options();
             let presenter = P::prepare(options.field_set, link_maker);
-            let id = try_status!(request.id().parse(), presenter);
+            let id = match request.id() {
+                Some(id)    => try_status!(id.parse(), presenter),
+                None        => try_status!(Err(()), presenter),
+            };
             presenter.try_present(T::get(id, options.includes))
         }
         self.router.attach_resource(T::resource_plural(), ResourceRoute {
@@ -86,7 +89,10 @@ impl<'a, R: Router> _Router<'a, R> {
             R: Router,
         {
             let presenter = P::prepare(None, link_maker);
-            let id = try_status!(request.id().parse(), presenter);
+            let id = match request.id() {
+                Some(id)    => try_status!(id.parse(), presenter),
+                None        => try_status!(Err(()), presenter),
+            };
             presenter.try_present(T::delete(&id))
         }
         self.router.attach_resource(T::resource_plural(), ResourceRoute {
@@ -134,7 +140,10 @@ impl<'a, R: Router> _Router<'a, R> {
         {
             let options = request.resource_options();
             let presenter = P::prepare(options.field_set, link_maker);
-            let id = try_status!(request.id().parse(), presenter);
+            let id = match request.id() {
+                Some(id)    => try_status!(id.parse(), presenter),
+                None        => try_status!(Err(()), presenter),
+            };
             let received = try_status!(C::receive_patch(request), presenter);
             presenter.try_present(T::patch(id, received))
         }
@@ -158,7 +167,10 @@ impl<'a, R: Router> _Router<'a, R> {
             C: PatchReceiver<T, R::Request, async::raw::Asynchronous>,
         {
             let presenter = P::prepare(None, link_maker);
-            let id = try_status!(request.id().parse(), presenter);
+            let id = match request.id() {
+                Some(id)    => try_status!(id.parse(), presenter),
+                None        => try_status!(Err(()), presenter),
+            };
             let received = try_status!(C::receive_patch(request), presenter);
             presenter.try_present(T::patch_async(id, received))
         }
@@ -262,7 +274,10 @@ impl<'a, R: Router> _Router<'a, R> {
         {
             let options = request.resource_options();
             let presenter = P::prepare(options.field_set, link_maker);
-            let id = try_status!(request.id().parse(), presenter);
+            let id = match request.id() {
+                Some(id)    => try_status!(id.parse(), presenter),
+                None        => try_status!(Err(()), presenter),
+            };
             presenter.try_present(T::get_one(&api::Entity::Id(id), options.includes))
         }
         fn fetch_one_rel<R, T, Rel, P>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>
@@ -275,12 +290,15 @@ impl<'a, R: Router> _Router<'a, R> {
         {
             let options = request.resource_options();
             let presenter = P::prepare(options.field_set, link_maker);
-            let parsed_id = try_status!(request.id().parse(), presenter);
+            let parsed_id = match request.id() {
+                Some(id)    => try_status!(id.parse(), presenter),
+                None        => try_status!(Err(()), presenter),
+            };
             presenter.try_present(T::has_one(&api::Entity::Id(parsed_id)).into_future().map(move |rel| {
                 raw::RelResponse {
                     resource: T::resource_plural(),
                     related: Rel::to_one(),
-                    id: request.id().to_owned(),
+                    id: request.id().unwrap().to_owned(),
                     rel: raw::Relationship::One(rel.map(|id| raw::Identifier::new::<Rel::Resource>(&id))),
                     includes: vec![],
                 }
@@ -313,7 +331,10 @@ impl<'a, R: Router> _Router<'a, R> {
         {
             let options = request.collection_options();
             let presenter = P::prepare(options.field_set, link_maker);
-            let id = try_status!(request.id().parse(), presenter);
+            let id = match request.id() {
+                Some(id)    => try_status!(id.parse(), presenter),
+                None        => try_status!(Err(()), presenter),
+            };
             presenter.try_present(T::index_many(&api::Entity::Id(id), options.includes))
         }
         fn fetch_many_rel<R, T, Rel, P>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>
@@ -326,12 +347,15 @@ impl<'a, R: Router> _Router<'a, R> {
         {
             let options = request.collection_options();
             let presenter = P::prepare(options.field_set, link_maker);
-            let parsed_id = try_status!(request.id().parse(), presenter);
+            let parsed_id = match request.id() {
+                Some(id)    => try_status!(id.parse(), presenter),
+                None        => try_status!(Err(()), presenter),
+            };
             presenter.try_present(T::has_many(&api::Entity::Id(parsed_id)).into_future().map(move |rel| {
                 raw::RelResponse {
                     resource: T::resource_plural(),
                     related: Rel::to_many(),
-                    id: request.id().to_owned(),
+                    id: request.id().unwrap().to_owned(),
                     rel: raw::Relationship::Many(rel.into_iter().map(|id| raw::Identifier::new::<Rel::Resource>(&id)).collect()),
                     includes: vec![],
                 }
@@ -361,7 +385,10 @@ impl<'a, R: Router> _Router<'a, R> {
             R: Router,
         {
             let presenter = P::prepare(None, link_maker);
-            let id = try_status!(request.id().parse(), presenter);
+            let id = match request.id() {
+                Some(id)    => try_status!(id.parse(), presenter),
+                None        => try_status!(Err(()), presenter),
+            };
             presenter.try_present(T::delete_one(&api::Entity::Id(id)))
         }
         fn delete_one_rel<R, T, Rel, P>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>
@@ -372,7 +399,10 @@ impl<'a, R: Router> _Router<'a, R> {
             R: Router,
         {
             let presenter = P::prepare(None, link_maker);
-            let parsed_id = try_status!(request.id().parse(), presenter);
+            let parsed_id = match request.id() {
+                Some(id)    => try_status!(id.parse(), presenter),
+                None        => try_status!(Err(()), presenter),
+            };
             presenter.try_present(T::unlink_one(&api::Entity::Id(parsed_id)).into_future().map(|_| ()))
         }
         self.router.attach_resource(T::resource_plural(), ResourceRoute {
@@ -399,7 +429,10 @@ impl<'a, R: Router> _Router<'a, R> {
             R: Router,
         {
             let presenter = P::prepare(None, link_maker);
-            let id = try_status!(request.id().parse(), presenter);
+            let id = match request.id() {
+                Some(id)    => try_status!(id.parse(), presenter),
+                None        => try_status!(Err(()), presenter),
+            };
             presenter.try_present(T::clear_many(&api::Entity::Id(id)))
         }
         fn clear_many_rel<R, T, Rel, P>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>
@@ -410,7 +443,10 @@ impl<'a, R: Router> _Router<'a, R> {
             R: Router,
         {
             let presenter = P::prepare(None, link_maker);
-            let id = try_status!(request.id().parse(), presenter);
+            let id = match request.id() {
+                Some(id)    => try_status!(id.parse(), presenter),
+                None        => try_status!(Err(()), presenter),
+            };
             presenter.try_present(T::clear_links(&api::Entity::Id(id)).into_future().map(|_| ()))
         }
         self.router.attach_resource(T::resource_plural(), ResourceRoute {
@@ -441,7 +477,10 @@ impl<'a, R: Router> _Router<'a, R> {
             C: Receiver<Rel::Resource, R::Request>,
         {
             let presenter = P::prepare(None, link_maker);
-            let id = try_status!(request.id().parse(), presenter);
+            let id = match request.id() {
+                Some(id)    => try_status!(id.parse(), presenter),
+                None        => try_status!(Err(()), presenter),
+            };
             let identifiers = try_status!(C::receive_identifiers(request), presenter);
             let parsed_rel_ids = try_status!(identifiers.into_iter().map(|identifier| identifier.id.parse()).collect::<Result<Vec<_>, _>>(), presenter);
             presenter.try_present(T::remove_many(&api::Entity::Id(id), &parsed_rel_ids))
@@ -456,7 +495,10 @@ impl<'a, R: Router> _Router<'a, R> {
             C: Receiver<Rel::Resource, R::Request>,
         {
             let presenter = P::prepare(None, link_maker);
-            let parsed_id = try_status!(request.id().parse(), presenter);
+            let parsed_id = match request.id() {
+                Some(id)    => try_status!(id.parse(), presenter),
+                None        => try_status!(Err(()), presenter),
+            };
             let identifiers = try_status!(C::receive_identifiers(request), presenter);
             let parsed_rel_ids = try_status!(identifiers.into_iter().map(|identifier| identifier.id.parse()).collect::<Result<Vec<_>, _>>(), presenter);
             presenter.try_present(T::remove_links(&api::Entity::Id(parsed_id), &parsed_rel_ids).into_future().map(|_| ()))
@@ -490,7 +532,10 @@ impl<'a, R: Router> _Router<'a, R> {
         {
             let options = request.resource_options();
             let presenter = P::prepare(options.field_set, link_maker);
-            let id = try_status!(request.id().parse(), presenter);
+            let id = match request.id() {
+                Some(id)    => try_status!(id.parse(), presenter),
+                None        => try_status!(Err(()), presenter),
+            };
             let received = try_status!(C::receive_patch(request), presenter);
             presenter.try_present(T::patch_one(&api::Entity::Id(id), received))
         }
@@ -519,7 +564,10 @@ impl<'a, R: Router> _Router<'a, R> {
         {
             let options = request.resource_options();
             let presenter = P::prepare(options.field_set, link_maker);
-            let id = try_status!(request.id().parse(), presenter);
+            let id = match request.id() {
+                Some(id)    => try_status!(id.parse(), presenter),
+                None        => try_status!(Err(()), presenter),
+            };
             let received = try_status!(C::receive_resource(request), presenter);
             presenter.try_present(T::post_one(api::Entity::Id(id), received))
         }
@@ -534,9 +582,12 @@ impl<'a, R: Router> _Router<'a, R> {
         {
             let options = request.resource_options();
             let presenter = <P as Presenter<(), R>>::prepare(options.field_set, link_maker);
-            let id = match request.id().parse() {
-                Ok(id)  => id,
-                Err(_)  => return Box::new(Ok(<P as Presenter<(), R>>::present_err(presenter, Error::Conflict)).into_future()),
+            let id = match request.id() {
+                Some(id)    => match id.parse() {
+                    Ok(id)  => id,
+                    Err(_)  => return Box::new(Ok(<P as Presenter<(), R>>::present_err(presenter, Error::Conflict)).into_future()),
+                },
+                None => return Box::new(Ok(<P as Presenter<(), R>>::present_err(presenter, Error::Conflict)).into_future()),
             };
             let identifier = match C::receive_to_one::<Rel>(request) {
                 Ok(rel) => rel,
@@ -584,7 +635,10 @@ impl<'a, R: Router> _Router<'a, R> {
         {
             let options = request.collection_options();
             let presenter = P::prepare(options.field_set, link_maker);
-            let id = try_status!(request.id().parse(), presenter);
+            let id = match request.id() {
+                Some(id)    => try_status!(id.parse(), presenter),
+                None        => try_status!(Err(()), presenter),
+            };
             let received = try_status!(C::receive_collection(request), presenter);
             presenter.try_present(T::append_many(api::Entity::Id(id), received))
         }
@@ -598,9 +652,12 @@ impl<'a, R: Router> _Router<'a, R> {
             C: Receiver<Rel::Resource, R::Request>,
         {
             let presenter = <P as Presenter<(), R>>::prepare(None, link_maker);
-            let id = match request.id().parse() {
-                Ok(id)  => id,
-                Err(_)  => return Box::new(Ok(<P as Presenter<(), R>>::present_err(presenter, Error::Conflict)).into_future()),
+            let id = match request.id() {
+                Some(id)    => match id.parse() {
+                    Ok(id)  => id,
+                    Err(_)  => return Box::new(Ok(<P as Presenter<(), R>>::present_err(presenter, Error::Conflict)).into_future()),
+                },
+                None => return Box::new(Ok(<P as Presenter<(), R>>::present_err(presenter, Error::Conflict)).into_future()),
             };
             let identifiers = match C::receive_to_many::<Rel>(request) {
                 Ok(rel) => rel,
@@ -647,7 +704,10 @@ impl<'a, R: Router> _Router<'a, R> {
         {
             let options = request.collection_options();
             let presenter = P::prepare(options.field_set, link_maker);
-            let id = try_status!(request.id().parse(), presenter);
+            let id = match request.id() {
+                Some(id)    => try_status!(id.parse(), presenter),
+                None        => try_status!(Err(()), presenter),
+            };
             let received = try_status!(C::receive_collection(request), presenter);
             presenter.try_present(T::replace_many(api::Entity::Id(id), received))
         }
@@ -662,9 +722,12 @@ impl<'a, R: Router> _Router<'a, R> {
         {
             let options = request.resource_options();
             let presenter = <P as Presenter<(), R>>::prepare(options.field_set, link_maker);
-            let id = match request.id().parse() {
-                Ok(id)  => id,
-                Err(_)  => return Box::new(Ok(<P as Presenter<(), R>>::present_err(presenter, Error::Conflict)).into_future()),
+            let id = match request.id() {
+                Some(id)    => match id.parse() {
+                    Ok(id)  => id,
+                    Err(_)  => return Box::new(Ok(<P as Presenter<(), R>>::present_err(presenter, Error::Conflict)).into_future()),
+                },
+                None => return Box::new(Ok(<P as Presenter<(), R>>::present_err(presenter, Error::Conflict)).into_future()),
             };
             let identifiers = match C::receive_to_many::<Rel>(request) {
                 Ok(rel) => rel,

@@ -150,7 +150,7 @@ pub struct MockRequest;
 
 impl Request for MockRequest {
     fn endpoint(&self) -> &str { unimplemented!() }
-    fn id(&self) -> &str { unimplemented!() }
+    fn id(&self) -> Option<&str> { unimplemented!() }
     fn relation(&self) -> Option<(&str, bool)> { unimplemented!() }
     fn method(&self) -> Method { unimplemented!() }
     fn resource_options(&self) -> ResourceOptions { unimplemented!() }

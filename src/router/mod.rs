@@ -103,7 +103,7 @@ pub struct CollectionOptions {
 
 pub trait Request: Read {
     fn endpoint(&self) -> &str;
-    fn id(&self) -> &str;
+    fn id(&self) -> Option<&str>;
     fn method(&self) -> Method;
     fn relation(&self) -> Option<(&str, bool)>;
     fn resource_options(&self) -> ResourceOptions;
