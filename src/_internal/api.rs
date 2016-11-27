@@ -3,7 +3,7 @@ use api::async;
 use api::raw;
 use api::rel::{self, ToOne, ToMany};
 use presenter::Presenter;
-use receiver::{Receiver, PatchReceiver, IdReceiver};
+use receiver::{Receiver, PatchReceiver};
 use router::Router;
 use _internal::_Router;
 
@@ -66,9 +66,9 @@ impl<T: Resource, P, C, R: Router> _MaybeRemove<P, C, R> for T { }
 
 impl<T, P, C, R> _MaybeRemove<P, C, R> for T
 where
-    T: api::Remove,
+    T: api::Remove + raw::RawResource,
     P: Presenter<(), R>,
-    C: IdReceiver<T, R::Request>,
+    C: Receiver<T, R::Request>,
     R: Router,
 {
     fn attach(router: &mut _Router<R>) {
@@ -251,8 +251,9 @@ impl<T, Rel, P, C, R> _MaybeRemoveMany<Rel, P, C, R> for T
 where
     T: rel::raw::RemoveMany<Rel>,
     Rel: ToMany,
+    Rel::Resource: raw::RawResource,
     P: Presenter<(), R>,
-    C: IdReceiver<Rel::Resource, R::Request>,
+    C: Receiver<Rel::Resource, R::Request>,
     R: Router,
 {
     fn attach(router: &mut _Router<R>) {

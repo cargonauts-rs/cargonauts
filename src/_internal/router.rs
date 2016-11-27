@@ -6,7 +6,7 @@ use api::rel;
 use api::raw;
 use router::{Request, Router, ResourceRoute, Method};
 use futures::{IntoFuture, Future};
-use receiver::{Receiver, IdReceiver, PatchReceiver, Post};
+use receiver::{Receiver, PatchReceiver, Post};
 use presenter::Presenter;
 
 macro_rules! try_status {
@@ -97,19 +97,20 @@ impl<'a, R: Router> _Router<'a, R> {
 
     pub fn attach_remove<T, P, C>(&mut self)
     where
-        T: api::Remove,
+        T: api::Remove + raw::RawResource,
         P: Presenter<(), R>,
-        C: IdReceiver<T, R::Request>,
+        C: Receiver<T, R::Request>,
     {
         fn remove<R, T, P, C>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>
         where
-            T: api::Remove,
+            T: api::Remove + raw::RawResource,
             P: Presenter<(), R>,
             R: Router,
-            C: IdReceiver<T, R::Request>,
+            C: Receiver<T, R::Request>,
         {
             let presenter = P::prepare(None, link_maker);
-            let ids = try_status!(C::receive_ids(request), presenter);
+            let identifiers = try_status!(C::receive_identifiers(request), presenter);
+            let ids = try_status!(identifiers.into_iter().map(|identifier| identifier.id.parse()).collect::<Result<Vec<_>, _>>(), presenter);
             presenter.try_present(T::remove(&ids))
         }
         self.router.attach_resource(T::resource_plural(), ResourceRoute {
@@ -426,20 +427,23 @@ impl<'a, R: Router> _Router<'a, R> {
     where
         T: rel::raw::RemoveMany<Rel>,
         Rel: rel::ToMany,
+        Rel::Resource: raw::RawResource,
         P: Presenter<(), R>,
-        C: IdReceiver<Rel::Resource, R::Request>,
+        C: Receiver<Rel::Resource, R::Request>,
     {
         fn remove_many<R, T, Rel, P, C>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>
         where
             R: Router,
             T: rel::raw::RemoveMany<Rel>,
             Rel: rel::ToMany,
+            Rel::Resource: raw::RawResource,
             P: Presenter<(), R>,
-            C: IdReceiver<Rel::Resource, R::Request>,
+            C: Receiver<Rel::Resource, R::Request>,
         {
             let presenter = P::prepare(None, link_maker);
             let id = try_status!(request.id().parse(), presenter);
-            let parsed_rel_ids = try_status!(C::receive_ids(request), presenter);
+            let identifiers = try_status!(C::receive_identifiers(request), presenter);
+            let parsed_rel_ids = try_status!(identifiers.into_iter().map(|identifier| identifier.id.parse()).collect::<Result<Vec<_>, _>>(), presenter);
             presenter.try_present(T::remove_many(&api::Entity::Id(id), &parsed_rel_ids))
         }
         fn remove_many_rel<R, T, Rel, P, C>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>
@@ -447,12 +451,14 @@ impl<'a, R: Router> _Router<'a, R> {
             R: Router,
             T: rel::raw::RemoveMany<Rel>,
             Rel: rel::ToMany,
+            Rel::Resource: raw::RawResource,
             P: Presenter<(), R>,
-            C: IdReceiver<Rel::Resource, R::Request>,
+            C: Receiver<Rel::Resource, R::Request>,
         {
             let presenter = P::prepare(None, link_maker);
             let parsed_id = try_status!(request.id().parse(), presenter);
-            let parsed_rel_ids = try_status!(C::receive_ids(request), presenter);
+            let identifiers = try_status!(C::receive_identifiers(request), presenter);
+            let parsed_rel_ids = try_status!(identifiers.into_iter().map(|identifier| identifier.id.parse()).collect::<Result<Vec<_>, _>>(), presenter);
             presenter.try_present(T::remove_links(&api::Entity::Id(parsed_id), &parsed_rel_ids).into_future().map(|_| ()))
         }
         self.router.attach_resource(T::resource_plural(), ResourceRoute {

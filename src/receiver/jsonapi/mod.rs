@@ -1,9 +1,11 @@
 mod collection;
+mod identifier;
 mod post;
 mod relation;
 mod resource;
 
 use self::collection::CollectionDocument;
+use self::identifier::IdentifiersDocument;
 use self::post::PostDocument;
 use self::relation::{ToOneDocument, ToManyDocument};
 use self::resource::ResourceDocument;
@@ -53,6 +55,11 @@ where
     fn receive_to_many<Rel: ToMany>(request: R) -> Result<Vec<Identifier>, Error> {
         let mut deserializer = D::wrap(request);
         ToManyDocument::<Rel>::deserialize(&mut deserializer).map(|x| x.0).or(Err(Error::BadRequest))
+    }
+
+    fn receive_identifiers(request: R) -> Result<Vec<Identifier>, Error> {
+        let mut deserializer = D::wrap(request);
+        IdentifiersDocument::<T>::deserialize(&mut deserializer).map(|x| x.0).or(Err(Error::BadRequest))
     }
 }
 
