@@ -1,22 +1,24 @@
 use api::{Error, Delete, Entity, Remove};
-use api::rel::{ToOne, ToMany, UnlinkOne, RemoveLinks, RelationId};
+use api::rel::{ToOne, ToMany, HasOne, UpdateLink, RemoveLinks, RelationId};
 use futures::Future;
 use IntoFuture;
 
-pub trait DeleteOne<T: ToOne>: UnlinkOne<T> {
+pub trait DeleteOne<T: ToOne>: UpdateLink<T> {
     type DeleteOneFut: Future<Item = (), Error = Error> + 'static;
-    fn delete_one(entity: &Entity<Self>) -> Self::DeleteOneFut;
+    fn delete_one(entity: Entity<Self>) -> Self::DeleteOneFut;
 }
 
 impl<T, Rel> DeleteOne<Rel> for T
-where T:             UnlinkOne<Rel>,
+where T:             UpdateLink<Rel>,
       Rel:           ToOne,
       Rel::Resource: Delete {
     type DeleteOneFut = Box<Future<Item = (), Error = Error>>;
-    fn delete_one(entity: &Entity<Self>) -> Self::DeleteOneFut {
-        Box::new(<T as UnlinkOne<Rel>>::unlink_one(entity).into_future().and_then(move |id| {
+    fn delete_one(entity: Entity<Self>) -> Self::DeleteOneFut {
+        Box::new(<T as HasOne<Rel>>::has_one(&entity).into_future().and_then(move |id| {
             if let Some(rel_id) = id {
-                Box::new(<Rel::Resource as Delete>::delete(&rel_id).into_future()) as Box<Future<Item = (), Error = Error>>
+                Box::new(<T as UpdateLink<Rel>>::update_link(&entity, None).into_future().and_then(move |_| {
+                    <Rel::Resource as Delete>::delete(&rel_id).into_future()
+                })) as Box<Future<Item = (), Error = Error>>
             } else {
                 Box::new(Ok(()).into_future())
             }

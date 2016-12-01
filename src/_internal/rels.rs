@@ -1,6 +1,6 @@
 use api::raw::{RawResource, Include};
 use api::{Resource, Entity, Error};
-use api::rel::{ToOne, ToMany, LinkOne, UnlinkOne, ReplaceLinks, HasOne, HasMany, RelationId};
+use api::rel::{ToOne, ToMany, UpdateLink, ReplaceLinks, HasOne, HasMany, RelationId};
 use router::IncludeQuery;
 use IntoFuture;
 use futures::Future;
@@ -13,39 +13,21 @@ pub trait _UpdateRels: RawResource {
     fn update_rels(entity: &Entity<Self>, rels: Self::UpdateRels) -> Result<Self::FetchRels, Error>;
 }
 
-pub trait _MaybeLinkOne<T: ToOne>: Resource {
-    type _MaybeLinkOneFut: Future<Item = (), Error = Error>;
-    fn link_one(entity: &Entity<Self>, rel_id: &RelationId<T>) -> Self::_MaybeLinkOneFut;
+pub trait _MaybeUpdateLink<T: ToOne>: Resource {
+    type _MaybeUpdateLinkFut: Future<Item = (), Error = Error>;
+    fn update_link(entity: &Entity<Self>, rel_id: Option<&RelationId<T>>) -> Self::_MaybeUpdateLinkFut;
 }
 
-impl<T, Rel> _MaybeLinkOne<Rel> for T where T: HasOne<Rel>, Rel: ToOne {
-    type _MaybeLinkOneFut = Box<Future<Item = (), Error = Error>>;
-    default fn link_one(_: &Entity<Self>, _: &RelationId<Rel>) -> Self::_MaybeLinkOneFut {
+impl<T, Rel> _MaybeUpdateLink<Rel> for T where T: HasOne<Rel>, Rel: ToOne {
+    type _MaybeUpdateLinkFut = Box<Future<Item = (), Error = Error>>;
+    default fn update_link(_: &Entity<Self>, _: Option<&RelationId<Rel>>) -> Self::_MaybeUpdateLinkFut {
         Box::new(Err(Error::BadRequest).into_future())
     }
 }
 
-impl<T, Rel> _MaybeLinkOne<Rel> for T where T: LinkOne<Rel>, Rel: ToOne {
-    fn link_one(entity: &Entity<Self>, rel_id: &RelationId<Rel>) -> Self::_MaybeLinkOneFut {
-        Box::new(<T as LinkOne<Rel>>::link_one(entity, rel_id).into_future())
-    }
-}
-
-pub trait _MaybeUnlinkOne<T: ToOne>: Resource {
-    type _MaybeUnlinkOneFut: Future<Item = (), Error = Error>;
-    fn unlink_one(entity: &Entity<Self>) -> Self::_MaybeUnlinkOneFut;
-}
-
-impl<T, Rel> _MaybeUnlinkOne<Rel> for T where T: HasOne<Rel>, Rel: ToOne {
-    type _MaybeUnlinkOneFut = Box<Future<Item = (), Error = Error>>;
-    default fn unlink_one(_: &Entity<Self>) -> Self::_MaybeUnlinkOneFut {
-        Box::new(Err(Error::BadRequest).into_future())
-    }
-}
-
-impl<T, Rel> _MaybeUnlinkOne<Rel> for T where T: UnlinkOne<Rel>, Rel: ToOne {
-    fn unlink_one(entity: &Entity<Self>) -> Self::_MaybeUnlinkOneFut {
-        Box::new(<T as UnlinkOne<Rel>>::unlink_one(entity).into_future().map(|_| ()))
+impl<T, Rel> _MaybeUpdateLink<Rel> for T where T: UpdateLink<Rel>, Rel: ToOne {
+    fn update_link(entity: &Entity<Self>, rel_id: Option<&RelationId<Rel>>) -> Self::_MaybeUpdateLinkFut {
+        Box::new(<T as UpdateLink<Rel>>::update_link(entity, rel_id).into_future())
     }
 }
 

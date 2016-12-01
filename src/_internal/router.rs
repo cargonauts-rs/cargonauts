@@ -48,30 +48,12 @@ impl<'a, R: Router> _Router<'a, R> {
                 Some(id)    => try_status!(id.parse(), presenter),
                 None        => try_status!(Err(()), presenter),
             };
-            presenter.try_present(T::delete_one(&api::Entity::Id(id)))
-        }
-        fn delete_one_rel<R, T, Rel, P>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>
-        where
-            T: rel::raw::DeleteOne<Rel>,
-            Rel: rel::ToOne,
-            P: Presenter<(), R>,
-            R: Router,
-        {
-            let presenter = P::prepare(None, link_maker);
-            let parsed_id = match request.id() {
-                Some(id)    => try_status!(id.parse(), presenter),
-                None        => try_status!(Err(()), presenter),
-            };
-            presenter.try_present(T::unlink_one(&api::Entity::Id(parsed_id)).into_future().map(|_| ()))
+            presenter.try_present(T::delete_one(api::Entity::Id(id)))
         }
         self.router.attach_resource(T::resource_plural(), ResourceRoute {
             method: Method::Delete,
             relation: Some((Rel::to_one(), false))
         }, delete_one::<R, T, Rel, P>);
-        self.router.attach_resource(T::resource_plural(), ResourceRoute {
-            method: Method::Delete,
-            relation: Some((Rel::to_one(), true))
-        }, delete_one_rel::<R, T, Rel, P>)
     }
 
     pub fn attach_remove_many<T, Rel, P, C>(&mut self)
@@ -158,55 +140,6 @@ impl<'a, R: Router> _Router<'a, R> {
             method: Method::Patch,
             relation: Some((Rel::to_one(), false))
         }, patch_one::<R, T, Rel, P, C>);
-    }
-
-    pub fn attach_replace_one<T, Rel, P, C>(&mut self)
-    where
-        T: rel::LinkOne<Rel> + rel::UnlinkOne<Rel>,
-        Rel: rel::ToOne,
-        Rel::Resource: raw::RawResource,
-        P: Presenter<Rel::Resource, R> + Presenter<(), R>,
-        C: Receiver<Rel::Resource, R::Request>,
-    {
-        fn replace_one<R, T, Rel, P, C>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>
-        where
-            R: Router,
-            T: rel::LinkOne<Rel> + rel::UnlinkOne<Rel>,
-            Rel: rel::ToOne,
-            Rel::Resource: raw::RawResource,
-            P: Presenter<Rel::Resource, R> + Presenter<(), R>,
-            C: Receiver<Rel::Resource, R::Request>,
-        {
-            let options = request.resource_options();
-            let presenter = <P as Presenter<(), R>>::prepare(options.field_set, link_maker);
-            let id = match request.id() {
-                Some(id)    => match id.parse() {
-                    Ok(id)  => id,
-                    Err(_)  => return Box::new(Ok(<P as Presenter<(), R>>::present_err(presenter, Error::Conflict)).into_future()),
-                },
-                None => return Box::new(Ok(<P as Presenter<(), R>>::present_err(presenter, Error::Conflict)).into_future()),
-            };
-            let identifier = match C::receive_to_one::<Rel>(request) {
-                Ok(rel) => rel,
-                Err(_)  => return Box::new(Ok(<P as Presenter<(), R>>::present_err(presenter, Error::Conflict)).into_future()),
-            };
-            match identifier {
-                Some(identifier)    => {
-                    let rel_id = match identifier.id.parse() {
-                        Ok(id)  => id,
-                        Err(_)  => return Box::new(Ok(<P as Presenter<(), R>>::present_err(presenter, Error::Conflict)).into_future()),
-                    };
-                    presenter.try_present(T::link_one(&api::Entity::Id(id), &rel_id))
-                }
-                None                => {
-                    presenter.try_present(T::unlink_one(&api::Entity::Id(id)).into_future().map(|_| ()))
-                }
-            }
-        }
-        self.router.attach_resource(T::resource_plural(), ResourceRoute {
-            method: Method::Patch,
-            relation: Some((Rel::to_one(), true))
-        }, replace_one::<R, T, Rel, P, C>);
     }
 
     pub fn attach_append_many<T, Rel, P, C>(&mut self)

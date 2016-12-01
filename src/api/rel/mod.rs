@@ -53,9 +53,9 @@ pub trait HasMany<T: ToMany>: Resource {
     fn has_many(entity: &Entity<Self>) -> Self::HasManyFut;
 }
 
-pub trait LinkOne<T: ToOne>: HasOne<T> {
-    type LinkOneFut: IntoFuture<Item = (), Error = Error> + 'static;
-    fn link_one(entity: &Entity<Self>, rel_id: &RelationId<T>) -> Self::LinkOneFut;
+pub trait UpdateLink<T: ToOne>: HasOne<T> {
+    type UpdateLinkFut: IntoFuture<Item = (), Error = Error> + 'static;
+    fn update_link(entity: &Entity<Self>, rel_id: Option<&RelationId<T>>) -> Self::UpdateLinkFut;
 }
 
 pub trait AppendLinks<T: ToMany>: HasMany<T> {
@@ -66,11 +66,6 @@ pub trait AppendLinks<T: ToMany>: HasMany<T> {
 pub trait ReplaceLinks<T: ToMany>: HasMany<T> {
     type ReplaceLinksFut: IntoFuture<Item = (), Error = Error> + 'static;
     fn replace_links(entity: &Entity<Self>, rel_ids: &[RelationId<T>]) -> Self::ReplaceLinksFut;
-}
-
-pub trait UnlinkOne<T: ToOne>: HasOne<T> {
-    type UnlinkOneFut: IntoFuture<Item = Option<RelationId<T>>, Error = Error> + 'static;
-    fn unlink_one(entity: &Entity<Self>) -> Self::UnlinkOneFut;
 }
 
 pub trait RemoveLinks<T: ToMany>: HasMany<T> {
