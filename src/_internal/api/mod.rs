@@ -27,17 +27,23 @@ pub use self::replace::{_attach_replace, _MaybeReplace as _MaybeAttachReplace};
 
 mod has_one;
 mod has_many;
+mod remove_links;
 mod update_link;
 
 pub use self::has_one::{_attach_has_one, _MaybeHasOne as _MaybeAttachHasOne};
 pub use self::has_many::{_attach_has_many, _MaybeHasMany as _MaybeAttachHasMany};
+pub use self::remove_links::{_attach_remove_links, _MaybeRemoveLinks as _MaybeAttachRemoveLinks};
 pub use self::update_link::{_attach_update_link, _MaybeUpdateLink as _MaybeAttachUpdateLink};
 
+mod delete_one;
 mod get_one;
 mod index_many;
+mod remove_many;
 
+pub use self::delete_one::{_attach_delete_one, _MaybeDeleteOne as _MaybeAttachDeleteOne};
 pub use self::get_one::{_attach_get_one, _MaybeGetOne as _MaybeAttachGetOne};
 pub use self::index_many::{_attach_index_many, _MaybeIndexMany as _MaybeAttachIndexMany};
+pub use self::remove_many::{_attach_remove_many, _MaybeRemoveMany as _MaybeAttachRemoveMany};
 
 use api::Resource;
 use router::{Router, ResourceRoute};
@@ -55,44 +61,6 @@ use api::rel::{self, ToOne, ToMany};
 use presenter::Presenter;
 use receiver::{Receiver, PatchReceiver};
 use _internal::_Router;
-
-pub trait _MaybeDeleteOne<Rel: ToOne, P, R: Router>: Resource {
-    fn attach(_: &mut _Router<R>) { }
-}
-
-impl<T: Resource, Rel: ToOne, P, R: Router> _MaybeDeleteOne<Rel, P, R> for T { }
-
-impl<T, Rel, P, R> _MaybeDeleteOne<Rel, P, R> for T
-where
-    T: rel::raw::DeleteOne<Rel>,
-    Rel: ToOne,
-    P: Presenter<(), R>,
-    R: Router,
-{
-    fn attach(router: &mut _Router<R>) {
-        router.attach_delete_one::<T, Rel, P>();
-    }
-}
-
-pub trait _MaybeRemoveMany<Rel: ToMany, P, C, R: Router>: Resource {
-    fn attach(_: &mut _Router<R>) { }
-}
-
-impl<T: Resource, Rel: ToMany, P, C, R: Router> _MaybeRemoveMany<Rel, P, C, R> for T { }
-
-impl<T, Rel, P, C, R> _MaybeRemoveMany<Rel, P, C, R> for T
-where
-    T: rel::raw::RemoveMany<Rel>,
-    Rel: ToMany,
-    Rel::Resource: raw::RawResource,
-    P: Presenter<(), R>,
-    C: Receiver<Rel::Resource, R::Request>,
-    R: Router,
-{
-    fn attach(router: &mut _Router<R>) {
-        router.attach_remove_many::<T, Rel, P, C>();
-    }
-}
 
 pub trait _MaybePatchOne<Rel: ToOne, P, C, R: Router>: Resource {
     fn attach(_: &mut _Router<R>) { }
