@@ -5,7 +5,7 @@ use api::rel;
 use api::raw;
 use router::{Request, Router, ResourceRoute, Method};
 use futures::{IntoFuture, Future};
-use receiver::{Receiver, PatchReceiver};
+use receiver::{Receiver};
 use presenter::Presenter;
 
 macro_rules! try_status {
@@ -28,38 +28,6 @@ impl<'a, R: Router> _Router<'a, R> {
         _Router {
             router: router,
         }
-    }
-
-    pub fn attach_patch_one<T, Rel, P, C>(&mut self)
-    where
-        T: rel::raw::PatchOne<P::Include, Rel>,
-        Rel: rel::ToOne,
-        Rel::Resource: raw::RawHasPatch<raw::Synchronous>,
-        P: Presenter<Rel::Resource, R>,
-        C: PatchReceiver<Rel::Resource, R::Request, raw::Synchronous>,
-    {
-        fn patch_one<R, T, Rel, P, C>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>
-        where
-            R: Router,
-            T: rel::raw::PatchOne<P::Include, Rel>,
-            Rel: rel::ToOne,
-            Rel::Resource: raw::RawHasPatch<raw::Synchronous>,
-            P: Presenter<Rel::Resource, R>,
-            C: PatchReceiver<Rel::Resource, R::Request, raw::Synchronous>,
-        {
-            let options = request.resource_options();
-            let presenter = P::prepare(options.field_set, link_maker);
-            let id = match request.id() {
-                Some(id)    => try_status!(id.parse(), presenter),
-                None        => try_status!(Err(()), presenter),
-            };
-            let received = try_status!(C::receive_patch(request), presenter);
-            presenter.try_present(T::patch_one(&api::Entity::Id(id), received))
-        }
-        self.router.attach_resource(T::resource_plural(), ResourceRoute {
-            method: Method::Patch,
-            relation: Some((Rel::to_one(), false))
-        }, patch_one::<R, T, Rel, P, C>);
     }
 
     pub fn attach_append_many<T, Rel, P, C>(&mut self)
