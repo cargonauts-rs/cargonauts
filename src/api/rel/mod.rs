@@ -45,30 +45,30 @@ pub type RelationId<T> = <<T as Relation>::Resource as Resource>::Id;
 
 pub trait HasOne<T: ToOne>: Resource {
     type HasOneFut: IntoFuture<Item = Option<RelationId<T>>, Error = Error> + 'static;
-    fn has_one(entity: &Entity<Self>) -> Self::HasOneFut;
+    fn has_one(entity: Entity<Self>) -> Self::HasOneFut;
 }
 
 pub trait HasMany<T: ToMany>: Resource {
     type HasManyFut: IntoFuture<Item = Vec<RelationId<T>>, Error = Error> + 'static;
-    fn has_many(entity: &Entity<Self>) -> Self::HasManyFut;
+    fn has_many(entity: Entity<Self>) -> Self::HasManyFut;
 }
 
 pub trait UpdateLink<T: ToOne>: HasOne<T> {
     type UpdateLinkFut: IntoFuture<Item = (), Error = Error> + 'static;
-    fn update_link(entity: &Entity<Self>, rel_id: Option<&RelationId<T>>) -> Self::UpdateLinkFut;
+    fn update_link(entity: Entity<Self>, rel_id: Option<&RelationId<T>>) -> Self::UpdateLinkFut;
 }
 
 pub trait AppendLinks<T: ToMany>: HasMany<T> {
     type AppendLinksFut: IntoFuture<Item = (), Error = Error> + 'static;
-    fn append_links(entity: &Entity<Self>, rel_ids: &[RelationId<T>]) -> Self::AppendLinksFut;
+    fn append_links(entity: Entity<Self>, rel_ids: &[RelationId<T>]) -> Self::AppendLinksFut;
 }
 
 pub trait ReplaceLinks<T: ToMany>: HasMany<T> {
     type ReplaceLinksFut: IntoFuture<Item = (), Error = Error> + 'static;
-    fn replace_links(entity: &Entity<Self>, rel_ids: &[RelationId<T>]) -> Self::ReplaceLinksFut;
+    fn replace_links(entity: Entity<Self>, rel_ids: &[RelationId<T>]) -> Self::ReplaceLinksFut;
 }
 
 pub trait RemoveLinks<T: ToMany>: HasMany<T> {
     type RemoveLinksFut: IntoFuture<Item = Vec<RelationId<T>>, Error = Error> + 'static;
-    fn remove_links(entity: &Entity<Self>, rel_ids: &[RelationId<T>]) -> Self::RemoveLinksFut;
+    fn remove_links(entity: Entity<Self>, rel_ids: &[RelationId<T>]) -> Self::RemoveLinksFut;
 }

@@ -54,5 +54,5 @@ where
         Some(id)    => try_status!(id.parse(), presenter),
         None        => try_status!(Err(()), presenter),
     };
-    presenter.try_present(T::get_one(&Entity::Id(id), options.includes))
+    presenter.try_present(T::get_one(Entity::Id(id), options.includes))
 }

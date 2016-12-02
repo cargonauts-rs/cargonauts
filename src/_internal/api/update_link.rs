@@ -71,5 +71,5 @@ where
         }
         None                => None
     };
-    presenter.try_present(T::update_link(&Entity::Id(id), rel_id.as_ref()))
+    presenter.try_present(T::update_link(Entity::Id(id), rel_id.as_ref()))
 }

@@ -1,4 +1,5 @@
 use std::str::FromStr;
+use std::sync::Arc;
 
 mod alias;
 mod error;
@@ -36,7 +37,16 @@ pub trait Resource: Sized + 'static {
 
 pub enum Entity<T: Resource> {
     Id(T::Id),
-    Resource(T),
+    Resource(Arc<T>),
+}
+
+impl<T: Resource> Clone for Entity<T> {
+    fn clone(&self) -> Entity<T> {
+        match *self {
+            Entity::Id(ref id)              => Entity::Id(id.clone()),
+            Entity::Resource(ref resource)  => Entity::Resource(resource.clone()),
+        }
+    }
 }
 
 impl Resource for () {

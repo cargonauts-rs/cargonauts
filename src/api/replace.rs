@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use api::{Resource, Entity, Error};
 use api::raw::{RawResource, RawReceived, CollectionResponse, ResourceObject};
 use _internal::_UpdateRels;
@@ -21,13 +23,13 @@ impl<I, T> RawReplace<I> for T where T: Replace + _UpdateRels, I: 'static {
         let (data, rels) = split(received.into_iter().map(|r| (r.attributes, r.relationships)));
         Box::new(<Self as Replace>::replace(data).into_future().and_then(move |data| {
             stream::iter(data.into_iter().zip(rels).map(Ok)).and_then(move |(resource, rels)| {
-                let entity = Entity::Resource(resource);
-                <T as _UpdateRels>::update_rels(&entity, rels).into_future().join(Ok(entity))
+                let entity = Entity::Resource(Arc::new(resource));
+                <T as _UpdateRels>::update_rels(entity.clone(), rels).into_future().join(Ok(entity))
             }).fold(CollectionResponse::default(), |mut response, (rels, entity)| {
                 match entity {
                     Entity::Resource(resource)  => response.resources.push(ResourceObject {
                         id: resource.id(),
-                        attributes: resource,
+                        attributes: Arc::try_unwrap(resource).ok().unwrap(),
                         relationships: rels,
                     }),
                     _                           => unreachable!()

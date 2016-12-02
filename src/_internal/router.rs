@@ -87,7 +87,7 @@ impl<'a, R: Router> _Router<'a, R> {
                 }
                 ids
             };
-            presenter.try_present(T::append_links(&api::Entity::Id(id), &rel_ids))
+            presenter.try_present(T::append_links(api::Entity::Id(id), &rel_ids))
         }
         self.router.attach_resource(T::resource_plural(), ResourceRoute {
             method: Method::Append,
@@ -157,7 +157,7 @@ impl<'a, R: Router> _Router<'a, R> {
                 }
                 ids
             };
-            presenter.try_present(T::replace_links(&api::Entity::Id(id), &rel_ids))
+            presenter.try_present(T::replace_links(api::Entity::Id(id), &rel_ids))
         }
         self.router.attach_resource(T::resource_plural(), ResourceRoute {
             method: Method::Replace,

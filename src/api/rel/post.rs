@@ -19,7 +19,7 @@ where T:                AppendLinks<Rel>,
     fn append_many(entity: Entity<Self>, received: Vec<RawReceived<Rel::Resource, Rel::Resource>>) -> Self::AppendManyFut {
         Box::new(RawPost::append(received).into_future().and_then(move |response| {
             let ids = response.resources.iter().map(|resource| resource.id.clone()).collect::<Vec<_>>();
-            <T as AppendLinks<Rel>>::append_links(&entity, &ids).into_future().map(|_| response)
+            <T as AppendLinks<Rel>>::append_links(entity, &ids).into_future().map(|_| response)
         }))
     }
 }
@@ -40,7 +40,7 @@ where
     fn replace_many(entity: Entity<Self>, received: Vec<RawReceived<Rel::Resource, Rel::Resource>>) -> Self::ReplaceManyFut {
         Box::new(RawPost::append(received).into_future().and_then(move |response| {
             let ids = response.resources.iter().map(|resource| resource.id.clone()).collect::<Vec<_>>();
-            <T as ReplaceLinks<Rel>>::replace_links(&entity, &ids).into_future().map(|_| response)
+            <T as ReplaceLinks<Rel>>::replace_links(entity, &ids).into_future().map(|_| response)
         }))
     }
 }

@@ -59,5 +59,5 @@ where
         None        => try_status!(Err(()), presenter),
     };
     let received = try_status!(C::receive_patch(request), presenter);
-    presenter.try_present(T::patch_one(&Entity::Id(id), received))
+    presenter.try_present(T::patch_one(Entity::Id(id), received))
 }

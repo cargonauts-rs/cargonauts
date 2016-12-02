@@ -59,5 +59,5 @@ where
     };
     let identifiers = try_status!(C::receive_identifiers(request), presenter);
     let parsed_rel_ids = try_status!(identifiers.into_iter().map(|identifier| identifier.id.parse()).collect::<Result<Vec<_>, _>>(), presenter);
-    presenter.try_present(T::remove_many(&Entity::Id(id), &parsed_rel_ids))
+    presenter.try_present(T::remove_many(Entity::Id(id), &parsed_rel_ids))
 }

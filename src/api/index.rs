@@ -1,3 +1,4 @@
+use std::sync::Arc;
 use itertools::Itertools;
 
 use api::sort::MaybeSort;
@@ -53,13 +54,13 @@ pub fn raw_index<I: 'static, T: _FetchRels<I>>(index: Vec<T>, includes: Vec<Incl
     let mut resources = vec![];
     let mut include_objects = vec![];
     for resource in index {
-        let entity = Entity::Resource(resource);
-        let (rels, incls) = match <T as _FetchRels<I>>::rels(&entity, &includes) {
+        let entity = Entity::Resource(Arc::new(resource));
+        let (rels, incls) = match <T as _FetchRels<I>>::rels(entity.clone(), &includes) {
             Ok(data)    => data,
             Err(err)    => return Box::new(Err(err).into_future()),
         };
         let resource = match entity {
-            Entity::Resource(resource)  => resource,
+            Entity::Resource(resource)  => Arc::try_unwrap(resource).ok().unwrap(),
             _                           => unreachable!()
         };
         include_objects.extend(incls);

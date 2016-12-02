@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use api::{Resource, Error, Entity};
 use api::raw::{ResourceResponse, RawReceived, RawResource, ResourceObject};
 use _internal::_UpdateRels;
@@ -30,10 +32,10 @@ impl<I, T> RawPatch<I> for T where T: Patch + _UpdateRels, I: 'static {
     fn patch(id: Self::Id, received: RawReceived<Self, Self::Patch>) -> Self::RawPatchFut {
         let RawReceived { attributes, relationships } = received;
         Box::new(<T as Patch>::patch(&id, attributes).into_future().and_then(move |resource| {
-            let entity = Entity::Resource(resource);
-            <T as _UpdateRels>::update_rels(&entity, relationships).map(move |relationships| {
+            let entity = Entity::Resource(Arc::new(resource));
+            <T as _UpdateRels>::update_rels(entity.clone(), relationships).map(move |relationships| {
                 let resource = match entity {
-                    Entity::Resource(resource)  => resource,
+                    Entity::Resource(resource)  => Arc::try_unwrap(resource).ok().unwrap(),
                     _                           => unreachable!()
                 };
                 ResourceResponse {

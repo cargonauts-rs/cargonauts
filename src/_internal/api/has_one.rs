@@ -50,7 +50,7 @@ where
         Some(id)    => try_status!(id.parse(), presenter),
         None        => try_status!(Err(()), presenter),
     };
-    presenter.try_present(T::has_one(&Entity::Id(parsed_id)).into_future().map(move |rel| {
+    presenter.try_present(T::has_one(Entity::Id(parsed_id)).into_future().map(move |rel| {
         RelResponse {
             resource: T::resource_plural(),
             related: Rel::to_one(),
