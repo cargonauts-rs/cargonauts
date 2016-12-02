@@ -224,10 +224,11 @@ macro_rules! _rel_methods {
         <$resource as $crate::_internal::_MaybeAttachHasMany<$rel, P<T, T::Response>, T>>::attach($router.router);
         <$resource as $crate::_internal::_MaybeAttachRemoveLinks<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router.router);
         <$resource as $crate::_internal::_MaybeAttachPostLinks<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router.router);
+        <$resource as $crate::_internal::_MaybeAttachReplaceLinks<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router.router);
         <$resource as $crate::_internal::_MaybeAttachIndexMany<$rel, P<T, T::Response>, T>>::attach($router.router);
         <$resource as $crate::_internal::_MaybeAttachRemoveMany<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router.router);
         <$resource as $crate::_internal::_MaybeAttachPostMany<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router.router);
-        <$resource as $crate::_internal::_MaybeReplaceMany<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach(&mut $router);
+        <$resource as $crate::_internal::_MaybeAttachReplaceMany<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router.router);
     };
 }
 

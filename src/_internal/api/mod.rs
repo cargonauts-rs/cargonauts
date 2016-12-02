@@ -29,12 +29,14 @@ mod has_one;
 mod has_many;
 mod post_links;
 mod remove_links;
+mod replace_links;
 mod update_link;
 
 pub use self::has_one::{_attach_has_one, _MaybeHasOne as _MaybeAttachHasOne};
 pub use self::has_many::{_attach_has_many, _MaybeHasMany as _MaybeAttachHasMany};
 pub use self::post_links::{_attach_post_links, _MaybePostLinks as _MaybeAttachPostLinks};
 pub use self::remove_links::{_attach_remove_links, _MaybeRemoveLinks as _MaybeAttachRemoveLinks};
+pub use self::replace_links::{_attach_replace_links, _MaybeReplaceLinks as _MaybeAttachReplaceLinks};
 pub use self::update_link::{_attach_update_link, _MaybeUpdateLink as _MaybeAttachUpdateLink};
 
 mod delete_one;
@@ -43,6 +45,7 @@ mod index_many;
 mod patch_one;
 mod post_many;
 mod remove_many;
+mod replace_many;
 
 pub use self::delete_one::{_attach_delete_one, _MaybeDeleteOne as _MaybeAttachDeleteOne};
 pub use self::get_one::{_attach_get_one, _MaybeGetOne as _MaybeAttachGetOne};
@@ -50,6 +53,7 @@ pub use self::index_many::{_attach_index_many, _MaybeIndexMany as _MaybeAttachIn
 pub use self::patch_one::{_attach_patch_one, _MaybePatchOne as _MaybeAttachPatchOne};
 pub use self::post_many::{_attach_post_many, _MaybePostMany as _MaybeAttachPostMany};
 pub use self::remove_many::{_attach_remove_many, _MaybeRemoveMany as _MaybeAttachRemoveMany};
+pub use self::replace_many::{_attach_replace_many, _MaybeReplaceMany as _MaybeAttachReplaceMany};
 
 use api::Resource;
 use router::{Router, ResourceRoute};
@@ -60,30 +64,4 @@ fn attach<R, T>(router: &mut R,
                 handler: fn(R::Request, R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>)
 where R: Router, T: Resource, {
     router.attach_resource(T::resource_plural(), route, handler)
-}
-
-use api::raw;
-use api::rel::{self, ToMany};
-use presenter::Presenter;
-use receiver::{Receiver};
-use _internal::_Router;
-
-pub trait _MaybeReplaceMany<Rel: ToMany, P, C, R: Router>: Resource {
-    fn attach(_: &mut _Router<R>) { }
-}
-
-impl<T: Resource, Rel: ToMany, C, P, R: Router> _MaybeReplaceMany<Rel, P, C, R> for T { }
-
-impl<T, Rel, C, P, R> _MaybeReplaceMany<Rel, P, C, R> for T
-where
-    T: rel::raw::ReplaceMany<<P as Presenter<Rel::Resource, R>>::Include, Rel>,
-    Rel: ToMany,
-    Rel::Resource: raw::RawResource,
-    P: Presenter<Rel::Resource, R> + Presenter<(), R>,
-    C: Receiver<Rel::Resource, R::Request>,
-    R: Router,
-{
-    fn attach(router: &mut _Router<R>) {
-        router.attach_replace_many::<T, Rel, P, C>();
-    }
 }
