@@ -1,5 +1,7 @@
 use api::{Resource, Entity, Error};
+use Future;
 use IntoFuture;
+use futures::stream::{self, Stream};
 
 mod fetch;
 mod delete;
@@ -10,7 +12,7 @@ pub mod raw {
     pub use api::rel::delete::{DeleteOne, RemoveMany};
     pub use api::rel::fetch::{GetOne, IndexMany};
     pub use api::rel::patch::PatchOne;
-    pub use api::rel::post::{AppendMany, ReplaceMany};
+    pub use api::rel::post::{PostMany, ReplaceMany};
 }
 
 pub trait Relation {
@@ -58,9 +60,12 @@ pub trait UpdateLink<T: ToOne>: HasOne<T> {
     fn update_link(entity: Entity<Self>, rel_id: Option<&RelationId<T>>) -> Self::UpdateLinkFut;
 }
 
-pub trait AppendLinks<T: ToMany>: HasMany<T> {
-    type AppendLinksFut: IntoFuture<Item = (), Error = Error> + 'static;
-    fn append_links(entity: Entity<Self>, rel_ids: &[RelationId<T>]) -> Self::AppendLinksFut;
+pub trait PostLinks<T: ToMany>: HasMany<T> {
+    type PostLinksFut: IntoFuture<Item = (), Error = Error> + 'static;
+    fn post_link(entity: Entity<Self>, rel_id: RelationId<T>) -> Self::PostLinksFut;
+    fn append_links(entity: Entity<Self>, rel_id: Vec<RelationId<T>>) -> Box<Future<Item = (), Error = Error>> {
+        Box::new(stream::iter(rel_id.into_iter().map(Ok)).and_then(move |id| Self::post_link(entity.clone(), id)).for_each(|_| Ok(())))
+    }
 }
 
 pub trait ReplaceLinks<T: ToMany>: HasMany<T> {

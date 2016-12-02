@@ -36,13 +36,13 @@ macro_rules! _resource {
         }
 
         impl<I: 'static> $crate::_internal::_FetchRels<I> for $resource {
-            fn rels(_: &$crate::api::Entity<Self>, _: &[$crate::router::IncludeQuery]) -> ::std::result::Result<(Self::FetchRels, Vec<$crate::api::raw::Include<I>>), $crate::api::Error> {
+            fn rels(_: $crate::api::Entity<Self>, _: &[$crate::router::IncludeQuery]) -> ::std::result::Result<(Self::FetchRels, Vec<$crate::api::raw::Include<I>>), $crate::api::Error> {
                 Ok(($crate::api::raw::NoRelationships, vec![]))
             }
         }
 
         impl $crate::_internal::_UpdateRels for $resource {
-            fn update_rels(_: &$crate::api::Entity<Self>, rels: $crate::api::raw::NoRelationships) -> ::std::result::Result<$crate::api::raw::NoRelationships, $crate::api::Error> {
+            fn update_rels(_: $crate::api::Entity<Self>, rels: $crate::api::raw::NoRelationships) -> ::std::result::Result<$crate::api::raw::NoRelationships, $crate::api::Error> {
                 Ok($crate::api::raw::NoRelationships)
             }
         }
@@ -62,7 +62,7 @@ macro_rules! _resource {
         $(
             I: $crate::presenter::ConvertInclude<<$rel as $crate::api::rel::Relation>::Resource>,
         )* {
-            fn rels(id: &$crate::api::Entity<Self>, includes: &[$crate::router::IncludeQuery]) -> ::std::result::Result<(Self::FetchRels, Vec<$crate::api::raw::Include<I>>), $crate::api::Error> {
+            fn rels(id: $crate::api::Entity<Self>, includes: &[$crate::router::IncludeQuery]) -> ::std::result::Result<(Self::FetchRels, Vec<$crate::api::raw::Include<I>>), $crate::api::Error> {
                 let mut include_objects = vec![];
                 let rels = Relationships {
                     $(
@@ -76,7 +76,7 @@ macro_rules! _resource {
         }
 
         impl $crate::_internal::_UpdateRels for $resource {
-            fn update_rels(id: &$crate::api::Entity<Self>, rels: UpdateRelationships) -> ::std::result::Result<Relationships, $crate::api::Error> {
+            fn update_rels(id: $crate::api::Entity<Self>, rels: UpdateRelationships) -> ::std::result::Result<Relationships, $crate::api::Error> {
                 $(
                     if let Some(rel) = rels.$rel {
                         _link_rel!(id, rel, $resource, $rel, $count);
@@ -222,10 +222,11 @@ macro_rules! _rel_methods {
     };
     ($router:expr, $resource:ty, many $rel:ty) => {
         <$resource as $crate::_internal::_MaybeAttachHasMany<$rel, P<T, T::Response>, T>>::attach($router.router);
+        <$resource as $crate::_internal::_MaybeAttachRemoveLinks<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router.router);
+        <$resource as $crate::_internal::_MaybeAttachPostLinks<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router.router);
         <$resource as $crate::_internal::_MaybeAttachIndexMany<$rel, P<T, T::Response>, T>>::attach($router.router);
         <$resource as $crate::_internal::_MaybeAttachRemoveMany<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router.router);
-        <$resource as $crate::_internal::_MaybeAttachRemoveLinks<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router.router);
-        <$resource as $crate::_internal::_MaybeAppendMany<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach(&mut $router);
+        <$resource as $crate::_internal::_MaybeAttachPostMany<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router.router);
         <$resource as $crate::_internal::_MaybeReplaceMany<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach(&mut $router);
     };
 }

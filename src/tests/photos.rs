@@ -54,14 +54,14 @@ impl api::Patch for User {
 
 impl api::rel::HasMany<Photo> for User {
     type HasManyFut = Result<Vec<u32>, api::Error>;
-    fn has_many(entity: &api::Entity<User>) -> Self::HasManyFut {
+    fn has_many(entity: api::Entity<User>) -> Self::HasManyFut {
         unimplemented!()
     }
 }
 
-impl api::rel::AppendLinks<Photo> for User {
-    type AppendLinksFut = Result<(), api::Error>;
-    fn append_links(entity: &api::Entity<User>, rel_ids: &[u32]) -> Self::AppendLinksFut {
+impl api::rel::PostLinks<Photo> for User {
+    type PostLinksFut = Result<(), api::Error>;
+    fn post_link(entity: api::Entity<User>, rel_ids: u32) -> Self::PostLinksFut {
         unimplemented!()
     }
 }
@@ -119,7 +119,7 @@ impl api::Post for Photo {
 
 impl api::rel::HasOne<User> for Photo {
     type HasOneFut = Result<Option<u32>, api::Error>;
-    fn has_one(entity: &api::Entity<Photo>) -> Self::HasOneFut {
+    fn has_one(entity: api::Entity<Photo>) -> Self::HasOneFut {
         unimplemented!()
     }
 }
@@ -134,7 +134,7 @@ fn it_has_attached_routes() {
     const ME_ROUTES: &'static [&'static str] = &["alias-get"];
     const USERS_ROUTES: &'static [&'static str] = &["get", "patch"];
     const PHOTOS_ROUTES: &'static [&'static str] = &["get", "index", "delete", "post"];
-    const USERS_PHOTOS_ROUTES: &'static [&'static str] = &["index-rel", "index-many", "append-many", "append-rel"];
+    const USERS_PHOTOS_ROUTES: &'static [&'static str] = &["index-rel", "append-rel", "index-many", "append-many"];
     const PHOTOS_USER_ROUTES: &'static [&'static str] = &["get-rel", "get-one", "patch-one"];
 
     let mut router = MockRouter::new();
