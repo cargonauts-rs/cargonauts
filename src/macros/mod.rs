@@ -17,7 +17,6 @@ macro_rules! routes {
             type D<T> = $crate::json::Deserializer<::std::io::Bytes<T>>;
             type C<T> = $crate::receiver::JsonApi<D<T>, T>;
 
-            let mut router = $crate::_internal::_Router::new(router);
             $({ _resource!(router, $resource
                           { $($count $rel;)* }
                           { $($route => $method;)* }
@@ -200,45 +199,45 @@ macro_rules! _resource {
 #[macro_export]
 macro_rules! _methods {
     ($router:expr, $resource:ty) => {
-        <$resource as $crate::_internal::_MaybeAttachGet<P<T, T::Response>, T>>::attach($router.router);
-        <$resource as $crate::_internal::_MaybeAttachIndex<P<T, T::Response>, T>>::attach($router.router);
-        <$resource as $crate::_internal::_MaybeAttachDelete<P<T, T::Response>, T>>::attach($router.router);
-        <$resource as $crate::_internal::_MaybeAttachRemove<P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router.router);
-        <$resource as $crate::_internal::_MaybeAttachPatch<P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router.router);
-        <$resource as $crate::_internal::_MaybeAttachPost<P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router.router);
-        <$resource as $crate::_internal::_MaybeAttachReplace<P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router.router);
+        <$resource as $crate::_internal::_MaybeAttachGet<P<T, T::Response>, T>>::attach($router);
+        <$resource as $crate::_internal::_MaybeAttachIndex<P<T, T::Response>, T>>::attach($router);
+        <$resource as $crate::_internal::_MaybeAttachDelete<P<T, T::Response>, T>>::attach($router);
+        <$resource as $crate::_internal::_MaybeAttachRemove<P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router);
+        <$resource as $crate::_internal::_MaybeAttachPatch<P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router);
+        <$resource as $crate::_internal::_MaybeAttachPost<P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router);
+        <$resource as $crate::_internal::_MaybeAttachReplace<P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router);
     };
 }
 
 #[macro_export]
 macro_rules! _rel_methods {
     ($router:expr, $resource:ty, one $rel:ty) => {
-        <$resource as $crate::_internal::_MaybeAttachHasOne<$rel, P<T, T::Response>, T>>::attach($router.router);
-        <$resource as $crate::_internal::_MaybeAttachUpdateLink<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router.router);
+        <$resource as $crate::_internal::_MaybeAttachHasOne<$rel, P<T, T::Response>, T>>::attach($router);
+        <$resource as $crate::_internal::_MaybeAttachUpdateLink<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router);
 
-        <$resource as $crate::_internal::_MaybeAttachGetOne<$rel, P<T, T::Response>, T>>::attach($router.router);
-        <$resource as $crate::_internal::_MaybeAttachDeleteOne<$rel, P<T, T::Response>, T>>::attach($router.router);
-        <$resource as $crate::_internal::_MaybeAttachPatchOne<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router.router);
+        <$resource as $crate::_internal::_MaybeAttachGetOne<$rel, P<T, T::Response>, T>>::attach($router);
+        <$resource as $crate::_internal::_MaybeAttachDeleteOne<$rel, P<T, T::Response>, T>>::attach($router);
+        <$resource as $crate::_internal::_MaybeAttachPatchOne<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router);
     };
     ($router:expr, $resource:ty, many $rel:ty) => {
-        <$resource as $crate::_internal::_MaybeAttachHasMany<$rel, P<T, T::Response>, T>>::attach($router.router);
-        <$resource as $crate::_internal::_MaybeAttachRemoveLinks<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router.router);
-        <$resource as $crate::_internal::_MaybeAttachPostLinks<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router.router);
-        <$resource as $crate::_internal::_MaybeAttachReplaceLinks<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router.router);
-        <$resource as $crate::_internal::_MaybeAttachIndexMany<$rel, P<T, T::Response>, T>>::attach($router.router);
-        <$resource as $crate::_internal::_MaybeAttachRemoveMany<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router.router);
-        <$resource as $crate::_internal::_MaybeAttachPostMany<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router.router);
-        <$resource as $crate::_internal::_MaybeAttachReplaceMany<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router.router);
+        <$resource as $crate::_internal::_MaybeAttachHasMany<$rel, P<T, T::Response>, T>>::attach($router);
+        <$resource as $crate::_internal::_MaybeAttachRemoveLinks<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router);
+        <$resource as $crate::_internal::_MaybeAttachPostLinks<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router);
+        <$resource as $crate::_internal::_MaybeAttachReplaceLinks<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router);
+        <$resource as $crate::_internal::_MaybeAttachIndexMany<$rel, P<T, T::Response>, T>>::attach($router);
+        <$resource as $crate::_internal::_MaybeAttachRemoveMany<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router);
+        <$resource as $crate::_internal::_MaybeAttachPostMany<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router);
+        <$resource as $crate::_internal::_MaybeAttachReplaceMany<$rel, P<T, T::Response>, C<<T::Request as $crate::router::Request>::Body>, T>>::attach($router);
     };
 }
 
 #[macro_export]
 macro_rules! _alias {
     ($router:expr, $resource:ty, $route:expr, get) => {
-        $router.attach_get_alias::<$resource, $crate::presenter::JsonApi<T, S<T::Response>>>($route);
+        $crate::_internal::_attach_get_aliased::<T, $resource, $crate::presenter::JsonApi<T, S<T::Response>>>($router, $route);
     };
     ($router:expr, $resource:ty, $route:expr, index) => {
-        $router.attach_index_alias::<$resource, $crate::presenter::JsonApi<T, S<T::Response>>>($route);
+        $rate::_internal::_attach_index_aliased::<T, $resource, $crate::presenter::JsonApi<T, S<T::Response>>>($router, $route);
     };
 }
 

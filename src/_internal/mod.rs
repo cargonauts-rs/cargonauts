@@ -7,8 +7,6 @@
 //! **always** a mistake.
 mod api;
 mod rels;
-mod router;
 
 pub use self::api::*;
 pub use self::rels::{_FetchRels, _UpdateRels, _MaybeUpdateLink, _MaybeReplaceLinks};
-pub use self::router::_Router;

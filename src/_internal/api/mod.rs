@@ -9,6 +9,7 @@ macro_rules! try_status {
     };
 }
 
+mod alias;
 mod delete;
 mod get;
 mod index;
@@ -17,6 +18,7 @@ mod post;
 mod remove;
 mod replace;
 
+pub use self::alias::{_attach_get_aliased, _attach_index_aliased};
 pub use self::delete::{_attach_delete, _MaybeDelete as _MaybeAttachDelete};
 pub use self::get::{_attach_get, _MaybeGet as _MaybeAttachGet};
 pub use self::index::{_attach_index, _MaybeIndex as _MaybeAttachIndex};
