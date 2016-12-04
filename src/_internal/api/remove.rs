@@ -6,13 +6,13 @@ use receiver::Receiver;
 use IntoFuture;
 use Future;
 
-pub trait _MaybeRemove<P, C, R: Router>: Resource {
+pub trait _MaybeAttachRemove<P, C, R: Router>: Resource {
     fn attach(_: &mut R) { }
 }
 
-impl<T: Resource, P, C, R: Router> _MaybeRemove<P, C, R> for T { }
+impl<T: Resource, P, C, R: Router> _MaybeAttachRemove<P, C, R> for T { }
 
-impl<T, P, C, R> _MaybeRemove<P, C, R> for T
+impl<T, P, C, R> _MaybeAttachRemove<P, C, R> for T
 where
     T: Remove + RawResource,
     P: Presenter<(), R>,

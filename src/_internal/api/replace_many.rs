@@ -8,13 +8,13 @@ use presenter::Presenter;
 use Future;
 use IntoFuture;
 
-pub trait _MaybeReplaceMany<Rel: ToMany, P, C, R: Router>: Resource {
+pub trait _MaybeAttachReplaceMany<Rel: ToMany, P, C, R: Router>: Resource {
     fn attach(_: &mut R) { }
 }
 
-impl<T: Resource, Rel: ToMany, C, P, R: Router> _MaybeReplaceMany<Rel, P, C, R> for T { }
+impl<T: Resource, Rel: ToMany, C, P, R: Router> _MaybeAttachReplaceMany<Rel, P, C, R> for T { }
 
-impl<T, Rel, C, P, R> _MaybeReplaceMany<Rel, P, C, R> for T
+impl<T, Rel, C, P, R> _MaybeAttachReplaceMany<Rel, P, C, R> for T
 where
     T: ReplaceMany<<P as Presenter<Rel::Resource, R>>::Include, Rel>,
     Rel: ToMany,

@@ -6,13 +6,13 @@ use presenter::Presenter;
 use Future;
 use IntoFuture;
 
-pub trait _MaybeHasMany<Rel: ToMany, P, R: Router> {
+pub trait _MaybeAttachHasMany<Rel: ToMany, P, R: Router> {
     fn attach(_: &mut R) { }
 }
 
-impl<T: Resource, Rel: ToMany, P, R: Router> _MaybeHasMany<Rel, P, R> for T { }
+impl<T: Resource, Rel: ToMany, P, R: Router> _MaybeAttachHasMany<Rel, P, R> for T { }
 
-impl<T, Rel, P, R> _MaybeHasMany<Rel, P, R> for T
+impl<T, Rel, P, R> _MaybeAttachHasMany<Rel, P, R> for T
 where
     T: HasMany<Rel>,
     Rel: ToMany,

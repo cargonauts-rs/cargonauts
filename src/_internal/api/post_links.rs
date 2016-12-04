@@ -7,13 +7,13 @@ use presenter::Presenter;
 use Future;
 use IntoFuture;
 
-pub trait _MaybePostLinks<Rel: ToMany, P, C, R: Router>: Resource {
+pub trait _MaybeAttachPostLinks<Rel: ToMany, P, C, R: Router>: Resource {
     fn attach(_: &mut R) { }
 }
 
-impl<T: Resource, Rel: ToMany, C, P, R: Router> _MaybePostLinks<Rel, P, C, R> for T { }
+impl<T: Resource, Rel: ToMany, C, P, R: Router> _MaybeAttachPostLinks<Rel, P, C, R> for T { }
 
-impl<T, Rel, C, P, R> _MaybePostLinks<Rel, P, C, R> for T
+impl<T, Rel, C, P, R> _MaybeAttachPostLinks<Rel, P, C, R> for T
 where
     T: PostLinks<Rel>,
     Rel: ToMany,

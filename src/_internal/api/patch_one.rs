@@ -8,13 +8,13 @@ use presenter::Presenter;
 use Future;
 use IntoFuture;
 
-pub trait _MaybePatchOne<Rel: ToOne, P, C, R: Router>: Resource {
+pub trait _MaybeAttachPatchOne<Rel: ToOne, P, C, R: Router>: Resource {
     fn attach(_: &mut R) { }
 }
 
-impl<T: Resource, Rel: ToOne, C, P, R: Router> _MaybePatchOne<Rel, P, C, R> for T { }
+impl<T: Resource, Rel: ToOne, C, P, R: Router> _MaybeAttachPatchOne<Rel, P, C, R> for T { }
 
-impl<T, Rel, C, P, R> _MaybePatchOne<Rel, P, C, R> for T
+impl<T, Rel, C, P, R> _MaybeAttachPatchOne<Rel, P, C, R> for T
 where
     T: PatchOne<P::Include, Rel>,
     Rel: ToOne,

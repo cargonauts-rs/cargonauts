@@ -29,13 +29,13 @@ where
     );
 }
 
-pub trait _MaybeIndex<P, R: Router>: Resource {
+pub trait _MaybeAttachIndex<P, R: Router>: Resource {
     fn attach(_: &mut R) { }
 }
 
-impl<T: Resource, P, R: Router> _MaybeIndex<P, R> for T { }
+impl<T: Resource, P, R: Router> _MaybeAttachIndex<P, R> for T { }
 
-impl<T, P, R> _MaybeIndex<P, R> for T
+impl<T, P, R> _MaybeAttachIndex<P, R> for T
 where
     T: RawIndex<P::Include>,
     P: Presenter<T, R>,

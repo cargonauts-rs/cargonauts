@@ -4,13 +4,13 @@ use presenter::Presenter;
 use IntoFuture;
 use Future;
 
-pub trait _MaybeDelete<P, R: Router>: Resource {
+pub trait _MaybeAttachDelete<P, R: Router>: Resource {
     fn attach(_: &mut R) { }
 }
 
-impl<T: Resource, P, R: Router> _MaybeDelete<P, R> for T { }
+impl<T: Resource, P, R: Router> _MaybeAttachDelete<P, R> for T { }
 
-impl<T, P, R> _MaybeDelete<P, R> for T
+impl<T, P, R> _MaybeAttachDelete<P, R> for T
 where
     T: Delete,
     P: Presenter<(), R>,

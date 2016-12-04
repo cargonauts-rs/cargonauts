@@ -7,13 +7,13 @@ use router::{Router, Component, Method, Request};
 use Future;
 use IntoFuture;
 
-pub trait _MaybePatch<P, C, R: Router>: Resource {
+pub trait _MaybeAttachPatch<P, C, R: Router>: Resource {
     fn attach(_: &mut R) { }
 }
 
-impl<T: Resource, P, C, R: Router> _MaybePatch<P, C, R> for T { }
+impl<T: Resource, P, C, R: Router> _MaybeAttachPatch<P, C, R> for T { }
 
-impl<T, P, C, R> _MaybePatch<P, C, R> for T
+impl<T, P, C, R> _MaybeAttachPatch<P, C, R> for T
 where
     T: RawPatch<P::Include>,
     P: Presenter<T, R>,
@@ -25,13 +25,13 @@ where
     }
 }
 
-pub trait _MaybePatchAsync<P, C, R: Router>: Resource {
+pub trait _MaybeAttachPatchAsync<P, C, R: Router>: Resource {
     fn attach(_: &mut R) { }
 }
 
-impl<T: Resource, P, C, R: Router> _MaybePatchAsync<P, C, R> for T { }
+impl<T: Resource, P, C, R: Router> _MaybeAttachPatchAsync<P, C, R> for T { }
 
-impl<T, P, C, R> _MaybePatchAsync<P, C, R> for T
+impl<T, P, C, R> _MaybeAttachPatchAsync<P, C, R> for T
 where
     T: RawPatchAsync,
     P: Presenter<T::Job, R>,

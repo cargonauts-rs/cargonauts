@@ -7,13 +7,13 @@ use presenter::Presenter;
 use Future;
 use IntoFuture;
 
-pub trait _MaybeIndexMany<Rel: ToMany, P, R: Router>: Resource {
+pub trait _MaybeAttachIndexMany<Rel: ToMany, P, R: Router>: Resource {
     fn attach(_: &mut R) { }
 }
 
-impl<T: Resource, Rel: ToMany, P, R: Router> _MaybeIndexMany<Rel, P, R> for T { }
+impl<T: Resource, Rel: ToMany, P, R: Router> _MaybeAttachIndexMany<Rel, P, R> for T { }
 
-impl<T, Rel, P, R> _MaybeIndexMany<Rel, P, R> for T
+impl<T, Rel, P, R> _MaybeAttachIndexMany<Rel, P, R> for T
 where
     T: IndexMany<P::Include, Rel>,
     Rel: ToMany,

@@ -6,13 +6,13 @@ use presenter::Presenter;
 use Future;
 use IntoFuture;
 
-pub trait _MaybeDeleteOne<Rel: ToOne, P, R: Router>: Resource {
+pub trait _MaybeAttachDeleteOne<Rel: ToOne, P, R: Router>: Resource {
     fn attach(_: &mut R) { }
 }
 
-impl<T: Resource, Rel: ToOne, P, R: Router> _MaybeDeleteOne<Rel, P, R> for T { }
+impl<T: Resource, Rel: ToOne, P, R: Router> _MaybeAttachDeleteOne<Rel, P, R> for T { }
 
-impl<T, Rel, P, R> _MaybeDeleteOne<Rel, P, R> for T
+impl<T, Rel, P, R> _MaybeAttachDeleteOne<Rel, P, R> for T
 where
     T: DeleteOne<Rel>,
     Rel: ToOne,

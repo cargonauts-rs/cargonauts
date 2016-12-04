@@ -6,13 +6,13 @@ use router::{Request, Router, Component, Method};
 use IntoFuture;
 use Future;
 
-pub trait _MaybeReplace<P, C, R: Router>: Resource {
+pub trait _MaybeAttachReplace<P, C, R: Router>: Resource {
     fn attach(_: &mut R) { }
 }
 
-impl<T: Resource, P, C, R: Router> _MaybeReplace<P, C, R> for T { }
+impl<T: Resource, P, C, R: Router> _MaybeAttachReplace<P, C, R> for T { }
 
-impl<T, P, C, R> _MaybeReplace<P, C, R> for T
+impl<T, P, C, R> _MaybeAttachReplace<P, C, R> for T
 where
     T: RawReplace<P::Include>,
     P: Presenter<T, R>,

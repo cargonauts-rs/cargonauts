@@ -8,13 +8,13 @@ use presenter::Presenter;
 use Future;
 use IntoFuture;
 
-pub trait _MaybePostMany<Rel: ToMany, P, C, R: Router>: Resource {
+pub trait _MaybeAttachPostMany<Rel: ToMany, P, C, R: Router>: Resource {
     fn attach(_: &mut R) { }
 }
 
-impl<T: Resource, Rel: ToMany, C, P, R: Router> _MaybePostMany<Rel, P, C, R> for T { }
+impl<T: Resource, Rel: ToMany, C, P, R: Router> _MaybeAttachPostMany<Rel, P, C, R> for T { }
 
-impl<T, Rel, C, P, R> _MaybePostMany<Rel, P, C, R> for T
+impl<T, Rel, C, P, R> _MaybeAttachPostMany<Rel, P, C, R> for T
 where
     T: PostMany<P::Include, Rel>,
     Rel: ToMany,

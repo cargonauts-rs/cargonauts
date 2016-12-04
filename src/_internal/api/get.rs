@@ -5,13 +5,13 @@ use api::raw::RawGet;
 use Future;
 use IntoFuture;
 
-pub trait _MaybeGet<P, R: Router>: Resource {
+pub trait _MaybeAttachGet<P, R: Router>: Resource {
     fn attach(_: &mut R) { }
 }
 
-impl<T: Resource, P, R: Router> _MaybeGet<P, R> for T { }
+impl<T: Resource, P, R: Router> _MaybeAttachGet<P, R> for T { }
 
-impl<T, P, R> _MaybeGet<P, R> for T
+impl<T, P, R> _MaybeAttachGet<P, R> for T
 where
     T: RawGet<P::Include>,
     P: Presenter<T, R>,

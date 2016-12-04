@@ -7,13 +7,13 @@ use presenter::Presenter;
 use Future;
 use IntoFuture;
 
-pub trait _MaybeRemoveLinks<Rel: ToMany, P, C, R: Router>: Resource {
+pub trait _MaybeAttachRemoveLinks<Rel: ToMany, P, C, R: Router>: Resource {
     fn attach(_: &mut R) { }
 }
 
-impl<T: Resource, Rel: ToMany, P, C, R: Router> _MaybeRemoveLinks<Rel, P, C, R> for T { }
+impl<T: Resource, Rel: ToMany, P, C, R: Router> _MaybeAttachRemoveLinks<Rel, P, C, R> for T { }
 
-impl<T, Rel, P, C, R> _MaybeRemoveLinks<Rel, P, C, R> for T
+impl<T, Rel, P, C, R> _MaybeAttachRemoveLinks<Rel, P, C, R> for T
 where
     T: RemoveLinks<Rel>,
     Rel: ToMany,

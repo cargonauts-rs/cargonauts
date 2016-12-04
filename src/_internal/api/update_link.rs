@@ -6,18 +6,18 @@ use router::{Router, Component, Method, Request};
 use Future;
 use IntoFuture;
 
-pub trait _MaybeUpdateLink<Rel: ToOne, P, C, R: Router>: Resource {
+pub trait _MaybeAttachUpdateLink<Rel: ToOne, P, C, R: Router>: Resource {
     fn attach(_: &mut R) { }
 }
 
-impl<T, Rel, P, C, R> _MaybeUpdateLink<Rel, P, C, R> for T
+impl<T, Rel, P, C, R> _MaybeAttachUpdateLink<Rel, P, C, R> for T
 where
     T: HasOne<Rel>,
     Rel: ToOne,
     R: Router,
 { }
 
-impl<T, Rel, P, C, R> _MaybeUpdateLink<Rel, P, C, R> for T
+impl<T, Rel, P, C, R> _MaybeAttachUpdateLink<Rel, P, C, R> for T
 where
     T: UpdateLink<Rel>,
     Rel: ToOne,
