@@ -3,7 +3,7 @@ use api::async::raw::RawPostAsync;
 use api::raw::RawPost;
 use presenter::Presenter;
 use receiver::{Receiver, Post};
-use router::{Router, ResourceRoute, Method, Request};
+use router::{Router, Component, Method, Request};
 use IntoFuture;
 use Future;
 
@@ -51,10 +51,12 @@ where
     P: Presenter<T, R>,
     C: Receiver<T, R::Request>,
 {
-    super::attach::<R, T>(router, ResourceRoute {
-        method: Method::Post,
-        relation: None,
-    }, post::<R, T, P, C>);
+    super::attach::<R, T>(
+        router,
+        Method::Create,
+        Component::Collection,
+        post::<R, T, P, C>
+    );
 }
 
 pub fn _attach_post_async<R, T, P, C>(router: &mut R)
@@ -64,10 +66,12 @@ where
     P: Presenter<T::Job, R>,
     C: Receiver<T, R::Request>,
 {
-    super::attach::<R, T>(router, ResourceRoute {
-        method: Method::Post,
-        relation: None,
-    }, post_async::<R, T, P, C>);
+    super::attach::<R, T>(
+        router,
+        Method::Create,
+        Component::Collection,
+        post_async::<R, T, P, C>
+    );
 }
 
 fn post<R, T, P, C>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>

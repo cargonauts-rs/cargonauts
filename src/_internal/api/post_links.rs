@@ -2,7 +2,7 @@ use api::{Resource, Error, Entity};
 use api::rel::ToMany;
 use api::rel::PostLinks;
 use receiver::Receiver;
-use router::{Router, ResourceRoute, Method, Request};
+use router::{Router, Component, Method, Request};
 use presenter::Presenter;
 use Future;
 use IntoFuture;
@@ -34,10 +34,12 @@ where
     P: Presenter<(), R>,
     C: Receiver<(), R::Request>,
 {
-    super::attach::<R, T>(router, ResourceRoute {
-        method: Method::Append,
-        relation: Some((Rel::to_many(), true))
-    }, post_links::<R, T, Rel, P, C>);
+    super::attach::<R, T>(
+        router,
+        Method::Create,
+        Component::Relationship(Rel::to_many()),
+        post_links::<R, T, Rel, P, C>
+    );
 }
 
 fn post_links<R, T, Rel, P, C>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>

@@ -3,7 +3,7 @@ use api::async::raw::{RawPatchAsync, Asynchronous};
 use api::raw::{RawPatch, Synchronous};
 use presenter::Presenter;
 use receiver::PatchReceiver;
-use router::{Router, ResourceRoute, Method, Request};
+use router::{Router, Component, Method, Request};
 use Future;
 use IntoFuture;
 
@@ -50,10 +50,12 @@ where
     P: Presenter<T, R>,
     C: PatchReceiver<T, R::Request, Synchronous>,
 {
-    super::attach::<R, T>(router, ResourceRoute {
-        method: Method::Patch,
-        relation: None,
-    }, patch::<R, T, P, C>);
+    super::attach::<R, T>(
+        router,
+        Method::Update,
+        Component::Resource,
+        patch::<R, T, P, C>
+    );
 }
 
 pub fn _attach_patch_async<R, T, P, C>(router: &mut R)
@@ -63,10 +65,12 @@ where
     P: Presenter<T::Job, R>,
     C: PatchReceiver<T, R::Request, Asynchronous>,
 {
-    super::attach::<R, T>(router, ResourceRoute {
-        method: Method::Patch,
-        relation: None,
-    }, patch_async::<R, T, P, C>);
+    super::attach::<R, T>(
+        router,
+        Method::Update,
+        Component::Resource,
+        patch_async::<R, T, P, C>
+    );
 }
 
 fn patch<R, T, P, C>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>

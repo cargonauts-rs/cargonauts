@@ -38,8 +38,9 @@ impl<S: Server> DefaultRouter<S> {
             match *endpoint {
                 Endpoint::Resource(ref resource_routes)     => {
                     let route = ResourceRoute {
+                        name: request.endpoint(),
                         method: request.method(),
-                        relation: request.relation(),
+                        component: request.component(),
                     };
                     resource_routes.routes.get(&route).map(|handler| *handler)
                 }
@@ -59,14 +60,13 @@ impl<S: Server> Router for DefaultRouter<S> {
     type LinkMaker = S::LinkMaker;
 
     fn attach_resource(&mut self,
-        resource: &'static str,
         route: ResourceRoute<'static>,
         handler: fn(Self::Request, Self::LinkMaker) -> Box<Future<Item = Self::Response, Error = ()>>
     ) {
-        match *self.endpoints.entry(resource).or_insert_with(Endpoint::new_resource) {
+        match *self.endpoints.entry(route.name).or_insert_with(Endpoint::new_resource) {
             Endpoint::Resource(ref mut resource_routes) => {
                 if resource_routes.routes.insert(route, handler).is_some() {
-                    panic!("resource route attached twice: {}, {:?}", resource, route);
+                    panic!("resource route attached twice: {:?}", route);
                 }
             }
             _                                           => unreachable!(),

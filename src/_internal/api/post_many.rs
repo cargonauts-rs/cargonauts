@@ -3,7 +3,7 @@ use api::raw::RawResource;
 use api::rel::ToMany;
 use api::rel::raw::PostMany;
 use receiver::{Receiver, Post};
-use router::{Router, ResourceRoute, Method, Request};
+use router::{Router, Component, Method, Request};
 use presenter::Presenter;
 use Future;
 use IntoFuture;
@@ -37,10 +37,12 @@ where
     P: Presenter<Rel::Resource, R>,
     C: Receiver<Rel::Resource, R::Request>,
 {
-    super::attach::<R, T>(router, ResourceRoute {
-        method: Method::Append,
-        relation: Some((Rel::to_many(), false))
-    }, post_many::<R, T, Rel, P, C>);
+    super::attach::<R, T>(
+        router,
+        Method::Create,
+        Component::Related(Rel::to_many()),
+        post_many::<R, T, Rel, P, C>
+    );
 }
 
 fn post_many<R, T, Rel, P, C>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>

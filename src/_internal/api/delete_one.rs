@@ -1,7 +1,7 @@
 use api::{Resource, Error, Entity};
 use api::rel::ToOne;
 use api::rel::raw::DeleteOne;
-use router::{Router, ResourceRoute, Method, Request};
+use router::{Router, Component, Method, Request};
 use presenter::Presenter;
 use Future;
 use IntoFuture;
@@ -31,10 +31,12 @@ where
     Rel: ToOne,
     P: Presenter<(), R>,
 {
-    super::attach::<R, T>(router, ResourceRoute {
-        method: Method::Delete,
-        relation: Some((Rel::to_one(), false))
-    }, delete_one::<R, T, Rel, P>);
+    super::attach::<R, T>(
+        router,
+        Method::Destroy,
+        Component::Related(Rel::to_one()),
+        delete_one::<R, T, Rel, P>
+    );
 }
 
 fn delete_one<R, T, Rel, P>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>

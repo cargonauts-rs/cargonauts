@@ -1,5 +1,5 @@
 use api::{Resource, Error};
-use router::{Router, ResourceRoute, Method, Request};
+use router::{Router, Component, Method, Request};
 use presenter::Presenter;
 use api::raw::RawGet;
 use Future;
@@ -28,10 +28,12 @@ where
     P: Presenter<T, R>,
     R: Router,
 {
-    super::attach::<R, T>(router, ResourceRoute {
-        method: Method::Get,
-        relation: None,
-    }, get::<R, T, P>)
+    super::attach::<R, T>(
+        router,
+        Method::Read,
+        Component::Resource,
+        get::<R, T, P>
+    );
 }
 
 fn get<R, T, P>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>

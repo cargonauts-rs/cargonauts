@@ -58,12 +58,17 @@ pub use self::remove_many::{_attach_remove_many, _MaybeRemoveMany as _MaybeAttac
 pub use self::replace_many::{_attach_replace_many, _MaybeReplaceMany as _MaybeAttachReplaceMany};
 
 use api::Resource;
-use router::{Router, ResourceRoute};
+use router::{Router, Method, Component, ResourceRoute};
 use Future;
 
 fn attach<R, T>(router: &mut R,
-                route: ResourceRoute<'static>,
+                method: Method,
+                component: Component<'static>,
                 handler: fn(R::Request, R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>)
 where R: Router, T: Resource, {
-    router.attach_resource(T::resource_plural(), route, handler)
+    router.attach_resource(ResourceRoute {
+        name: T::resource_plural(),
+        component: component,
+        method: method,
+    }, handler)
 }

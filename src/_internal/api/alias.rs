@@ -8,14 +8,14 @@ where
     R: Router,
     T: RawGetAliased<P::Include>,
     P: Presenter<T, R>,
-{ router.attach_alias(route, Method::Get, get_aliased::<R, T, P>); }
+{ router.attach_alias(route, Method::Read, get_aliased::<R, T, P>); }
 
 pub fn _attach_index_aliased<R, T, P>(router: &mut R, route: &'static str)
 where
     R: Router,
     T: RawIndexAliased<P::Include>,
     P: Presenter<T, R>,
-{ router.attach_alias(route, Method::Index, index_aliased::<R, T, P>); }
+{ router.attach_alias(route, Method::Read, index_aliased::<R, T, P>); }
 
 fn get_aliased<R, T, P>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>
 where

@@ -2,7 +2,7 @@ use api::{Resource, Error};
 use api::raw::RawReplace;
 use presenter::Presenter;
 use receiver::Receiver;
-use router::{Request, Router, ResourceRoute, Method};
+use router::{Request, Router, Component, Method};
 use IntoFuture;
 use Future;
 
@@ -31,10 +31,12 @@ where
     P: Presenter<T, R>,
     C: Receiver<T, R::Request>,
 {
-    super::attach::<R, T>(router, ResourceRoute {
-        method: Method::Replace,
-        relation: None,
-    }, replace::<R, T, P, C>);
+    super::attach::<R, T>(
+        router,
+        Method::Update,
+        Component::Collection,
+        replace::<R, T, P, C>
+    );
 }
 
 fn replace<R, T, P, C>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>

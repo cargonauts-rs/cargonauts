@@ -3,7 +3,7 @@ use api::raw::RawResource;
 use api::rel::ToMany;
 use api::rel::raw::RemoveMany;
 use receiver::Receiver;
-use router::{Router, ResourceRoute, Method, Request};
+use router::{Router, Component, Method, Request};
 use presenter::Presenter;
 use Future;
 use IntoFuture;
@@ -37,10 +37,12 @@ where
     P: Presenter<(), R>,
     C: Receiver<Rel::Resource, R::Request>,
 {
-    super::attach::<R, T>(router, ResourceRoute {
-        method: Method::Remove,
-        relation: Some((Rel::to_many(), false))
-    }, remove_many::<R, T, Rel, P, C>);
+    super::attach::<R, T>(
+        router,
+        Method::Destroy,
+        Component::Related(Rel::to_many()),
+        remove_many::<R, T, Rel, P, C>
+    );
 }
 
 fn remove_many<R, T, Rel, P, C>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>

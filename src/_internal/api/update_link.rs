@@ -2,7 +2,7 @@ use api::{Resource, Error, Entity};
 use api::rel::{ToOne, HasOne, UpdateLink};
 use presenter::Presenter;
 use receiver::Receiver;
-use router::{Router, ResourceRoute, Method, Request};
+use router::{Router, Component, Method, Request};
 use Future;
 use IntoFuture;
 
@@ -38,13 +38,15 @@ where
     C: Receiver<(), R::Request>,
     R: Router,
 {
-    super::attach::<R, T>(router, ResourceRoute {
-        method: Method::Patch,
-        relation: Some((Rel::to_one(), true))
-    }, _update_link::<R, T, Rel, P, C>);
+    super::attach::<R, T>(
+        router,
+        Method::Update,
+        Component::Relationship(Rel::to_one()),
+        update_link::<R, T, Rel, P, C>
+    );
 }
 
-fn _update_link<R, T, Rel, P, C>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>
+fn update_link<R, T, Rel, P, C>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>
 where
     T: UpdateLink<Rel>,
     Rel: ToOne,

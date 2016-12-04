@@ -3,7 +3,7 @@ use api::raw::{Synchronous, RawHasPatch};
 use api::rel::ToOne;
 use api::rel::raw::PatchOne;
 use receiver::PatchReceiver;
-use router::{Router, ResourceRoute, Method, Request};
+use router::{Router, Component, Method, Request};
 use presenter::Presenter;
 use Future;
 use IntoFuture;
@@ -37,10 +37,12 @@ where
     P: Presenter<Rel::Resource, R>,
     C: PatchReceiver<Rel::Resource, R::Request, Synchronous>,
 {
-    super::attach::<R, T>(router, ResourceRoute {
-        method: Method::Patch,
-        relation: Some((Rel::to_one(), false))
-    }, patch_one::<R, T, Rel, P, C>);
+    super::attach::<R, T>(
+        router,
+        Method::Update,
+        Component::Related(Rel::to_one()),
+        patch_one::<R, T, Rel, P, C>
+    );
 }
 
 fn patch_one<R, T, Rel, P, C>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>

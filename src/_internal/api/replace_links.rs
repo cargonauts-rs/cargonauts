@@ -2,7 +2,7 @@ use api::{Resource, Error, Entity};
 use api::rel::ToMany;
 use api::rel::ReplaceLinks;
 use receiver::Receiver;
-use router::{Router, ResourceRoute, Method, Request};
+use router::{Router, Component, Method, Request};
 use presenter::Presenter;
 use Future;
 use IntoFuture;
@@ -35,10 +35,12 @@ where
     P: Presenter<(), R>,
     C: Receiver<(), R::Request>,
 {
-    super::attach::<R, T>(router, ResourceRoute {
-        method: Method::Replace,
-        relation: Some((Rel::to_many(), true))
-    }, replace_links::<R, T, Rel, P, C>);
+    super::attach::<R, T>(
+        router,
+        Method::Update,
+        Component::Relationship(Rel::to_many()),
+        replace_links::<R, T, Rel, P, C>
+    );
 }
 
 fn replace_links<R, T, Rel, P, C>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>

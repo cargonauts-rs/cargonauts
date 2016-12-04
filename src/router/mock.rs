@@ -72,38 +72,26 @@ impl Router for MockRouter {
     type LinkMaker = MockLinker;
 
     fn attach_resource(&mut self,
-        resource: &'static str,
         route: ResourceRoute<'static>,
         _: fn(Self::Request, Self::LinkMaker) -> Box<Future<Item = Self::Response, Error = ()>>
     ) {
-        match (route.method, route.relation) {
-            (Method::Get, None)                     => self.register("get", resource),
-            (Method::Index, None)                   => self.register("index", resource),
-            (Method::Delete, None)                  => self.register("delete", resource),
-            (Method::Clear, None)                   => self.register("clear", resource),
-            (Method::Remove, None)                  => self.register("remove", resource),
-            (Method::Patch, None)                   => self.register("patch", resource),
-            (Method::Post, None)                    => self.register("post", resource),
-            (Method::Append, None)                  => self.register("append", resource),
-            (Method::Replace, None)                 => self.register("replace", resource),
-            (Method::Get, Some((rel, false)))       => self.register_rel("get-one", resource, rel),
-            (Method::Index, Some((rel, false)))     => self.register_rel("index-many", resource, rel),
-            (Method::Delete, Some((rel, false)))    => self.register_rel("delete-one", resource, rel),
-            (Method::Clear, Some((rel, false)))     => self.register_rel("clear-many", resource, rel),
-            (Method::Remove, Some((rel, false)))    => self.register_rel("remove-many", resource, rel),
-            (Method::Post, Some((rel, false)))      => self.register_rel("post-one", resource, rel),
-            (Method::Patch, Some((rel, false)))     => self.register_rel("patch-one", resource, rel),
-            (Method::Append, Some((rel, false)))    => self.register_rel("append-many", resource, rel),
-            (Method::Replace, Some((rel, false)))   => self.register_rel("replace-many", resource, rel),
-            (Method::Get, Some((rel, true)))        => self.register_rel("get-rel", resource, rel),
-            (Method::Index, Some((rel, true)))      => self.register_rel("index-rel", resource, rel),
-            (Method::Delete, Some((rel, true)))     => self.register_rel("delete-rel", resource, rel),
-            (Method::Clear, Some((rel, true)))      => self.register_rel("clear-rel", resource, rel),
-            (Method::Remove, Some((rel, true)))     => self.register_rel("remove-rel", resource, rel),
-            (Method::Post, Some((rel, true)))       => self.register_rel("post-rel", resource, rel),
-            (Method::Patch, Some((rel, true)))      => self.register_rel("patch-rel", resource, rel),
-            (Method::Append, Some((rel, true)))     => self.register_rel("append-rel", resource, rel),
-            (Method::Replace, Some((rel, true)))    => self.register_rel("replace-rel", resource, rel),
+        match (route.method, route.component) {
+            (Method::Read,    Component::Resource)          => self.register("get", route.name),
+            (Method::Destroy, Component::Resource)          => self.register("delete", route.name),
+            (Method::Update,  Component::Resource)          => self.register("patch", route.name),
+            (Method::Create,  Component::Resource)          => unreachable!(),
+            (Method::Read,    Component::Collection)        => self.register("index", route.name),
+            (Method::Destroy, Component::Collection)        => self.register("remove", route.name),
+            (Method::Create,  Component::Collection)        => self.register("post", route.name),
+            (Method::Update,  Component::Collection)        => self.register("replace", route.name),
+            (Method::Read,    Component::Related(rel))      => self.register_rel("read-related", route.name, rel),
+            (Method::Destroy, Component::Related(rel))      => self.register_rel("destroy-related", route.name, rel),
+            (Method::Create,  Component::Related(rel))      => self.register_rel("create-related", route.name, rel),
+            (Method::Update,  Component::Related(rel))      => self.register_rel("update-related", route.name, rel),
+            (Method::Read,    Component::Relationship(rel)) => self.register_rel("read-rel", route.name, rel),
+            (Method::Destroy, Component::Relationship(rel)) => self.register_rel("destroy-rel", route.name, rel),
+            (Method::Create,  Component::Relationship(rel)) => self.register_rel("create-rel", route.name, rel),
+            (Method::Update,  Component::Relationship(rel)) => self.register_rel("update-rel", route.name, rel),
         }
     }
 
@@ -113,15 +101,10 @@ impl Router for MockRouter {
         _: fn(Self::Request, Self::LinkMaker) -> Box<Future<Item = Self::Response, Error = ()>>
     ) {
         match method {
-            Method::Get     => self.register("alias-get", alias),
-            Method::Index   => self.register("alias-index", alias),
-            Method::Delete  => self.register("alias-delete", alias),
-            Method::Clear   => self.register("alias-clear", alias),
-            Method::Remove  => self.register("alias-remove", alias),
-            Method::Patch   => self.register("alias-patch", alias),
-            Method::Post    => self.register("alias-post", alias),
-            Method::Append  => self.register("alias-append", alias),
-            Method::Replace => self.register("alias-replace", alias),
+            Method::Read    => self.register("alias-read", alias),
+            Method::Destroy => self.register("alias-destroy", alias),
+            Method::Update  => self.register("alias-update", alias),
+            Method::Create  => self.register("alias-create", alias),
         }
     }
 }
@@ -152,7 +135,7 @@ impl Request for MockRequest {
     type Body = Box<Read>;
     fn endpoint(&self) -> &str { unimplemented!() }
     fn id(&self) -> Option<&str> { unimplemented!() }
-    fn relation(&self) -> Option<(&str, bool)> { unimplemented!() }
+    fn component(&self) -> Component { unimplemented!() }
     fn method(&self) -> Method { unimplemented!() }
     fn resource_options(&self) -> ResourceOptions { unimplemented!() }
     fn collection_options(&self) -> CollectionOptions { unimplemented!() }

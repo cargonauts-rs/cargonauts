@@ -20,7 +20,6 @@ pub trait Router: 'static {
     type LinkMaker: MakeLinks;
 
     fn attach_resource(&mut self,
-        resource: &'static str,
         route: ResourceRoute<'static>,
         handler: fn(Self::Request, Self::LinkMaker) -> Box<Future<Item = Self::Response, Error = ()>>
     );
@@ -33,22 +32,26 @@ pub trait Router: 'static {
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
-pub enum Method {
-    Get,
-    Patch,
-    Post,
-    Delete,
-    Index,
-    Replace,
-    Clear,
-    Remove,
-    Append,
+pub struct ResourceRoute<'a> {
+    pub name: &'a str,
+    pub component: Component<'a>,
+    pub method: Method,
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
-pub struct ResourceRoute<'a> {
-    pub method: Method,
-    pub relation: Option<(&'a str, bool)>,
+pub enum Component<'a> {
+    Resource,
+    Collection,
+    Related(&'a str),
+    Relationship(&'a str),
+}
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+pub enum Method {
+    Create,
+    Read,
+    Update,
+    Destroy,
 }
 
 pub enum Status {
@@ -106,7 +109,7 @@ pub trait Request {
     fn endpoint(&self) -> &str;
     fn id(&self) -> Option<&str>;
     fn method(&self) -> Method;
-    fn relation(&self) -> Option<(&str, bool)>;
+    fn component(&self) -> Component;
     fn resource_options(&self) -> ResourceOptions;
     fn collection_options(&self) -> CollectionOptions;
     fn alias_info(&self) -> AliasRequest;

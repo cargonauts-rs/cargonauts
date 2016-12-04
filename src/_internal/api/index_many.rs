@@ -2,7 +2,7 @@ use api::{Resource, Error, Entity};
 use api::raw::RawResource;
 use api::rel::ToMany;
 use api::rel::raw::IndexMany;
-use router::{Router, ResourceRoute, Method, Request};
+use router::{Router, Component, Method, Request};
 use presenter::Presenter;
 use Future;
 use IntoFuture;
@@ -33,10 +33,12 @@ where
     P: Presenter<Rel::Resource, R>,
     R: Router,
 {
-    super::attach::<R, T>(router, ResourceRoute {
-        method: Method::Index,
-        relation: Some((Rel::to_many(), false))
-    }, index_many::<R, T, Rel, P>);
+    super::attach::<R, T>(
+        router,
+        Method::Read,
+        Component::Related(Rel::to_many()),
+        index_many::<R, T, Rel, P>
+    );
 }
 
 fn index_many<R, T, Rel, P>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>

@@ -1,6 +1,6 @@
 use api::{Remove, Resource, Error};
 use api::raw::RawResource;
-use router::{Router, ResourceRoute, Method};
+use router::{Router, Component, Method};
 use presenter::Presenter;
 use receiver::Receiver;
 use IntoFuture;
@@ -31,10 +31,12 @@ where
     P: Presenter<(), R>,
     C: Receiver<T, R::Request>,
 {
-    super::attach::<R, T>(router, ResourceRoute {
-        method: Method::Remove,
-        relation: None,
-    }, remove::<R, T, P, C>);
+    super::attach::<R, T>(
+        router,
+        Method::Destroy,
+        Component::Collection,
+        remove::<R, T, P, C>
+    );
 }
 
 fn remove<R, T, P, C>(request: R::Request, link_maker: R::LinkMaker) -> Box<Future<Item = R::Response, Error = ()>>

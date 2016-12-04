@@ -1,5 +1,5 @@
 use api::Resource;
-use router::{Router, ResourceRoute, Method, Request};
+use router::{Router, Component, Method, Request};
 use presenter::Presenter;
 use api::raw::RawIndex;
 use Future;
@@ -21,10 +21,12 @@ where
     T: RawIndex<P::Include>,
     P: Presenter<T, R>,
 {
-    super::attach::<R, T>(router, ResourceRoute {
-        method: Method::Index,
-        relation: None,
-    }, index::<R, T, P>)
+    super::attach::<R, T>(
+        router,
+        Method::Read,
+        Component::Collection,
+        index::<R, T, P>
+    );
 }
 
 pub trait _MaybeIndex<P, R: Router>: Resource {

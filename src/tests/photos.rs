@@ -131,11 +131,11 @@ fn it_compiles() { }
 fn it_has_attached_routes() {
     use router::mock::MockRouter;
     
-    const ME_ROUTES: &'static [&'static str] = &["alias-get"];
+    const ME_ROUTES: &'static [&'static str] = &["alias-read"];
     const USERS_ROUTES: &'static [&'static str] = &["get", "patch"];
     const PHOTOS_ROUTES: &'static [&'static str] = &["get", "index", "delete", "post"];
-    const USERS_PHOTOS_ROUTES: &'static [&'static str] = &["index-rel", "append-rel", "index-many", "append-many"];
-    const PHOTOS_USER_ROUTES: &'static [&'static str] = &["get-rel", "get-one", "patch-one"];
+    const USERS_PHOTOS_ROUTES: &'static [&'static str] = &["read-rel", "create-rel", "read-related", "create-related"];
+    const PHOTOS_USER_ROUTES: &'static [&'static str] = &["read-rel", "read-related", "update-related"];
 
     let mut router = MockRouter::new();
     attach_routes(&mut router);
