@@ -1,0 +1,59 @@
+use ast::*;
+
+grammar;
+
+pub resources: Vec<Resource> = <Resource*>;
+
+Resource: Resource = {
+    <attrs:Attribute*> <header:ResourceHeader> ";" => Resource {
+        attrs, header, members: vec![],
+    },
+    <attrs:Attribute*> <header:ResourceHeader> "{" <members:ResourceMember*> "}" => Resource {
+        attrs, header, members,
+    },
+};
+
+ResourceHeader: ResourceHeader  = {
+    "resource" <ty:Ident> <endpoint:Endpoint?> <methods:Methods?> => ResourceHeader { ty, endpoint, methods },
+};
+
+Endpoint: String = "@" <String>;
+
+ResourceMember: ResourceMember = {
+    "relation" <rel:Relation> ";" => ResourceMember::Relation(rel),
+};
+
+Relation: Relation = {
+    <rel:Ident> <endpoint:Endpoint?> <methods: Methods?> => Relation { rel, methods, endpoint },
+};
+
+Methods: Vec<Method> = ":" <RepeatWith<Method, "+">>;
+
+Method: Method = {
+    "Get" => Method::Get,
+    "Index" => Method::Index,
+};
+
+Ident: String = {
+    r"[A-Za-z][A-Za-z0-9]*" => String::from(<>)
+};
+
+String: String = {
+    r#""(?:[^"\\]|\\.)*""# => String::from(<>)
+};
+
+Attribute: Attribute = {
+    "#" "[" <id: Ident> "(" <idents:RepeatWith<Ident, ",">> ")" "]" => Attribute::Arg(id, idents),
+    "#" "[" <Ident> "]" => Attribute::Ident(<>),
+};
+
+RepeatWith<T, X>: Vec<T> = {
+    <v:(<T> X)*> <e:T?> => match e {
+       None => v,
+       Some(e) => {
+           let mut v = v;
+           v.push(e);
+           v
+       }
+   }
+};

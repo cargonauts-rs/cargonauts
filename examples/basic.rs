@@ -1,13 +1,5 @@
-# cargonauts - a Rust web framework
+#![feature(associated_consts)]
 
-**cargonauts** is a Rust web framework intended for building long lasting,
-maintainable web services.
-
-**This project is an incomplete work in progress. Please do not attempt to use
-it yet.**
-
-
-```rust
 #[macro_use]
 extern crate cargonauts;
 
@@ -15,11 +7,6 @@ use cargonauts::api::{Resource, Get, Index, Environment, Error};
 use cargonauts::format::Debug;
 use cargonauts::futures::{Future, BoxFuture, future};
 use cargonauts::futures::stream::{self, Stream, BoxStream};
-
-routes! {
-    #[format(Debug)]
-    resource Something: Get + Index;
-}
 
 #[derive(Debug)]
 struct Something(u32);
@@ -41,17 +28,12 @@ impl Index for Something {
     }
 }
 
+routes! {
+    #[format(Debug)]
+    resource Something: Get + Index;
+}
+
 fn main() {
     let socket_addr = "127.0.0.1:8000".parse().unwrap();
     cargonauts::server::Http::new().bind(&socket_addr, routes).unwrap().run().unwrap();
 }
-```
-
-## License
-
-Cargonauts is primarily distributed under the terms of both the MIT license
-and the Apache License (Version 2.0).
-
-See LICENSE-APACHE and LICENSE-MIT for details.
-
-[json-api]: http://jsonapi.org

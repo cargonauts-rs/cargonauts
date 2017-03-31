@@ -1,0 +1,8 @@
+[package]
+authors = ["Without Boats <woboats@gmail.com>"]
+name = "mainsail"
+version = "0.1.0"
+
+[dependencies]
+anymap = "0.12.1"
+futures = "0.1.11"
