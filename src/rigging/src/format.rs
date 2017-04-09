@@ -1,11 +1,11 @@
-use mainsail::Resource;
+use mainsail::ResourceEndpoint;
 use mime::Mime;
 
 use http;
 use present::Present;
 use receive::Receive;
 
-pub trait Format<T: Resource> {
+pub trait Format<T: ResourceEndpoint> {
     type Receiver: Receive<T>;
     type Presenter: Present<T>;
     const MIME_TYPES: &'static [&'static str];

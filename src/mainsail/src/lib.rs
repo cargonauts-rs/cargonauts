@@ -13,13 +13,13 @@ use futures::stream::BoxStream;
 
 pub use anymap::AnyMap;
 
-pub trait ResourceEndpoint: Send + Sized + 'static {
+pub trait ResourceEndpoint: Resource {
     const ENDPOINT: &'static str;
     const RESOURCE: &'static str;
     const REL_LINKS: &'static [relations::RelationshipLink];
 }
 
-pub trait Resource: ResourceEndpoint + Send + Sized + 'static {
+pub trait Resource: Send + Sized + 'static {
     type Identifier: FromStr + ToString + Send + 'static;
     fn identifier(&self) -> Self::Identifier;
 }

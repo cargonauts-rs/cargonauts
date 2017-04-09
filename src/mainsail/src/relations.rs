@@ -1,6 +1,12 @@
 use Resource;
+use ResourceEndpoint;
 
-pub trait RelationEndpoint<R: Relationship>: Send + Sync + Sized + 'static {
+pub trait RelationEndpoint<R>
+where
+    R: Relationship,
+    R::Related: ResourceEndpoint,
+    Self: ResourceEndpoint,
+{
     const LINK: RelationshipLink;
 }
 
@@ -10,21 +16,9 @@ pub struct RelationshipLink {
 }
 
 pub trait Relationship: Sized {
-    type Related;
-}
-
-pub trait ToOne: Relationship<Related = <Self as ToOne>::One> {
-    type One: Resource;
-}
-
-pub trait ToMany: Relationship<Related = Vec<<Self as ToMany>::Many>> {
-    type Many: Resource;
+    type Related: Resource;
 }
 
 impl<T: Resource> Relationship for T {
     type Related = T;
-}
-
-impl<T: Resource> ToOne for T {
-    type One = T;
 }

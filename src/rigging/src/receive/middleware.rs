@@ -6,7 +6,7 @@ use tokio::{Service, NewService, Middleware, NewMiddleware};
 use tokio::stream::{StreamService, StreamMiddleware, NewStreamMiddleware, NewStreamService};
 
 use http;
-use mainsail::{Resource, Error};
+use mainsail::{ResourceEndpoint, Error};
 use request::Request;
 use receive::Receive;
 
@@ -23,7 +23,7 @@ impl<R> Receiver<R> {
 
 impl<S, R, T, Q> Middleware<S> for Receiver<R>
 where
-    T: Resource,
+    T: ResourceEndpoint,
     R: Receive<T>,
     Q: Request<T>,
     Q::Service: NewService<Request = Q, Response = T, Error = Error, Instance = S>,
@@ -40,7 +40,7 @@ where
 
 impl<S, R, T, Q> NewMiddleware<S> for Receiver<R>
 where
-    T: Resource,
+    T: ResourceEndpoint,
     R: Receive<T>,
     Q: Request<T>,
     Q::Service: NewService<Request = Q, Response = T, Error = Error, Instance = S>,
@@ -61,7 +61,7 @@ pub struct ReceivedReq<S, R> {
 
 impl<S, R, T, Q> Service for ReceivedReq<S, R>
 where
-    T: Resource,
+    T: ResourceEndpoint,
     R: Receive<T>,
     Q: Request<T>,
     Q::Service: NewService<Request = Q, Response = T, Error = Error, Instance = S>,
@@ -82,7 +82,7 @@ where
 
 impl<S, R, T, Q> NewStreamMiddleware<S> for Receiver<R>
 where
-    T: Resource,
+    T: ResourceEndpoint,
     R: Receive<T>,
     Q: Request<T>,
     Q::Service: NewStreamService<Request = Q, Response = T, Error = Error, Instance = S>,
@@ -98,7 +98,7 @@ where
 
 impl<S, R, T, Q> StreamMiddleware<S> for Receiver<R>
 where
-    T: Resource,
+    T: ResourceEndpoint,
     R: Receive<T>,
     Q: Request<T>,
     Q::Service: NewStreamService<Request = Q, Response = T, Error = Error, Instance = S>,
@@ -120,7 +120,7 @@ pub struct ReceivedReqStream<S, R> {
 
 impl<S, R, T, Q> StreamService for ReceivedReqStream<S, R>
 where
-    T: Resource,
+    T: ResourceEndpoint,
     R: Receive<T>,
     Q: Request<T>,
     Q::Service: NewStreamService<Request = Q, Response = T, Error = Error, Instance = S>,

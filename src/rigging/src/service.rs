@@ -1,16 +1,16 @@
 macro_rules! service {
     ($method:ident as $service:ident : $request:ident -> Resource |$req:ident| $call:block) => {
-        pub struct $service<T: ::mainsail::$method> {
+        pub struct $service<T: ::mainsail::$method + ::mainsail::ResourceEndpoint> {
             _spoopy: ::std::marker::PhantomData<T>,
         }
 
-        impl<T: ::mainsail::$method> Default for $service<T> {
+        impl<T: ::mainsail::$method + ::mainsail::ResourceEndpoint> Default for $service<T> {
             fn default() -> Self {
                 Self { _spoopy: ::std::marker::PhantomData, }
             }
         }
 
-        impl<T: ::mainsail::$method> ::tokio::Service for $service<T> {
+        impl<T: ::mainsail::$method + ::mainsail::ResourceEndpoint> ::tokio::Service for $service<T> {
             type Request = ::request::$request<T>;
             type Response = T;
             type Error = ::mainsail::Error;
@@ -21,7 +21,7 @@ macro_rules! service {
             }
         }
 
-        impl<T: ::mainsail::$method> ::tokio::NewService for $service<T> {
+        impl<T: ::mainsail::$method + ::mainsail::ResourceEndpoint> ::tokio::NewService for $service<T> {
             type Request = ::request::$request<T>;
             type Response = T;
             type Error = ::mainsail::Error;
@@ -35,18 +35,18 @@ macro_rules! service {
         }
     };
     ($method:ident as $service:ident : $request:ident -> Collection |$req:ident| $call:block) => {
-        pub struct $service<T: ::mainsail::$method> {
+        pub struct $service<T: ::mainsail::$method + ::mainsail::ResourceEndpoint> {
             _spoopy: ::std::marker::PhantomData<T>,
         }
 
-        impl<T: ::mainsail::$method> Default for $service<T> {
+        impl<T: ::mainsail::$method + ::mainsail::ResourceEndpoint> Default for $service<T> {
             fn default() -> Self {
                 Self { _spoopy: ::std::marker::PhantomData, }
             }
         }
 
         impl<T> ::tokio::stream::StreamService for $service<T> where
-            T: ::mainsail::$method,
+            T: ::mainsail::$method + ::mainsail::ResourceEndpoint,
         {
             type Request = ::request::$request<T>;
             type Response = T;
@@ -59,7 +59,7 @@ macro_rules! service {
         }
 
         impl<T> ::tokio::stream::NewStreamService for $service<T> where
-            T: ::mainsail::$method,
+            T: ::mainsail::$method + ::mainsail::ResourceEndpoint,
         {
             type Request = ::request::$request<T>;
             type Response = T;

@@ -4,7 +4,7 @@ use tokio::{Service, NewService};
 use tokio::stream::{StreamService, NewStreamService};
 use tokio as t;
 use tokio::stream as s;
-use mainsail::{Resource, Error};
+use mainsail::{ResourceEndpoint, Error};
 
 use http;
 use format::Format;
@@ -62,7 +62,7 @@ where
     Q: ResourceRequest<T>,
     Q::Service: NewService<Request = Q, Response = T, Error = Error, Instance = S>,
     S: Service<Request = Q, Response = T, Error = Error, Future = BoxFuture<T, Error>>,
-    T: Resource,
+    T: ResourceEndpoint,
 {
     let receiver = Receiver::new(F::Receiver::default());
     let presenter = Presenter::<_, Q>::new(F::Presenter::default());
@@ -78,7 +78,7 @@ where
     Q: CollectionRequest<T>,
     Q::Service: NewStreamService<Request = Q, Response = T, Error = Error, Instance = S>,
     S: StreamService<Request = Q, Response = T, Error = Error, Stream = BoxStream<T, Error>>,
-    T: Resource,
+    T: ResourceEndpoint,
 {
     let receiver = Receiver::new(F::Receiver::default());
     let presenter = Presenter::<_, Q>::new(F::Presenter::default());

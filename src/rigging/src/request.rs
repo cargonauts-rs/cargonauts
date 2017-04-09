@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use mainsail::{Resource, Error, Environment, Get, Index};
+use mainsail::{ResourceEndpoint, Error, Environment, Get, Index};
 use tokio::NewService;
 use tokio::stream::NewStreamService;
 
@@ -8,27 +8,27 @@ use http;
 use service::{GetService, IndexService};
 use receive::Receive;
 
-pub trait Request<T: Resource>: Sized {
+pub trait Request<T: ResourceEndpoint>: Sized {
     type Service: Default;
     fn receive<R: Receive<T>>(rec: &R, req: http::Request) -> Result<Self, Error>;
 }
 
-pub trait ResourceRequest<T: Resource>: Request<T>
+pub trait ResourceRequest<T: ResourceEndpoint>: Request<T>
 where
     <Self as Request<T>>::Service: NewService<Response = T, Error = Error>,
 { }
 
-pub trait CollectionRequest<T: Resource>: Request<T>
+pub trait CollectionRequest<T: ResourceEndpoint>: Request<T>
 where
     <Self as Request<T>>::Service: NewStreamService<Response = T, Error = Error>,
 { }
 
-pub struct GetRequest<T: Resource> {
+pub struct GetRequest<T: ResourceEndpoint> {
     pub identifier: T::Identifier,
     pub env: Environment,
 }
 
-impl<T: Get> Request<T> for GetRequest<T> {
+impl<T: Get + ResourceEndpoint> Request<T> for GetRequest<T> {
     type Service = GetService<T>;
 
     fn receive<R: Receive<T>>(rec: &R, req: http::Request) -> Result<Self, Error> {
@@ -39,14 +39,14 @@ impl<T: Get> Request<T> for GetRequest<T> {
     }
 }
 
-impl<T: Get> ResourceRequest<T> for GetRequest<T> { }
+impl<T: Get + ResourceEndpoint> ResourceRequest<T> for GetRequest<T> { }
 
-pub struct IndexRequest<T: Resource> {
+pub struct IndexRequest<T: ResourceEndpoint> {
     pub env: Environment,
     pub _spoopy: PhantomData<T>,
 }
 
-impl<T: Index> Request<T> for IndexRequest<T> {
+impl<T: Index + ResourceEndpoint> Request<T> for IndexRequest<T> {
     type Service = IndexService<T>;
 
     fn receive<R: Receive<T>>(rec: &R, req: http::Request) -> Result<Self, Error> {
@@ -55,4 +55,4 @@ impl<T: Index> Request<T> for IndexRequest<T> {
     }
 }
 
-impl<T: Index> CollectionRequest<T> for IndexRequest<T> { }
+impl<T: Index + ResourceEndpoint> CollectionRequest<T> for IndexRequest<T> { }

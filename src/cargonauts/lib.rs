@@ -23,34 +23,15 @@ pub mod api {
 
     #[macro_use]
     pub mod relations {
-        pub use mainsail::relations::{Relationship, ToOne, ToMany};
+        pub use mainsail::relations::{Relationship};
 
         #[macro_export]
-        macro_rules! to_one {
+        macro_rules! relation {
             ($rel:ident => $resource:ident) => {
                 pub struct $rel;
 
                 impl $crate::api::relations::Relationship for $rel {
                     type Related = $resource;
-                }
-
-                impl $crate::api::relations::ToOne for $rel {
-                    type One = $resource;
-                }
-            }
-        }
-
-        #[macro_export]
-        macro_rules! to_many {
-            ($rel:ident => $resource:ident) => {
-                pub struct $rel;
-
-                impl $crate::api::relations::Relationship for $rel {
-                    type Related = Vec<$resource>;
-                }
-
-                impl $crate::api::relations::ToMany for $rel {
-                    type Many = $resource;
                 }
             }
         }

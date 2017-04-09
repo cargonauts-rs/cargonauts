@@ -6,7 +6,7 @@ extern crate tokio_service as tokio;
 
 use std::fmt::Debug;
 
-use mainsail::{Resource, Error};
+use mainsail::{ResourceEndpoint, Error};
 use rigging::http;
 use rigging::format::Format;
 use rigging::present::{Present, PresentResource, PresentCollection, Template};
@@ -22,16 +22,16 @@ pub struct SimpleDebug {
 
 impl<T> Format<T> for SimpleDebug
 where
-    T: Resource + Debug,
+    T: ResourceEndpoint + Debug,
 {
     type Presenter = Self;
     type Receiver = Self;
     const MIME_TYPES: &'static [&'static str] = &[MIME];
 }
 
-impl<T: Resource> Receive<T> for SimpleDebug { }
+impl<T: ResourceEndpoint> Receive<T> for SimpleDebug { }
 
-impl<T: Resource + Debug> Present<T> for SimpleDebug {
+impl<T: ResourceEndpoint + Debug> Present<T> for SimpleDebug {
     type ResourcePresenter = ResourcePresenter;
     type CollectionPresenter = CollectionPresenter<T>;
 
@@ -47,7 +47,7 @@ impl<T: Resource + Debug> Present<T> for SimpleDebug {
 #[derive(Default, Clone, Copy)]
 pub struct ResourcePresenter;
 
-impl<T: Resource + Debug> PresentResource<T> for ResourcePresenter {
+impl<T: ResourceEndpoint + Debug> PresentResource<T> for ResourcePresenter {
     fn resource<R>(self, resource: T, _: Option<Template>) -> http::Response
     where
         R: ResourceRequest<T>,
@@ -81,7 +81,7 @@ impl<T> Clone for CollectionPresenter<T> {
     }
 }
 
-impl<T: Resource + Debug> PresentCollection<T> for CollectionPresenter<T> {
+impl<T: ResourceEndpoint + Debug> PresentCollection<T> for CollectionPresenter<T> {
     fn append(&mut self, resource: T, _: Option<Template>) {
         let _ = self.resources.as_mut().map(|v| v.push(resource));
     }

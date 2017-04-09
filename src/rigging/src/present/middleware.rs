@@ -6,7 +6,7 @@ use tokio::{Service, NewService, Middleware, NewMiddleware};
 use tokio::stream::{StreamService, StreamReduce, NewStreamReduce, NewStreamService};
 
 use http;
-use mainsail::{Resource, Error};
+use mainsail::{ResourceEndpoint, Error};
 use present::{Present, PresentResource, PresentCollection};
 use request::{ResourceRequest, CollectionRequest};
 
@@ -23,7 +23,7 @@ impl<P, Q> Presenter<P, Q> {
 
 impl<S, P, T, Q> NewMiddleware<S> for Presenter<P, Q>
 where
-    T: Resource,
+    T: ResourceEndpoint,
     P: Present<T>,
     Q: ResourceRequest<T>,
     Q::Service: NewService<Response = T, Error = Error>,
@@ -48,7 +48,7 @@ pub struct ResourcePresenter<P, Q> {
 
 impl<S, P, T, Q> Middleware<S> for ResourcePresenter<P, Q>
 where
-    T: Resource,
+    T: ResourceEndpoint,
     P: PresentResource<T>,
     Q: ResourceRequest<T>,
     Q::Service: NewService<Response = T, Error = Error>,
@@ -74,7 +74,7 @@ pub struct PresentedResource<S, P, Q> {
 
 impl<S, P, T, Q> Service for PresentedResource<S, P, Q>
 where
-    T: Resource,
+    T: ResourceEndpoint,
     P: PresentResource<T>,
     Q: ResourceRequest<T>,
     Q::Service: NewService<Response = T, Error = Error>,
@@ -97,7 +97,7 @@ where
 
 impl<S, P, T, Q> NewStreamReduce<S> for Presenter<P, Q>
 where
-    T: Resource,
+    T: ResourceEndpoint,
     P: Present<T>,
     Q: CollectionRequest<T>,
     Q::Service: NewStreamService<Response = T, Error = Error>,
@@ -122,7 +122,7 @@ pub struct CollectionPresenter<P, Q> {
 
 impl<S, P, T, Q> StreamReduce<S> for CollectionPresenter<P, Q>
 where
-    T: Resource,
+    T: ResourceEndpoint,
     P: PresentCollection<T>,
     Q: CollectionRequest<T>,
     Q::Service: NewStreamService<Response = T, Error = Error>,
@@ -148,7 +148,7 @@ pub struct PresentedCollection<S, P, Q> {
 
 impl<S, P, T, Q> Service for PresentedCollection<S, P, Q>
 where
-    T: Resource,
+    T: ResourceEndpoint,
     P: PresentCollection<T>,
     Q: CollectionRequest<T>,
     Q::Service: NewStreamService<Response = T, Error = Error>,
@@ -175,12 +175,12 @@ where
     }
 }
 
-struct CollectionSink<P: PresentCollection<T>, T: Resource> {
+struct CollectionSink<P: PresentCollection<T>, T: ResourceEndpoint> {
     presenter: P,
     _spoopy: PhantomData<T>
 }
 
-impl<P: PresentCollection<T>, T: Resource> futures::Sink for CollectionSink<P, T> {
+impl<P: PresentCollection<T>, T: ResourceEndpoint> futures::Sink for CollectionSink<P, T> {
     type SinkItem = Result<T, Error>;
     type SinkError = http::Error;
 
