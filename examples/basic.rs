@@ -4,12 +4,13 @@
 extern crate cargonauts;
 
 use cargonauts::api::{Resource, Get, Index, Environment, Error};
+use cargonauts::api::relations::GetOne;
 use cargonauts::format::Debug;
 use cargonauts::futures::{Future, BoxFuture, future};
 use cargonauts::futures::stream::{self, Stream, BoxStream};
 
 #[derive(Debug)]
-struct MyResource { 
+pub struct MyResource { 
     slug: String,
 }
 
@@ -30,10 +31,22 @@ impl Index for MyResource {
     }
 }
 
+relation!(AllCaps => MyResource);
+
+impl GetOne<AllCaps> for MyResource {
+    fn get_one(slug: String, _: Environment) -> BoxFuture<MyResource, Error> {
+        future::ok(MyResource { slug: slug.to_uppercase() }).boxed()
+    }
+}
+
 routes! {
     resource MyResource {
         method Get in Debug;
         method Index in Debug;
+
+        relation AllCaps {
+            method GetOne in Debug;
+        }
     }
 }
 

@@ -1,3 +1,8 @@
+use futures::BoxFuture;
+use futures::stream::BoxStream;
+
+use Environment;
+use Error;
 use Resource;
 use ResourceEndpoint;
 
@@ -21,4 +26,12 @@ pub trait Relationship: Sized {
 
 impl<T: Resource> Relationship for T {
     type Related = T;
+}
+
+pub trait GetOne<R: Relationship>: Resource {
+    fn get_one(identifier: Self::Identifier, env: Environment) -> BoxFuture<R::Related, Error>;
+}
+
+pub trait GetMany<R: Relationship>: Resource {
+    fn get_many(identifier: Self::Identifier, env: Environment) -> BoxStream<R::Related, Error>;
 }

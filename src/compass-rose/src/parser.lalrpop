@@ -21,7 +21,7 @@ Endpoint: String = "@" <String>;
 
 ResourceMember: ResourceMember = {
     "relation" <Relation> => ResourceMember::Relation(<>),
-    "method" <Method> => ResourceMember::Method(<>),
+    "method" <Method<MethodKind>> => ResourceMember::Method(<>),
 };
 
 Relation: Relation = {
@@ -34,13 +34,11 @@ Relation: Relation = {
 };
 
 RelationMember: RelationMember = {
-    "method" <Method> => RelationMember::Method(<>),
+    "method" <Method<RelMethodKind>> => RelationMember::Method(<>),
 };
 
-Methods: Vec<Method> = ":" <RepeatWith<Method, "+">>;
-
-Method: Method = {
-    <attrs:Attribute*> <method:MethodKind> "in" <format:Ident> ";" => Method {
+Method<K>: Method<K> = {
+    <attrs:Attribute*> <method:K> "in" <format:Ident> ";" => Method {
         attrs, method, format,
     }
 };
@@ -48,6 +46,11 @@ Method: Method = {
 MethodKind: MethodKind = {
     "Get" => MethodKind::Get,
     "Index" => MethodKind::Index,
+};
+
+RelMethodKind: RelMethodKind = {
+    "GetOne" => RelMethodKind::GetOne,
+    "GetMany" => RelMethodKind::GetMany,
 };
 
 Ident: String = {

@@ -17,7 +17,7 @@ impl ToTokens for Resource {
                 const REL_LINKS: &'static [::cargonauts::routing::RelationshipLink] = &#rel_links;
             }
 
-            #relationships
+            #(#relationships)*
         })
     }
 }
@@ -49,7 +49,7 @@ impl<'a> ToTokens for RelLink<'a> {
         let relation_ty = Ident::new(self.relation);
         let resource_ty = Ident::new(self.resource);
         tokens.append(quote! {
-            <#resource_ty as ::cargonauts::routing::RelationEndpoint<#relation_ty>>::LINK,
+            <#resource_ty as ::cargonauts::routing::RelationEndpoint<#relation_ty>>::LINK
         })
     }
 }

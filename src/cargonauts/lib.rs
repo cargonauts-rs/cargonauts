@@ -23,7 +23,7 @@ pub mod api {
 
     #[macro_use]
     pub mod relations {
-        pub use mainsail::relations::{Relationship};
+        pub use mainsail::relations::{Relationship, GetOne, GetMany};
 
         #[macro_export]
         macro_rules! relation {

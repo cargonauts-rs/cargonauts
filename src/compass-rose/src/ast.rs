@@ -43,12 +43,12 @@ pub struct Relation {
 
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub enum RelationMember {
-    Method(Method),
+    Method(Method<RelMethodKind>),
 }
 
 #[derive(PartialEq, Eq, Debug, Clone)]
-pub struct Method {
-    pub method: MethodKind,
+pub struct Method<Kind = MethodKind> {
+    pub method: Kind,
     pub format: String,
     pub attrs: Vec<Attribute>,
 }
@@ -57,6 +57,12 @@ pub struct Method {
 pub enum MethodKind {
     Get,
     Index,
+}
+
+#[derive(PartialEq, Eq, Debug, Clone, Copy)]
+pub enum RelMethodKind {
+    GetOne,
+    GetMany,
 }
 
 #[derive(PartialEq, Eq, Clone, Debug)]
