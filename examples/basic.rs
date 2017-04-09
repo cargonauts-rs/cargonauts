@@ -9,28 +9,32 @@ use cargonauts::futures::{Future, BoxFuture, future};
 use cargonauts::futures::stream::{self, Stream, BoxStream};
 
 #[derive(Debug)]
-struct Something(u32);
-
-impl Resource for Something {
-    type Identifier = u32;
-    fn identifier(&self) -> u32 { self.0 }
+struct MyResource { 
+    slug: String,
 }
 
-impl Get for Something {
-    fn get(id: u32, _: Environment) -> BoxFuture<Something, Error> {
-        future::ok(Something(id)).boxed()
+impl Resource for MyResource {
+    type Identifier = String;
+    fn identifier(&self) -> String { self.slug.clone() }
+}
+
+impl Get for MyResource {
+    fn get(slug: String, _: Environment) -> BoxFuture<MyResource, Error> {
+        future::ok(MyResource { slug }).boxed()
     }
 }
 
-impl Index for Something {
-    fn index(_: Environment) -> BoxStream<Something, Error> {
-        stream::once(Ok(Something(0))).boxed()
+impl Index for MyResource {
+    fn index(_: Environment) -> BoxStream<MyResource, Error> {
+        stream::once(Ok(MyResource { slug: String::from("hello-world") })).boxed()
     }
 }
 
 routes! {
-    #[format(Debug)]
-    resource Something: Get + Index;
+    resource MyResource {
+        method Get in Debug;
+        method Index in Debug;
+    }
 }
 
 fn main() {

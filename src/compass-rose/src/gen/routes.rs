@@ -32,7 +32,7 @@ impl ToTokens for Routes {
 #[derive(Clone)]
 struct Route {
     endpoint: String,
-    method: Method,
+    method: MethodKind,
 }
 
 impl Route {
@@ -44,8 +44,8 @@ impl Route {
                 resource.header.ty.to_kebab_case()
             });
             
-            for &method in resource.header.methods.iter().flat_map(|x|x) {
-                vec.push(Route { method, endpoint: endpoint.clone(), });
+            for method in resource.members.iter().filter_map(|m| m.as_method()) {
+                vec.push(Route { method: method.method, endpoint: endpoint.clone(), });
             }
         }
 
@@ -66,18 +66,18 @@ impl ToTokens for Route {
     }
 }
 
-impl ToTokens for Method {
+impl ToTokens for MethodKind {
     fn to_tokens(&self, tokens: &mut Tokens) {
         match *self {
-            Method::Get     => tokens.append(quote!(::cargonauts::routing::Method::Get)),
-            Method::Index   => tokens.append(quote!(::cargonauts::routing::Method::Index)),
+            MethodKind::Get     => tokens.append(quote!(::cargonauts::routing::Method::Get)),
+            MethodKind::Index   => tokens.append(quote!(::cargonauts::routing::Method::Index)),
         }
     }
 }
 
 #[derive(Clone)]
 struct Handler {
-    method: Method,
+    method: MethodKind,
     format: String,
     resource: String,
 }
@@ -88,17 +88,13 @@ impl Handler {
 
         for resource in resources {
             let resource_ty = &resource.header.ty;
-            let format_attr = resource.attrs.iter().find(|attr| match **attr {
-                Attribute::Arg(ref s, _)    => s == "format",
-                _                           => false,
-            });
-            if let Some(&Attribute::Arg(_, ref formats)) = format_attr {
-                for &method in resource.header.methods.iter().flat_map(|x|x) {
-                    let format = formats[0].clone();
-                    let resource = resource_ty.clone();
-                    vec.push(Handler { method, format, resource });
-                }
-            } else { panic!("Must have format attribute on resource") }
+            for method in resource.members.iter().filter_map(|m| m.as_method()) {
+                vec.push(Handler {
+                    method: method.method,
+                    format: method.format.clone(),
+                    resource: resource_ty.clone(),
+                })
+            }
         }
 
         vec
@@ -110,18 +106,18 @@ impl ToTokens for Handler {
         let format = Ident::new(&self.format[..]);
         let resource = Ident::new(&self.resource[..]);;
         let handler = match self.method {
-            Method::Get => Ident::new("new_resource_service"),
-            Method::Index => Ident::new("new_collection_service"),
+            MethodKind::Get => Ident::new("new_resource_service"),
+            MethodKind::Index => Ident::new("new_collection_service"),
         };
         let req = match self.method {
-            Method::Get => quote!(::cargonauts::format::GetRequest<#resource>),
-            Method::Index => quote!(::cargonauts::format::IndexRequest<#resource>),
+            MethodKind::Get => quote!(::cargonauts::format::GetRequest<#resource>),
+            MethodKind::Index => quote!(::cargonauts::format::IndexRequest<#resource>),
         };
         let service = match self.method {
-            Method::Get => quote! {
+            MethodKind::Get => quote! {
                 <::cargonauts::format::GetRequest<#resource> as ::cargonauts::format::Request<#resource>>::Service
             },
-            Method::Index => quote! {
+            MethodKind::Index => quote! {
                 <::cargonauts::format::IndexRequest<#resource> as ::cargonauts::format::Request<#resource>>::Service
             },
         };

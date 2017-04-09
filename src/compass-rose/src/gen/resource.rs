@@ -24,21 +24,17 @@ impl ToTokens for Resource {
 
 impl Resource {
     fn rel_links(&self) -> Vec<RelLink> {
-        self.members.iter().filter_map(|member| match *member {
-            ResourceMember::Relation(ref rel)   => Some(RelLink {
-                resource: &self.header.ty,
-                relation: &rel.rel,
-            }),
+        self.members.iter().filter_map(|m| m.as_relation()).map(|rel| RelLink {
+            resource: &self.header.ty,
+            relation: &rel.rel,
         }).collect()
     }
 
     fn relationships(&self) -> Vec<Relationship> {
-        self.members.iter().filter_map(|member| match *member {
-            ResourceMember::Relation(ref rel)   => Some(Relationship {
-                resource: &self.header.ty,
-                relation: &rel.rel,
-                endpoint: rel.endpoint.as_ref(),
-            }),
+        self.members.iter().filter_map(|m| m.as_relation()).map(|rel| Relationship {
+            resource: &self.header.ty,
+            relation: &rel.rel,
+            endpoint: rel.endpoint.as_ref(),
         }).collect()
     }
 }

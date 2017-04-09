@@ -14,24 +14,40 @@ Resource: Resource = {
 };
 
 ResourceHeader: ResourceHeader  = {
-    "resource" <ty:Ident> <endpoint:Endpoint?> <methods:Methods?> => ResourceHeader { ty, endpoint, methods },
+    "resource" <ty:Ident> <endpoint:Endpoint?> => ResourceHeader { ty, endpoint },
 };
 
 Endpoint: String = "@" <String>;
 
 ResourceMember: ResourceMember = {
-    "relation" <rel:Relation> ";" => ResourceMember::Relation(rel),
+    "relation" <Relation> => ResourceMember::Relation(<>),
+    "method" <Method> => ResourceMember::Method(<>),
 };
 
 Relation: Relation = {
-    <rel:Ident> <endpoint:Endpoint?> <methods: Methods?> => Relation { rel, methods, endpoint },
+    <attrs:Attribute*> <rel:Ident> <endpoint:Endpoint?> ";" => Relation {
+        attrs, rel, endpoint, members: vec![],
+    },
+    <attrs:Attribute*> <rel:Ident> <endpoint:Endpoint?> "{" <members:RelationMember*> "}" => Relation {
+        attrs, rel, endpoint, members,
+    },
+};
+
+RelationMember: RelationMember = {
+    "method" <Method> => RelationMember::Method(<>),
 };
 
 Methods: Vec<Method> = ":" <RepeatWith<Method, "+">>;
 
 Method: Method = {
-    "Get" => Method::Get,
-    "Index" => Method::Index,
+    <attrs:Attribute*> <method:MethodKind> "in" <format:Ident> ";" => Method {
+        attrs, method, format,
+    }
+};
+
+MethodKind: MethodKind = {
+    "Get" => MethodKind::Get,
+    "Index" => MethodKind::Index,
 };
 
 Ident: String = {
@@ -39,7 +55,10 @@ Ident: String = {
 };
 
 String: String = {
-    r#""(?:[^"\\]|\\.)*""# => String::from(<>)
+    <s:r#""(?:[^"\\]|\\.)*""#> => {
+        let last = s.len() - 1;
+        String::from(&s[1..last])
+    },
 };
 
 Attribute: Attribute = {

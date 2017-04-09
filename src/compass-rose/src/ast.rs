@@ -1,31 +1,65 @@
+#[derive(PartialEq, Eq, Debug, Clone, Default)]
 pub struct Resource {
     pub header: ResourceHeader,
     pub members: Vec<ResourceMember>,
     pub attrs: Vec<Attribute>,
 }
 
+#[derive(PartialEq, Eq, Debug, Clone, Default)]
 pub struct ResourceHeader {
     pub ty: String,
     pub endpoint: Option<String>,
-    pub methods: Option<Vec<Method>>,
 }
 
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub enum ResourceMember {
     Relation(Relation),
+    Method(Method),
 }
 
+impl ResourceMember {
+    pub fn as_relation(&self) -> Option<&Relation> {
+        match *self {
+            ResourceMember::Relation(ref rel)   => Some(rel),
+            _                                   => None,
+        }
+    }
+
+    pub fn as_method(&self) -> Option<&Method> {
+        match *self {
+            ResourceMember::Method(ref method)  => Some(method),
+            _                                   => None,
+        }
+    }
+}
+
+#[derive(PartialEq, Eq, Debug, Clone, Default)]
 pub struct Relation {
     pub rel: String,
     pub endpoint: Option<String>,
-    pub methods: Option<Vec<Method>>,
+    pub members: Vec<RelationMember>,
+    pub attrs: Vec<Attribute>,
 }
 
-#[derive(Clone, Copy)]
-pub enum Method {
+#[derive(PartialEq, Eq, Clone, Debug)]
+pub enum RelationMember {
+    Method(Method),
+}
+
+#[derive(PartialEq, Eq, Debug, Clone)]
+pub struct Method {
+    pub method: MethodKind,
+    pub format: String,
+    pub attrs: Vec<Attribute>,
+}
+
+#[derive(PartialEq, Eq, Debug, Clone, Copy)]
+pub enum MethodKind {
     Get,
     Index,
 }
 
+#[derive(PartialEq, Eq, Clone, Debug)]
 pub enum Attribute {
     Ident(String),
     Arg(String, Vec<String>),
