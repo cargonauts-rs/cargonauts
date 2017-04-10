@@ -19,7 +19,7 @@ pub trait ResourceEndpoint: Resource {
     const REL_LINKS: &'static [relations::RelationshipLink];
 }
 
-pub trait Resource: Send + Sized + 'static {
+pub trait Resource: Send + 'static {
     type Identifier: FromStr + ToString + Send + 'static;
     fn identifier(&self) -> Self::Identifier;
 }
@@ -30,9 +30,11 @@ pub type Environment = Arc<Mutex<AnyMap>>;
 pub struct Error;
 
 pub trait Get: Resource {
-    fn get(identifier: Self::Identifier, env: Environment) -> BoxFuture<Self, Error>;
+    fn get(identifier: Self::Identifier, env: Environment) -> BoxFuture<Self, Error>
+    where Self: Sized;
 }
 
 pub trait Index: Resource {
-    fn index(env: Environment) -> BoxStream<Self, Error>;
+    fn index(env: Environment) -> BoxStream<Self, Error>
+    where Self: Sized;
 }

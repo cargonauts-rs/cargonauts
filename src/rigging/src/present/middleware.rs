@@ -6,32 +6,31 @@ use tokio::{Service, NewService, Middleware, NewMiddleware};
 use tokio::stream::{StreamService, StreamReduce, NewStreamReduce, NewStreamService};
 
 use http;
+use method::Method;
 use mainsail::{ResourceEndpoint, Error};
 use present::{Present, PresentResource, PresentCollection};
-use request::{ResourceRequest, CollectionRequest};
 
-pub struct Presenter<P, Q> {
+pub struct Presenter<P, M: ?Sized> {
     presenter: P,
-    _spoopy: PhantomData<Q>,
+    _spoopy: PhantomData<M>,
 }
 
-impl<P, Q> Presenter<P, Q> {
+impl<P, M: ?Sized> Presenter<P, M> {
     pub fn new(presenter: P) -> Self {
         Presenter { presenter, _spoopy: PhantomData }
     }
 }
 
-impl<S, P, T, Q> NewMiddleware<S> for Presenter<P, Q>
+impl<S, P, M> NewMiddleware<S> for Presenter<P, M>
 where
-    T: ResourceEndpoint,
-    P: Present<T>,
-    Q: ResourceRequest<T>,
-    Q::Service: NewService<Response = T, Error = Error>,
-    S: Service<Response = T, Error = Error>,
+    M: ?Sized + Method,
+    M::Service: NewService<Response = M::Response, Error = Error>,
+    P: Present<M::Response>,
+    S: Service<Response = M::Response, Error = Error>,
     S::Future: Send + 'static,
 {
-    type Instance = ResourcePresenter<P::ResourcePresenter, Q>;
-    type WrappedService = PresentedResource<S, P::ResourcePresenter, Q>;
+    type Instance = ResourcePresenter<P::ResourcePresenter, M>;
+    type WrappedService = PresentedResource<S, P::ResourcePresenter, M>;
 
     fn new_middleware(&self) -> io::Result<Self::Instance> {
         Ok(ResourcePresenter {
@@ -41,21 +40,20 @@ where
     }
 }
 
-pub struct ResourcePresenter<P, Q> {
+pub struct ResourcePresenter<P, M: ?Sized> {
     presenter: P,
-    _spoopy: PhantomData<Q>,
+    _spoopy: PhantomData<M>,
 }
 
-impl<S, P, T, Q> Middleware<S> for ResourcePresenter<P, Q>
+impl<S, P, M> Middleware<S> for ResourcePresenter<P, M>
 where
-    T: ResourceEndpoint,
-    P: PresentResource<T>,
-    Q: ResourceRequest<T>,
-    Q::Service: NewService<Response = T, Error = Error>,
-    S: Service<Response = T, Error = Error>,
+    M: ?Sized + Method,
+    M::Service: NewService<Response = M::Response, Error = Error>,
+    P: PresentResource<M::Response>,
+    S: Service<Response = M::Response, Error = Error>,
     S::Future: Send + 'static,
 {
-    type WrappedService = PresentedResource<S, P, Q>;
+    type WrappedService = PresentedResource<S, P, M>;
 
     fn wrap(self, service: S) -> Self::WrappedService {
         PresentedResource {
@@ -66,19 +64,18 @@ where
     }
 }
 
-pub struct PresentedResource<S, P, Q> {
+pub struct PresentedResource<S, P, M: ?Sized> {
     presenter: P,
     service: S,
-    _spoopy: PhantomData<Q>,
+    _spoopy: PhantomData<M>,
 }
 
-impl<S, P, T, Q> Service for PresentedResource<S, P, Q>
+impl<S, P, M> Service for PresentedResource<S, P, M>
 where
-    T: ResourceEndpoint,
-    P: PresentResource<T>,
-    Q: ResourceRequest<T>,
-    Q::Service: NewService<Response = T, Error = Error>,
-    S: Service<Response = T, Error = Error>,
+    M: ?Sized + Method,
+    M::Service: NewService<Response = M::Response, Error = Error>,
+    P: PresentResource<M::Response>,
+    S: Service<Response = M::Response, Error = Error>,
     S::Future: Send + 'static,
 {
     type Request = S::Request;
@@ -89,23 +86,22 @@ where
     fn call(&self, req: Self::Request) -> Self::Future {
         let presenter = self.presenter.clone();
         self.service.call(req).then(move |result| match result {
-            Ok(resource) => Ok(presenter.resource::<Q>(resource, None)),
-            Err(error) => Ok(presenter.error::<Q>(error, None)),
+            Ok(resource) => Ok(presenter.resource::<M>(resource, None)),
+            Err(error) => Ok(presenter.error::<M>(error, None)),
         }).boxed()
     }
 }
 
-impl<S, P, T, Q> NewStreamReduce<S> for Presenter<P, Q>
+impl<S, P, M> NewStreamReduce<S> for Presenter<P, M>
 where
-    T: ResourceEndpoint,
-    P: Present<T>,
-    Q: CollectionRequest<T>,
-    Q::Service: NewStreamService<Response = T, Error = Error>,
-    S: StreamService<Response = T, Error = Error>,
+    P: Present<M::Response>,
+    M: ?Sized + Method,
+    M::Service: NewStreamService<Response = M::Response, Error = Error>,
+    S: StreamService<Response = M::Response, Error = Error>,
     S::Stream: Send + 'static,
 {
-    type Instance = CollectionPresenter<P::CollectionPresenter, Q>;
-    type ReducedService = PresentedCollection<S, P::CollectionPresenter, Q>;
+    type Instance = CollectionPresenter<P::CollectionPresenter, M>;
+    type ReducedService = PresentedCollection<S, P::CollectionPresenter, M>;
 
     fn new_reducer(&self) -> io::Result<Self::Instance> {
         Ok(CollectionPresenter  {
@@ -115,21 +111,20 @@ where
     }
 }
 
-pub struct CollectionPresenter<P, Q> {
+pub struct CollectionPresenter<P, M: ?Sized> {
     presenter: P,
-    _spoopy: PhantomData<Q>,
+    _spoopy: PhantomData<M>,
 }
 
-impl<S, P, T, Q> StreamReduce<S> for CollectionPresenter<P, Q>
+impl<S, P, M> StreamReduce<S> for CollectionPresenter<P, M>
 where
-    T: ResourceEndpoint,
-    P: PresentCollection<T>,
-    Q: CollectionRequest<T>,
-    Q::Service: NewStreamService<Response = T, Error = Error>,
-    S: StreamService<Response = T, Error = Error>,
+    P: PresentCollection<M::Response>,
+    M: ?Sized + Method,
+    M::Service: NewStreamService<Response = M::Response, Error = Error>,
+    S: StreamService<Response = M::Response, Error = Error>,
     S::Stream: Send + 'static,
 {
-    type ReducedService = PresentedCollection<S, P, Q>;
+    type ReducedService = PresentedCollection<S, P, M>;
 
     fn reduce(self, service: S) -> Self::ReducedService {
         PresentedCollection  {
@@ -140,19 +135,18 @@ where
     }
 }
 
-pub struct PresentedCollection<S, P, Q> {
+pub struct PresentedCollection<S, P, M: ?Sized> {
     presenter: P,
     service: S,
-    _spoopy: PhantomData<Q>,
+    _spoopy: PhantomData<M>,
 }
 
-impl<S, P, T, Q> Service for PresentedCollection<S, P, Q>
+impl<S, P, M> Service for PresentedCollection<S, P, M>
 where
-    T: ResourceEndpoint,
-    P: PresentCollection<T>,
-    Q: CollectionRequest<T>,
-    Q::Service: NewStreamService<Response = T, Error = Error>,
-    S: StreamService<Response = T, Error = Error>,
+    P: PresentCollection<M::Response>,
+    M: ?Sized + Method,
+    M::Service: NewStreamService<Response = M::Response, Error = Error>,
+    S: StreamService<Response = M::Response, Error = Error>,
     S::Stream: Send + 'static,
 {
     type Request = S::Request;
@@ -162,7 +156,7 @@ where
 
     fn call(&self, req: Self::Request) -> Self::Future {
         let mut presenter = self.presenter.clone();
-        presenter.start::<Q>();
+        presenter.start::<M>();
         self.service.call(req).then(|result| -> Result<_, http::Error> {
             Ok(result)
         }).forward(CollectionSink {
@@ -196,3 +190,4 @@ impl<P: PresentCollection<T>, T: ResourceEndpoint> futures::Sink for CollectionS
         Ok(futures::Async::Ready(()))
     }
 }
+

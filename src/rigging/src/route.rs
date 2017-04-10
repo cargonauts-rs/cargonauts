@@ -1,46 +1,70 @@
-use futures::{future, Future, BoxFuture};
-use futures::stream::BoxStream;
-use tokio::{Service, NewService};
-use tokio::stream::{StreamService, NewStreamService};
-use tokio as t;
-use tokio::stream as s;
-use mainsail::{ResourceEndpoint, Error};
+use std::collections::HashMap;
 
+use tokio::Service;
+use futures::{future, BoxFuture, Future};
 use http;
-use format::Format;
-use present::middleware::Presenter;
-use receive::middleware::Receiver;
-use request::{ResourceRequest, CollectionRequest};
 
-#[derive(Clone, Hash, Eq, PartialEq, Debug)]
-pub struct Route {
-    pub endpoint: String,
-    pub method: Method,
-}
-
-#[derive(Clone, Hash, Eq, PartialEq, Debug)]
-pub enum Method {
+#[derive(Copy, Clone, Hash, Eq, PartialEq, Debug)]
+pub enum MethodKind {
     Get,
     Index,
+    GetRel(&'static str),
 }
 
-impl Route {
-    pub fn from_request(req: &http::Request) -> Route {
-        let path = {
-            let path = req.path();
-            if path.starts_with('/') { &path[1..] } else { path }
-        };
-        let mut path_components = path.rsplitn(2, '/').collect::<Vec<_>>();
-        if path_components.len() == 1 {
-            Route {
-                endpoint: path_components.pop().unwrap().to_string(),
-                method: Method::Index,
+#[derive(Copy, Clone, Hash, Eq, PartialEq, Debug)]
+pub struct Routes {
+    pub endpoints: &'static [Route],
+}
+
+pub type Route = (&'static str, MethodKind);
+
+impl Routes {
+    fn process(&self, req: &http::Request) -> Option<Route> {
+        let mut path_components = req.path().split('/').filter(|p| !p.is_empty());
+        path_components.next().and_then(|p| {
+            let mut endpoint_routes = self.endpoints.iter().filter(|&&(e, _)| e == p);
+            match path_components.next() {
+                Some(_) => {
+                    match path_components.next() {
+                        Some(r) => {
+                            endpoint_routes.find(|&&(_, m)| match m {
+                                MethodKind::GetRel(e_r) => e_r == r,
+                                _                   => false,
+                            }).map(|x|*x)
+                        }
+                        None    => {
+                            endpoint_routes.find(|&&(_, m)| m == MethodKind::Get).map(|x|*x)
+                        }
+                    }
+                }
+                None    => {
+                    endpoint_routes.find(|&&(_, m)| m == MethodKind::Index).map(|x|*x)
+                }
             }
-        } else {
-            Route {
-                endpoint: path_components.pop().unwrap().to_string(),
-                method: Method::Get,
+        })
+    }
+}
+
+pub struct RoutingTable {
+    pub routes: Routes,
+    pub handlers: HashMap<Route, Handler>,
+}
+
+impl Service for RoutingTable {
+    type Request = http::Request;
+    type Response = http::Response;
+    type Error = http::Error;
+    type Future = BoxFuture<Self::Response, Self::Error>;
+
+    fn call(&self, req: Self::Request) -> Self::Future {
+        match self.routes.process(&req) {
+            Some(route) => {
+                match self.handlers.get(&route) {
+                    Some(handler)   => handler.call(req),
+                    None            => not_found(req),
+                }
             }
+            None        => not_found(req),
         }
     }
 }
@@ -52,36 +76,4 @@ pub type Handler = Box<Service<Request = http::Request,
 
 pub fn not_found(_: http::Request) -> BoxFuture<http::Response, http::Error> {
     future::ok(http::Response::new().with_status(http::StatusCode::NotFound)).boxed()
-}
-
-pub fn new_resource_service<F, Q, T, S>()
-    -> t::NewServiceWrapper<Presenter<F::Presenter, Q>,
-                            t::NewServiceWrapper<Receiver<F::Receiver>, Q::Service>>
-where
-    F: Format<T>,
-    Q: ResourceRequest<T>,
-    Q::Service: NewService<Request = Q, Response = T, Error = Error, Instance = S>,
-    S: Service<Request = Q, Response = T, Error = Error, Future = BoxFuture<T, Error>>,
-    T: ResourceEndpoint,
-{
-    let receiver = Receiver::new(F::Receiver::default());
-    let presenter = Presenter::<_, Q>::new(F::Presenter::default());
-    let service = Q::Service::default();
-    service.wrap(receiver).wrap(presenter)
-}
-
-pub fn new_collection_service<F, Q, T, S>()
-    -> s::NewStreamServiceReducer<Presenter<F::Presenter, Q>,
-                                  s::NewStreamServiceWrapper<Receiver<F::Receiver>, Q::Service>>
-where
-    F: Format<T>,
-    Q: CollectionRequest<T>,
-    Q::Service: NewStreamService<Request = Q, Response = T, Error = Error, Instance = S>,
-    S: StreamService<Request = Q, Response = T, Error = Error, Stream = BoxStream<T, Error>>,
-    T: ResourceEndpoint,
-{
-    let receiver = Receiver::new(F::Receiver::default());
-    let presenter = Presenter::<_, Q>::new(F::Presenter::default());
-    let service = Q::Service::default();
-    service.wrap(receiver).reduce(presenter)
 }

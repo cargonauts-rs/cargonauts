@@ -1,10 +1,7 @@
 pub mod middleware;
 
-use tokio::NewService;
-use tokio::stream::NewStreamService;
-
 use mainsail::{ResourceEndpoint, Error};
-use request::{ResourceRequest, CollectionRequest};
+use method::Method;
 use http;
 
 pub trait Present<T: ResourceEndpoint>: Default {
@@ -16,15 +13,11 @@ pub trait Present<T: ResourceEndpoint>: Default {
 }
 
 pub trait PresentResource<T: ResourceEndpoint>: Clone + Send + 'static {
-    fn resource<R>(self, resource: T, template: Option<Template>) -> http::Response
-    where
-        R: ResourceRequest<T>,
-        R::Service: NewService<Response = T, Error = Error>;
+    fn resource<M: ?Sized + Method<Response = T>>(self, resource: T, template: Option<Template>)
+        -> http::Response;
 
-    fn error<R>(self, error: Error, template: Option<Template>) -> http::Response
-    where
-        R: ResourceRequest<T>,
-        R::Service: NewService<Response = T, Error = Error>;
+    fn error<M: ?Sized + Method<Response = T>>(self, error: Error, template: Option<Template>)
+        -> http::Response;
 }
 
 pub trait PresentCollection<T: ResourceEndpoint>: Clone + Send + 'static {
@@ -32,10 +25,7 @@ pub trait PresentCollection<T: ResourceEndpoint>: Clone + Send + 'static {
     fn error(&mut self, error: Error, template: Option<Template>);
     fn finish(self) -> http::Response;
 
-    fn start<R>(&mut self)
-    where
-        R: CollectionRequest<T>,
-        R::Service: NewStreamService<Response = T, Error = Error> { }
+    fn start<M: ?Sized + Method<Response = T>>(&mut self) { }
 }
 
 #[derive(Copy, Clone)]

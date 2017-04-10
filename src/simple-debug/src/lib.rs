@@ -9,9 +9,9 @@ use std::fmt::Debug;
 use mainsail::{ResourceEndpoint, Error};
 use rigging::http;
 use rigging::format::Format;
+use rigging::method::Method;
 use rigging::present::{Present, PresentResource, PresentCollection, Template};
 use rigging::receive::Receive;
-use rigging::request::ResourceRequest;
 
 const MIME: &'static str = "ext/plain; charset=utf-8";
 
@@ -48,18 +48,14 @@ impl<T: ResourceEndpoint + Debug> Present<T> for SimpleDebug {
 pub struct ResourcePresenter;
 
 impl<T: ResourceEndpoint + Debug> PresentResource<T> for ResourcePresenter {
-    fn resource<R>(self, resource: T, _: Option<Template>) -> http::Response
-    where
-        R: ResourceRequest<T>,
-        R::Service: tokio::NewService<Response = T, Error = Error>
+    fn resource<M: ?Sized + Method<Response = T>>(self, resource: T, _: Option<Template>)
+        -> http::Response
     {
         debug_response(resource, http::StatusCode::Ok)
     }
 
-    fn error<R>(self, error: Error, _: Option<Template>) -> http::Response
-    where
-        R: ResourceRequest<T>,
-        R::Service: tokio::NewService<Response = T, Error = Error>
+    fn error<M: ?Sized + Method<Response = T>>(self, error: Error, _: Option<Template>)
+        -> http::Response
     {
         debug_response(error, http::StatusCode::InternalServerError)
     }

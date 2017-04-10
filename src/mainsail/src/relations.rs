@@ -29,9 +29,11 @@ impl<T: Resource> Relationship for T {
 }
 
 pub trait GetOne<R: Relationship>: Resource {
-    fn get_one(identifier: Self::Identifier, env: Environment) -> BoxFuture<R::Related, Error>;
+    fn get_one(identifier: Self::Identifier, env: Environment) -> BoxFuture<R::Related, Error>
+    where Self: Sized;
 }
 
 pub trait GetMany<R: Relationship>: Resource {
-    fn get_many(identifier: Self::Identifier, env: Environment) -> BoxStream<R::Related, Error>;
+    fn get_many(identifier: Self::Identifier, env: Environment) -> BoxStream<R::Related, Error>
+    where Self: Sized;
 }

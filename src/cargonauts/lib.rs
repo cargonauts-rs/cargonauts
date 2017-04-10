@@ -42,8 +42,8 @@ pub mod routing {
     pub use mainsail::ResourceEndpoint;
     pub use mainsail::relations::{RelationEndpoint, RelationshipLink};
     pub use rigging::present::middleware::Presenter;
-    pub use rigging::route::{Route, Method, Handler, not_found};
-    pub use rigging::route::{new_resource_service, new_collection_service};
+    pub use rigging::route::{Routes, RoutingTable, Route, MethodKind, Handler, not_found};
+    pub use rigging::method::Method;
 }
 
 pub mod server {
@@ -51,7 +51,7 @@ pub mod server {
 }
 
 pub mod format {
-    pub use rigging::request::{Request, ResourceRequest, CollectionRequest, GetRequest, IndexRequest};
+    pub use rigging::request::{Request, GetRequest, IndexRequest};
 
     pub use simple_debug::SimpleDebug as Debug;
 

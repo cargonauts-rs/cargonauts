@@ -11,6 +11,7 @@ pub mod format;
 pub mod present;
 pub mod receive;
 pub mod request;
+pub mod method;
 pub mod route;
 pub mod service;
 

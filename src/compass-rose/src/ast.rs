@@ -46,6 +46,14 @@ pub enum RelationMember {
     Method(Method<RelMethodKind>),
 }
 
+impl RelationMember {
+    pub fn as_method(&self) -> Option<&Method<RelMethodKind>> {
+        match *self {
+            RelationMember::Method(ref method)  => Some(method),
+        }
+    }
+}
+
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct Method<Kind = MethodKind> {
     pub method: Kind,
