@@ -105,6 +105,8 @@ struct Handler {
     resource: String,
     method: Option<MethodKind>,
     rel_method: Option<(RelMethodKind, String)>,
+    middleware: Option<String>,
+    http_middleware: Option<String>,
 }
 
 impl Handler {
@@ -114,21 +116,29 @@ impl Handler {
         for resource in resources {
             let resource_ty = &resource.header.ty;
             for method in resource.members.iter().filter_map(|m| m.as_method()) {
+                let middleware = method.attrs.iter().filter_map(|attr| attr.as_middleware()).next();
+                let http_middleware = method.attrs.iter().filter_map(|attr| attr.as_http_middleware()).next();
                 vec.push(Handler {
                     format: method.format.clone(),
                     resource: resource_ty.clone(),
                     method: Some(method.method),
                     rel_method: None,
+                    middleware,
+                    http_middleware,
                 })
             }
 
             for relation in resource.members.iter().filter_map(|m| m.as_relation()) {
                 for method in relation.members.iter().filter_map(|m| m.as_method()) {
+                    let middleware = method.attrs.iter().filter_map(|attr| attr.as_middleware()).next();
+                    let http_middleware = method.attrs.iter().filter_map(|attr| attr.as_http_middleware()).next();
                     vec.push(Handler {
                         format: method.format.clone(),
                         resource: resource_ty.clone(),
                         method: None,
                         rel_method: Some((method.method, relation.rel.clone())),
+                        middleware,
+                        http_middleware,
                     });
                 }
             }
@@ -162,10 +172,23 @@ impl ToTokens for Handler {
                 },
             }
         } else { panic!() };
-        tokens.append(quote!({
-            use ::cargonauts::server::NewService;
-            Box::new(<(#resource, #format, #method) as ::cargonauts::routing::Method>::new_service().new_service()?)
-                as ::cargonauts::routing::Handler
-        }))
+        let service = if let Some(ref middleware) = self.middleware {
+            let middleware = Ident::new(&middleware[..]);
+            quote!(<(#middleware, #resource, #format, #method) as ::cargonauts::routing::Method>)
+        } else {
+            quote!(<(#resource, #format, #method) as ::cargonauts::routing::Method>)
+        };
+        if let Some(ref middleware) = self.http_middleware {
+            let middleware = Ident::new(&middleware[..]);
+            tokens.append(quote!({
+                use ::cargonauts::server::NewService;
+                Box::new(#service::new_service().wrap(<#middleware as Default>::default()).new_service()?) as ::cargonauts::routing::Handler
+            }));
+        } else {
+            tokens.append(quote!({
+                use ::cargonauts::server::NewService;
+                Box::new(#service::new_service().new_service()?) as ::cargonauts::routing::Handler
+            }));
+        }
     }
 }

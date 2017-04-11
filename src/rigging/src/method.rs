@@ -1,9 +1,12 @@
-use tokio::NewService;
-use tokio::stream::NewStreamService;
+use futures::BoxFuture;
+use futures::stream::BoxStream;
+
+use tokio::{Service, NewService, NewMiddleware};
+use tokio::stream::{StreamService, NewStreamService, NewStreamMiddleware};
 use tokio as t;
 use tokio::stream as s;
 
-use mainsail::{ResourceEndpoint, Get, Index};
+use mainsail::{ResourceEndpoint, Get, Index, Error};
 use mainsail::relations::{RelationEndpoint, Relationship, GetOne, GetMany};
 
 use http;
@@ -16,97 +19,118 @@ use receive::middleware::Receiver;
 pub trait Method {
     type Request;
     type Response: ResourceEndpoint;
-    type Service: Default;
+    type Service;
     type WrappedService: NewService<Request = http::Request,
                                     Response = http::Response,
                                     Error = http::Error>;
     fn new_service() -> Self::WrappedService;
 }
 
-impl<F, T> Method for (T, F, Get<Identifier = T::Identifier>)
-where
-    F: Format<T>,
-    T: ResourceEndpoint + Get,
-{
-    type Request = GetRequest<T>;
-    type Response = T;
-    type Service = GetService<T>;
-    type WrappedService = t::NewServiceWrapper<
-        Presenter<F::Presenter, Self>,
-        t::NewServiceWrapper<Receiver<F::Receiver, Self>, Self::Service>
-    >;
+macro_rules! method {
+    ($method:ident [ $($arg:ident),* ] : $request:ty => $response:ty as Resource in $service:ty; $($other_bounds:tt)*) => {
+        impl<F, T, $($arg),*> Method for (T, F, $method<$($arg,)* Identifier = T::Identifier>)
+        $($other_bounds)*, F: Format<T>,
+        {
+            type Request = $request;
+            type Response = $response;
+            type Service = $service;
+            type WrappedService = t::NewServiceWrapper<
+                Presenter<<F as Format<$response>>::Presenter, Self>,
+                t::NewServiceWrapper<Receiver<<F as Format<T>>::Receiver, Self>, Self::Service>
+            >;
+            fn new_service() -> Self::WrappedService {
+                let presenter = Presenter::<_, Self>::new(<F as Format<$response>>::Presenter::default());
+                let receiver = Receiver::<_, Self>::new(<F as Format<T>>::Receiver::default());
+                let service = <$service as Default>::default();
+                NewService::wrap(service, receiver).wrap(presenter)
+            }
+        }
 
-    fn new_service() -> Self::WrappedService {
-        let presenter = Presenter::<_, Self>::new(F::Presenter::default());
-        let receiver = Receiver::<_, Self>::new(F::Receiver::default());
-        let service = GetService::default();
-        service.wrap(receiver).wrap(presenter)
-    }
+        impl<F, T, M, $($arg),*> Method for (M, T, F, $method<$($arg,)* Identifier = T::Identifier>)
+        $($other_bounds)*,
+            F: Format<T>,
+            M: NewMiddleware<$service> + Default,
+            M::WrappedService: Service<
+                Request = $request,
+                Response = $response,
+                Error = Error,
+                Future = BoxFuture<$response, Error>,
+            >,
+        {
+            type Request = $request;
+            type Response = $response;
+            type Service = t::NewServiceWrapper<M, $service>;
+            type WrappedService = t::NewServiceWrapper<
+                Presenter<<F as Format<$response>>::Presenter, Self>,
+                t::NewServiceWrapper<Receiver<<F as Format<T>>::Receiver, Self>, Self::Service>
+            >;
+            fn new_service() -> Self::WrappedService {
+                let presenter = Presenter::<_, Self>::new(<F as Format<$response>>::Presenter::default());
+                let receiver = Receiver::<_, Self>::new(<F as Format<T>>::Receiver::default());
+                let service = M::default().wrap(<$service as Default>::default());
+                NewService::wrap(service, receiver).wrap(presenter)
+            }
+        }
+    };
+    ($method:ident [ $($arg:ident),* ] : $request:ty => $response:ty as Collection in $service:ty; $($other_bounds:tt)*) => {
+        impl<F, T, $($arg),*> Method for (T, F, $method<$($arg,)* Identifier = T::Identifier>)
+        $($other_bounds)*, F: Format<T>,
+        {
+            type Request = $request;
+            type Response = $response;
+            type Service = $service;
+            type WrappedService = s::NewStreamServiceReducer<
+                Presenter<<F as Format<$response>>::Presenter, Self>,
+                s::NewStreamServiceWrapper<Receiver<<F as Format<T>>::Receiver, Self>, Self::Service>
+            >;
+            fn new_service() -> Self::WrappedService {
+                let presenter = Presenter::<_, Self>::new(<F as Format<$response>>::Presenter::default());
+                let receiver = Receiver::<_, Self>::new(<F as Format<T>>::Receiver::default());
+                let service = <$service as Default>::default();
+                NewStreamService::wrap(service, receiver).reduce(presenter)
+            }
+        }
+
+        impl<F, T, M, $($arg),*> Method for (M, T, F, $method<$($arg,)* Identifier = T::Identifier>)
+        $($other_bounds)*,
+            F: Format<T>,
+            M: NewStreamMiddleware<$service> + Default,
+            M::WrappedService: StreamService<
+                Request = $request,
+                Response = $response,
+                Error = Error,
+                Stream = BoxStream<$response, Error>,
+            >,
+        {
+            type Request = $request;
+            type Response = $response;
+            type Service = s::NewStreamServiceWrapper<M, $service>;
+            type WrappedService = s::NewStreamServiceReducer<
+                Presenter<<F as Format<$response>>::Presenter, Self>,
+                s::NewStreamServiceWrapper<Receiver<<F as Format<T>>::Receiver, Self>, Self::Service>
+            >;
+            fn new_service() -> Self::WrappedService {
+                let presenter = Presenter::<_, Self>::new(<F as Format<$response>>::Presenter::default());
+                let receiver = Receiver::<_, Self>::new(<F as Format<T>>::Receiver::default());
+                let service = M::default().wrap(<$service as Default>::default());
+                NewStreamService::wrap(service, receiver).reduce(presenter)
+            }
+        }
+    };
 }
 
-impl<F, T> Method for (T, F, Index<Identifier = T::Identifier>)
-where
-    F: Format<T>,
-    T: ResourceEndpoint + Index,
-{
-    type Request = IndexRequest<T>;
-    type Response = T;
-    type Service = IndexService<T>;
-    type WrappedService =  s::NewStreamServiceReducer<
-        Presenter<F::Presenter, Self>,
-        s::NewStreamServiceWrapper<Receiver<F::Receiver, Self>, Self::Service>
-    >;
+method!(Get[]: GetRequest<T> => T as Resource in GetService<T>;
+        where T: ResourceEndpoint + Get);
 
-    fn new_service() -> Self::WrappedService {
-        let presenter = Presenter::<_, Self>::new(F::Presenter::default());
-        let receiver = Receiver::<_, Self>::new(F::Receiver::default());
-        let service = IndexService::default();
-        service.wrap(receiver).reduce(presenter)
-    }
-}
+method!(Index[]: IndexRequest<T> => T as Collection in IndexService<T>;
+        where T: ResourceEndpoint + Index);
 
-impl<F, T, R> Method for (T, F, GetOne<R, Identifier = T::Identifier>)
-where
-    F: Format<T> + Format<R::Related>,
-    T: RelationEndpoint<R> + GetOne<R>,
-    R: Relationship,
-    R::Related: ResourceEndpoint,
-{
-    type Request = GetRequest<T>;
-    type Response = R::Related;
-    type Service = GetOneService<T, R>;
-    type WrappedService = t::NewServiceWrapper<
-        Presenter<<F as Format<R::Related>>::Presenter, Self>,
-        t::NewServiceWrapper<Receiver<<F as Format<T>>::Receiver, Self>, Self::Service>
-    >;
+method!(GetOne[R]: GetRequest<T> => R::Related as Resource in GetOneService<T, R>;
+        where T: RelationEndpoint<R> + GetOne<R>,
+              R: Relationship, R::Related: ResourceEndpoint,
+              F: Format<R::Related>);
 
-    fn new_service() -> Self::WrappedService {
-        let presenter = Presenter::<_, Self>::new(<F as Format<R::Related>>::Presenter::default());
-        let receiver = Receiver::<_, Self>::new(<F as Format<T>>::Receiver::default());
-        let service = GetOneService::default();
-        service.wrap(receiver).wrap(presenter)
-    }
-}
-
-impl<F, T, R> Method for (T, F, GetMany<R, Identifier = T::Identifier>)
-where
-    F: Format<T> + Format<R::Related>,
-    T: RelationEndpoint<R> + GetMany<R>,
-    R: Relationship,
-    R::Related: ResourceEndpoint,
-{
-    type Request = GetRequest<T>;
-    type Response = R::Related;
-    type Service = GetManyService<T, R>;
-    type WrappedService =  s::NewStreamServiceReducer<
-        Presenter<<F as Format<R::Related>>::Presenter, Self>,
-        s::NewStreamServiceWrapper<Receiver<<F as Format<T>>::Receiver, Self>, Self::Service>
-    >;
-
-    fn new_service() -> Self::WrappedService {
-        let presenter = Presenter::<_, Self>::new(<F as Format<R::Related>>::Presenter::default());
-        let receiver = Receiver::<_, Self>::new(<F as Format<T>>::Receiver::default());
-        let service = GetManyService::default();
-        service.wrap(receiver).reduce(presenter)
-    }
-}
+method!(GetMany[R]: GetRequest<T> => R::Related as Collection in GetManyService<T, R>;
+        where T: RelationEndpoint<R> + GetMany<R>,
+              R: Relationship, R::Related: ResourceEndpoint,
+              F: Format<R::Related>);

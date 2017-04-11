@@ -54,7 +54,7 @@ RelMethodKind: RelMethodKind = {
 };
 
 Ident: String = {
-    r"[A-Za-z][A-Za-z0-9]*" => String::from(<>)
+    r"[A-Za-z][A-Za-z0-9_]*" => String::from(<>)
 };
 
 String: String = {
@@ -65,8 +65,10 @@ String: String = {
 };
 
 Attribute: Attribute = {
-    "#" "[" <id: Ident> "(" <idents:RepeatWith<Ident, ",">> ")" "]" => Attribute::Arg(id, idents),
-    "#" "[" <Ident> "]" => Attribute::Ident(<>),
+    "#" "[" <id: Ident> "(" <idents:RepeatWith<Ident, ",">> ")" "]"
+        => Attribute::Arg(id, idents),
+    "#" "[" <Ident> "]"
+        => Attribute::Ident(<>),
 };
 
 RepeatWith<T, X>: Vec<T> = {

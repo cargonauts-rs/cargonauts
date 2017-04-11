@@ -78,3 +78,23 @@ pub enum Attribute {
     Ident(String),
     Arg(String, Vec<String>),
 }
+
+impl Attribute {
+    pub fn as_middleware(&self) -> Option<String> {
+        match *self {
+            Attribute::Arg(ref s, ref args) if s == "middleware" && args.len() == 1 => {
+                Some(args[0].clone())
+            }
+            _ => None
+        }
+    }
+
+    pub fn as_http_middleware(&self) -> Option<String> {
+        match *self {
+            Attribute::Arg(ref s, ref args) if s == "http_middleware" && args.len() == 1 => {
+                Some(args[0].clone())
+            }
+            _ => None
+        }
+    }
+}
