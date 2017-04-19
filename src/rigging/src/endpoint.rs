@@ -1,7 +1,7 @@
 use std::io;
 use std::marker::PhantomData;
 
-use futures::{Future, BoxFuture, Stream, IntoFuture};
+use futures::{Future, BoxFuture, Stream, IntoFuture, future};
 use tokio::{Service, NewService};
 
 use Error;
@@ -189,8 +189,9 @@ where
     type Response = http::Response;
     type Error = http::Error;
     type Instance = Self;
+    type Future = future::FutureResult<Self::Instance, io::Error>;
 
-    fn new_service(&self) -> io::Result<Self::Instance> {
-        Ok(self.clone())
+    fn new_service(&self) -> Self::Future {
+        future::ok(self.clone())
     }
 }

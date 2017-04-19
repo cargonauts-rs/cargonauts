@@ -3,12 +3,16 @@
 extern crate futures;
 extern crate hyper;
 extern crate tokio_service as tokio;
+extern crate tokio_proto as proto;
+extern crate tokio_core as core;
+extern crate c3po;
 
 pub mod request;
 pub mod format;
 pub mod endpoint;
 pub mod environment;
 pub mod routes;
+pub mod connections;
 
 use std::str::FromStr;
 

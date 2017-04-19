@@ -10,6 +10,19 @@ version = "0.2.0"
 futures = "0.1.11"
 mime = "0.2.3"
 proc-macro-hack = "0.3.3"
+tokio-core = "0.1.6"
+
+[dependencies.c3po]
+branch = "new-service"
+git = "https://github.com/withoutboats/c3po"
+
+[dependencies.tokio-service]
+branch = "new-new-service"
+git = "https://github.com/withoutboats/tokio-service"
+
+[dependencies.tokio-proto]
+branch = "new-new-service"
+git = "https://github.com/withoutboats/tokio-proto"
 
 [dependencies.compass-rose]
 path = "src/compass-rose"

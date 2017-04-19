@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Without Boats <woboats@gmail.com>"]
 
 [dependencies]
-futures = "0.1.11"
+futures = "0.1.13"
 
 [dependencies.rigging]
 path = "../rigging"
