@@ -1,0 +1,9 @@
+[package]
+authors = ["Without Boats <woboats@gmail.com>"]
+name = "cargonauts-config"
+version = "0.1.0"
+
+[dependencies]
+serde = "0.9.11"
+serde_derive = "0.9.11"
+toml = "0.3.1"
