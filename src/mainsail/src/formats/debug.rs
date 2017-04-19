@@ -1,9 +1,3 @@
-#![feature(associated_consts)]
-
-extern crate mainsail;
-extern crate rigging;
-extern crate tokio_service as tokio;
-
 use std::fmt::Debug;
 
 use rigging::{ResourceEndpoint, Error, Method};

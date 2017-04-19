@@ -20,9 +20,6 @@ path = "src/mainsail"
 [dependencies.rigging]
 path = "src/rigging"
 
-[dependencies.simple-debug]
-path = "src/simple-debug"
-
 [lib]
 path = "src/cargonauts/lib.rs"
 

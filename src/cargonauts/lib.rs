@@ -3,7 +3,6 @@
 pub extern crate futures;
 extern crate mainsail;
 extern crate rigging;
-extern crate simple_debug;
 
 #[allow(unused_imports)]
 #[macro_use] extern crate compass_rose;
@@ -21,12 +20,12 @@ proc_macro_item_decl! {
 pub mod api {
     pub use rigging::{Resource, Error};
     pub use rigging::environment::Environment;
-    pub use mainsail::{Get, Index};
+    pub use mainsail::methods::{Get, Index};
 
     #[macro_use]
     pub mod relations {
         pub use rigging::Relationship;
-        pub use mainsail::{GetOne, GetMany};
+        pub use mainsail::methods::{GetOne, GetMany};
 
         #[macro_export]
         macro_rules! relation {
@@ -55,12 +54,12 @@ pub mod method {
     pub use rigging::Method;
     pub use rigging::request::{Request, ResourceRequest, CollectionRequest};
     pub use rigging::routes::Route;
-    pub use mainsail::{GetRequest, IndexRequest};
+    pub use mainsail::methods::{GetRequest, IndexRequest};
 }
 
 pub mod format {
 
-    pub use simple_debug::SimpleDebug as Debug;
+    pub use mainsail::formats::Debug;
 
     pub mod presenter {
         pub use rigging::format::{Present, PresentResource, PresentCollection, Template};
