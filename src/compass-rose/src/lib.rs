@@ -3,6 +3,7 @@
 #[macro_use] extern crate proc_macro_hack;
 #[macro_use] extern crate quote;
 
+extern crate cargonauts_config as cfg;
 extern crate heck;
 
 mod ast;
@@ -11,7 +12,8 @@ mod parser;
 
 proc_macro_item_impl! {
     pub fn routes_impl(input: &str) -> String {
-        gen::code_gen(parser::parse_routes(input).unwrap().resources)
+        let cfg = cfg::CargonautsConfig::find_and_parse().ok();
+        gen::code_gen(parser::parse_routes(input).unwrap(), cfg)
     }
 }
 
