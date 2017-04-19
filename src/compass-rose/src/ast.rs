@@ -1,4 +1,25 @@
 #[derive(PartialEq, Eq, Debug, Clone, Default)]
+pub struct Routes {
+    pub setup: Option<Setup>,
+    pub resources: Vec<Resource>,
+}
+#[derive(PartialEq, Eq, Debug, Clone, Default)]
+pub struct Setup {
+    pub members: Vec<SetupMember>,
+}
+
+#[derive(PartialEq, Eq, Debug, Clone)]
+pub enum SetupMember {
+    Client(Client),
+}
+
+#[derive(PartialEq, Eq, Debug, Clone, Default)]
+pub struct Client {
+    pub conn: String,
+    pub wrapper: Option<String>,
+}
+
+#[derive(PartialEq, Eq, Debug, Clone, Default)]
 pub struct Resource {
     pub header: ResourceHeader,
     pub members: Vec<ResourceMember>,

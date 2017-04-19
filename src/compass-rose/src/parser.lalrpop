@@ -2,7 +2,22 @@ use ast::*;
 
 grammar;
 
-pub resources: Vec<Resource> = <Resource*>;
+pub routes: Routes = {
+    <setup:Setup?> <resources:Resource*> => Routes { setup, resources }
+};
+
+Setup: Setup = {
+    "setup" "{" <members:SetupMember*> "}" => Setup { members, },
+};
+
+SetupMember: SetupMember = {
+    "client" <Client> ";" => SetupMember::Client(<>),
+};
+
+Client: Client = {
+    "for" <conn:Ident> => Client { conn, wrapper: None },
+    "for" <conn:Ident> "as" <wrapper:Ident> => Client { conn, wrapper: Some(wrapper) },
+};
 
 Resource: Resource = {
     <attrs:Attribute*> <header:ResourceHeader> ";" => Resource {
