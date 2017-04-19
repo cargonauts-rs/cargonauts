@@ -19,19 +19,19 @@ impl Routes {
 
 impl ToTokens for Routes {
     fn to_tokens(&self, tokens: &mut Tokens) {
-        let routes = self.routes.clone();
-        let routes2 = self.routes.clone();
+        let route_key: Vec<_> = self.routes.iter().flat_map(|route| &route.subroutes).collect();
+
+        let routes = &self.routes;
         let handlers = self.handlers.clone();
         tokens.append(quote! {
-            const ROUTES: ::cargonauts::routing::Routes = ::cargonauts::routing::Routes {
-                endpoints: &[
-                    #(#routes,)*
-                ]
+            use ::cargonauts::server::NewService;
+            let routes = ::cargonauts::routing::Routes {
+                endpoints: vec! #routes
             };
             let mut hash_map = ::std::collections::HashMap::new();
-            #( hash_map.insert(#routes2, #handlers); )*
+            #( hash_map.insert(#route_key, #handlers); )*
             ::cargonauts::routing::RoutingTable {
-                routes: ROUTES, handlers: hash_map,
+                routes, handlers: hash_map,
             }
         });
     }
@@ -40,8 +40,7 @@ impl ToTokens for Routes {
 #[derive(Clone)]
 struct Route {
     endpoint: String,
-    method: Option<MethodKind>,
-    rel_method: Option<(RelMethodKind, String)>,
+    subroutes: Vec<SubRoute>,
 }
 
 impl Route {
@@ -52,27 +51,36 @@ impl Route {
             let endpoint = resource.header.endpoint.clone().unwrap_or_else(|| {
                 resource.header.ty.to_kebab_case()
             });
+
+            let resource_ty = &resource.header.ty;
+
+            let mut subroutes = vec![];
             
             for method in resource.members.iter().filter_map(|m| m.as_method()) {
-                vec.push(Route {
-                    endpoint: endpoint.clone(),
-                    method: Some(method.method),
-                    rel_method: None
+                subroutes.push(SubRoute {
+                    resource: resource_ty.clone(),
+                    method: method.method.clone(),
+                    rel: None,
                 });
             }
 
             for relation in resource.members.iter().filter_map(|m| m.as_relation()) {
                 for method in relation.members.iter().filter_map(|m| m.as_method()) {
-                    let rel_endpoint = relation.endpoint.clone().unwrap_or_else(|| relation.rel.to_kebab_case());
-                    vec.push(Route {
-                        endpoint: endpoint.clone(),
-                        method: None,
-                        rel_method: Some((method.method, rel_endpoint)),
-                    })
+                    subroutes.push(SubRoute {
+                        resource: resource_ty.clone(),
+                        method: method.method.clone(),
+                        rel: Some(relation.rel.clone()),
+                    });
                 }
             }
+
+            vec.push(Route {
+                endpoint,
+                subroutes,
+            })
         }
 
+        vec.sort_by_key(|r| r.endpoint.clone());
         vec
     }
 }
@@ -80,33 +88,45 @@ impl Route {
 impl ToTokens for Route {
     fn to_tokens(&self, tokens: &mut Tokens) {
         let endpoint = &self.endpoint;
-        if let Some(method) = self.method {
-            tokens.append(quote! { (#endpoint, #method) });
-        } else if let Some((_, ref rel)) = self.rel_method {
-            tokens.append(quote! {
-                (#endpoint, ::cargonauts::routing::MethodKind::GetRel(#rel))
-            });
-        }
-    }
-}
-
-impl ToTokens for MethodKind {
-    fn to_tokens(&self, tokens: &mut Tokens) {
-        tokens.append(match *self {
-            MethodKind::Get     => quote!(::cargonauts::routing::MethodKind::Get),
-            MethodKind::Index   => quote!(::cargonauts::routing::MethodKind::Index),
+        let routes = &self.subroutes;
+        tokens.append(quote! {
+            (#endpoint, vec! #routes)
         })
     }
 }
 
 #[derive(Clone)]
+struct SubRoute {
+    resource: String,
+    method: String,
+    rel: Option<String>,
+}
+
+impl ToTokens for SubRoute {
+    fn to_tokens(&self, tokens: &mut Tokens) {
+        let resource = Ident::new(&self.resource[..]);
+        let method = Ident::new(&self.method[..]);
+        if let Some(ref rel) = self.rel {
+            let rel = Ident::new(&rel[..]);
+            tokens.append(quote! {
+                <#method<#rel, Identifier = <#resource as ::cargonauts::api::Resource>::Identifier> as ::cargonauts::method::Method<#resource>>::ROUTE
+            })
+        } else {
+            tokens.append(quote! {
+                <#method<Identifier = <#resource as ::cargonauts::api::Resource>::Identifier> as ::cargonauts::method::Method<#resource>>::ROUTE
+            })
+        }
+    }
+}
+
+#[derive(Clone)]
 struct Handler {
+    endpoint: String,
     format: String,
     resource: String,
-    method: Option<MethodKind>,
-    rel_method: Option<(RelMethodKind, String)>,
+    method: String,
+    rel: Option<String>,
     middleware: Option<String>,
-    http_middleware: Option<String>,
 }
 
 impl Handler {
@@ -115,35 +135,37 @@ impl Handler {
 
         for resource in resources {
             let resource_ty = &resource.header.ty;
+            let endpoint = resource.header.endpoint.clone().unwrap_or_else(|| {
+                resource.header.ty.to_kebab_case()
+            });
             for method in resource.members.iter().filter_map(|m| m.as_method()) {
                 let middleware = method.attrs.iter().filter_map(|attr| attr.as_middleware()).next();
-                let http_middleware = method.attrs.iter().filter_map(|attr| attr.as_http_middleware()).next();
                 vec.push(Handler {
+                    endpoint: endpoint.clone(),
                     format: method.format.clone(),
                     resource: resource_ty.clone(),
-                    method: Some(method.method),
-                    rel_method: None,
+                    method: method.method.clone(),
+                    rel: None,
                     middleware,
-                    http_middleware,
                 })
             }
 
             for relation in resource.members.iter().filter_map(|m| m.as_relation()) {
                 for method in relation.members.iter().filter_map(|m| m.as_method()) {
                     let middleware = method.attrs.iter().filter_map(|attr| attr.as_middleware()).next();
-                    let http_middleware = method.attrs.iter().filter_map(|attr| attr.as_http_middleware()).next();
                     vec.push(Handler {
+                        endpoint: endpoint.clone(),
                         format: method.format.clone(),
                         resource: resource_ty.clone(),
-                        method: None,
-                        rel_method: Some((method.method, relation.rel.clone())),
+                        method: method.method.clone(),
+                        rel: Some(relation.rel.clone()),
                         middleware,
-                        http_middleware,
                     });
                 }
             }
         }
 
+        vec.sort_by_key(|r| r.endpoint.clone());
         vec
     }
 }
@@ -151,44 +173,22 @@ impl Handler {
 impl ToTokens for Handler {
     fn to_tokens(&self, tokens: &mut Tokens) {
         let format = Ident::new(&self.format[..]);
-        let resource = Ident::new(&self.resource[..]);;
-        let method = if let Some(method) = self.method {
-            match method {
-                MethodKind::Get => quote! {
-                    ::cargonauts::api::Get<Identifier = <#resource as ::cargonauts::api::Resource>::Identifier>
-                },
-                MethodKind::Index => quote! {
-                    ::cargonauts::api::Index<Identifier = <#resource as ::cargonauts::api::Resource>::Identifier>
-                },
-            }
-        } else if let Some((method, ref rel)) = self.rel_method {
+        let resource = Ident::new(&self.resource[..]);
+        let method = if let Some(ref rel) = self.rel {
+            let method = Ident::new(&self.method[..]);
             let rel = Ident::new(&rel[..]);
-            match method {
-                RelMethodKind::GetOne => quote! {
-                    ::cargonauts::api::relations::GetOne<#rel, Identifier = <#resource as ::cargonauts::api::Resource>::Identifier>
-                },
-                RelMethodKind::GetMany => quote! {
-                    ::cargonauts::api::relations::GetMany<#rel, Identifier = <#resource as ::cargonauts::api::Resource>::Identifier>
-                },
-            }
-        } else { panic!() };
-        let service = if let Some(ref middleware) = self.middleware {
-            let middleware = Ident::new(&middleware[..]);
-            quote!(<(#middleware, #resource, #format, #method) as ::cargonauts::routing::Method>)
+            quote!(#method<#rel, Identifier = <#resource as cargonauts::api::Resource>::Identifier>)
         } else {
-            quote!(<(#resource, #format, #method) as ::cargonauts::routing::Method>)
+            let method = Ident::new(&self.method[..]);
+            quote!(#method<Identifier = <#resource as cargonauts::api::Resource>::Identifier>)
         };
-        if let Some(ref middleware) = self.http_middleware {
-            let middleware = Ident::new(&middleware[..]);
-            tokens.append(quote!({
-                use ::cargonauts::server::NewService;
-                Box::new(#service::new_service().wrap(<#middleware as Default>::default()).new_service()?) as ::cargonauts::routing::Handler
-            }));
+        let service = if let Some(_) = self.middleware {
+            panic!()
         } else {
-            tokens.append(quote!({
-                use ::cargonauts::server::NewService;
-                Box::new(#service::new_service().new_service()?) as ::cargonauts::routing::Handler
-            }));
-        }
+            quote!(<::cargonauts::routing::EndpointService<_, _, #resource, (#format, #method)>>)
+        };
+        tokens.append(quote!({
+            Box::new(#service::default().new_service()?) as ::cargonauts::routing::Handler
+        }));
     }
 }

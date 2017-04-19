@@ -6,12 +6,11 @@ extern crate tokio_service as tokio;
 
 use std::fmt::Debug;
 
-use mainsail::{ResourceEndpoint, Error};
+use rigging::{ResourceEndpoint, Error, Method};
+use rigging::environment::Environment;
 use rigging::http;
-use rigging::format::Format;
-use rigging::method::Method;
-use rigging::present::{Present, PresentResource, PresentCollection, Template};
-use rigging::receive::Receive;
+use rigging::format::*;
+use rigging::request::Request;
 
 const MIME: &'static str = "ext/plain; charset=utf-8";
 
@@ -20,26 +19,43 @@ pub struct SimpleDebug {
     _private: (),
 }
 
-impl<T> Format<T> for SimpleDebug
+impl<T, M> Format<T, M> for SimpleDebug
 where
-    T: ResourceEndpoint + Debug,
+    T: ResourceEndpoint,
+    M: ?Sized + Method<T>,
+    M::Request: Request<T, BodyParts = ()>,
+    M::Response: Debug,
 {
     type Presenter = Self;
     type Receiver = Self;
-    const MIME_TYPES: &'static [&'static str] = &[MIME];
 }
 
-impl<T: ResourceEndpoint> Receive<T> for SimpleDebug { }
+impl<T, M> Receive<T, M> for SimpleDebug
+where
+    T: ResourceEndpoint,
+    M: ?Sized + Method<T>,
+    M::Request: Request<T, BodyParts = ()>,
+{
+    fn receive(_: http::Request, _: &mut Environment) -> Result<<M::Request as Request<T>>::BodyParts, Error> {
+        Ok(())
+    }
+}
 
-impl<T: ResourceEndpoint + Debug> Present<T> for SimpleDebug {
+
+impl<T, M> Present<T, M> for SimpleDebug
+where
+    T: ResourceEndpoint,
+    M: ?Sized + Method<T>,
+    M::Response: Debug,
+{
     type ResourcePresenter = ResourcePresenter;
-    type CollectionPresenter = CollectionPresenter<T>;
+    type CollectionPresenter = CollectionPresenter<M::Response>;
 
-    fn for_resource(&self) -> Self::ResourcePresenter {
+    fn for_resource() -> Self::ResourcePresenter {
         ResourcePresenter::default()
     }
 
-    fn for_collection(&self) -> Self::CollectionPresenter {
+    fn for_collection() -> Self::CollectionPresenter {
         CollectionPresenter::default()
     }
 }
@@ -47,14 +63,19 @@ impl<T: ResourceEndpoint + Debug> Present<T> for SimpleDebug {
 #[derive(Default, Clone, Copy)]
 pub struct ResourcePresenter;
 
-impl<T: ResourceEndpoint + Debug> PresentResource<T> for ResourcePresenter {
-    fn resource<M: ?Sized + Method<Response = T>>(self, resource: T, _: Option<Template>)
+impl<T, M> PresentResource<T, M> for ResourcePresenter
+where
+    T: ResourceEndpoint,
+    M: ?Sized + Method<T>,
+    M::Response: Debug,
+{
+    fn resource(self, resource: M::Response, _: Option<Template>)
         -> http::Response
     {
         debug_response(resource, http::StatusCode::Ok)
     }
 
-    fn error<M: ?Sized + Method<Response = T>>(self, error: Error, _: Option<Template>)
+    fn error(self, error: Error, _: Option<Template>)
         -> http::Response
     {
         debug_response(error, http::StatusCode::InternalServerError)
@@ -77,8 +98,13 @@ impl<T> Clone for CollectionPresenter<T> {
     }
 }
 
-impl<T: ResourceEndpoint + Debug> PresentCollection<T> for CollectionPresenter<T> {
-    fn append(&mut self, resource: T, _: Option<Template>) {
+impl<T, M> PresentCollection<T, M> for CollectionPresenter<M::Response>
+where
+    T: ResourceEndpoint,
+    M: ?Sized + Method<T>,
+    M::Response: Debug,
+{
+    fn append(&mut self, resource: M::Response, _: Option<Template>) {
         let _ = self.resources.as_mut().map(|v| v.push(resource));
     }
 

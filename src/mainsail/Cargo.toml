@@ -1,8 +1,10 @@
 [package]
-authors = ["Without Boats <woboats@gmail.com>"]
 name = "mainsail"
 version = "0.1.0"
+authors = ["Without Boats <woboats@gmail.com>"]
 
 [dependencies]
-anymap = "0.12.1"
 futures = "0.1.11"
+
+[dependencies.rigging]
+path = "../rigging"

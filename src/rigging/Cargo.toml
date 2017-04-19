@@ -5,14 +5,7 @@ version = "0.1.0"
 
 [dependencies]
 futures = "0.1.11"
-mime = "0.2.3"
-
-[dependencies.mainsail]
-path = "../mainsail"
+tokio-service = "0.1.0"
 
 [dependencies.hyper]
 git = "https://github.com/hyperium/hyper"
-
-[dependencies.tokio-service]
-branch = "stream-middleware"
-git = "https://github.com/withoutboats/tokio-service"

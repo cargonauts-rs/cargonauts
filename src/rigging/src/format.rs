@@ -1,35 +1,35 @@
-use mainsail::ResourceEndpoint;
-use mime::Mime;
-
+use environment::Environment;
+use {ResourceEndpoint, Method, Error};
+use request::Request;
 use http;
-use present::Present;
-use receive::Receive;
 
-pub trait Format<T: ResourceEndpoint> {
-    type Receiver: Receive<T>;
-    type Presenter: Present<T>;
-    const MIME_TYPES: &'static [&'static str];
-
-    fn accepted_by(req: http::Request) -> bool {
-        Self::MIME_TYPES.iter().any(|mime| req.accepts(&mime.parse().unwrap()))
-    }
+pub trait Format<T: ResourceEndpoint, M: ?Sized + Method<T>> {
+    type Receiver: Receive<T, M>;
+    type Presenter: Present<T, M>;
 }
 
-trait Accepts {
-    fn accepts(&self, offered: &Mime) -> bool;
+pub trait Receive<T: ResourceEndpoint, M: ?Sized + Method<T>> {
+    fn receive(req: http::Request, env: &mut Environment) -> Result<<M::Request as Request<T>>::BodyParts, Error>;
 }
 
-impl Accepts for Mime {
-    fn accepts(&self, offered: &Mime) -> bool {
-        // TODO actually check 'accepts'
-        true
-    }
+pub trait Present<T: ResourceEndpoint, M: ?Sized + Method<T>>: Send + 'static {
+    type ResourcePresenter: PresentResource<T, M>;
+    type CollectionPresenter: PresentCollection<T, M>;
+
+    fn for_resource() -> Self::ResourcePresenter;
+    fn for_collection() -> Self::CollectionPresenter;
 }
 
-impl Accepts for http::Request {
-    fn accepts(&self, offered: &Mime) -> bool {
-        self.headers().get::<http::headers::Accept>().map_or(true, |accept| {
-            accept.0.iter().any(|q| q.item.accepts(offered))
-        })
-    }
+pub trait PresentResource<T: ResourceEndpoint, M: ?Sized + Method<T>> {
+    fn resource(self, resource: M::Response, template: Option<Template>) -> http::Response;
+    fn error(self, error: Error, template: Option<Template>) -> http::Response;
 }
+
+pub trait PresentCollection<T: ResourceEndpoint, M: ?Sized + Method<T>>: Send + 'static {
+    fn append(&mut self, resource: M::Response, template: Option<Template>);
+    fn error(&mut self, error: Error, template: Option<Template>);
+    fn finish(self) -> http::Response;
+}
+
+pub struct Template;
+

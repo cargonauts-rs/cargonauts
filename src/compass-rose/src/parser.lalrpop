@@ -21,7 +21,7 @@ Endpoint: String = "@" <String>;
 
 ResourceMember: ResourceMember = {
     "relation" <Relation> => ResourceMember::Relation(<>),
-    "method" <Method<MethodKind>> => ResourceMember::Method(<>),
+    "method" <Method> => ResourceMember::Method(<>),
 };
 
 Relation: Relation = {
@@ -34,23 +34,13 @@ Relation: Relation = {
 };
 
 RelationMember: RelationMember = {
-    "method" <Method<RelMethodKind>> => RelationMember::Method(<>),
+    "method" <Method> => RelationMember::Method(<>),
 };
 
-Method<K>: Method<K> = {
-    <attrs:Attribute*> <method:K> "in" <format:Ident> ";" => Method {
+Method: Method = {
+    <attrs:Attribute*> <method:Ident> "in" <format:Ident> ";" => Method {
         attrs, method, format,
     }
-};
-
-MethodKind: MethodKind = {
-    "Get" => MethodKind::Get,
-    "Index" => MethodKind::Index,
-};
-
-RelMethodKind: RelMethodKind = {
-    "GetOne" => RelMethodKind::GetOne,
-    "GetMany" => RelMethodKind::GetMany,
 };
 
 Ident: String = {

@@ -14,6 +14,19 @@ pub struct MyResource {
     slug: String,
 }
 
+relation!(AllCaps => MyResource);
+
+routes! {
+    resource MyResource {
+        method Get in Debug;
+        method Index in Debug;
+
+        relation AllCaps {
+            method GetOne in Debug;
+        }
+    }
+}
+
 impl Resource for MyResource {
     type Identifier = String;
     fn identifier(&self) -> String { self.slug.clone() }
@@ -31,26 +44,13 @@ impl Index for MyResource {
     }
 }
 
-relation!(AllCaps => MyResource);
-
 impl GetOne<AllCaps> for MyResource {
     fn get_one(slug: String, _: Environment) -> BoxFuture<MyResource, Error> {
         future::ok(MyResource { slug: slug.to_uppercase() }).boxed()
     }
 }
 
-routes! {
-    resource MyResource {
-        method Get in Debug;
-        method Index in Debug;
-
-        relation AllCaps {
-            method GetOne in Debug;
-        }
-    }
-}
-
 fn main() {
-    let socket_addr = "127.0.0.1:8000".parse().unwrap();
+    let socket_addr = "127.0.0.1:7878".parse().unwrap();
     cargonauts::server::Http::new().bind(&socket_addr, routes).unwrap().run().unwrap();
 }

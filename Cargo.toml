@@ -26,10 +26,4 @@ path = "src/simple-debug"
 [lib]
 path = "src/cargonauts/lib.rs"
 
-[replace]
-
-[replace."tokio-service:0.1.0"]
-branch = "stream-middleware"
-git = "https://github.com/withoutboats/tokio-service"
-
 [workspace]

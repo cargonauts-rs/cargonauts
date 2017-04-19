@@ -43,11 +43,11 @@ pub struct Relation {
 
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub enum RelationMember {
-    Method(Method<RelMethodKind>),
+    Method(Method),
 }
 
 impl RelationMember {
-    pub fn as_method(&self) -> Option<&Method<RelMethodKind>> {
+    pub fn as_method(&self) -> Option<&Method> {
         match *self {
             RelationMember::Method(ref method)  => Some(method),
         }
@@ -55,22 +55,10 @@ impl RelationMember {
 }
 
 #[derive(PartialEq, Eq, Debug, Clone)]
-pub struct Method<Kind = MethodKind> {
-    pub method: Kind,
+pub struct Method {
+    pub method: String,
     pub format: String,
     pub attrs: Vec<Attribute>,
-}
-
-#[derive(PartialEq, Eq, Debug, Clone, Copy)]
-pub enum MethodKind {
-    Get,
-    Index,
-}
-
-#[derive(PartialEq, Eq, Debug, Clone, Copy)]
-pub enum RelMethodKind {
-    GetOne,
-    GetMany,
 }
 
 #[derive(PartialEq, Eq, Clone, Debug)]
@@ -83,15 +71,6 @@ impl Attribute {
     pub fn as_middleware(&self) -> Option<String> {
         match *self {
             Attribute::Arg(ref s, ref args) if s == "middleware" && args.len() == 1 => {
-                Some(args[0].clone())
-            }
-            _ => None
-        }
-    }
-
-    pub fn as_http_middleware(&self) -> Option<String> {
-        match *self {
-            Attribute::Arg(ref s, ref args) if s == "http_middleware" && args.len() == 1 => {
                 Some(args[0].clone())
             }
             _ => None

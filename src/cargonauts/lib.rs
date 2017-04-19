@@ -19,11 +19,14 @@ proc_macro_item_decl! {
 
 #[macro_use]
 pub mod api {
-    pub use mainsail::{AnyMap, Get, Index, Resource, Error, Environment};
+    pub use rigging::{Resource, Error};
+    pub use rigging::environment::Environment;
+    pub use mainsail::{Get, Index};
 
     #[macro_use]
     pub mod relations {
-        pub use mainsail::relations::{Relationship, GetOne, GetMany};
+        pub use rigging::Relationship;
+        pub use mainsail::{GetOne, GetMany};
 
         #[macro_export]
         macro_rules! relation {
@@ -39,27 +42,31 @@ pub mod api {
 }
 
 pub mod routing {
-    pub use mainsail::ResourceEndpoint;
-    pub use mainsail::relations::{RelationEndpoint, RelationshipLink};
-    pub use rigging::present::middleware::Presenter;
-    pub use rigging::route::{Routes, RoutingTable, Route, MethodKind, Handler, not_found};
-    pub use rigging::method::Method;
+    pub use rigging::{ResourceEndpoint, RelationEndpoint, RelationshipLink};
+    pub use rigging::endpoint::EndpointService;
+    pub use rigging::routes::{Kind, Routes, RoutingTable, Handler, not_found};
 }
 
 pub mod server {
     pub use rigging::http::{Request, Response, Http, Server, Error, Service, NewService};
 }
 
+pub mod method {
+    pub use rigging::Method;
+    pub use rigging::request::{Request, ResourceRequest, CollectionRequest};
+    pub use rigging::routes::Route;
+    pub use mainsail::{GetRequest, IndexRequest};
+}
+
 pub mod format {
-    pub use rigging::request::{Request, GetRequest, IndexRequest};
 
     pub use simple_debug::SimpleDebug as Debug;
 
     pub mod presenter {
-        pub use rigging::present::{Present, PresentResource, PresentCollection, Template};
+        pub use rigging::format::{Present, PresentResource, PresentCollection, Template};
     }
 
     pub mod receiver {
-        pub use rigging::receive::Receive;
+        pub use rigging::format::Receive;
     }
 }
