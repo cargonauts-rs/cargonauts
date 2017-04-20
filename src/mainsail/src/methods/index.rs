@@ -1,11 +1,11 @@
-use futures::stream::BoxStream;
+use futures::Stream;
 use rigging::{Resource, Method, Error, http};
 use rigging::environment::Environment;
 use rigging::routes::{Route, Kind};
 use rigging::request::*;
 
 pub trait Index: Resource {
-    fn index(env: Environment) -> BoxStream<Self, Error> where Self: Sized;
+    fn index(env: Environment) -> Box<Stream<Item = Self, Error = Error>> where Self: Sized;
 }
 
 pub struct IndexRequest;
@@ -28,7 +28,7 @@ impl<T: Index> Method<T> for Index<Identifier = T::Identifier> {
 
     type Request = IndexRequest;
     type Response = T;
-    type Outcome = BoxStream<T, Error>;
+    type Outcome = Box<Stream<Item = T, Error = Error>>;
 
     fn call(_: Self::Request, env: Environment) -> Self::Outcome {
         T::index(env)

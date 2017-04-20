@@ -4,20 +4,21 @@ name = "rigging"
 version = "0.1.0"
 
 [dependencies]
+anymap = "0.12.1"
 futures = "0.1.13"
 tokio-core = "0.1.6"
 
-[dependencies.tokio-service]
-branch = "new-new-service"
-git = "https://github.com/withoutboats/tokio-service"
+[dependencies.c3po]
+branch = "new-service"
+git = "https://github.com/withoutboats/c3po"
+
+[dependencies.hyper]
+git = "https://github.com/hyperium/hyper"
 
 [dependencies.tokio-proto]
 branch = "new-new-service"
 git = "https://github.com/withoutboats/tokio-proto"
 
-[dependencies.hyper]
-git = "https://github.com/hyperium/hyper"
-
-[dependencies.c3po]
-branch = "new-service"
-git = "https://github.com/withoutboats/c3po"
+[dependencies.tokio-service]
+branch = "new-new-service"
+git = "https://github.com/withoutboats/tokio-service"

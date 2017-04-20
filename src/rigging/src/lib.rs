@@ -1,5 +1,6 @@
 #![feature(associated_consts)]
 
+extern crate anymap;
 extern crate futures;
 extern crate hyper;
 extern crate tokio_service as tokio;
@@ -59,7 +60,7 @@ pub trait Method<T: Resource> {
 
     type Request: Request<T>;
     type Response: Resource;
-    type Outcome: Send + 'static;
+    type Outcome: 'static;
 
     fn call(req: Self::Request, env: environment::Environment) -> Self::Outcome;
 }

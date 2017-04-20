@@ -13,14 +13,15 @@ use connections::Configure;
 
 pub trait Client {
     type Connection: Service;
+    type Protocol;
     fn connect(conn: Self::Connection) -> Self;
     fn conn(&self) -> &Self::Connection;
 }
 
 pub struct ClientService<C>(C);
 
-pub struct ClientConnector<C, P, Kind> {
-    tcp: BoundTcpClient<Kind, P>,
+pub struct ClientConnector<C: Client, Kind> {
+    tcp: BoundTcpClient<Kind, C::Protocol>,
     _marker: PhantomData<C>,
 }
 
@@ -36,9 +37,9 @@ impl<C: Client> Service for ClientService<C> {
     }
 }
 
-impl<C, P, Conn, Kind> NewService for ClientConnector<C, P, Kind>
+impl<C, P, Conn, Kind> NewService for ClientConnector<C, Kind>
 where
-    C: Client<Connection = Conn>,
+    C: Client<Connection = Conn, Protocol = P>,
     P: BindClient<Kind, TcpStream, BindClient = Conn>,
     Conn: Service<Request = P::ServiceRequest, Response = P::ServiceResponse, Error = P::ServiceError>,
     Kind: 'static
@@ -54,9 +55,9 @@ where
     }
 }
 
-impl<C, Kind, P> Configure for ClientConnector<C, P, Kind>
+impl<C, Kind, P> Configure for ClientConnector<C, Kind>
 where
-    C: Client,
+    C: Client<Protocol = P>,
     P: BindClient<Kind, TcpStream> + Configure,
 {
     type Config = (P::Config, SocketAddr);

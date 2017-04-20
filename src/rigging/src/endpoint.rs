@@ -1,7 +1,7 @@
 use std::io;
 use std::marker::PhantomData;
 
-use futures::{Future, BoxFuture, Stream, IntoFuture, future};
+use futures::{Future, Stream, IntoFuture, future};
 use tokio::{Service, NewService};
 
 use Error;
@@ -15,7 +15,7 @@ use http;
 
 pub trait Endpoint<Hits, Returns, T: ResourceEndpoint> {
     type Future: Future<Item = http::Response, Error = http::Error>;
-    fn call(http::Request) -> Self::Future;
+    fn call(http::Request, env: Environment) -> Self::Future;
 }
 
 fn parse_id<T: ResourceEndpoint>(req: &http::Request) -> Result<T::Identifier, Error> {
@@ -36,10 +36,9 @@ where
     M::Outcome: Future<Item = M::Response, Error = Error>,
     F: Format<T, M>,
 {
-    type Future = BoxFuture<http::Response, http::Error>;
-    fn call(req: http::Request) -> Self::Future {
-        parse_id::<T>(&req).into_future().and_then(|id| {
-            let mut env = Environment::default();
+    type Future = Box<Future<Item = http::Response, Error = http::Error>>;
+    fn call(req: http::Request, mut env: Environment) -> Self::Future {
+        Box::new(parse_id::<T>(&req).into_future().and_then(|id| {
             F::Receiver::receive(req, &mut env).into_future().and_then(|parts| {
                 let request = M::Request::new(parts, id, &mut env);
                 M::call(request, env).then(|result| {
@@ -52,7 +51,7 @@ where
             })
         }).or_else(|err| {
             Ok(F::Presenter::for_resource().error(err, None))
-        }).boxed()
+        }))
     }
 }
 
@@ -64,10 +63,9 @@ where
     M::Outcome: Stream<Item = M::Response, Error = Error>,
     F: Format<T, M>,
 {
-    type Future = BoxFuture<http::Response, http::Error>;
-    fn call(req: http::Request) -> Self::Future {
-        let mut env = Environment::default();
-        F::Receiver::receive(req, &mut env).into_future().and_then(|parts| {
+    type Future = Box<Future<Item = http::Response, Error = http::Error>>;
+    fn call(req: http::Request, mut env: Environment) -> Self::Future {
+        Box::new(F::Receiver::receive(req, &mut env).into_future().and_then(|parts| {
             let request = M::Request::new(parts, &mut env);
             let stream = M::call(request, env);
             let presenter = F::Presenter::for_collection();
@@ -80,7 +78,7 @@ where
             }).then(|presenter| Ok(presenter.unwrap().finish()))
         }).or_else(|err| {
             Ok(F::Presenter::for_resource().error(err, None))
-        }).boxed()
+        }))
     }
 }
 
@@ -92,10 +90,9 @@ where
     M::Outcome: Future<Item = M::Response, Error = Error>,
     F: Format<T, M>,
 {
-    type Future = BoxFuture<http::Response, http::Error>;
-    fn call(req: http::Request) -> Self::Future {
-        let mut env = Environment::default();
-        F::Receiver::receive(req, &mut env).into_future().and_then(|parts| {
+    type Future = Box<Future<Item = http::Response, Error = http::Error>>;
+    fn call(req: http::Request, mut env: Environment) -> Self::Future {
+        Box::new(F::Receiver::receive(req, &mut env).into_future().and_then(|parts| {
             let request = M::Request::new(parts, &mut env);
             M::call(request, env).then(|result| {
                 let presenter = F::Presenter::for_resource();
@@ -106,7 +103,7 @@ where
             })
         }).or_else(|err| {
             Ok(F::Presenter::for_resource().error(err, None))
-        }).boxed()
+        }))
     }
 }
 
@@ -118,10 +115,9 @@ where
     M::Outcome: Stream<Item = M::Response, Error = Error>,
     F: Format<T, M>,
 {
-    type Future = BoxFuture<http::Response, http::Error>;
-    fn call(req: http::Request) -> Self::Future {
-        parse_id::<T>(&req).into_future().and_then(|id| {
-            let mut env = Environment::default();
+    type Future = Box<Future<Item = http::Response, Error = http::Error>>;
+    fn call(req: http::Request, mut env: Environment) -> Self::Future {
+        Box::new(parse_id::<T>(&req).into_future().and_then(|id| {
             F::Receiver::receive(req, &mut env).into_future().and_then(|parts| {
                 let request = M::Request::new(parts, id, &mut env);
                 let stream = M::call(request, env);
@@ -136,21 +132,18 @@ where
             })
         }).or_else(|err| {
             Ok(F::Presenter::for_resource().error(err, None))
-        }).boxed()
+        }))
     }
 }
 
 pub struct EndpointService<Hits, Returns, T, E: ?Sized> {
+    env: Environment,
     _marker: PhantomData<(Hits, Returns, T, E)>,
 }
 
-impl<H, R, T, E> Default for EndpointService<H, R, T, E>
-where
-    T: ResourceEndpoint,
-    E: ?Sized + Endpoint<H, R, T>,
-{
-    fn default() -> Self {
-        EndpointService { _marker: PhantomData }
+impl<H, R, T, E: ?Sized> EndpointService<H, R, T, E> {
+    pub fn new(env: Environment) -> Self {
+        EndpointService { env, _marker: PhantomData, }
     }
 }
 
@@ -160,7 +153,7 @@ where
     E: ?Sized + Endpoint<H, R, T>,
 {
     fn clone(&self) -> Self {
-        EndpointService { _marker: PhantomData }
+        EndpointService { _marker: PhantomData, env: self.env.clone(), }
     }
 }
 
@@ -175,7 +168,7 @@ where
     type Future = E::Future;
 
     fn call(&self, req: Self::Request) -> Self::Future {
-        E::call(req)
+        E::call(req, self.env.clone())
     }
 }
 
