@@ -20,6 +20,20 @@ struct RouteKeyRef<'a> {
     route: Route<'a>,
 }
 
+#[derive(Clone, Hash, Eq, PartialEq)]
+pub struct Route<'a> {
+    pub method: http::Method,
+    pub kind: Kind<'a>,
+}
+
+
+#[derive(Copy, Clone, PartialEq, Eq, Hash)]
+pub enum Kind<'a> {
+    Resource,
+    Collection,
+    Relationship(&'a str),
+}
+
 impl RouteKey {
     pub fn new(endpoint: &'static str, route: Route<'static>) -> RouteKey {
         RouteKey { key: RouteKeyRef { endpoint, route } }
@@ -57,20 +71,6 @@ impl<'a> RouteKeyRef<'a> {
     }
 }
 
-#[derive(Clone, Hash, Eq, PartialEq)]
-pub struct Route<'a> {
-    pub method: http::Method,
-    pub kind: Kind<'a>,
-}
-
-
-#[derive(Copy, Clone, PartialEq, Eq, Hash)]
-pub enum Kind<'a> {
-    Resource,
-    Collection,
-    Relationship(&'a str),
-}
-
 #[derive(Clone)]
 pub struct RoutingTable {
     routes: Rc<HashMap<RouteKey, Handler>>,
@@ -91,7 +91,7 @@ impl Service for RoutingTable {
 
     fn call(&self, req: Self::Request) -> Self::Future {
         match RouteKeyRef::req(&req).and_then(|route| self.routes.get(&route)) {
-            Some(handler)   => handler(req, self.env.clone()),
+            Some(handle)    => handle(req, self.env.clone()),
             None            => not_found(),
         }
     }

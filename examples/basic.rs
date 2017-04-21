@@ -2,6 +2,31 @@
 
 #[macro_use]
 extern crate cargonauts;
+extern crate tokio_service;
+
+#[derive(Default)]
+struct Foo;
+
+impl tokio_service::NewService for Foo {
+    type Request = ();
+    type Response = ();
+    type Error = ();
+    type Instance = Self;
+    type Future = cargonauts::futures::future::FutureResult<Self, ::std::io::Error>;
+    fn new_service(&self) -> Self::Future {
+        ::cargonauts::futures::future::ok(Foo)
+    }
+}
+
+impl tokio_service::Service for Foo {
+    type Request = ();
+    type Response = ();
+    type Error = ();
+    type Future = cargonauts::futures::future::FutureResult<(), ()>;
+    fn call(&self, _: ()) -> Self::Future {
+        ::cargonauts::futures::future::ok(())
+    }
+}
 
 use cargonauts::api::{Resource, Get, Index, Environment, Error};
 use cargonauts::api::relations::GetOne;
@@ -16,6 +41,10 @@ pub struct MyResource {
 relation!(AllCaps => MyResource);
 
 routes! {
+    setup {
+        client for Foo;
+    }
+
     resource MyResource {
         method Get in Debug;
         method Index in Debug;

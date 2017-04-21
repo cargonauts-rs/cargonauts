@@ -1,6 +1,7 @@
 #![feature(associated_consts)]
 
 pub extern crate futures;
+extern crate c3po;
 extern crate mainsail;
 extern crate rigging;
 
@@ -43,13 +44,19 @@ pub mod api {
 #[doc(hidden)]
 pub mod routing {
     pub use rigging::{ResourceEndpoint, RelationEndpoint, RelationshipLink};
-    pub use rigging::endpoint::EndpointService;
+    pub use rigging::endpoint::endpoint;
     pub use rigging::routes::{Kind, RoutingTable, RouteKey, Handler, not_found};
     pub use rigging::environment::EnvBuilder;
+    pub use rigging::connections::new_pool;
 }
 
 pub mod server {
     pub use rigging::http::{Request, Response, Error, Service, NewService, serve, Handle};
+
+    pub mod pool {
+        pub use rigging::connections::Configure;
+        pub use c3po::{Pool, Config};
+    }
 }
 
 pub mod method {

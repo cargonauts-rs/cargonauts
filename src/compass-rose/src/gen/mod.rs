@@ -23,7 +23,8 @@ pub fn code_gen(routes: Routes, cfg: Option<CargonautsConfig>) -> String {
                     )
             {
                 use ::cargonauts::futures::{Future, Stream};
-                (#addr.parse().unwrap(), Box::new({#setup_environment}.map(|env| {#build_routing_table})))
+                let future: ::cargonauts::futures::future::Map<_, _> = {#setup_environment}.map(|env| {#build_routing_table});
+                (#addr.parse().unwrap(), Box::new(future))
             }
 
             #(#resources)*

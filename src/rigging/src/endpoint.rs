@@ -1,8 +1,4 @@
-use std::io;
-use std::marker::PhantomData;
-
-use futures::{Future, Stream, IntoFuture, future};
-use tokio::{Service, NewService};
+use futures::{Future, Stream, IntoFuture};
 
 use Error;
 use ResourceEndpoint;
@@ -13,7 +9,7 @@ use format::*;
 use environment::Environment;
 use http;
 
-pub trait Endpoint<Hits, Returns, T: ResourceEndpoint> {
+pub trait Endpoint<Hits, Returns> {
     type Future: Future<Item = http::Response, Error = http::Error>;
     fn call(http::Request, env: Environment) -> Self::Future;
 }
@@ -28,7 +24,7 @@ pub struct _Resource;
 
 pub struct _Collection;
 
-impl<M, T, F> Endpoint<_Resource, _Resource, T> for (F, M)
+impl<M, T, F> Endpoint<_Resource, _Resource> for (T, F, M)
 where
     T: ResourceEndpoint,
     M: ?Sized + Method<T>,
@@ -55,7 +51,7 @@ where
     }
 }
 
-impl<M, T, F> Endpoint<_Collection, _Collection, T> for (F, M)
+impl<M, T, F> Endpoint<_Collection, _Collection> for (T, F, M)
 where
     T: ResourceEndpoint,
     M: ?Sized + Method<T>,
@@ -82,7 +78,7 @@ where
     }
 }
 
-impl<M, T, F> Endpoint<_Collection, _Resource, T> for (F, M)
+impl<M, T, F> Endpoint<_Collection, _Resource> for (T, F, M)
 where
     T: ResourceEndpoint,
     M: ?Sized + Method<T>,
@@ -107,7 +103,7 @@ where
     }
 }
 
-impl<M, T, F> Endpoint<_Resource, _Collection, T> for (F, M)
+impl<M, T, F> Endpoint<_Resource, _Collection> for (T, F, M)
 where
     T: ResourceEndpoint,
     M: ?Sized + Method<T>,
@@ -136,54 +132,8 @@ where
     }
 }
 
-pub struct EndpointService<Hits, Returns, T, E: ?Sized> {
-    _marker: PhantomData<(Hits, Returns, T, E)>,
-}
-
-impl<H, R, T, E: ?Sized> Default for EndpointService<H, R, T, E> {
-    fn default() -> Self {
-        EndpointService { _marker: PhantomData, }
-    }
-}
-
-impl<H, R, T, E> Clone for EndpointService<H, R, T, E>
-where
-    T: ResourceEndpoint,
-    E: ?Sized + Endpoint<H, R, T>,
+pub fn endpoint<H, R, E: ?Sized + Endpoint<H, R>>(req: http::Request, env: Environment)
+    -> E::Future
 {
-    fn clone(&self) -> Self {
-        EndpointService { _marker: PhantomData }
-    }
-}
-
-impl<H, R, T, E> Service for EndpointService<H, R, T, E>
-where
-    T: ResourceEndpoint,
-    E: ?Sized + Endpoint<H, R, T>,
-{
-    type Request = (http::Request, Environment);
-    type Response = http::Response;
-    type Error = http::Error;
-    type Future = E::Future;
-
-    fn call(&self, req: Self::Request) -> Self::Future {
-        E::call(req.0, req.1)
-    }
-}
-
-
-impl<H, R, T, E> NewService for EndpointService<H, R, T, E>
-where
-    T: ResourceEndpoint,
-    E: ?Sized + Endpoint<H, R, T>,
-{
-    type Request = (http::Request, Environment);
-    type Response = http::Response;
-    type Error = http::Error;
-    type Instance = Self;
-    type Future = future::FutureResult<Self::Instance, io::Error>;
-
-    fn new_service(&self) -> Self::Future {
-        future::ok(self.clone())
-    }
+    E::call(req, env)
 }

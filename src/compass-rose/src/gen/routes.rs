@@ -95,16 +95,10 @@ impl ToTokens for Route {
         };
 
         tokens.append(quote!({
-            let route_key = ::cargonauts::routing::RouteKey::new(#endpoint, <#full_method as ::cargonauts::method::Method<#resource>>::ROUTE);
-
-            fn handler(req: ::cargonauts::server::Request, env: ::cargonauts::api::Environment)
-                -> Box<::cargonauts::futures::Future<Item = ::cargonauts::server::Response, Error = ::cargonauts::server::Error>>
-            {
-                let service = <::cargonauts::routing::EndpointService<_, _, #resource, (#format, #full_method)>>::default();
-                ::cargonauts::server::Service::call(&service, (req, env))
-            }
-
-            (route_key, handler as ::cargonauts::routing::Handler)
+            let route = <#full_method as ::cargonauts::method::Method<#resource>>::ROUTE;
+            let route_key = ::cargonauts::routing::RouteKey::new(#endpoint, route);
+            let endpoint = ::cargonauts::routing::endpoint::<_, _, (#resource, #format, #full_method)>;
+            (route_key, endpoint as ::cargonauts::routing::Handler)
         }))
     }
 }
