@@ -13,7 +13,8 @@ branch = "new-service"
 git = "https://github.com/withoutboats/c3po"
 
 [dependencies.hyper]
-git = "https://github.com/hyperium/hyper"
+branch = "new-new-service"
+git = "https://github.com/withoutboats/hyper"
 
 [dependencies.tokio-proto]
 branch = "new-new-service"
@@ -22,3 +23,4 @@ git = "https://github.com/withoutboats/tokio-proto"
 [dependencies.tokio-service]
 branch = "new-new-service"
 git = "https://github.com/withoutboats/tokio-service"
+

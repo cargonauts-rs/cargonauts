@@ -13,6 +13,14 @@ pub enum SetupMember {
     Client(Client),
 }
 
+impl SetupMember {
+    pub fn as_client(&self) -> Option<&Client> {
+        match *self {
+            SetupMember::Client(ref client) => Some(client),
+        }
+    }
+}
+
 #[derive(PartialEq, Eq, Debug, Clone, Default)]
 pub struct Client {
     pub conn: String,

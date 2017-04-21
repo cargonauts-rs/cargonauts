@@ -6,8 +6,7 @@ extern crate cargonauts;
 use cargonauts::api::{Resource, Get, Index, Environment, Error};
 use cargonauts::api::relations::GetOne;
 use cargonauts::format::Debug;
-use cargonauts::futures::{Future, BoxFuture, future};
-use cargonauts::futures::stream::{self, Stream, BoxStream};
+use cargonauts::futures::{Future, future, Stream, stream};
 
 #[derive(Debug)]
 pub struct MyResource { 
@@ -33,24 +32,23 @@ impl Resource for MyResource {
 }
 
 impl Get for MyResource {
-    fn get(slug: String, _: Environment) -> BoxFuture<MyResource, Error> {
+    fn get(slug: String, _: Environment) -> Box<Future<Item = MyResource, Error = Error>> {
         future::ok(MyResource { slug }).boxed()
     }
 }
 
 impl Index for MyResource {
-    fn index(_: Environment) -> BoxStream<MyResource, Error> {
+    fn index(_: Environment) -> Box<Stream<Item = MyResource, Error = Error>> {
         stream::once(Ok(MyResource { slug: String::from("hello-world") })).boxed()
     }
 }
 
 impl GetOne<AllCaps> for MyResource {
-    fn get_one(slug: String, _: Environment) -> BoxFuture<MyResource, Error> {
+    fn get_one(slug: String, _: Environment) -> Box<Future<Item = MyResource, Error = Error>> {
         future::ok(MyResource { slug: slug.to_uppercase() }).boxed()
     }
 }
 
 fn main() {
-    let socket_addr = "127.0.0.1:7878".parse().unwrap();
-    cargonauts::server::Http::new().bind(&socket_addr, routes).unwrap().run().unwrap();
+    cargonauts::server::serve(routes).unwrap();
 }

@@ -37,6 +37,10 @@ git = "https://github.com/withoutboats/tokio-proto"
 branch = "new-new-service"
 git = "https://github.com/withoutboats/tokio-service"
 
+[dependencies.hyper]
+branch = "new-new-service"
+git = "https://github.com/withoutboats/hyper"
+
 [lib]
 path = "src/cargonauts/lib.rs"
 

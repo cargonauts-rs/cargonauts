@@ -10,12 +10,14 @@ use std::env;
 use std::error::Error;
 use std::fs::File;
 use std::io::{self, Read};
+use std::net::SocketAddr;
 use std::path::PathBuf;
 
 pub use toml::Value;
 
 #[derive(Deserialize)]
 pub struct CargonautsConfig {
+    host: Option<SocketAddr>,
     clients: Option<BTreeMap<String, toml::Value>>,
 }
 
@@ -42,6 +44,10 @@ impl CargonautsConfig {
     fn from_toml(toml: &str) -> Result<CargonautsConfig, toml::de::Error> {
         let cargo: CargoToml = toml::from_str(toml)?;
         Ok(cargo.package.metadata.cargonauts)
+    }
+
+    pub fn host(&self) -> Option<SocketAddr> {
+        self.host
     }
 
     pub fn client_cfg(&self, client: &str) -> Option<&Value> {

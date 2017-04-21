@@ -137,13 +137,12 @@ where
 }
 
 pub struct EndpointService<Hits, Returns, T, E: ?Sized> {
-    env: Environment,
     _marker: PhantomData<(Hits, Returns, T, E)>,
 }
 
-impl<H, R, T, E: ?Sized> EndpointService<H, R, T, E> {
-    pub fn new(env: Environment) -> Self {
-        EndpointService { env, _marker: PhantomData, }
+impl<H, R, T, E: ?Sized> Default for EndpointService<H, R, T, E> {
+    fn default() -> Self {
+        EndpointService { _marker: PhantomData, }
     }
 }
 
@@ -153,7 +152,7 @@ where
     E: ?Sized + Endpoint<H, R, T>,
 {
     fn clone(&self) -> Self {
-        EndpointService { _marker: PhantomData, env: self.env.clone(), }
+        EndpointService { _marker: PhantomData }
     }
 }
 
@@ -162,13 +161,13 @@ where
     T: ResourceEndpoint,
     E: ?Sized + Endpoint<H, R, T>,
 {
-    type Request = http::Request;
+    type Request = (http::Request, Environment);
     type Response = http::Response;
     type Error = http::Error;
     type Future = E::Future;
 
     fn call(&self, req: Self::Request) -> Self::Future {
-        E::call(req, self.env.clone())
+        E::call(req.0, req.1)
     }
 }
 
@@ -178,7 +177,7 @@ where
     T: ResourceEndpoint,
     E: ?Sized + Endpoint<H, R, T>,
 {
-    type Request = http::Request;
+    type Request = (http::Request, Environment);
     type Response = http::Response;
     type Error = http::Error;
     type Instance = Self;

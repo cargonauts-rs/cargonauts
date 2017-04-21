@@ -23,7 +23,7 @@ impl<T: Resource> ResourceRequest<T> for GetRequest<T> {
 }
 
 impl<T: Get> Method<T> for Get<Identifier = T::Identifier> {
-    const ROUTE: Route = Route {
+    const ROUTE: Route<'static> = Route {
         kind: Kind::Resource,
         method: http::Method::Get,
     };
@@ -44,7 +44,7 @@ pub trait GetOne<R: Relationship>: Resource {
 impl<T: GetOne<R> + RelationEndpoint<R>, R: Relationship> Method<T> for GetOne<R, Identifier = T::Identifier>
     where R::Related: ResourceEndpoint,
 {
-    const ROUTE: Route = Route {
+    const ROUTE: Route<'static> = Route {
         kind: Kind::Relationship(T::LINK.endpoint),
         method: http::Method::Get,
     };
@@ -65,7 +65,7 @@ pub trait GetMany<R: Relationship>: Resource {
 impl<T: GetMany<R> + RelationEndpoint<R>, R: Relationship> Method<T> for GetMany<R, Identifier = T::Identifier>
     where R::Related: ResourceEndpoint,
 {
-    const ROUTE: Route = Route {
+    const ROUTE: Route<'static> = Route {
         kind: Kind::Relationship(T::LINK.endpoint),
         method: http::Method::Get,
     };

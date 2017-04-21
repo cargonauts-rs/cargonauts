@@ -21,7 +21,7 @@ impl<T: Resource> CollectionRequest<T> for IndexRequest {
 }
 
 impl<T: Index> Method<T> for Index<Identifier = T::Identifier> {
-    const ROUTE: Route = Route {
+    const ROUTE: Route<'static> = Route {
         kind: Kind::Collection,
         method: http::Method::Get,
     };

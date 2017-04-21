@@ -8,12 +8,13 @@ extern crate tokio_proto as proto;
 extern crate tokio_core as core;
 extern crate c3po;
 
-pub mod request;
-pub mod format;
+pub mod connections;
 pub mod endpoint;
 pub mod environment;
+pub mod format;
+pub mod http;
+pub mod request;
 pub mod routes;
-pub mod connections;
 
 use std::str::FromStr;
 
@@ -56,18 +57,11 @@ where
 use request::Request;
 
 pub trait Method<T: Resource> {
-    const ROUTE: routes::Route;
+    const ROUTE: routes::Route<'static>;
 
     type Request: Request<T>;
     type Response: Resource;
     type Outcome: 'static;
 
     fn call(req: Self::Request, env: environment::Environment) -> Self::Outcome;
-}
-
-pub mod http {
-    pub use hyper::header as headers;
-    pub use hyper::{StatusCode, Error};
-    pub use hyper::server::{Request, Response, Server, Http, Service, NewService};
-    pub use hyper::Method;
 }
