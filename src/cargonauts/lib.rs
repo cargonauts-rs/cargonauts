@@ -47,7 +47,6 @@ pub mod routing {
     pub use rigging::endpoint::endpoint;
     pub use rigging::routes::{Kind, RoutingTable, RouteKey, Handler, not_found};
     pub use rigging::environment::EnvBuilder;
-    pub use rigging::connections::new_pool;
 }
 
 pub mod server {

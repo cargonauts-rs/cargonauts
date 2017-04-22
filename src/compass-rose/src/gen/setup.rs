@@ -15,10 +15,10 @@ pub fn setup(setup: &Setup, config: Option<&CargonautsConfig>) -> Tokens {
     } else {
         quote!({
             let env_b = ::cargonauts::routing::EnvBuilder::new();
-            ::cargonauts::futures::stream::futures_unordered(vec!#clients).fold(env_b, |mut env_b, pool| {
-                env_b.insert_pool(pool);
-                Ok(env_b)
-            }).map(|env_b| env_b.build())
+            let mut vec = vec![];
+            #({ let env_b = env_b.clone(); vec.push(#clients) })*
+            ::cargonauts::futures::stream::futures_unordered(vec).for_each(|_| Ok(()))
+                .map(|_| env_b.build())
         })
     }
 }
@@ -34,7 +34,7 @@ fn client(client: &Client, config: Option<&CargonautsConfig>) -> Tokens {
     let client = client.wrapper.as_ref().unwrap_or(&client.conn).to_kebab_case();
     let cfg = pool_cfg(&client, config);
     let client_cfg = client_cfg(&client, &service, config);
-    quote!({::cargonauts::routing::new_pool::<#service>(handle.clone(), #cfg, #client_cfg)})
+    quote!({env_b.new_pool::<#service>(handle.clone(), #cfg, #client_cfg)})
 }
 
 fn pool_cfg(client: &str, config: Option<&CargonautsConfig>) -> Tokens {

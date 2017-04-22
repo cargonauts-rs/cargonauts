@@ -16,10 +16,17 @@ pub mod http;
 pub mod request;
 pub mod routes;
 
+use std::io;
 use std::str::FromStr;
 
 #[derive(Debug)]
 pub struct Error;
+
+impl From<io::Error> for Error {
+    fn from(_: io::Error) -> Error {
+        Error // TODO
+    }
+}
 
 pub trait Resource: Send + 'static {
     type Identifier: Eq + ToString + FromStr + Send + 'static;
