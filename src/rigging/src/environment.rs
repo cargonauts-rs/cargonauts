@@ -5,7 +5,7 @@ use std::rc::Rc;
 use Error;
 
 use anymap::AnyMap;
-use futures::Future;
+use futures::{Future, future};
 use core::net::TcpStream;
 use core::reactor::Handle;
 use proto::BindClient;
@@ -24,7 +24,7 @@ impl Environment {
         if let Some(pool) = self.pools.get::<Pool<C>>() {
             pool.connection()
         } else {
-            panic!()
+            future::Either::A(future::err(Error))
         }
     }
 
@@ -40,7 +40,7 @@ impl Environment {
         if let Some(pool) = self.pools.get::<Pool<ClientConnector<C, K>>>() {
             pool.connection()
         } else {
-            panic!()
+            future::Either::A(future::err(Error))
         }
     }
 }
