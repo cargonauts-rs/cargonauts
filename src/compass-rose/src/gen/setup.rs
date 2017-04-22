@@ -5,8 +5,10 @@ use quote::{Tokens, Ident};
 use ast::*;
 
 pub fn setup(setup: &Setup, config: Option<&CargonautsConfig>) -> Tokens {
-    let clients: Vec<_> = setup.members.iter().filter_map(SetupMember::as_client)
-                               .map(|c| client(c, config)).collect();
+    let clients: Vec<_> = setup.members.iter().map(|setup| match *setup {
+        SetupMember::Client(ref c) => client(c, config),
+        SetupMember::Connection(ref c) => conn(c, config),
+    }).collect();
 
     if clients.is_empty() {
         quote! {
@@ -24,20 +26,20 @@ pub fn setup(setup: &Setup, config: Option<&CargonautsConfig>) -> Tokens {
 }
 
 fn client(client: &Client, config: Option<&CargonautsConfig>) -> Tokens {
-    let service = match client.wrapper {
-        Some(ref wrapper)   => {
-            let ident = Ident::new(&wrapper[..]);
-            quote!(::cargonauts::routing::ClientConnector<#ident>)
-        }
-        None                => {
-            let ident = Ident::new(&client.conn[..]);
-            quote!(#ident)
-        }
-    };
-    let client = client.wrapper.as_ref().unwrap_or(&client.conn).to_kebab_case();
+    let ident = Ident::new(&client.client[..]);
+    let service = quote!(::cargonauts::routing::ClientConnector<#ident>);
+    let client = client.client.to_kebab_case();
     let cfg = pool_cfg(&client, config);
-    let client_cfg = client_cfg(&client, &service, config);
-    quote!({env_b.new_pool::<#service>(handle.clone(), #cfg, #client_cfg)})
+    let member_cfg = member_cfg(&client, &service, config);
+    quote!({env_b.new_pool::<#service>(handle.clone(), #cfg, #member_cfg)})
+}
+
+fn conn(conn: &Connection, config: Option<&CargonautsConfig>) -> Tokens {
+    let ident = Ident::new(&conn.conn[..]);
+    let conn = conn.conn.to_kebab_case();
+    let cfg = pool_cfg(&conn, config);
+    let member_cfg = member_cfg(&conn, &quote!(#ident), config);
+    quote!({env_b.new_pool::<#ident>(handle.clone(), #cfg, #member_cfg)})
 }
 
 fn pool_cfg(client: &str, config: Option<&CargonautsConfig>) -> Tokens {
@@ -47,7 +49,7 @@ fn pool_cfg(client: &str, config: Option<&CargonautsConfig>) -> Tokens {
     }
 }
 
-fn client_cfg(client: &str, service: &Tokens, config: Option<&CargonautsConfig>) -> Tokens {
+fn member_cfg(client: &str, service: &Tokens, config: Option<&CargonautsConfig>) -> Tokens {
     match config.and_then(|cfg| cfg.client_cfg(client)) {
         Some(cfg)   => panic!(),
         None        => {

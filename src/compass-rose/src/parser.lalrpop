@@ -12,11 +12,15 @@ Setup: Setup = {
 
 SetupMember: SetupMember = {
     "client" <Client> ";" => SetupMember::Client(<>),
+    "connection" <Connection> ";" => SetupMember::Connection(<>),
 };
 
 Client: Client = {
-    "for" <conn:Ident> => Client { conn, wrapper: None },
-    "for" <conn:Ident> "as" <wrapper:Ident> => Client { conn, wrapper: Some(wrapper) },
+    "for" <client:Ident> => Client { client },
+};
+
+Connection: Connection = {
+    "to" <conn:Ident> => Connection { conn },
 };
 
 Resource: Resource = {

@@ -11,20 +11,17 @@ pub struct Setup {
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub enum SetupMember {
     Client(Client),
-}
-
-impl SetupMember {
-    pub fn as_client(&self) -> Option<&Client> {
-        match *self {
-            SetupMember::Client(ref client) => Some(client),
-        }
-    }
+    Connection(Connection),
 }
 
 #[derive(PartialEq, Eq, Debug, Clone, Default)]
 pub struct Client {
+    pub client: String,
+}
+
+#[derive(PartialEq, Eq, Debug, Clone, Default)]
+pub struct Connection {
     pub conn: String,
-    pub wrapper: Option<String>,
 }
 
 #[derive(PartialEq, Eq, Debug, Clone, Default)]

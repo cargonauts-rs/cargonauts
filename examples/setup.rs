@@ -63,8 +63,8 @@ pub struct MyResource {
 
 routes! {
     setup {
-        client for Foo;
-        client for Foo as Bar;
+        connection to Foo;
+        client for Bar;
     }
 
     resource MyResource {
