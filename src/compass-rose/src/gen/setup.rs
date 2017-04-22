@@ -25,7 +25,10 @@ pub fn setup(setup: &Setup, config: Option<&CargonautsConfig>) -> Tokens {
 
 fn client(client: &Client, config: Option<&CargonautsConfig>) -> Tokens {
     let service = match client.wrapper {
-        Some(ref wrapper)   => quote!(::cargonauts::routing::ClientConnector<#wrapper, _>),
+        Some(ref wrapper)   => {
+            let ident = Ident::new(&wrapper[..]);
+            quote!(::cargonauts::routing::ClientConnector<#ident>)
+        }
         None                => {
             let ident = Ident::new(&client.conn[..]);
             quote!(#ident)

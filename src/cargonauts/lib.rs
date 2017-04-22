@@ -47,6 +47,7 @@ pub mod routing {
     pub use rigging::endpoint::endpoint;
     pub use rigging::routes::{Kind, RoutingTable, RouteKey, Handler, not_found};
     pub use rigging::environment::EnvBuilder;
+    pub use rigging::connections::ClientConnector;
 }
 
 pub mod server {
@@ -56,6 +57,10 @@ pub mod server {
         pub use rigging::connections::Configure;
         pub use c3po::{Pool, Config};
     }
+}
+
+pub mod clients {
+    pub use rigging::connections::{Client, Configure};
 }
 
 pub mod method {

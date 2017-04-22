@@ -5,7 +5,7 @@ mod client;
 pub use self::client::{Client, ClientService, ClientConnector};
 
 pub trait Configure: Sized {
-    type Config;
+    type Config: Default;
     fn new(handle: &Handle, cfg: Self::Config) -> Self;
 }
 

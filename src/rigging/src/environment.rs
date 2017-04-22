@@ -6,10 +6,8 @@ use Error;
 
 use anymap::AnyMap;
 use futures::{Future, future};
-use core::net::TcpStream;
 use core::reactor::Handle;
-use proto::BindClient;
-use tokio::{Service, NewService};
+use tokio::NewService;
 use c3po::{ConnFuture, Conn, Pool, Config};
 
 use connections::{Client, ClientConnector, Configure};
@@ -28,16 +26,8 @@ impl Environment {
         }
     }
 
-    pub fn client<C, K>(&self) -> ConnFuture<Conn<ClientConnector<C, K>>, Error>
-    where
-        C: Client,
-        C::Protocol: BindClient<K, TcpStream, BindClient = C::Connection>,
-        C::Connection: Service<Request  = <C::Protocol as BindClient<K, TcpStream>>::ServiceRequest,
-                               Response = <C::Protocol as BindClient<K, TcpStream>>::ServiceResponse,
-                               Error    = <C::Protocol as BindClient<K, TcpStream>>::ServiceError>,
-        K: 'static,
-    {
-        if let Some(pool) = self.pools.get::<Pool<ClientConnector<C, K>>>() {
+    pub fn client<C: Client>(&self) -> ConnFuture<Conn<ClientConnector<C>>, Error> {
+        if let Some(pool) = self.pools.get::<Pool<ClientConnector<C>>>() {
             pool.connection()
         } else {
             future::Either::A(future::err(Error))

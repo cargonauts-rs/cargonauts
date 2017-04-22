@@ -1,30 +1,22 @@
 use std::io;
-use std::marker::PhantomData;
-use std::net::SocketAddr;
-
-use proto::{TcpClient, BindClient, BoundTcpClient};
+use std::ops::Deref;
 
 use futures::Future;
 use core::reactor::Handle;
-use core::net::TcpStream;
 use tokio::{Service, NewService};
 
 use connections::Configure;
 
-pub trait Client {
-    type Connection: Service;
-    type Protocol;
+pub trait Client: {
+    type Connector: NewService<Instance = Self::Connection>;
+    type Connection: Service<Request = <Self::Connector as NewService>::Request,
+                             Response = <Self::Connector as NewService>::Response,
+                             Error = <Self::Connector as NewService>::Error>;
     fn connect(conn: Self::Connection) -> Self;
     fn conn(&self) -> &Self::Connection;
 }
 
 pub struct ClientService<C>(C);
-
-pub struct ClientConnector<C: Client, Kind> {
-    tcp: BoundTcpClient<Kind, C::Protocol>,
-    _marker: PhantomData<C>,
-}
-
 
 impl<C: Client> Service for ClientService<C> {
     type Request = <C::Connection as Service>::Request;
@@ -37,12 +29,23 @@ impl<C: Client> Service for ClientService<C> {
     }
 }
 
-impl<C, P, Conn, Kind> NewService for ClientConnector<C, Kind>
+impl<C: Client> Deref for ClientService<C> {
+    type Target = C;
+    fn deref(&self) -> &C {
+        &self.0
+    }
+}
+
+
+pub struct ClientConnector<C: Client> {
+    connector: C::Connector,
+}
+
+impl<C, Conn> NewService for ClientConnector<C>
 where
-    C: Client<Connection = Conn, Protocol = P>,
-    P: BindClient<Kind, TcpStream, BindClient = Conn>,
-    Conn: Service<Request = P::ServiceRequest, Response = P::ServiceResponse, Error = P::ServiceError>,
-    Kind: 'static
+    C: Client<Connector = Conn>,
+    Conn: NewService<Instance = C::Connection>,
+    Conn::Future: 'static,
 {
     type Request = Conn::Request;
     type Response = Conn::Response;
@@ -51,23 +54,20 @@ where
     type Future = Box<Future<Item = ClientService<C>, Error = io::Error>>;
 
     fn new_service(&self) -> Self::Future {
-        Box::new(self.tcp.new_service().map(|conn| ClientService(C::connect(conn))))
+        Box::new(self.connector.new_service().map(|conn| ClientService(C::connect(conn))))
     }
 }
 
-impl<C, Kind, P> Configure for ClientConnector<C, Kind>
+impl<C, Conn> Configure for ClientConnector<C>
 where
-    C: Client<Protocol = P>,
-    P: BindClient<Kind, TcpStream> + Configure,
+    C: Client<Connector = Conn>,
+    Conn: NewService<Instance = C::Connection> + Configure,
 {
-    type Config = (P::Config, SocketAddr);
+    type Config = Conn::Config;
     
     fn new(handle: &Handle, cfg: Self::Config) -> Self {
-        let (cfg, addr) = cfg;
-        let proto = P::new(handle, cfg);
         ClientConnector {
-            tcp: TcpClient::new(proto).bind(addr, handle.clone()),
-            _marker: PhantomData,
+            connector: Conn::new(handle, cfg),
         }
     }
 }
