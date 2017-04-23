@@ -1,9 +1,10 @@
 use core::reactor::Handle;
 use tokio::NewService;
 use c3po::Conn;
+use serde::de::DeserializeOwned;
 
 pub trait Configure: Sized {
-    type Config: Default;
+    type Config: Default + DeserializeOwned;
     fn new(handle: &Handle, cfg: Self::Config) -> Self;
 }
 

@@ -12,6 +12,7 @@ heck = "0.2.0"
 lalrpop-util = "0.12.5"
 proc-macro-hack = "0.3.2"
 quote = "0.3.15"
+serde_json = "1.0.0"
 
 [dependencies.cargonauts-config]
 path = "../cargonauts-config"

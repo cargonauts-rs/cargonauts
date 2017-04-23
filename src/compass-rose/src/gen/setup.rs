@@ -1,6 +1,7 @@
 use cfg::CargonautsConfig;
 use heck::KebabCase;
 use quote::{Tokens, Ident};
+use json;
 
 use ast::*;
 
@@ -34,14 +35,22 @@ fn conn(conn: &Connection, config: Option<&CargonautsConfig>) -> Tokens {
 
 fn pool_cfg(conn: &str, config: Option<&CargonautsConfig>) -> Tokens {
     match config.and_then(|cfg| cfg.client_cfg(conn)) {
-        Some(cfg)   => panic!(),
+        Some(cfg)   => {
+            // TODO must separate out member cfg from pool cfg
+            let config = json::to_string(cfg).unwrap();
+            quote!(::cargonauts::json::from_str(#config).unwrap())
+        }
         None        => quote!(::cargonauts::server::pool::Config::default()),
     }
 }
 
 fn member_cfg(conn: &str, service: &Tokens, config: Option<&CargonautsConfig>) -> Tokens {
     match config.and_then(|cfg| cfg.client_cfg(conn)) {
-        Some(cfg)   => panic!(),
+        Some(cfg)   => {
+            // TODO must separate out member cfg from pool cfg
+            let config = json::to_string(cfg).unwrap();
+            quote!(::cargonauts::json::from_str(#config).unwrap())
+        }
         None        => {
             quote!(<#service as ::cargonauts::server::pool::Configure>::Config::default())
         }

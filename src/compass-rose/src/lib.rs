@@ -5,6 +5,7 @@
 
 extern crate cargonauts_config as cfg;
 extern crate heck;
+extern crate serde_json as json;
 
 mod ast;
 mod gen;

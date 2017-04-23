@@ -11,7 +11,10 @@ anymap = "0.12.1"
 futures = "0.1.11"
 mime = "0.2.3"
 proc-macro-hack = "0.3.3"
+serde = "1.0.0"
+serde_json = "1.0.0"
 tokio-core = "0.1.6"
+toml = "0.4.0"
 
 [dependencies.c3po]
 branch = "new-service"
@@ -22,6 +25,10 @@ path = "src/cargonauts-config"
 
 [dependencies.compass-rose]
 path = "src/compass-rose"
+
+[dependencies.hyper]
+branch = "new-new-service"
+git = "https://github.com/withoutboats/hyper"
 
 [dependencies.mainsail]
 path = "src/mainsail"
@@ -36,10 +43,6 @@ git = "https://github.com/withoutboats/tokio-proto"
 [dependencies.tokio-service]
 branch = "new-new-service"
 git = "https://github.com/withoutboats/tokio-service"
-
-[dependencies.hyper]
-branch = "new-new-service"
-git = "https://github.com/withoutboats/hyper"
 
 [lib]
 path = "src/cargonauts/lib.rs"

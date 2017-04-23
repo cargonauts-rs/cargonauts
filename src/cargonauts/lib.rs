@@ -4,6 +4,8 @@ pub extern crate futures;
 extern crate c3po;
 extern crate mainsail;
 extern crate rigging;
+pub extern crate serde;
+pub extern crate serde_json as json;
 
 #[allow(unused_imports)]
 #[macro_use] extern crate compass_rose;
