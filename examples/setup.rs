@@ -5,7 +5,7 @@ extern crate cargonauts;
 extern crate tokio_service;
 
 use cargonauts::api::{Resource, Get, Environment, Error};
-use cargonauts::clients::Client;
+use cargonauts::clients::{Client, Conn};
 use cargonauts::format::Debug;
 use cargonauts::futures::{Future, future};
 
@@ -36,7 +36,7 @@ impl Service for Foo {
 }
 
 #[derive(Default)]
-struct Bar(Foo);
+struct Bar;
 
 impl Bar {
     fn bar(&self) -> MyResource {
@@ -46,13 +46,8 @@ impl Bar {
 
 impl Client for Bar {
     type Connection = Foo;
-    type Connector = Foo;
-    fn connect(conn: Self::Connection) -> Self {
-        Bar(conn)
-    }
-
-    fn conn(&self) -> &Self::Connection {
-        &self.0
+    fn connect(_: Conn<Self::Connection>) -> Self {
+        Bar
     }
 }
 
@@ -64,7 +59,6 @@ pub struct MyResource {
 routes! {
     setup {
         connection to Foo;
-        client for Bar;
     }
 
     resource MyResource {

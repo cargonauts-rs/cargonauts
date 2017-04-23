@@ -10,7 +10,7 @@ use core::reactor::Handle;
 use tokio::NewService;
 use c3po::{ConnFuture, Conn, Pool, Config};
 
-use connections::{Client, ClientConnector, Configure};
+use connections::{Client, Configure};
 
 #[derive(Clone)]
 pub struct Environment {
@@ -26,11 +26,11 @@ impl Environment {
         }
     }
 
-    pub fn client<C: Client>(&self) -> ConnFuture<Conn<ClientConnector<C>>, Error> {
-        if let Some(pool) = self.pools.get::<Pool<ClientConnector<C>>>() {
-            pool.connection()
+    pub fn client<C: Client>(&self) -> Box<Future<Item = C, Error = Error>> {
+        if let Some(pool) = self.pools.get::<Pool<C::Connection>>() {
+            Box::new(pool.connection().map(|c| C::connect(c)))
         } else {
-            future::Either::A(future::err(Error))
+            Box::new(future::err(Error))
         }
     }
 }

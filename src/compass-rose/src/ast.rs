@@ -10,13 +10,7 @@ pub struct Setup {
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub enum SetupMember {
-    Client(Client),
     Connection(Connection),
-}
-
-#[derive(PartialEq, Eq, Debug, Clone, Default)]
-pub struct Client {
-    pub client: String,
 }
 
 #[derive(PartialEq, Eq, Debug, Clone, Default)]
