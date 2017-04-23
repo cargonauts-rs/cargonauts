@@ -1,16 +1,23 @@
 use std::collections::BTreeMap;
 
 use cfg::{CargonautsConfig, Value};
-use heck::{KebabCase, SnekCase};
+use heck::SnekCase;
+use itertools::Itertools;
 use quote::{Tokens, Ident};
 use json;
 
 use ast::*;
 
 pub fn setup(setup: &Setup, config: Option<&CargonautsConfig>) -> Tokens {
-    let conns: Vec<_> = setup.members.iter().map(|setup| match *setup {
-        SetupMember::Connection(ref c) => conn(c, config),
-    }).collect();
+    let conn_groups = setup.members.iter().filter_map(|m| m.as_conn()).group_by(|c| &c.conn);
+    let conns = conn_groups.into_iter().map(|(proto, conns)| {
+       let conns = conns.collect::<Vec<_>>(); 
+       if conns.len() > 1 {
+            conn_group(proto, &conns, config)
+       } else {
+            conn(conns[0], config)
+       }
+    }).collect::<Vec<_>>();
 
     if conns.is_empty() {
         quote! {
@@ -29,10 +36,25 @@ pub fn setup(setup: &Setup, config: Option<&CargonautsConfig>) -> Tokens {
 
 fn conn(conn: &Connection, config: Option<&CargonautsConfig>) -> Tokens {
     let ident = Ident::new(&conn.conn[..]);
-    let conn = conn.conn.to_kebab_case();
-    let cfg = pool_cfg(&conn, config);
-    let member_cfg = member_cfg(&conn, &quote!(#ident), config);
+    let cfg = pool_cfg(&conn.name, config);
+    let member_cfg = member_cfg(&conn.name, &quote!(#ident), config);
     quote!({env_b.new_pool::<#ident>(handle.clone(), #cfg, #member_cfg)})
+}
+
+fn conn_group(proto: &str, conns: &[&Connection], config: Option<&CargonautsConfig>) -> Tokens {
+    let ident = Ident::new(proto);
+    let cfgs = cfg_group(conns, config);
+    quote!({env_b.new_pool_vec::<#ident>(handle.clone(), vec!#cfgs)})
+}
+
+fn cfg_group(conns: &[&Connection], config: Option<&CargonautsConfig>) -> Vec<Tokens> {
+    conns.iter().map(|conn| {
+        let name = &conn.name;
+        let cfg = pool_cfg(name, config);
+        let ident = Ident::new(&conn.conn[..]);
+        let member_cfg = member_cfg(name, &quote!(#ident), config);
+        quote!{(#name, #cfg, #member_cfg)}
+    }).collect()
 }
 
 fn pool_cfg(conn: &str, config: Option<&CargonautsConfig>) -> Tokens {

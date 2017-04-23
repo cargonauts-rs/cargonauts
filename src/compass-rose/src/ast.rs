@@ -13,9 +13,18 @@ pub enum SetupMember {
     Connection(Connection),
 }
 
+impl SetupMember {
+    pub fn as_conn(&self) -> Option<&Connection> {
+        match *self {
+            SetupMember::Connection(ref c) => Some(c),
+        }
+    }
+}
+
 #[derive(PartialEq, Eq, Debug, Clone, Default)]
 pub struct Connection {
     pub conn: String,
+    pub name: String,
 }
 
 #[derive(PartialEq, Eq, Debug, Clone, Default)]

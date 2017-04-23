@@ -59,7 +59,8 @@ pub struct MyResource {
 
 routes! {
     setup {
-        connection to Foo;
+        connection to Foo as "foo";
+        connection to Foo as "baz";
     }
 
     resource MyResource {
@@ -69,14 +70,14 @@ routes! {
 
 impl Resource for MyResource {
     type Identifier = String;
-    fn identifier(&self) -> String { self.slug.to_owned() }
 }
 
 impl Get for MyResource {
     fn get(slug: String, env: Environment) -> Box<Future<Item = MyResource, Error = Error>> {
         match &slug[..] {
-            "foo"   => Box::new(env.conn::<Foo>().and_then(|foo| foo.call(()))),
+            "foo"   => Box::new(env.conn_for::<Foo>("foo").and_then(|foo| foo.call(()))),
             "bar"   => Box::new(env.client::<Bar>().map(|bar| bar.bar())),
+            "baz"   => Box::new(env.conn_for::<Foo>("baz").and_then(|foo| foo.call(()))),
             _       => future::err(Error).boxed(),
         }
     }

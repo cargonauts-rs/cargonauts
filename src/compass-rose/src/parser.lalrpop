@@ -1,3 +1,5 @@
+use heck::KebabCase;
+
 use ast::*;
 
 grammar;
@@ -15,7 +17,8 @@ SetupMember: SetupMember = {
 };
 
 Connection: Connection = {
-    "to" <conn:Ident> ";" => Connection { conn, },
+    "to" <conn:Ident> ";" => Connection { name: conn.to_kebab_case(), conn },
+    "to" <conn:Ident> "as" <name:String> ";" => Connection { conn, name },
 };
 
 Resource: Resource = {

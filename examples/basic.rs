@@ -29,7 +29,6 @@ routes! {
 
 impl Resource for MyResource {
     type Identifier = String;
-    fn identifier(&self) -> String { self.slug.clone() }
 }
 
 impl Get for MyResource {

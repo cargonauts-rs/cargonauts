@@ -9,6 +9,7 @@ lalrpop = "0.12.5"
 
 [dependencies]
 heck = "0.2.1"
+itertools = "0.6.0"
 lalrpop-util = "0.12.5"
 proc-macro-hack = "0.3.2"
 quote = "0.3.15"
