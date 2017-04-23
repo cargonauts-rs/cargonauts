@@ -16,6 +16,7 @@ impl<T: Default, Args> Configure<Args> for T {
 }
 
 pub trait Client: 'static {
+    const CONNECTION_NAME: &'static str;
     type Connection: Configure<Handle> + NewService + 'static;
     fn connect(conn: Conn<Self::Connection>) -> Self;
 }

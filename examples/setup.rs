@@ -45,6 +45,7 @@ impl Bar {
 }
 
 impl Client for Bar {
+    const CONNECTION_NAME: &'static str = "foo";
     type Connection = Foo;
     fn connect(_: Conn<Self::Connection>) -> Self {
         Bar
