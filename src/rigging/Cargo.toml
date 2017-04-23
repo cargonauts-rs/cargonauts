@@ -10,7 +10,6 @@ tokio-core = "0.1.6"
 serde = "1.0.0"
 
 [dependencies.c3po]
-branch = "new-service"
 git = "https://github.com/withoutboats/c3po"
 
 [dependencies.hyper]
