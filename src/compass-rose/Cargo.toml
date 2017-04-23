@@ -8,7 +8,7 @@ version = "0.1.0"
 lalrpop = "0.12.5"
 
 [dependencies]
-heck = "0.2.0"
+heck = "0.2.1"
 lalrpop-util = "0.12.5"
 proc-macro-hack = "0.3.2"
 quote = "0.3.15"
