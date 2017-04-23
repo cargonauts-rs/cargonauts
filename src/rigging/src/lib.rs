@@ -31,7 +31,6 @@ impl From<io::Error> for Error {
 
 pub trait Resource: Send + 'static {
     type Identifier: Eq + ToString + FromStr + Send + 'static;
-    fn identifier(&self) -> Self::Identifier;
 }
 
 pub trait ResourceEndpoint: Resource {
