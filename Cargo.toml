@@ -24,6 +24,10 @@ path = "src/mainsail"
 [dependencies.rigging]
 path = "src/rigging"
 
+[dependencies.tokio-service]
+branch = "new-new-service"
+git = "https://github.com/withoutboats/tokio-service"
+
 [lib]
 path = "src/cargonauts/lib.rs"
 

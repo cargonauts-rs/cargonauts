@@ -3,19 +3,19 @@ use tokio::NewService;
 use c3po::Conn;
 use serde::de::DeserializeOwned;
 
-pub trait Configure: Sized {
+pub trait Configure<Args>: Sized {
     type Config: Default + DeserializeOwned;
-    fn new(handle: &Handle, cfg: Self::Config) -> Self;
+    fn new(cfg: Self::Config, args: Args) -> Self;
 }
 
-impl<T: Default> Configure for T {
+impl<T: Default, Args> Configure<Args> for T {
     type Config = ();
-    fn new(_: &Handle, _: Self::Config) -> Self {
+    fn new(_: Self::Config, _: Args) -> Self {
         T::default()
     }
 }
 
 pub trait Client: 'static {
-    type Connection: Configure + NewService + 'static;
+    type Connection: Configure<Handle> + NewService + 'static;
     fn connect(conn: Conn<Self::Connection>) -> Self;
 }

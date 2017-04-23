@@ -49,9 +49,9 @@ impl EnvBuilder {
 
     pub fn new_pool<C>(self, handle: Handle, cfg: Config, client_cfg: C::Config)
         -> Box<Future<Item = (), Error = io::Error>>
-    where C: NewService + Configure + 'static
+    where C: NewService + Configure<Handle> + 'static
     {
-        let client = C::new(&handle, client_cfg);
+        let client = C::new(client_cfg, handle.clone());
         Box::new(Pool::new(client, handle, cfg).map(move |pool| {
             self.pools.borrow_mut().insert(pool);
         }))
