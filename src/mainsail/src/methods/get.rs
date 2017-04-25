@@ -1,5 +1,6 @@
 use futures::{Future, Stream};
-use rigging::{RelationEndpoint, ResourceEndpoint, Relationship, Resource, Method, Error, http};
+use rigging::{RelationEndpoint, ResourceEndpoint, Relationship, Resource, Error, http};
+use rigging::method::Method;
 use rigging::environment::Environment;
 use rigging::routes::{Route, Kind};
 use rigging::request::*;

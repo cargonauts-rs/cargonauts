@@ -1,9 +1,10 @@
 use std::fmt::{self, Debug, Display};
 
-use rigging::{ResourceEndpoint, Error, Method};
+use rigging::{ResourceEndpoint, Error};
 use rigging::environment::Environment;
 use rigging::http;
 use rigging::format::*;
+use rigging::method::Method;
 use rigging::request::Request;
 
 const MIME: &'static str = "ext/plain; charset=utf-8";

@@ -1,5 +1,6 @@
+use {ResourceEndpoint, Error};
 use environment::Environment;
-use {ResourceEndpoint, Method, Error};
+use method::Method;
 use request::Request;
 use http;
 

@@ -82,23 +82,38 @@ impl ToTokens for Route {
     fn to_tokens(&self, tokens: &mut Tokens) {
         let endpoint = &self.endpoint;
         let resource = Ident::new(&self.resource[..]);
-        let method = Ident::new(&self.method[..]);
         let format = Ident::new(&self.format[..]);
-        let full_method = match self.rel {
-            Some(ref rel)   => {
-                let rel = Ident::new(&rel[..]);
-                quote!(#method<#rel, Identifier = <#resource as ::cargonauts::api::Resource>::Identifier>)
-            },
-            None            => {
-                quote!(#method<Identifier = <#resource as ::cargonauts::api::Resource>::Identifier>)
-            },
-        };
+        let method = method_for(&self.method, self.rel.as_ref(), &resource);
 
         tokens.append(quote!({
-            let route = <#full_method as ::cargonauts::method::Method<#resource>>::ROUTE;
+            let route = <#method as ::cargonauts::method::Method<#resource>>::ROUTE;
             let route_key = ::cargonauts::routing::RouteKey::new(#endpoint, route);
-            let endpoint = ::cargonauts::routing::endpoint::<_, _, (#resource, #format, #full_method)>;
+            let endpoint = ::cargonauts::routing::endpoint::<_, _, (#resource, #format, #method)>;
             (route_key, endpoint as ::cargonauts::routing::Handler)
         }))
+    }
+}
+
+fn method_for(method: &str, rel: Option<&String>, resource: &Ident) -> Tokens {
+    // Special cases to allow mainsail methods to have associated types
+    match method {
+        "Post"  => {
+            quote!(Post<Identifier = <#resource as ::cargonauts::api::Resource>::Identifier, Post = <#resource as ::cargonauts::api::Post>::Post>)
+        }
+        "Patch" => {
+            quote!(Patch<Identifier = <#resource as ::cargonauts::api::Resource>::Identifier, Patch = <#resource as ::cargonauts::api::Patch>::Patch>)
+        }
+        _       => {
+            let method = Ident::new(method);
+            match rel {
+                Some(rel)   => {
+                    let rel = Ident::new(&rel[..]);
+                    quote!(#method<#rel, Identifier = <#resource as ::cargonauts::api::Resource>::Identifier>)
+                }
+                None        => {
+                    quote!(#method<Identifier = <#resource as ::cargonauts::api::Resource>::Identifier>)
+                }
+            }
+        }
     }
 }

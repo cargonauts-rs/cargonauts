@@ -69,7 +69,7 @@ impl EnvBuilder {
         -> Box<Future<Item = (), Error = io::Error>>
     where C: NewService + Configure<Handle> + 'static
     {
-        let client = C::new(client_cfg, handle.clone());
+        let client = C::config(client_cfg, handle.clone());
         Box::new(Pool::new(client, handle, cfg).map(move |pool| {
             self.pools.borrow_mut().insert(pool);
         }))
@@ -81,7 +81,7 @@ impl EnvBuilder {
     where C: NewService + Configure<Handle> + 'static
     {
         Box::new(stream::futures_unordered(cfgs.into_iter().map(|(name, cfg, client_cfg)| {
-            let client = C::new(client_cfg, handle.clone());
+            let client = C::config(client_cfg, handle.clone());
             Pool::new(client, handle.clone(), cfg).map(move |pool| (name, pool))
         })).collect().map(move |pools| {
             self.pools.borrow_mut().insert(pools);

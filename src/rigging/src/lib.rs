@@ -8,12 +8,16 @@ extern crate tokio_proto as proto;
 extern crate tokio_core as core;
 extern crate c3po;
 extern crate serde;
+extern crate tokio_redis as redis;
+
+#[macro_use] extern crate serde_derive;
 
 pub mod connections;
 pub mod endpoint;
 pub mod environment;
 pub mod format;
 pub mod http;
+pub mod method;
 pub mod request;
 pub mod routes;
 
@@ -61,14 +65,3 @@ where
     const LINK: RelationshipLink;
 }
 
-use request::Request;
-
-pub trait Method<T: Resource> {
-    const ROUTE: routes::Route<'static>;
-
-    type Request: Request<T>;
-    type Response: Resource;
-    type Outcome: 'static;
-
-    fn call(req: Self::Request, env: environment::Environment) -> Self::Outcome;
-}

@@ -2,7 +2,7 @@ use futures::{Future, Stream, IntoFuture};
 
 use Error;
 use ResourceEndpoint;
-use Method;
+use method::Method;
 
 use request::*;
 use format::*;
