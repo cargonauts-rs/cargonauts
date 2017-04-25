@@ -34,7 +34,7 @@ pub mod api {
         ($rel:ident => $resource:ident) => {
             pub struct $rel;
 
-            impl $crate::api::relations::Relationship for $rel {
+            impl $crate::api::Relationship for $rel {
                 type Related = $resource;
             }
         }

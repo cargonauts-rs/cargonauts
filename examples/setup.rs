@@ -5,7 +5,7 @@ extern crate cargonauts;
 extern crate tokio_service;
 
 use cargonauts::api::{Resource, Get, Environment, Error};
-use cargonauts::clients::{Client, Conn};
+use cargonauts::clients::{Client, Conn, Configure};
 use cargonauts::format::Debug;
 use cargonauts::futures::{Future, future};
 
@@ -13,6 +13,13 @@ use tokio_service::Service;
 
 #[derive(Default)]
 struct Foo;
+
+impl<Args> Configure<Args> for Foo {
+    type Config = ();
+    fn config(_: (), _: Args) -> Foo {
+        Foo::default()
+    }
+}
 
 impl tokio_service::NewService for Foo {
     type Request = ();
