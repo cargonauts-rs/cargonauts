@@ -74,7 +74,7 @@ pub mod method {
 
 pub mod format {
 
-    pub use mainsail::formats::Debug;
+    pub use mainsail::formats::{Debug, Display};
 
     pub mod presenter {
         pub use rigging::format::{Present, PresentResource, PresentCollection, Template};
