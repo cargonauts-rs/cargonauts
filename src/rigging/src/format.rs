@@ -33,4 +33,17 @@ pub trait PresentCollection<T: ResourceEndpoint, M: ?Sized + Method<T>>: Send + 
 }
 
 #[derive(Copy, Clone)]
-pub struct Template;
+pub struct Template {
+    src: &'static str
+}
+
+impl Template {
+    #[doc(hidden)]
+    pub fn static_prepare(src: &'static str) -> Template {
+        Template { src }
+    }
+}
+
+impl AsRef<str> for Template {
+    fn as_ref(&self) -> &str { self.src }
+}

@@ -1,3 +1,8 @@
+use std::env;
+use std::fs;
+use std::io;
+use std::path::PathBuf;
+
 use heck::KebabCase;
 use quote::{ToTokens, Tokens, Ident};
 
@@ -34,11 +39,14 @@ struct Route {
     format: String,
     rel: Option<String>,
     middleware: Option<String>,
+    source_root: PathBuf,
 }
 
 impl Route {
     fn build(resources: &[Resource]) -> Vec<Route> {
         let mut vec = vec![];
+
+        let source_root = find_src_root(env::current_dir().expect("current dir")).expect("src root");
 
         for resource in resources {
             let endpoint = resource.header.endpoint.clone().unwrap_or_else(|| {
@@ -56,6 +64,7 @@ impl Route {
                     format: method.format.clone(),
                     rel: None,
                     middleware,
+                    source_root: source_root.clone(),
                 })
             }
 
@@ -69,6 +78,7 @@ impl Route {
                         format: method.format.clone(),
                         rel: Some(relation.rel.clone()),
                         middleware,
+                        source_root: source_root.clone(),
                     })
                 }
             }
@@ -81,6 +91,10 @@ impl Route {
 impl ToTokens for Route {
     fn to_tokens(&self, tokens: &mut Tokens) {
         let endpoint = &self.endpoint;
+        let template = load_template(self.source_root.clone(),
+                                     &self.resource,
+                                     &self.method,
+                                     self.rel.as_ref());
         let resource = Ident::new(&self.resource[..]);
         let format = Ident::new(&self.format[..]);
         let method = method_for(&self.method, self.rel.as_ref(), &resource);
@@ -90,8 +104,7 @@ impl ToTokens for Route {
             where
                 E: ?Sized + ::cargonauts::routing::Endpoint<H, R>,
             {
-                let template = None;
-                ::cargonauts::routing::endpoint::<_, _, E>(req, template, env)
+                ::cargonauts::routing::endpoint::<_, _, E>(req, #template, env)
             }
             let route = <#method as ::cargonauts::method::Method<#resource>>::ROUTE;
             let route_key = ::cargonauts::routing::RouteKey::new(#endpoint, route);
@@ -122,4 +135,32 @@ fn method_for(method: &str, rel: Option<&String>, resource: &Ident) -> Tokens {
             }
         }
     }
+}
+
+fn load_template(mut path: PathBuf, resource: &str, method: &str, rel: Option<&String>) -> Tokens {
+    path.push("src");
+    path.push("templates");
+    path.push(resource);
+    if let Some(rel) = rel { path.push(rel); }
+
+    let match_method = |entry: &fs::DirEntry| {
+        entry.file_name().into_string().unwrap().starts_with(&method.to_kebab_case())
+    };
+
+    let mut walk_dir = fs::read_dir(path).into_iter().flat_map(|ls| ls.into_iter().map(|e| e.unwrap()));
+
+    if let Some(entry) = walk_dir.find(match_method) {
+        let path = entry.path();
+        let path = path.to_string_lossy();
+        quote!(Some(::cargonauts::format::Template::static_prepare(include_str!(#path))))
+    } else {
+        quote!(None)
+    }
+}
+
+fn find_src_root(mut current_dir: PathBuf) -> io::Result<PathBuf> {
+    fs::metadata(current_dir.join("Cargo.toml")).map(|_| current_dir.clone()).or_else(move |err| {
+        if current_dir.pop() { find_src_root(current_dir) }
+        else { Err(err) }
+    })
 }
