@@ -44,7 +44,7 @@ pub mod api {
 #[doc(hidden)]
 pub mod routing {
     pub use rigging::{ResourceEndpoint, RelationEndpoint, RelationshipLink};
-    pub use rigging::endpoint::endpoint;
+    pub use rigging::endpoint::{Endpoint, endpoint};
     pub use rigging::routes::{Kind, RoutingTable, RouteKey, Handler, not_found};
     pub use rigging::environment::EnvBuilder;
 }

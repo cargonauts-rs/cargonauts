@@ -32,5 +32,5 @@ pub trait PresentCollection<T: ResourceEndpoint, M: ?Sized + Method<T>>: Send + 
     fn finish(self) -> http::Response;
 }
 
+#[derive(Copy, Clone)]
 pub struct Template;
-

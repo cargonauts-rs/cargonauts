@@ -86,10 +86,16 @@ impl ToTokens for Route {
         let method = method_for(&self.method, self.rel.as_ref(), &resource);
 
         tokens.append(quote!({
+            fn handle<H, R, E>(req: ::cargonauts::server::Request, env: ::cargonauts::api::Environment) -> E::Future
+            where
+                E: ?Sized + ::cargonauts::routing::Endpoint<H, R>,
+            {
+                let template = None;
+                ::cargonauts::routing::endpoint::<_, _, E>(req, template, env)
+            }
             let route = <#method as ::cargonauts::method::Method<#resource>>::ROUTE;
             let route_key = ::cargonauts::routing::RouteKey::new(#endpoint, route);
-            let endpoint = ::cargonauts::routing::endpoint::<_, _, (#resource, #format, #method)>;
-            (route_key, endpoint as ::cargonauts::routing::Handler)
+            (route_key, handle::<_, _, (#resource, #format, #method)> as ::cargonauts::routing::Handler)
         }))
     }
 }
