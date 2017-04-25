@@ -17,8 +17,8 @@ pub trait Present<T: ResourceEndpoint, M: ?Sized + Method<T>>: Send + 'static {
     type ResourcePresenter: PresentResource<T, M>;
     type CollectionPresenter: PresentCollection<T, M>;
 
-    fn for_resource() -> Self::ResourcePresenter;
-    fn for_collection() -> Self::CollectionPresenter;
+    fn for_resource(env: &mut Environment) -> Self::ResourcePresenter;
+    fn for_collection(env: &mut Environment) -> Self::CollectionPresenter;
 }
 
 pub trait PresentResource<T: ResourceEndpoint, M: ?Sized + Method<T>> {

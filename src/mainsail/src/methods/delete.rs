@@ -6,7 +6,7 @@ use rigging::routes::{Route, Kind};
 use rigging::request::*;
 
 pub trait Delete: Resource {
-    fn delete(id: Self::Identifier, env: Environment) -> Box<Future<Item = Self, Error = Error>> where Self: Sized;
+    fn delete(id: Self::Identifier, env: &mut Environment) -> Box<Future<Item = Self, Error = Error>> where Self: Sized;
 }
 
 pub struct DeleteRequest<T: Resource> {
@@ -33,7 +33,7 @@ impl<T: Delete> Method<T> for Delete<Identifier = T::Identifier> {
     type Response = T;
     type Outcome = Box<Future<Item = T, Error = Error>>;
 
-    fn call(req: Self::Request, env: Environment) -> Self::Outcome {
+    fn call(req: Self::Request, env: &mut Environment) -> Self::Outcome {
         T::delete(req.id, env)
     }
 }

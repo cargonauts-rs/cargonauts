@@ -32,19 +32,19 @@ impl Resource for MyResource {
 }
 
 impl Get for MyResource {
-    fn get(slug: String, _: Environment) -> Box<Future<Item = MyResource, Error = Error>> {
+    fn get(slug: String, _: &mut Environment) -> Box<Future<Item = MyResource, Error = Error>> {
         future::ok(MyResource { slug }).boxed()
     }
 }
 
 impl Index for MyResource {
-    fn index(_: Environment) -> Box<Stream<Item = MyResource, Error = Error>> {
+    fn index(_: &mut Environment) -> Box<Stream<Item = MyResource, Error = Error>> {
         stream::once(Ok(MyResource { slug: String::from("hello-world") })).boxed()
     }
 }
 
 impl GetOne<AllCaps> for MyResource {
-    fn get_one(slug: String, _: Environment) -> Box<Future<Item = MyResource, Error = Error>> {
+    fn get_one(slug: String, _: &mut Environment) -> Box<Future<Item = MyResource, Error = Error>> {
         future::ok(MyResource { slug: slug.to_uppercase() }).boxed()
     }
 }

@@ -7,7 +7,7 @@ use rigging::request::*;
 
 pub trait Post: Resource {
     type Post;
-    fn post(post: Self::Post, env: Environment) -> Box<Future<Item = Self, Error = Error>> where Self: Sized;
+    fn post(post: Self::Post, env: &mut Environment) -> Box<Future<Item = Self, Error = Error>> where Self: Sized;
 }
 
 pub struct PostRequest<T: Post> {
@@ -28,7 +28,7 @@ impl<T: Post> Method<T> for Post<Identifier = T::Identifier, Post = T::Post> {
     type Response = T;
     type Outcome = Box<Future<Item = T, Error = Error>>;
 
-    fn call(req: Self::Request, env: Environment) -> Self::Outcome {
+    fn call(req: Self::Request, env: &mut Environment) -> Self::Outcome {
         T::post(req.post, env)
     }
 }

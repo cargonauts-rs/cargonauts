@@ -46,11 +46,11 @@ where
     type ResourcePresenter = ResourcePresenter;
     type CollectionPresenter = CollectionPresenter<M::Response>;
 
-    fn for_resource() -> Self::ResourcePresenter {
+    fn for_resource(_: &mut Environment) -> Self::ResourcePresenter {
         ResourcePresenter::default()
     }
 
-    fn for_collection() -> Self::CollectionPresenter {
+    fn for_collection(_: &mut Environment) -> Self::CollectionPresenter {
         CollectionPresenter::default()
     }
 }

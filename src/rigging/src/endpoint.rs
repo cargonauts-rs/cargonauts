@@ -1,4 +1,5 @@
 use futures::{Future, Stream, IntoFuture};
+use futures::future::Either;
 
 use Error;
 use ResourceEndpoint;
@@ -34,19 +35,27 @@ where
 {
     type Future = Box<Future<Item = http::Response, Error = http::Error>>;
     fn call(req: http::Request, template: Option<Template>, mut env: Environment) -> Self::Future {
-        Box::new(parse_id::<T>(&req).into_future().and_then(move |id| {
-            F::Receiver::receive(req, &mut env).into_future().and_then(move |parts| {
-                let request = M::Request::new(parts, id, &mut env);
-                M::call(request, env).then(move |result| {
-                    let presenter = F::Presenter::for_resource();
-                    match result {
-                        Ok(resource)    => Ok(presenter.resource(resource, template)),
-                        Err(error)      => Ok(presenter.error(error, template)),
+        Box::new(parse_id::<T>(&req).into_future().then(move |result| match result {
+            Ok(id) => {
+                Either::A(F::Receiver::receive(req, &mut env).into_future().then(move |result| match result {
+                    Ok(parts) => {
+                        let request = M::Request::new(parts, id, &mut env);
+                        Either::A(M::call(request, &mut env).then(move |result| {
+                            let presenter = F::Presenter::for_resource(&mut env);
+                            match result {
+                                Ok(resource)    => Ok(presenter.resource(resource, template)),
+                                Err(error)      => Ok(presenter.error(error, template)),
+                            }
+                        }))
                     }
-                })
-            })
-        }).or_else(move |err| {
-            Ok(F::Presenter::for_resource().error(err, template))
+                    Err(err) => {
+                        Either::B(Ok(F::Presenter::for_resource(&mut env).error(err, template)).into_future())
+                    }
+                }))
+            }
+            Err(err) => {
+                Either::B(Ok(F::Presenter::for_resource(&mut env).error(err, template)).into_future())
+            }
         }))
     }
 }
@@ -61,19 +70,22 @@ where
 {
     type Future = Box<Future<Item = http::Response, Error = http::Error>>;
     fn call(req: http::Request, template: Option<Template>, mut env: Environment) -> Self::Future {
-        Box::new(F::Receiver::receive(req, &mut env).into_future().and_then(move |parts| {
-            let request = M::Request::new(parts, &mut env);
-            let stream = M::call(request, env);
-            let presenter = F::Presenter::for_collection();
-            stream.then(move |result| -> Result<_, ()> { Ok(result) }).fold(presenter, move |mut presenter, result| {
-                match result {
-                    Ok(resource)    => presenter.append(resource, template),
-                    Err(error)      => presenter.error(error, template),
-                }
-                Ok(presenter)
-            }).then(|presenter| Ok(presenter.unwrap().finish()))
-        }).or_else(move |err| {
-            Ok(F::Presenter::for_resource().error(err, template))
+        Box::new(F::Receiver::receive(req, &mut env).into_future().then(move |result| match result {
+            Ok(parts) => {
+                let request = M::Request::new(parts, &mut env);
+                let stream = M::call(request, &mut env);
+                let presenter = F::Presenter::for_collection(&mut env);
+                Either::A(stream.then(move |result| -> Result<_, ()> { Ok(result) }).fold(presenter, move |mut presenter, result| {
+                    match result {
+                        Ok(resource)    => presenter.append(resource, template),
+                        Err(error)      => presenter.error(error, template),
+                    }
+                    Ok(presenter)
+                }).then(|presenter| Ok(presenter.unwrap().finish())))
+            }
+            Err(err) => {
+                Either::B(Ok(F::Presenter::for_resource(&mut env).error(err, template)).into_future())
+            }
         }))
     }
 }
@@ -88,17 +100,20 @@ where
 {
     type Future = Box<Future<Item = http::Response, Error = http::Error>>;
     fn call(req: http::Request, template: Option<Template>, mut env: Environment) -> Self::Future {
-        Box::new(F::Receiver::receive(req, &mut env).into_future().and_then(move |parts| {
-            let request = M::Request::new(parts, &mut env);
-            M::call(request, env).then(move |result| {
-                let presenter = F::Presenter::for_resource();
-                match result {
-                    Ok(resource)    => Ok(presenter.resource(resource, template)),
-                    Err(error)      => Ok(presenter.error(error, template)),
-                }
-            })
-        }).or_else(move |err| {
-            Ok(F::Presenter::for_resource().error(err, template))
+        Box::new(F::Receiver::receive(req, &mut env).into_future().then(move |result| match result {
+            Ok(parts) => {
+                let request = M::Request::new(parts, &mut env);
+                Either::A(M::call(request, &mut env).then(move |result| {
+                    let presenter = F::Presenter::for_resource(&mut env);
+                    match result {
+                        Ok(resource)    => Ok(presenter.resource(resource, template)),
+                        Err(error)      => Ok(presenter.error(error, template)),
+                    }
+                }))
+            }
+            Err(err) => {
+                Either::B(Ok(F::Presenter::for_resource(&mut env).error(err, template)).into_future())
+            }
         }))
     }
 }
@@ -113,21 +128,29 @@ where
 {
     type Future = Box<Future<Item = http::Response, Error = http::Error>>;
     fn call(req: http::Request, template: Option<Template>, mut env: Environment) -> Self::Future {
-        Box::new(parse_id::<T>(&req).into_future().and_then(move |id| {
-            F::Receiver::receive(req, &mut env).into_future().and_then(move |parts| {
-                let request = M::Request::new(parts, id, &mut env);
-                let stream = M::call(request, env);
-                let presenter = F::Presenter::for_collection();
-                stream.then(move |result| -> Result<_, ()> { Ok(result) }).fold(presenter, move |mut presenter, result| {
-                    match result {
-                        Ok(resource)    => presenter.append(resource, template),
-                        Err(error)      => presenter.error(error, template),
+        Box::new(parse_id::<T>(&req).into_future().then(move |result| match result {
+            Ok(id)  => {
+                Either::A(F::Receiver::receive(req, &mut env).into_future().then(move |result| match result {
+                    Ok(parts) => {
+                        let request = M::Request::new(parts, id, &mut env);
+                        let stream = M::call(request, &mut env);
+                        let presenter = F::Presenter::for_collection(&mut env);
+                        Either::A(stream.then(move |result| -> Result<_, ()> { Ok(result) }).fold(presenter, move |mut presenter, result| {
+                            match result {
+                                Ok(resource)    => presenter.append(resource, template),
+                                Err(error)      => presenter.error(error, template),
+                            }
+                            Ok(presenter)
+                        }).then(|presenter| Ok(presenter.unwrap().finish())))
                     }
-                    Ok(presenter)
-                }).then(|presenter| Ok(presenter.unwrap().finish()))
-            })
-        }).or_else(move |err| {
-            Ok(F::Presenter::for_resource().error(err, template))
+                    Err(err) => {
+                        Either::B(Ok(F::Presenter::for_resource(&mut env).error(err, template)).into_future())
+                    }
+                }))
+            }
+            Err(err)    => {
+                Either::B(Ok(F::Presenter::for_resource(&mut env).error(err, template)).into_future())
+            }
         }))
     }
 }
