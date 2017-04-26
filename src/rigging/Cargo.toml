@@ -6,9 +6,9 @@ version = "0.1.0"
 [dependencies]
 anymap = "0.12.1"
 futures = "0.1.13"
-tokio-core = "0.1.6"
 serde = "1.0.0"
-serde_derive = "1.0.0"
+tokio-core = "0.1.6"
+url = "1.4.0"
 
 [dependencies.c3po]
 git = "https://github.com/withoutboats/c3po"
@@ -21,9 +21,9 @@ git = "https://github.com/withoutboats/hyper"
 branch = "new-new-service"
 git = "https://github.com/withoutboats/tokio-proto"
 
+[dependencies.tokio-redis]
+git = "https://github.com/withoutboats/tokio-redis"
+
 [dependencies.tokio-service]
 branch = "new-new-service"
 git = "https://github.com/withoutboats/tokio-service"
-
-[dependencies.tokio-redis]
-git = "https://github.com/withoutboats/tokio-redis"

@@ -9,8 +9,7 @@ extern crate tokio_core as core;
 extern crate c3po;
 extern crate serde;
 extern crate tokio_redis as redis;
-
-#[macro_use] extern crate serde_derive;
+extern crate url;
 
 pub mod connections;
 pub mod endpoint;

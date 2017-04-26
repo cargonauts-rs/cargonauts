@@ -58,7 +58,7 @@ fn cfg_group(conns: &[&Connection], config: Option<&CargonautsConfig>) -> Vec<To
 }
 
 fn pool_cfg(conn: &str, config: Option<&CargonautsConfig>) -> Tokens {
-    match config.and_then(|cfg| cfg.client_cfg(conn)) {
+    match config.and_then(|cfg| cfg.conn_cfg(conn)) {
         Some(cfg)   => {
             let (cfg, _) = split(cfg);
             let config = json::to_string(&cfg).unwrap();
@@ -69,7 +69,7 @@ fn pool_cfg(conn: &str, config: Option<&CargonautsConfig>) -> Tokens {
 }
 
 fn member_cfg(conn: &str, service: &Tokens, config: Option<&CargonautsConfig>) -> Tokens {
-    match config.and_then(|cfg| cfg.client_cfg(conn)) {
+    match config.and_then(|cfg| cfg.conn_cfg(conn)) {
         Some(cfg)   => {
             let (_, cfg) = split(cfg);
             let config = json::to_string(&cfg).unwrap();

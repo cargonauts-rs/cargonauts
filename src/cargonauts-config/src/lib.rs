@@ -18,7 +18,8 @@ pub use toml::Value;
 #[derive(Deserialize)]
 pub struct CargonautsConfig {
     host: Option<SocketAddr>,
-    clients: Option<BTreeMap<String, BTreeMap<String, toml::Value>>>,
+    conns: Option<BTreeMap<String, BTreeMap<String, toml::Value>>>,
+    env: Option<Env>,
 }
 
 impl CargonautsConfig {
@@ -50,9 +51,25 @@ impl CargonautsConfig {
         self.host
     }
 
-    pub fn client_cfg(&self, client: &str) -> Option<&BTreeMap<String, Value>> {
-        self.clients.as_ref().and_then(|clients| clients.get(client))
+    pub fn conn_cfg(&self, conn: &str) -> Option<&BTreeMap<String, Value>> {
+        self.conns.as_ref().and_then(|conns| conns.get(conn))
     }
+
+    pub fn env(&self, profile: &str) -> Option<&BTreeMap<String, String>> {
+        match profile {
+            "dev"       => self.env.as_ref().and_then(|env| env.dev.as_ref()),
+            "release"   => self.env.as_ref().and_then(|env| env.release.as_ref()),
+            "test"      => self.env.as_ref().and_then(|env| env.test.as_ref()),
+            _           => None,
+        }
+    }
+}
+
+#[derive(Deserialize)]
+pub struct Env {
+    dev: Option<BTreeMap<String, String>>,
+    release: Option<BTreeMap<String, String>>,
+    test: Option<BTreeMap<String, String>>
 }
 
 #[derive(Deserialize)]

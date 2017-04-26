@@ -61,7 +61,7 @@ pub mod server {
 }
 
 pub mod clients {
-    pub use rigging::connections::{Client, Configure, RedisConfig};
+    pub use rigging::connections::{Client, Configure};
     pub use c3po::{Config as PoolConfig, Conn};
 }
 
