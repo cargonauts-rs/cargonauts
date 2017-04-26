@@ -11,13 +11,14 @@ use std::error::Error;
 use std::fs::File;
 use std::io::{self, Read};
 use std::net::SocketAddr;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 pub use toml::Value;
 
 #[derive(Deserialize)]
 pub struct CargonautsConfig {
     host: Option<SocketAddr>,
+    templates: Option<PathBuf>,
     conns: Option<BTreeMap<String, BTreeMap<String, toml::Value>>>,
     env: Option<Env>,
 }
@@ -49,6 +50,10 @@ impl CargonautsConfig {
 
     pub fn host(&self) -> Option<SocketAddr> {
         self.host
+    }
+
+    pub fn templates(&self) -> Option<&Path> {
+        self.templates.as_ref().map(|p| p.as_path())
     }
 
     pub fn conn_cfg(&self, conn: &str) -> Option<&BTreeMap<String, Value>> {

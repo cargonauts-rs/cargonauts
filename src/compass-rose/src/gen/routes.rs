@@ -1,8 +1,8 @@
 use std::env;
 use std::fs;
-use std::io;
 use std::path::PathBuf;
 
+use cfg::CargonautsConfig;
 use heck::KebabCase;
 use quote::{ToTokens, Tokens, Ident};
 
@@ -13,9 +13,9 @@ pub struct Routes {
 }
 
 impl Routes {
-    pub fn new(resources: &[Resource]) -> Routes {
+    pub fn new(resources: &[Resource], cfg: Option<&CargonautsConfig>) -> Routes {
         Routes {
-            routes: Route::build(resources),
+            routes: Route::build(resources, cfg),
         }
     }
 }
@@ -39,14 +39,23 @@ struct Route {
     format: String,
     rel: Option<String>,
     middleware: Option<String>,
-    source_root: PathBuf,
+    template_root: PathBuf,
 }
 
 impl Route {
-    fn build(resources: &[Resource]) -> Vec<Route> {
+    fn build(resources: &[Resource], cfg: Option<&CargonautsConfig>) -> Vec<Route> {
         let mut vec = vec![];
 
-        let source_root = find_src_root(env::current_dir().expect("current dir")).expect("src root");
+        let root = match cfg.and_then(|cfg| cfg.templates()) {
+            Some(path)  => path.to_owned(),
+            None        => {
+                let mut root: PathBuf =  env::var("CARGO_MANIFEST_DIR").unwrap().into();
+                root.push("src");
+                root.push("templates");
+                root
+            }
+        };
+        
 
         for resource in resources {
             let endpoint = resource.header.endpoint.clone().unwrap_or_else(|| {
@@ -64,7 +73,7 @@ impl Route {
                     format: method.format.clone(),
                     rel: None,
                     middleware,
-                    source_root: source_root.clone(),
+                    template_root: root.clone(),
                 })
             }
 
@@ -78,7 +87,7 @@ impl Route {
                         format: method.format.clone(),
                         rel: Some(relation.rel.clone()),
                         middleware,
-                        source_root: source_root.clone(),
+                        template_root: root.clone(),
                     })
                 }
             }
@@ -91,7 +100,7 @@ impl Route {
 impl ToTokens for Route {
     fn to_tokens(&self, tokens: &mut Tokens) {
         let endpoint = &self.endpoint;
-        let template = load_template(self.source_root.clone(),
+        let template = load_template(self.template_root.clone(),
                                      &self.resource,
                                      &self.method,
                                      self.rel.as_ref());
@@ -138,8 +147,6 @@ fn method_for(method: &str, rel: Option<&String>, resource: &Ident) -> Tokens {
 }
 
 fn load_template(mut path: PathBuf, resource: &str, method: &str, rel: Option<&String>) -> Tokens {
-    path.push("src");
-    path.push("templates");
     path.push(resource);
     if let Some(rel) = rel { path.push(rel); }
 
@@ -156,11 +163,4 @@ fn load_template(mut path: PathBuf, resource: &str, method: &str, rel: Option<&S
     } else {
         quote!(None)
     }
-}
-
-fn find_src_root(mut current_dir: PathBuf) -> io::Result<PathBuf> {
-    fs::metadata(current_dir.join("Cargo.toml")).map(|_| current_dir.clone()).or_else(move |err| {
-        if current_dir.pop() { find_src_root(current_dir) }
-        else { Err(err) }
-    })
 }
