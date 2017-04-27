@@ -7,6 +7,7 @@ extern crate cargonauts_config as cfg;
 extern crate heck;
 extern crate itertools;
 extern crate serde_json as json;
+extern crate walkdir;
 
 mod ast;
 mod gen;

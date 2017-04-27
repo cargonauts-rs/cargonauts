@@ -24,7 +24,7 @@ where
     };
     fs::create_dir_all(&output_path)?;
 
-    println!("cargo:rustc-cfg=cargonauts_asset_pipeline");
+    println!("cargo:rustc-cfg=used_cargonauts_asset_pipeline");
 
     let iter = walkdir::WalkDir::new(asset_path).into_iter();
     f(iter, output_path.as_path())

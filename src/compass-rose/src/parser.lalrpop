@@ -5,7 +5,12 @@ use ast::*;
 grammar;
 
 pub routes: Routes = {
-    <setup:Setup?> <resources:Resource*> => Routes { setup, resources }
+    <asset_handler:AssetHandler?> <setup:Setup?> <resources:Resource*>
+        => Routes { asset_handler, setup, resources },
+};
+
+AssetHandler: String = {
+    "use" <Ident> "for" "assets" ";" => <>,
 };
 
 Setup: Setup = {

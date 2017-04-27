@@ -74,12 +74,24 @@ impl<'a> RouteKeyRef<'a> {
 #[derive(Clone)]
 pub struct RoutingTable {
     routes: Rc<HashMap<RouteKey, Handler>>,
+    assets: Rc<HashMap<&'static str, &'static [u8]>>,
+    asset_handler: AssetHandler,
     env: Environment,
 }
 
 impl RoutingTable {
-    pub fn new(routes: HashMap<RouteKey, Handler>, env: Environment) -> RoutingTable {
-        RoutingTable { routes: Rc::new(routes), env }
+    pub fn new(
+        routes: HashMap<RouteKey, Handler>,
+        assets: HashMap<&'static str, &'static [u8]>,
+        asset_handler: AssetHandler,
+        env: Environment
+    ) -> RoutingTable {
+        RoutingTable {
+            routes: Rc::new(routes),
+            assets: Rc::new(assets),
+            asset_handler,
+            env,
+        }
     }
 }
 
@@ -90,6 +102,12 @@ impl Service for RoutingTable {
     type Future = Box<Future<Item = Self::Response, Error = Self::Error>>;
 
     fn call(&self, req: Self::Request) -> Self::Future {
+        {
+            let path = req.path().trim_matches('/');
+            if let Some(asset) = self.assets.get(path) {
+                return (self.asset_handler)(asset)
+            }
+        }
         match RouteKeyRef::req(&req).and_then(|route| self.routes.get(&route)) {
             Some(handle)    => handle(req, self.env.clone()),
             None            => not_found(),
@@ -110,7 +128,17 @@ impl NewService for RoutingTable {
 }
 
 pub type Handler = fn(http::Request, Environment) -> Box<Future<Item = http::Response, Error = http::Error>>;
+pub type AssetHandler = fn(&'static [u8]) -> Box<Future<Item = http::Response, Error = http::Error>>;
 
 pub fn not_found() -> Box<Future<Item = http::Response, Error = http::Error>> {
     future::ok(http::Response::new().with_status(http::StatusCode::NotFound)).boxed()
+}
+
+pub fn default_asset_handler(asset: &'static [u8])
+    -> Box<Future<Item = http::Response, Error = http::Error>>
+{
+    Box::new(future::ok(http::Response::new()
+                            .with_status(http::StatusCode::Ok)
+                            .with_header(http::headers::ContentLength(asset.len() as u64))
+                            .with_body(asset)))
 }

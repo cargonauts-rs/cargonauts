@@ -1,5 +1,6 @@
 #[derive(PartialEq, Eq, Debug, Clone, Default)]
 pub struct Routes {
+    pub asset_handler: Option<String>,
     pub setup: Option<Setup>,
     pub resources: Vec<Resource>,
 }

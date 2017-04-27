@@ -26,7 +26,7 @@ impl ToTokens for Routes {
         tokens.append(quote! ({
             use ::cargonauts::server::NewService;
             let routes = vec!#routes.into_iter().collect();
-            ::cargonauts::routing::RoutingTable::new(routes, env)
+            ::cargonauts::routing::RoutingTable::new(routes, assets, asset_handler, env)
         }));
     }
 }
