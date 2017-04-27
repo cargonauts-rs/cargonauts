@@ -19,21 +19,15 @@ pub use toml::Value;
 pub struct CargonautsConfig {
     host: Option<SocketAddr>,
     templates: Option<PathBuf>,
+    assets: Option<PathBuf>,
     conns: Option<BTreeMap<String, BTreeMap<String, toml::Value>>>,
     env: Option<Env>,
 }
 
 impl CargonautsConfig {
     pub fn find_and_parse() -> Result<CargonautsConfig, Box<Error>> {
-
-        fn find_cargo_toml(mut current: PathBuf) -> io::Result<File> {
-            File::open(current.join("Cargo.toml")).or_else(|err| {
-                if current.pop() { find_cargo_toml(current) }
-                else { Err(err) }
-            })
-        }
-
-        let file = find_cargo_toml(env::current_dir()?)?;
+        let path: PathBuf = env::var("CARGO_MANIFEST_DIR")?.into();
+        let file = File::open(path.join("Cargo.toml"))?;
         CargonautsConfig::from_file(file)
     }
 
@@ -54,6 +48,10 @@ impl CargonautsConfig {
 
     pub fn templates(&self) -> Option<&Path> {
         self.templates.as_ref().map(|p| p.as_path())
+    }
+
+    pub fn assets(&self) -> Option<&Path> {
+        self.assets.as_ref().map(|p| p.as_path())
     }
 
     pub fn conn_cfg(&self, conn: &str) -> Option<&BTreeMap<String, Value>> {

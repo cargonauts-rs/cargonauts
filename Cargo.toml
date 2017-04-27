@@ -16,6 +16,9 @@ serde_derive = "1.0.0"
 [dependencies.c3po]
 git = "https://github.com/withoutboats/c3po"
 
+[dependencies.asset-pipeline]
+path = "src/asset-pipeline"
+
 [dependencies.compass-rose]
 path = "src/compass-rose"
 

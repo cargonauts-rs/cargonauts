@@ -1,6 +1,6 @@
 use std::env;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use cfg::CargonautsConfig;
 use heck::KebabCase;
@@ -46,14 +46,10 @@ impl Route {
     fn build(resources: &[Resource], cfg: Option<&CargonautsConfig>) -> Vec<Route> {
         let mut vec = vec![];
 
-        let root = match cfg.and_then(|cfg| cfg.templates()) {
-            Some(path)  => path.to_owned(),
-            None        => {
-                let mut root: PathBuf =  env::var("CARGO_MANIFEST_DIR").unwrap().into();
-                root.push("src");
-                root.push("templates");
-                root
-            }
+        let root = {
+            let root: PathBuf = env::var("CARGO_MANIFEST_DIR").unwrap().into();
+            let sub = cfg.and_then(|cfg| cfg.templates()).unwrap_or(Path::new("src/templates"));
+            root.join(sub)
         };
         
 
