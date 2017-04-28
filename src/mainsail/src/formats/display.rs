@@ -9,7 +9,7 @@ use rigging::format::*;
 use rigging::method::Method;
 use rigging::request::Request;
 
-const MIME: &'static str = "ext/plain; charset=utf-8";
+const MIME: &'static str = "text/plain; charset=utf-8";
 
 #[derive(Default, Clone)]
 pub struct SimpleDisplay {

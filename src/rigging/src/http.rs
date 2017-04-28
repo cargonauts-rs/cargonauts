@@ -7,8 +7,7 @@ use core::net::TcpListener;
 use core::reactor::Core;
 
 pub use hyper::header as headers;
-pub use hyper::{StatusCode, Error};
-pub use hyper::Method;
+pub use hyper::{StatusCode, Error, Method, Body};
 pub use hyper::server::{Request, Response};
 pub use core::reactor::Handle;
 pub use tokio::{Service, NewService};

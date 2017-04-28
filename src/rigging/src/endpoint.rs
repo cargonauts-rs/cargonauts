@@ -39,13 +39,15 @@ where
             Ok(id) => id,
             Err(err) => return F::Presenter::error(err, &env),
         };
-        let parts = match F::Receiver::receive(req, &env) {
-            Ok(parts)   => parts,
-            Err(err)    => return F::Presenter::error(err, &env),
-        };
-        let request = M::Request::new(parts, id, &env);
-        let future = M::call(request, &env);
-        F::Presenter::resource(future, template, &env)
+        Box::new(F::Receiver::receive(req, &env).then(move |result| {
+            let parts = match result {
+                Ok(parts)   => parts,
+                Err(err)    => return F::Presenter::error(err, &env),
+            };
+            let request = M::Request::new(parts, id, &env);
+            let future = M::call(request, &env);
+            F::Presenter::resource(future, template, &env)
+        }))
     }
 }
 
@@ -62,13 +64,15 @@ where
             Ok(id) => id,
             Err(err) => return F::Presenter::error(err, &env),
         };
-        let parts = match F::Receiver::receive(req, &env) {
-            Ok(parts)   => parts,
-            Err(err)    => return F::Presenter::error(err, &env),
-        };
-        let request = M::Request::new(parts, id, &env);
-        let future = M::call(request, &env);
-        F::Presenter::unit(future, template, &env)
+        Box::new(F::Receiver::receive(req, &env).then(move |result| {
+            let parts = match result {
+                Ok(parts)   => parts,
+                Err(err)    => return F::Presenter::error(err, &env),
+            };
+            let request = M::Request::new(parts, id, &env);
+            let future = M::call(request, &env);
+            F::Presenter::unit(future, template, &env)
+        }))
     }
 }
 
@@ -85,13 +89,15 @@ where
             Ok(id) => id,
             Err(err) => return F::Presenter::error(err, &env),
         };
-        let parts = match F::Receiver::receive(req, &env) {
-            Ok(parts)   => parts,
-            Err(err)    => return F::Presenter::error(err, &env),
-        };
-        let request = M::Request::new(parts, id, &env);
-        let stream = M::call(request, &env);
-        F::Presenter::collection(stream, template, &env)
+        Box::new(F::Receiver::receive(req, &env).then(move |result| {
+            let parts = match result {
+                Ok(parts)   => parts,
+                Err(err)    => return F::Presenter::error(err, &env),
+            };
+            let request = M::Request::new(parts, id, &env);
+            let stream = M::call(request, &env);
+            F::Presenter::collection(stream, template, &env)
+        }))
     }
 }
 
@@ -105,13 +111,15 @@ where
     F: Format<T, M>,
 {
     fn call(req: http::Request, template: Option<Template>, env: Environment) -> http::BoxFuture {
-        let parts = match F::Receiver::receive(req, &env) {
-            Ok(parts)   => parts,
-            Err(err)    => return F::Presenter::error(err, &env),
-        };
-        let request = M::Request::new(parts, &env);
-        let future = M::call(request, &env);
-        F::Presenter::resource(future, template, &env)
+        Box::new(F::Receiver::receive(req, &env).then(move |result| {
+            let parts = match result {
+                Ok(parts)   => parts,
+                Err(err)    => return F::Presenter::error(err, &env),
+            };
+            let request = M::Request::new(parts, &env);
+            let future = M::call(request, &env);
+            F::Presenter::resource(future, template, &env)
+        }))
     }
 }
 
@@ -125,13 +133,15 @@ where
     F: Format<T, M>,
 {
     fn call(req: http::Request, template: Option<Template>, env: Environment) -> http::BoxFuture {
-        let parts = match F::Receiver::receive(req, &env) {
-            Ok(parts)   => parts,
-            Err(err)    => return F::Presenter::error(err, &env),
-        };
-        let request = M::Request::new(parts, &env);
-        let future = M::call(request, &env);
-        F::Presenter::unit(future, template, &env)
+        Box::new(F::Receiver::receive(req, &env).then(move |result| {
+            let parts = match result {
+                Ok(parts)   => parts,
+                Err(err)    => return F::Presenter::error(err, &env),
+            };
+            let request = M::Request::new(parts, &env);
+            let future = M::call(request, &env);
+            F::Presenter::unit(future, template, &env)
+        }))
     }
 }
 
@@ -144,13 +154,15 @@ where
     F: Format<T, M>,
 {
     fn call(req: http::Request, template: Option<Template>, env: Environment) -> http::BoxFuture {
-        let parts = match F::Receiver::receive(req, &env) {
-            Ok(parts)   => parts,
-            Err(err)    => return F::Presenter::error(err, &env),
-        };
-        let request = M::Request::new(parts, &env);
-        let stream = M::call(request, &env);
-        F::Presenter::collection(stream, template, &env)
+        Box::new(F::Receiver::receive(req, &env).then(move |result| {
+            let parts = match result {
+                Ok(parts)   => parts,
+                Err(err)    => return F::Presenter::error(err, &env),
+            };
+            let request = M::Request::new(parts, &env);
+            let stream = M::call(request, &env);
+            F::Presenter::collection(stream, template, &env)
+        }))
     }
 }
 

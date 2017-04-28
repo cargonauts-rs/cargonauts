@@ -12,7 +12,8 @@ pub trait Format<T: ResourceEndpoint, M: ?Sized + Method<T>> {
 }
 
 pub trait Receive<T: ResourceEndpoint, R: Request<T>> {
-    fn receive(req: http::Request, env: &Environment) -> Result<R::BodyParts, Error>;
+    type Future: Future<Item = R::BodyParts, Error = Error> + 'static;
+    fn receive(req: http::Request, env: &Environment) -> Self::Future;
 }
 
 pub trait Present<T: ResourceEndpoint, M: ?Sized + Method<T>>: Send + 'static {
