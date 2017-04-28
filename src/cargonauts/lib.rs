@@ -48,6 +48,7 @@ pub mod routing {
     pub use rigging::routes::{Kind, RoutingTable, RouteKey, Handler, not_found};
     pub use rigging::routes::{AssetHandler, default_asset_handler};
     pub use rigging::environment::EnvBuilder;
+    pub use rigging::http::BoxFuture as HttpFuture;
 }
 
 pub use server::serve;
@@ -76,12 +77,5 @@ pub mod method {
 pub mod format {
 
     pub use mainsail::formats::{Debug, Display};
-
-    pub mod presenter {
-        pub use rigging::format::{Present, PresentResource, PresentCollection, Template};
-    }
-
-    pub mod receiver {
-        pub use rigging::format::Receive;
-    }
+    pub use rigging::format::{Format, Receive, Present, Template};
 }

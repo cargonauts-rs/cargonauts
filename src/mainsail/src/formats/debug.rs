@@ -1,5 +1,7 @@
 use std::fmt::Debug;
 
+use futures::{Future, Stream, future};
+
 use rigging::{ResourceEndpoint, Error};
 use rigging::environment::Environment;
 use rigging::http;
@@ -21,17 +23,14 @@ where
     M::Request: Request<T, BodyParts = ()>,
     M::Response: Debug,
 {
-    type Presenter = Self;
-    type Receiver = Self;
-}
+    type Presenter = Self; type Receiver = Self; }
 
-impl<T, M> Receive<T, M> for SimpleDebug
+impl<T, R> Receive<T, R> for SimpleDebug
 where
     T: ResourceEndpoint,
-    M: ?Sized + Method<T>,
-    M::Request: Request<T, BodyParts = ()>,
+    R: Request<T, BodyParts = ()>,
 {
-    fn receive(_: http::Request, _: &mut Environment) -> Result<<M::Request as Request<T>>::BodyParts, Error> {
+    fn receive(_: http::Request, _: &mut Environment) -> Result<R::BodyParts, Error> {
         Ok(())
     }
 }
@@ -43,75 +42,35 @@ where
     M: ?Sized + Method<T>,
     M::Response: Debug,
 {
-    type ResourcePresenter = ResourcePresenter;
-    type CollectionPresenter = CollectionPresenter<M::Response>;
-
-    fn for_resource(_: &mut Environment) -> Self::ResourcePresenter {
-        ResourcePresenter::default()
-    }
-
-    fn for_collection(_: &mut Environment) -> Self::CollectionPresenter {
-        CollectionPresenter::default()
-    }
-}
-
-#[derive(Default, Clone, Copy)]
-pub struct ResourcePresenter;
-
-impl<T, M> PresentResource<T, M> for ResourcePresenter
-where
-    T: ResourceEndpoint,
-    M: ?Sized + Method<T>,
-    M::Response: Debug,
-{
-    fn resource(self, resource: M::Response, _: Option<Template>)
-        -> http::Response
+    fn unit<F>(future: F, _: Option<Template>, _: &mut Environment) -> http::BoxFuture
+        where F: Future<Item = (), Error = Error> + 'static,
     {
-        debug_response(resource, http::StatusCode::Ok)
+        Box::new(future.then(|result| match result {
+            Ok(())  => Ok(http::Response::new().with_status(http::StatusCode::NoContent)),
+            Err(e)  => Ok(debug_response(e, http::StatusCode::InternalServerError)),
+        }))
     }
 
-    fn error(self, error: Error, _: Option<Template>)
-        -> http::Response
+    fn resource<F>(future: F, _: Option<Template>, _: &mut Environment) -> http::BoxFuture
+        where F: Future<Item = M::Response, Error = Error> + 'static,
     {
-        debug_response(error, http::StatusCode::InternalServerError)
-    }
-}
-
-pub struct CollectionPresenter<T> {
-    resources: Result<Vec<T>, Error>,
-}
-
-impl<T> Default for CollectionPresenter<T> {
-    fn default() -> Self {
-        Self { resources: Ok(vec![]) }
-    }
-}
-
-impl<T> Clone for CollectionPresenter<T> {
-    fn clone(&self) -> Self {
-        Self::default()
-    }
-}
-
-impl<T, M> PresentCollection<T, M> for CollectionPresenter<M::Response>
-where
-    T: ResourceEndpoint,
-    M: ?Sized + Method<T>,
-    M::Response: Debug,
-{
-    fn append(&mut self, resource: M::Response, _: Option<Template>) {
-        let _ = self.resources.as_mut().map(|v| v.push(resource));
+        Box::new(future.then(|result| match result {
+            Ok(resource)    => Ok(debug_response(resource, http::StatusCode::Ok)),
+            Err(e)          => Ok(debug_response(e, http::StatusCode::InternalServerError)),
+        }))
     }
 
-    fn error(&mut self, error: Error, _: Option<Template>) {
-        self.resources = Err(error);
+    fn collection<S>(stream: S, _: Option<Template>, _: &mut Environment) -> http::BoxFuture
+        where S: Stream<Item = M::Response, Error = Error> + 'static,
+    {
+        Box::new(stream.collect().then(|result| match result {
+            Ok(resources)   => Ok(debug_response(resources, http::StatusCode::Ok)),
+            Err(e)          => Ok(debug_response(e, http::StatusCode::InternalServerError)),
+        }))
     }
 
-    fn finish(self) -> http::Response {
-        match self.resources {
-            Ok(resources)   => debug_response(resources, http::StatusCode::Ok),
-            Err(error)      => debug_response(error, http::StatusCode::InternalServerError),
-        }
+    fn error(error: Error, _: &mut Environment) -> http::BoxFuture {
+        Box::new(future::ok(debug_response(error, http::StatusCode::InternalServerError)))
     }
 }
 

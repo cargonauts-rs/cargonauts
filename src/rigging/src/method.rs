@@ -7,7 +7,7 @@ pub trait Method<T: Resource> {
     const ROUTE: Route<'static>;
 
     type Request: Request<T>;
-    type Response: Resource;
+    type Response;
     type Outcome: 'static;
 
     fn call(req: Self::Request, env: &mut Environment) -> Self::Outcome;

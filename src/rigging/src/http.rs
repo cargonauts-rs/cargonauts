@@ -37,3 +37,5 @@ where
     });
     core.run(srv)
 }
+
+pub type BoxFuture = Box<Future<Item = Response, Error = Error>>;

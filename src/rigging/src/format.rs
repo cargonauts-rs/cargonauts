@@ -1,3 +1,5 @@
+use futures::{Future, Stream};
+
 use {ResourceEndpoint, Error};
 use environment::Environment;
 use method::Method;
@@ -5,31 +7,25 @@ use request::Request;
 use http;
 
 pub trait Format<T: ResourceEndpoint, M: ?Sized + Method<T>> {
-    type Receiver: Receive<T, M>;
+    type Receiver: Receive<T, M::Request>;
     type Presenter: Present<T, M>;
 }
 
-pub trait Receive<T: ResourceEndpoint, M: ?Sized + Method<T>> {
-    fn receive(req: http::Request, env: &mut Environment) -> Result<<M::Request as Request<T>>::BodyParts, Error>;
+pub trait Receive<T: ResourceEndpoint, R: Request<T>> {
+    fn receive(req: http::Request, env: &mut Environment) -> Result<R::BodyParts, Error>;
 }
 
 pub trait Present<T: ResourceEndpoint, M: ?Sized + Method<T>>: Send + 'static {
-    type ResourcePresenter: PresentResource<T, M>;
-    type CollectionPresenter: PresentCollection<T, M>;
+    fn unit<F>(future: F, template: Option<Template>, env: &mut Environment) -> http::BoxFuture
+        where F: Future<Item = (), Error = Error> + 'static;
 
-    fn for_resource(env: &mut Environment) -> Self::ResourcePresenter;
-    fn for_collection(env: &mut Environment) -> Self::CollectionPresenter;
-}
+    fn resource<F>(future: F, template: Option<Template>, env: &mut Environment) -> http::BoxFuture
+        where F: Future<Item = M::Response, Error = Error> + 'static;
 
-pub trait PresentResource<T: ResourceEndpoint, M: ?Sized + Method<T>> {
-    fn resource(self, resource: M::Response, template: Option<Template>) -> http::Response;
-    fn error(self, error: Error, template: Option<Template>) -> http::Response;
-}
+    fn collection<S>(stream: S, template: Option<Template>, env: &mut Environment) -> http::BoxFuture
+        where S: Stream<Item = M::Response, Error = Error> + 'static;
 
-pub trait PresentCollection<T: ResourceEndpoint, M: ?Sized + Method<T>>: Send + 'static {
-    fn append(&mut self, resource: M::Response, template: Option<Template>);
-    fn error(&mut self, error: Error, template: Option<Template>);
-    fn finish(self) -> http::Response;
+    fn error(error: Error, env: &mut Environment) -> http::BoxFuture;
 }
 
 #[derive(Copy, Clone)]

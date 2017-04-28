@@ -99,7 +99,7 @@ impl Service for RoutingTable {
     type Request = http::Request;
     type Response = http::Response;
     type Error = http::Error;
-    type Future = Box<Future<Item = Self::Response, Error = Self::Error>>;
+    type Future = http::BoxFuture;
 
     fn call(&self, req: Self::Request) -> Self::Future {
         {
@@ -127,16 +127,14 @@ impl NewService for RoutingTable {
     }
 }
 
-pub type Handler = fn(http::Request, Environment) -> Box<Future<Item = http::Response, Error = http::Error>>;
-pub type AssetHandler = fn(&'static [u8]) -> Box<Future<Item = http::Response, Error = http::Error>>;
+pub type Handler = fn(http::Request, Environment) -> http::BoxFuture;
+pub type AssetHandler = fn(&'static [u8]) -> http::BoxFuture;
 
-pub fn not_found() -> Box<Future<Item = http::Response, Error = http::Error>> {
+pub fn not_found() -> http::BoxFuture {
     future::ok(http::Response::new().with_status(http::StatusCode::NotFound)).boxed()
 }
 
-pub fn default_asset_handler(asset: &'static [u8])
-    -> Box<Future<Item = http::Response, Error = http::Error>>
-{
+pub fn default_asset_handler(asset: &'static [u8]) -> http::BoxFuture {
     Box::new(future::ok(http::Response::new()
                             .with_status(http::StatusCode::Ok)
                             .with_header(http::headers::ContentLength(asset.len() as u64))

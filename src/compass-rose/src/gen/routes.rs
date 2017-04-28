@@ -105,7 +105,7 @@ impl ToTokens for Route {
         let method = method_for(&self.method, self.rel.as_ref(), &resource);
 
         tokens.append(quote!({
-            fn handle<H, R, E>(req: ::cargonauts::server::Request, env: ::cargonauts::api::Environment) -> E::Future
+            fn handle<H, R, E>(req: ::cargonauts::server::Request, env: ::cargonauts::api::Environment) -> ::cargonauts::routing::HttpFuture
             where
                 E: ?Sized + ::cargonauts::routing::Endpoint<H, R>,
             {
