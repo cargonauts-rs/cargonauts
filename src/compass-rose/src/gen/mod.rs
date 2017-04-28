@@ -31,7 +31,7 @@ pub fn code_gen(routes: Routes, cfg: Option<CargonautsConfig>) -> String {
                 #load_env_vars
                 let assets = #assets;
                 let asset_handler = #asset_handler;
-                let future: ::cargonauts::futures::future::Map<_, _> = {#setup_environment}.map(|env| {#build_routing_table});
+                let future: ::cargonauts::futures::future::Map<_, _> = {#setup_environment}.map(move |env| {#build_routing_table});
                 (#addr.parse().unwrap(), Box::new(future))
             }
 
