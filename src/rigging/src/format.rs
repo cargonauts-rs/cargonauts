@@ -12,20 +12,20 @@ pub trait Format<T: ResourceEndpoint, M: ?Sized + Method<T>> {
 }
 
 pub trait Receive<T: ResourceEndpoint, R: Request<T>> {
-    fn receive(req: http::Request, env: &mut Environment) -> Result<R::BodyParts, Error>;
+    fn receive(req: http::Request, env: &Environment) -> Result<R::BodyParts, Error>;
 }
 
 pub trait Present<T: ResourceEndpoint, M: ?Sized + Method<T>>: Send + 'static {
-    fn unit<F>(future: F, template: Option<Template>, env: &mut Environment) -> http::BoxFuture
+    fn unit<F>(future: F, template: Option<Template>, env: &Environment) -> http::BoxFuture
         where F: Future<Item = (), Error = Error> + 'static;
 
-    fn resource<F>(future: F, template: Option<Template>, env: &mut Environment) -> http::BoxFuture
+    fn resource<F>(future: F, template: Option<Template>, env: &Environment) -> http::BoxFuture
         where F: Future<Item = M::Response, Error = Error> + 'static;
 
-    fn collection<S>(stream: S, template: Option<Template>, env: &mut Environment) -> http::BoxFuture
+    fn collection<S>(stream: S, template: Option<Template>, env: &Environment) -> http::BoxFuture
         where S: Stream<Item = M::Response, Error = Error> + 'static;
 
-    fn error(error: Error, env: &mut Environment) -> http::BoxFuture;
+    fn error(error: Error, env: &Environment) -> http::BoxFuture;
 }
 
 #[derive(Copy, Clone)]

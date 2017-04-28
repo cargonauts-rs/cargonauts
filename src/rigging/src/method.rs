@@ -10,5 +10,5 @@ pub trait Method<T: Resource> {
     type Response;
     type Outcome: 'static;
 
-    fn call(req: Self::Request, env: &mut Environment) -> Self::Outcome;
+    fn call(req: Self::Request, env: &Environment) -> Self::Outcome;
 }

@@ -6,7 +6,7 @@ use rigging::routes::{Route, Kind};
 use rigging::request::*;
 
 pub trait Index: Resource {
-    fn index(env: &mut Environment) -> Box<Stream<Item = Self, Error = Error>> where Self: Sized;
+    fn index(env: &Environment) -> Box<Stream<Item = Self, Error = Error>> where Self: Sized;
 }
 
 pub struct IndexRequest;
@@ -16,7 +16,7 @@ impl<T: Resource> Request<T> for IndexRequest {
 }
 
 impl<T: Resource> CollectionRequest<T> for IndexRequest {
-    fn new(_: Self::BodyParts, _: &mut Environment) -> Self {
+    fn new(_: Self::BodyParts, _: &Environment) -> Self {
         IndexRequest
     }
 }
@@ -31,7 +31,7 @@ impl<T: Index> Method<T> for Index<Identifier = T::Identifier> {
     type Response = T;
     type Outcome = Box<Stream<Item = T, Error = Error>>;
 
-    fn call(_: Self::Request, env: &mut Environment) -> Self::Outcome {
+    fn call(_: Self::Request, env: &Environment) -> Self::Outcome {
         T::index(env)
     }
 }

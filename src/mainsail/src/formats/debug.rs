@@ -30,7 +30,7 @@ where
     T: ResourceEndpoint,
     R: Request<T, BodyParts = ()>,
 {
-    fn receive(_: http::Request, _: &mut Environment) -> Result<R::BodyParts, Error> {
+    fn receive(_: http::Request, _: &Environment) -> Result<R::BodyParts, Error> {
         Ok(())
     }
 }
@@ -42,7 +42,7 @@ where
     M: ?Sized + Method<T>,
     M::Response: Debug,
 {
-    fn unit<F>(future: F, _: Option<Template>, _: &mut Environment) -> http::BoxFuture
+    fn unit<F>(future: F, _: Option<Template>, _: &Environment) -> http::BoxFuture
         where F: Future<Item = (), Error = Error> + 'static,
     {
         Box::new(future.then(|result| match result {
@@ -51,7 +51,7 @@ where
         }))
     }
 
-    fn resource<F>(future: F, _: Option<Template>, _: &mut Environment) -> http::BoxFuture
+    fn resource<F>(future: F, _: Option<Template>, _: &Environment) -> http::BoxFuture
         where F: Future<Item = M::Response, Error = Error> + 'static,
     {
         Box::new(future.then(|result| match result {
@@ -60,7 +60,7 @@ where
         }))
     }
 
-    fn collection<S>(stream: S, _: Option<Template>, _: &mut Environment) -> http::BoxFuture
+    fn collection<S>(stream: S, _: Option<Template>, _: &Environment) -> http::BoxFuture
         where S: Stream<Item = M::Response, Error = Error> + 'static,
     {
         Box::new(stream.collect().then(|result| match result {
@@ -69,7 +69,7 @@ where
         }))
     }
 
-    fn error(error: Error, _: &mut Environment) -> http::BoxFuture {
+    fn error(error: Error, _: &Environment) -> http::BoxFuture {
         Box::new(future::ok(debug_response(error, http::StatusCode::InternalServerError)))
     }
 }

@@ -31,18 +31,18 @@ where
     M::Outcome: Future<Item = M::Response, Error = Error>,
     F: Format<T, M>,
 {
-    fn call(req: http::Request, template: Option<Template>, mut env: Environment) -> http::BoxFuture {
+    fn call(req: http::Request, template: Option<Template>, env: Environment) -> http::BoxFuture {
         let id = match parse_id::<T>(&req) {
             Ok(id) => id,
-            Err(err) => return F::Presenter::error(err, &mut env),
+            Err(err) => return F::Presenter::error(err, &env),
         };
-        let parts = match F::Receiver::receive(req, &mut env) {
+        let parts = match F::Receiver::receive(req, &env) {
             Ok(parts)   => parts,
-            Err(err)    => return F::Presenter::error(err, &mut env),
+            Err(err)    => return F::Presenter::error(err, &env),
         };
-        let request = M::Request::new(parts, id, &mut env);
-        let future = M::call(request, &mut env);
-        F::Presenter::resource(future, template, &mut env)
+        let request = M::Request::new(parts, id, &env);
+        let future = M::call(request, &env);
+        F::Presenter::resource(future, template, &env)
     }
 }
 
@@ -54,14 +54,14 @@ where
     M::Outcome: Stream<Item = M::Response, Error = Error>,
     F: Format<T, M>,
 {
-    fn call(req: http::Request, template: Option<Template>, mut env: Environment) -> http::BoxFuture {
-        let parts = match F::Receiver::receive(req, &mut env) {
+    fn call(req: http::Request, template: Option<Template>, env: Environment) -> http::BoxFuture {
+        let parts = match F::Receiver::receive(req, &env) {
             Ok(parts)   => parts,
-            Err(err)    => return F::Presenter::error(err, &mut env),
+            Err(err)    => return F::Presenter::error(err, &env),
         };
-        let request = M::Request::new(parts, &mut env);
-        let stream = M::call(request, &mut env);
-        F::Presenter::collection(stream, template, &mut env)
+        let request = M::Request::new(parts, &env);
+        let stream = M::call(request, &env);
+        F::Presenter::collection(stream, template, &env)
     }
 }
 
@@ -73,14 +73,14 @@ where
     M::Outcome: Future<Item = M::Response, Error = Error>,
     F: Format<T, M>,
 {
-    fn call(req: http::Request, template: Option<Template>, mut env: Environment) -> http::BoxFuture {
-        let parts = match F::Receiver::receive(req, &mut env) {
+    fn call(req: http::Request, template: Option<Template>, env: Environment) -> http::BoxFuture {
+        let parts = match F::Receiver::receive(req, &env) {
             Ok(parts)   => parts,
-            Err(err)    => return F::Presenter::error(err, &mut env),
+            Err(err)    => return F::Presenter::error(err, &env),
         };
-        let request = M::Request::new(parts, &mut env);
-        let future = M::call(request, &mut env);
-        F::Presenter::resource(future, template, &mut env)
+        let request = M::Request::new(parts, &env);
+        let future = M::call(request, &env);
+        F::Presenter::resource(future, template, &env)
     }
 }
 
@@ -92,18 +92,18 @@ where
     M::Outcome: Stream<Item = M::Response, Error = Error>,
     F: Format<T, M>,
 {
-    fn call(req: http::Request, template: Option<Template>, mut env: Environment) -> http::BoxFuture {
+    fn call(req: http::Request, template: Option<Template>, env: Environment) -> http::BoxFuture {
         let id = match parse_id::<T>(&req) {
             Ok(id) => id,
-            Err(err) => return F::Presenter::error(err, &mut env),
+            Err(err) => return F::Presenter::error(err, &env),
         };
-        let parts = match F::Receiver::receive(req, &mut env) {
+        let parts = match F::Receiver::receive(req, &env) {
             Ok(parts)   => parts,
-            Err(err)    => return F::Presenter::error(err, &mut env),
+            Err(err)    => return F::Presenter::error(err, &env),
         };
-        let request = M::Request::new(parts, id, &mut env);
-        let stream = M::call(request, &mut env);
-        F::Presenter::collection(stream, template, &mut env)
+        let request = M::Request::new(parts, id, &env);
+        let stream = M::call(request, &env);
+        F::Presenter::collection(stream, template, &env)
     }
 }
 

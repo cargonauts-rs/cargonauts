@@ -7,7 +7,7 @@ use rigging::request::*;
 
 pub trait Patch: Resource {
     type Patch;
-    fn patch(id: Self::Identifier, patch: Self::Patch, env: &mut Environment) -> Box<Future<Item = Self, Error = Error>> where Self: Sized;
+    fn patch(id: Self::Identifier, patch: Self::Patch, env: &Environment) -> Box<Future<Item = Self, Error = Error>> where Self: Sized;
 }
 
 pub struct PatchRequest<T: Patch> {
@@ -29,7 +29,7 @@ impl<T: Patch> Method<T> for Patch<Identifier = T::Identifier, Patch = T::Patch>
     type Response = T;
     type Outcome = Box<Future<Item = T, Error = Error>>;
 
-    fn call(req: Self::Request, env: &mut Environment) -> Self::Outcome {
+    fn call(req: Self::Request, env: &Environment) -> Self::Outcome {
         T::patch(req.id, req.patch, env)
     }
 }

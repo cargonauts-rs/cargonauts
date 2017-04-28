@@ -6,9 +6,9 @@ pub trait Request<T: Resource>: Sized {
 }
 
 pub trait ResourceRequest<T: Resource>: Request<T> {
-    fn new(Self::BodyParts, T::Identifier, &mut Environment) -> Self;
+    fn new(Self::BodyParts, T::Identifier, &Environment) -> Self;
 }
 
 pub trait CollectionRequest<T: Resource>: Request<T> {
-    fn new(Self::BodyParts, &mut Environment) -> Self;
+    fn new(Self::BodyParts, &Environment) -> Self;
 }

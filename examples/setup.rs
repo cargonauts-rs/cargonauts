@@ -80,7 +80,7 @@ impl Resource for MyResource {
 }
 
 impl Get for MyResource {
-    fn get(slug: String, env: &mut Environment) -> Box<Future<Item = MyResource, Error = Error>> {
+    fn get(slug: String, env: &Environment) -> Box<Future<Item = MyResource, Error = Error>> {
         match &slug[..] {
             "foo"   => Box::new(env.conn_for::<Foo>("foo").and_then(|foo| foo.call(()))),
             "bar"   => Box::new(env.client::<Bar>().map(|bar| bar.bar())),
