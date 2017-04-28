@@ -23,18 +23,8 @@ where
     M::Request: Request<T, BodyParts = ()>,
     M::Response: Display,
 {
+    type Receiver = super::BasicReceiver;
     type Presenter = Self;
-    type Receiver = Self;
-}
-
-impl<T, R> Receive<T, R> for SimpleDisplay
-where
-    T: ResourceEndpoint,
-    R: Request<T, BodyParts = ()>,
-{
-    fn receive(_: http::Request, _: &Environment) -> Result<R::BodyParts, Error> {
-        Ok(())
-    }
 }
 
 impl<T, M> Present<T, M> for SimpleDisplay
