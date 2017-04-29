@@ -1,5 +1,7 @@
+mod attributes;
 mod traits;
 mod document;
+mod rels;
 
 use futures::{Future, Stream, future};
 
@@ -11,7 +13,7 @@ use rigging::method::Method;
 
 pub use self::traits::{Fields, ApiSerialize};
 
-use self::traits::{Bridge, ErrorBridge};
+use self::traits::{Object, ErrorObject};
 use self::document::{Document, ErrorDocument};
 
 const MIME: &'static str = "application/vnd.api+json";
@@ -20,7 +22,7 @@ impl<T, M> Present<T, M> for super::JsonApi
 where
     T: ResourceEndpoint,
     M: ?Sized + Method<T>,
-    M::Response: ApiSerialize,
+    M::Response: ApiSerialize + ResourceEndpoint,
 {
     fn unit<F>(future: F, _: Option<Template>, _: &Environment) -> http::BoxFuture
         where F: Future<Item = (), Error = Error> + 'static,
@@ -38,7 +40,7 @@ where
         Box::new(future.then(move |result| match result {
             Ok(r)   => {
                 let doc = Document {
-                    member: Bridge {
+                    member: Object {
                         inner: &r,
                         fields: fields.as_ref(),
                     }
@@ -60,7 +62,7 @@ where
         Box::new(stream.collect().then(move |result| match result {
             Ok(r)   => {
                 let doc = Document {
-                    member: Bridge {
+                    member: Object {
                         inner: &r,
                         fields: fields.as_ref(),
                     }
@@ -82,7 +84,7 @@ where
 }
 
 fn error_response(error: Error) -> http::Response {
-    let doc = ErrorDocument { error: ErrorBridge { error } };
+    let doc = ErrorDocument { error: ErrorObject { error } };
     let mut buf = vec![];
     match doc.serialize(&mut buf) {
         Ok(())  => respond_with(buf, http::StatusCode::InternalServerError),

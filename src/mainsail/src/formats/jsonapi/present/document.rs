@@ -2,7 +2,7 @@ use serde::{Serialize, Serializer};
 use serde::ser::SerializeMap;
 use json;
 
-use super::traits::ErrorBridge;
+use super::traits::ErrorObject;
 
 pub struct Document<T> {
     pub member: T,
@@ -30,7 +30,7 @@ impl Serialize for JsonApiObject {
 }
 
 pub struct ErrorDocument {
-    pub error: ErrorBridge,
+    pub error: ErrorObject,
 }
 
 impl ErrorDocument {

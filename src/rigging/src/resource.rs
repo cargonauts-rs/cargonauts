@@ -19,8 +19,8 @@ pub trait RelIds<T>: Default {
 }
 
 pub struct RelationshipLink {
-    pub endpoint: &'static str,
     pub relation: &'static str,
+    pub endpoint: &'static str,
 }
 
 pub trait Relationship: 'static {

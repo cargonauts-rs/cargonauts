@@ -16,7 +16,7 @@ where
     T: ResourceEndpoint,
     M: ?Sized + Method<T>,
     M::Request: Request<T>,
-    M::Response: ApiSerialize,
+    M::Response: ApiSerialize + ResourceEndpoint,
     M::Request: Request<T, BodyParts = P>,
     P: ParseBody,
 {
