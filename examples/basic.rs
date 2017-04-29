@@ -2,15 +2,18 @@
 
 #[macro_use]
 extern crate cargonauts;
+#[macro_use]
+extern crate jsonapi_derive;
 extern crate tokio_service;
 
 use cargonauts::api::{Resource, Get, Index, Environment, Error};
 use cargonauts::api::GetOne;
-use cargonauts::format::Debug;
+use cargonauts::format::JsonApi;
 use cargonauts::futures::{Future, future, Stream, stream};
 
-#[derive(Debug)]
+#[derive(ApiSerialize)]
 pub struct MyResource { 
+    #[api_id]
     slug: String,
 }
 
@@ -44,11 +47,11 @@ fn main() {
 
 routes! {
     resource MyResource {
-        method Get in Debug;
-        method Index in Debug;
+        method Get in JsonApi;
+        method Index in JsonApi;
 
         relation AllCaps {
-            method GetOne in Debug;
+            method GetOne in JsonApi;
         }
     }
 }

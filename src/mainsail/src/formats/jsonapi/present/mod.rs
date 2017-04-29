@@ -45,10 +45,10 @@ where
                         fields: fields.as_ref(),
                     }
                 };
-                let mut buf = vec![];
-                match doc.write(&mut buf) {
-                    Ok(_)   => future::ok(respond_with(buf, http::StatusCode::Ok)),
-                    Err(_)  => panic!(),
+                let buf = vec![];
+                match doc.write(buf) {
+                    Ok(buf) => future::ok(respond_with(buf, http::StatusCode::Ok)),
+                    Err(e)  => panic!("{:?}", e),
                 }
             }
             Err(e)  => future::ok(error_response(e)),
@@ -67,9 +67,9 @@ where
                         fields: fields.as_ref(),
                     }
                 };
-                let mut buf = vec![];
-                match doc.write(&mut buf) {
-                    Ok(_)   => future::ok(respond_with(buf, http::StatusCode::Ok)),
+                let buf = vec![];
+                match doc.write(buf) {
+                    Ok(buf) => future::ok(respond_with(buf, http::StatusCode::Ok)),
                     Err(_)  => panic!(),
                 }
             }
@@ -85,9 +85,9 @@ where
 
 fn error_response(error: Error) -> http::Response {
     let doc = ErrorDocument { error: ErrorObject { error } };
-    let mut buf = vec![];
-    match doc.serialize(&mut buf) {
-        Ok(())  => respond_with(buf, http::StatusCode::InternalServerError),
+    let buf = vec![];
+    match doc.write(buf) {
+        Ok(buf) => respond_with(buf, http::StatusCode::InternalServerError),
         Err(_)  => panic!()
     }
 }

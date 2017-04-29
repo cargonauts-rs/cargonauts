@@ -14,6 +14,14 @@ impl Fields {
     pub fn get(_: &Environment) -> Option<Fields> {
         None
     }
+
+    pub fn len(&self) -> usize {
+        panic!()
+    }
+
+    pub fn contains(&self, _field: &str) -> bool {
+        panic!()
+    }
 }
 
 pub trait ApiSerialize {

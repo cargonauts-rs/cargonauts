@@ -28,6 +28,9 @@ path = "src/mainsail"
 [dependencies.rigging]
 path = "src/rigging"
 
+[dependencies.jsonapi-derive]
+path = "src/jsonapi-derive"
+
 [dependencies.tokio-service]
 branch = "new-new-service"
 git = "https://github.com/withoutboats/tokio-service"

@@ -9,13 +9,16 @@ pub struct Document<T> {
 }
 
 impl<T: Serialize> Document<T> {
-    pub fn write(&self, buf: &mut [u8]) -> Result<(), json::Error> {
+    pub fn write(&self, buf: Vec<u8>) -> Result<Vec<u8>, json::Error> {
         let mut serializer = json::Serializer::new(buf);
-        let mut map = serializer.serialize_map(Some(2))?;
-        map.serialize_entry("data", &self.member)?;
-        // TODO links
-        map.serialize_entry("jsonapi", &JsonApiObject)?;
-        map.end()
+        {
+            let mut map = serializer.serialize_map(Some(2))?;
+            map.serialize_entry("data", &self.member)?;
+            // TODO links
+            map.serialize_entry("jsonapi", &JsonApiObject)?;
+            map.end()?;
+        }
+        Ok(serializer.into_inner())
     }
 }
 
@@ -34,11 +37,14 @@ pub struct ErrorDocument {
 }
 
 impl ErrorDocument {
-    pub fn serialize(&self, buf: &mut [u8]) -> Result<(), json::Error> {
+    pub fn write(&self, buf: Vec<u8>) -> Result<Vec<u8>, json::Error> {
         let mut serializer = json::Serializer::new(buf);
-        let mut map = serializer.serialize_map(Some(2))?;
-        map.serialize_entry("error", &self.error)?;
-        map.serialize_entry("jsonapi", &JsonApiObject)?;
-        map.end()
+        {
+            let mut map = serializer.serialize_map(Some(2))?;
+            map.serialize_entry("error", &self.error)?;
+            map.serialize_entry("jsonapi", &JsonApiObject)?;
+            map.end()?;
+        }
+        Ok(serializer.into_inner())
     }
 }
