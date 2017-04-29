@@ -18,10 +18,12 @@ pub mod format;
 pub mod http;
 pub mod method;
 pub mod request;
+pub mod resource;
 pub mod routes;
 
+pub use self::resource::*;
+
 use std::io;
-use std::str::FromStr;
 
 #[derive(Debug)]
 pub struct Error;
@@ -30,37 +32,5 @@ impl From<io::Error> for Error {
     fn from(_: io::Error) -> Error {
         Error // TODO
     }
-}
-
-pub trait Resource: Send + 'static {
-    type Identifier: Eq + ToString + FromStr + Send + 'static;
-}
-
-pub trait ResourceEndpoint: Resource {
-    const ENDPOINT: &'static str;
-    const RESOURCE: &'static str;
-    const REL_LINKS: &'static [RelationshipLink];
-}
-
-pub struct RelationshipLink {
-    pub endpoint: &'static str,
-    pub relation: &'static str,
-}
-
-pub trait Relationship: 'static {
-    type Related: Resource;
-}
-
-impl<T: Resource> Relationship for T {
-    type Related = T;
-}
-
-pub trait RelationEndpoint<R>
-where
-    R: Relationship,
-    R::Related: ResourceEndpoint,
-    Self: ResourceEndpoint,
-{
-    const LINK: RelationshipLink;
 }
 

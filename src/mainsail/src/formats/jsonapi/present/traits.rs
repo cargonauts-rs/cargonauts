@@ -13,17 +13,17 @@ impl Fields {
 }
 
 pub trait ApiSerialize {
-    fn serialize<S: Serializer>(&self, fields: &Option<Fields>, serializer: S) -> Result<S::Ok, S::Error>;
+    fn serialize<S: Serializer>(&self, fields: Option<&Fields>, serializer: S) -> Result<S::Ok, S::Error>;
 }
 
 impl ApiSerialize for () {
-    fn serialize<S: Serializer>(&self, _: &Option<Fields>, _: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: Serializer>(&self, _: Option<&Fields>, _: S) -> Result<S::Ok, S::Error> {
         panic!("ApiSerialize::serialize for () should never be called.")
     }
 }
 
 pub struct Bridge<'a, T: 'a> {
-    pub fields: &'a Option<Fields>,
+    pub fields: Option<&'a Fields>,
     pub inner: &'a T,
 }
 

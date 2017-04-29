@@ -1,18 +1,19 @@
 mod document;
+mod traits;
 
-use std::marker::PhantomData;
+pub use self::traits::ApiDeserialize;
+
 
 use futures::{Future, future, Stream};
-use serde::de::{Deserialize, Deserializer};
-use json;
 
-use rigging::{Error, ResourceEndpoint, RelationEndpoint, Relationship, Resource};
+use rigging::Error;
+use rigging::resource::{ResourceEndpoint, WithRels};
 use rigging::environment::Environment;
 use rigging::format::Receive;
 use rigging::http;
 use rigging::request::Request;
 
-use self::document::DocumentVisitor;
+use self::traits::Bridge;
 
 impl<T, R, P> Receive<T, R> for super::JsonApi
 where
@@ -39,7 +40,7 @@ impl ParseBody for () {
     }
 }
 
-impl<P: for<'d> ApiDeserialize<'d> + HasRelations> ParseBody for Object<P> {
+impl<T: ResourceEndpoint + for<'d> ApiDeserialize<'d>> ParseBody for WithRels<T> {
     type Future = Box<Future<Item = Self, Error = Error>>;
     fn parse(body: http::Body) -> Self::Future {
         let future = body.fold(vec![], |mut vec, chunk| -> Result<_, http::Error> {
@@ -47,53 +48,8 @@ impl<P: for<'d> ApiDeserialize<'d> + HasRelations> ParseBody for Object<P> {
             Ok(vec)
         });
         Box::new(future.then(|result| match result {
-            Ok(data)    => Object::parse(&data),
+            Ok(data)    => Bridge::parse(&data),
             Err(_)      => Err(Error),
         }))
-    }
-}
-
-pub trait ApiDeserialize<'d>: HasRelations + Sized + 'static {
-    fn deserialize<D: Deserializer<'d>>(deserializer: D) -> Result<Object<Self>, D::Error>;
-}
-
-pub trait HasRelations {
-    type Relations: RelationUpdate;
-}
-
-pub trait RelationUpdate {
-    fn find_id<R>(&self) -> Option<<R::Related as Resource>::Identifier>
-    where
-        Self: RelationEndpoint<R>,
-        R: Relationship,
-        R::Related: ResourceEndpoint;
-}
-
-pub struct Object<P: HasRelations> {
-    pub attrs: P,
-    relationships: P::Relations,
-}
-
-impl<P: HasRelations> Object<P> {
-    pub fn rel_id<R>(&self) -> Option<<R::Related as Resource>::Identifier>
-    where
-        P::Relations: RelationEndpoint<R>,
-        R: Relationship,
-        R::Related: ResourceEndpoint
-    {
-        self.relationships.find_id::<R>()
-    }
-}
-
-impl<'d, P: ApiDeserialize<'d> + HasRelations> Object<P> {
-    fn parse(data: &'d [u8]) -> Result<Object<P>, Error> {
-        let mut deserializer = json::Deserializer::new(json::de::SliceRead::new(data));
-        deserializer.deserialize_map(DocumentVisitor(PhantomData)).map_err(|_| Error)
-    }
-}
-
-impl<'d, P: ApiDeserialize<'d> + HasRelations> Deserialize<'d> for Object<P> {
-    fn deserialize<D: Deserializer<'d>>(deserializer: D) -> Result<Self, D::Error> {
-        P::deserialize(deserializer)
     }
 }

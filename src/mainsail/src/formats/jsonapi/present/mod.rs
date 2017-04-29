@@ -40,7 +40,7 @@ where
                 let doc = Document {
                     member: Bridge {
                         inner: &r,
-                        fields: &fields,
+                        fields: fields.as_ref(),
                     }
                 };
                 let mut buf = vec![];
@@ -62,7 +62,7 @@ where
                 let doc = Document {
                     member: Bridge {
                         inner: &r,
-                        fields: &fields,
+                        fields: fields.as_ref(),
                     }
                 };
                 let mut buf = vec![];

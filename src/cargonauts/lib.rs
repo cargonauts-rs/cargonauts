@@ -43,7 +43,7 @@ pub mod api {
 
 #[doc(hidden)]
 pub mod routing {
-    pub use rigging::{ResourceEndpoint, RelationEndpoint, RelationshipLink};
+    pub use rigging::resource::{ResourceEndpoint, RelationEndpoint, RelationshipLink, RelIds};
     pub use rigging::endpoint::{Endpoint, endpoint};
     pub use rigging::routes::{Kind, RoutingTable, RouteKey, Handler, not_found};
     pub use rigging::routes::{AssetHandler, default_asset_handler};
@@ -80,6 +80,6 @@ pub mod format {
     pub use rigging::format::{Format, Receive, Present, Template};
 
     pub mod jsonapi {
-        pub use mainsail::formats::jsonapi::{ApiSerialize, ApiDeserialize, Fields, Object, HasRelations, RelationUpdate};
+        pub use mainsail::formats::jsonapi::{ApiSerialize, ApiDeserialize, Fields};
     }
 }

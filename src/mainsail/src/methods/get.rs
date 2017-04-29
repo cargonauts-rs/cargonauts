@@ -46,7 +46,7 @@ impl<T: GetOne<R> + RelationEndpoint<R>, R: Relationship> Method<T> for GetOne<R
     where R::Related: ResourceEndpoint,
 {
     const ROUTE: Route<'static> = Route {
-        kind: Kind::Relationship(T::LINK.endpoint),
+        kind: Kind::Relationship(T::REL_ENDPOINT),
         method: http::Method::Get,
     };
 
@@ -67,7 +67,7 @@ impl<T: GetMany<R> + RelationEndpoint<R>, R: Relationship> Method<T> for GetMany
     where R::Related: ResourceEndpoint,
 {
     const ROUTE: Route<'static> = Route {
-        kind: Kind::Relationship(T::LINK.endpoint),
+        kind: Kind::Relationship(T::REL_ENDPOINT),
         method: http::Method::Get,
     };
 

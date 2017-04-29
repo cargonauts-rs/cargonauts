@@ -16,17 +16,6 @@ pub struct MyResource {
 
 relation!(AllCaps => MyResource);
 
-routes! {
-    resource MyResource {
-        method Get in Debug;
-        method Index in Debug;
-
-        relation AllCaps {
-            method GetOne in Debug;
-        }
-    }
-}
-
 impl Resource for MyResource {
     type Identifier = String;
 }
@@ -51,4 +40,15 @@ impl GetOne<AllCaps> for MyResource {
 
 fn main() {
     cargonauts::server::serve(routes).unwrap();
+}
+
+routes! {
+    resource MyResource {
+        method Get in Debug;
+        method Index in Debug;
+
+        relation AllCaps {
+            method GetOne in Debug;
+        }
+    }
 }
