@@ -1,16 +1,12 @@
 use std::fmt;
 use std::marker::PhantomData;
 
-use serde::de::{Visitor, MapAccess, IgnoredAny};
+use serde::de::{Deserialize, Visitor, MapAccess, IgnoredAny};
 
-use rigging::resource::ResourceEndpoint;
+pub struct DocumentVisitor<D>(pub PhantomData<D>);
 
-use super::{Bridge, ApiDeserialize};
-
-pub struct DocumentVisitor<P>(pub PhantomData<P>);
-
-impl<'d, P: ApiDeserialize<'d> + ResourceEndpoint> Visitor<'d> for DocumentVisitor<P> {
-    type Value = Bridge<P>;
+impl<'d, D: Deserialize<'d>> Visitor<'d> for DocumentVisitor<D> {
+    type Value = D;
 
     fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "an object with a \"data\" key")
