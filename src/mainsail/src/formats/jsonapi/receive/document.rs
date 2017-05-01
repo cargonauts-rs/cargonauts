@@ -22,3 +22,4 @@ impl<'d, D: Deserialize<'d>> Visitor<'d> for DocumentVisitor<D> {
         }
     }
 }
+

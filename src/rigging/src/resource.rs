@@ -12,6 +12,7 @@ pub trait ResourceEndpoint: Sized + Resource {
 }
 
 pub trait RelIds<T>: Default {
+    fn try_set_rel_id(&mut self, rel: &str, id: String) -> bool;
     fn set_rel_id<R: Relationship>(&mut self, id: String)
         where T: RelationEndpoint<R>, R::Related: ResourceEndpoint;
     fn rel_id<R: Relationship>(&self) -> Option<&str>
@@ -49,6 +50,10 @@ pub struct WithRels<T: ResourceEndpoint> {
 impl<T: ResourceEndpoint> WithRels<T> {
     pub fn new(resource: T) -> WithRels<T> {
         WithRels { resource, rel_ids: T::RelIds::default(), }
+    }
+
+    pub fn from_parts(resource: T, rel_ids: T::RelIds) -> WithRels<T> {
+        WithRels { resource, rel_ids }
     }
 
     pub fn set_rel_id<R>(&mut self, id: <R::Related as Resource>::Identifier)

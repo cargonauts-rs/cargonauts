@@ -103,14 +103,25 @@ impl<'a> ToTokens for RelIds<'a> {
         let resource = Ident::new(self.resource);
         let ty = Ident::new(&self.ty[..]);
         let rels = self.rels.iter().map(|&rel| Ident::new(rel));
+
+        let try_set_arms = self.rels.iter().map(|&rel| {
+            let rel = Ident::new(rel);
+            quote!(<#resource as ::cargonauts::routing::RelationEndpoint<#rel>>::RELATION => {
+                self.#rel = Some(id);
+                true
+            })
+        });
+
         let set_arms = self.rels.iter().map(|&rel| {
             let rel = Ident::new(rel);
             quote!(<#resource as ::cargonauts::routing::RelationEndpoint<#rel>>::RELATION => self.#rel = Some(id),)
         });
+
         let get_arms = self.rels.iter().map(|&rel| {
             let rel = Ident::new(rel);
             quote!(<#resource as ::cargonauts::routing::RelationEndpoint<#rel>>::RELATION => self.#rel.as_ref().map(|s| &s[..]),)
         });
+
         tokens.append(quote! {
             #[allow(non_snake_case)]
             #[derive(Default)]
@@ -119,6 +130,13 @@ impl<'a> ToTokens for RelIds<'a> {
             }
 
             impl ::cargonauts::routing::RelIds<#resource> for #ty {
+                fn try_set_rel_id(&mut self, rel: &str, id: String) -> bool {
+                    match rel {
+                        #(#try_set_arms)*
+                        _ => false,
+                    }
+                }
+
                 fn set_rel_id<R>(&mut self, id: String)
                 where
                     R: ::cargonauts::api::Relationship,
