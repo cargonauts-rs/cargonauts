@@ -1,6 +1,7 @@
 mod document;
 mod traits;
 mod object;
+mod rels;
 
 pub use self::traits::{ApiDeserialize, ClientIdPolicy};
 
