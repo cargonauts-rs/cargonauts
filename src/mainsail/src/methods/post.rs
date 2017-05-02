@@ -18,6 +18,12 @@ impl<T: Post> Request<T> for PostRequest<T> {
     type BodyParts = T::Post;
 }
 
+impl<T: Post> CollectionRequest<T> for PostRequest<T> {
+    fn new(post: Self::BodyParts, _: &Environment) -> Self {
+        PostRequest { post }
+    }
+}
+
 impl<T: Post> Method<T> for Post<Identifier = T::Identifier, Post = T::Post> {
     const ROUTE: Route<'static> = Route {
         kind: Kind::Collection,

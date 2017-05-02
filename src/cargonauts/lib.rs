@@ -80,6 +80,6 @@ pub mod format {
     pub use rigging::format::{Format, Receive, Present, Template};
 
     pub mod jsonapi {
-        pub use mainsail::formats::jsonapi::{ApiSerialize, ApiDeserialize, Fields};
+        pub use mainsail::formats::jsonapi::{ApiSerialize, ApiDeserialize, Fields, ClientIdPolicy, JsonApiBody};
     }
 }

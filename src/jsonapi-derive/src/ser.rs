@@ -22,6 +22,7 @@ pub fn serialize(ast: DeriveInput) -> Tokens {
                 #id_body
             }
 
+            #[allow(unused_mut)]
             fn serialize<S: ::cargonauts::serde::Serializer>(
                 &self,
                 fields: Option<&::cargonauts::format::jsonapi::Fields>,
@@ -35,7 +36,7 @@ pub fn serialize(ast: DeriveInput) -> Tokens {
 }
 
 fn id_body(fields: &[Field]) -> Tokens {
-    let id_fields = fields.iter().filter(|field| is_id(field)).collect::<Vec<_>>();
+    let id_fields = fields.iter().filter(|field| ::is_id(field)).collect::<Vec<_>>();
 
     if id_fields.is_empty() {
         panic!("Could not derive ApiSerialize: must tag one field #[api_id]")
@@ -54,7 +55,7 @@ fn id_body(fields: &[Field]) -> Tokens {
 fn serialize_body(fields: &[Field]) -> Tokens {
     let len = fields.len() - 1;
 
-    let attrs = fields.iter().filter(|field| !is_id(field)).map(|field| {
+    let attrs = fields.iter().filter(|field| !::is_id(field)).map(|field| {
         let ident = field.ident.as_ref().unwrap();
         let key: &str = ident.as_ref();
         quote! {
@@ -62,7 +63,7 @@ fn serialize_body(fields: &[Field]) -> Tokens {
         }
     });
 
-    let fieldset_attrs = fields.iter().filter(|field| is_id(field)).map(|field| {
+    let fieldset_attrs = fields.iter().filter(|field| !::is_id(field)).map(|field| {
         let ident = field.ident.as_ref().unwrap();
         let key: &str = ident.as_ref();
         quote! {
@@ -86,11 +87,4 @@ fn serialize_body(fields: &[Field]) -> Tokens {
             }
         }
     }
-}
-
-fn is_id(field: &Field) -> bool {
-    field.attrs.iter().any(|attr| match attr.value {
-        MetaItem::Word(ref ident)   => ident.as_ref() == "api_id",
-        _                           => false,
-    })
 }

@@ -42,18 +42,18 @@ where
     const RELATION: &'static str;
 }
 
-pub struct WithRels<T: ResourceEndpoint> {
-    pub resource: T,
+pub struct WithRels<T: ResourceEndpoint, P> {
+    pub inner: P,
     rel_ids: T::RelIds,
 }
 
-impl<T: ResourceEndpoint> WithRels<T> {
-    pub fn new(resource: T) -> WithRels<T> {
-        WithRels { resource, rel_ids: T::RelIds::default(), }
+impl<T: ResourceEndpoint, P> WithRels<T, P> {
+    pub fn new(inner: P) -> WithRels<T, P> {
+        WithRels { inner, rel_ids: T::RelIds::default(), }
     }
 
-    pub fn from_parts(resource: T, rel_ids: T::RelIds) -> WithRels<T> {
-        WithRels { resource, rel_ids }
+    pub fn from_parts(inner: P, rel_ids: T::RelIds) -> WithRels<T, P> {
+        WithRels { inner, rel_ids }
     }
 
     pub fn set_rel_id<R>(&mut self, id: <R::Related as Resource>::Identifier)

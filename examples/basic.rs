@@ -6,7 +6,7 @@ extern crate cargonauts;
 extern crate jsonapi_derive;
 extern crate tokio_service;
 
-use cargonauts::api::{Resource, Get, Index, Environment, Error};
+use cargonauts::api::{Resource, Post, Get, Index, Environment, Error};
 use cargonauts::api::GetOne;
 use cargonauts::format::JsonApi;
 use cargonauts::futures::{Future, future, Stream, stream};
@@ -35,13 +35,28 @@ impl Index for MyResource {
     }
 }
 
+#[derive(ApiDeserialize)]
+pub struct MyResourcePost {
+    attrs: i32,
+}
+
+impl Post for MyResource {
+    type Post = MyResourcePost;
+    fn post(_: Self::Post, _: &Environment) -> Box<Future<Item = MyResource, Error = Error>> {
+        future::ok(MyResource { slug: String::from("hello-world") }).boxed()
+    }
+}
+
 impl GetOne<AllCaps> for MyResource {
     fn get_one(slug: String, _: &Environment) -> Box<Future<Item = MyResource, Error = Error>> {
         future::ok(MyResource { slug: slug.to_uppercase() }).boxed()
     }
 }
 
+fn asrt<T: ::cargonauts::format::jsonapi::JsonApiBody<MyResource>>() { }
+
 fn main() {
+    asrt::<MyResourcePost>();
     cargonauts::server::serve(routes).unwrap();
 }
 

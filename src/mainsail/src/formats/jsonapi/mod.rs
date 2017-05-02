@@ -7,7 +7,7 @@ use rigging::method::Method;
 use rigging::request::Request;
 
 pub use self::present::{Fields, ApiSerialize};
-pub use self::receive::{JsonApiBody, ApiDeserialize};
+pub use self::receive::{JsonApiBody, ApiDeserialize, ClientIdPolicy};
 
 pub struct JsonApi;
 
@@ -18,7 +18,7 @@ where
     M::Request: Request<T>,
     M::Response: ApiSerialize + ResourceEndpoint,
     M::Request: Request<T, BodyParts = P>,
-    P: JsonApiBody,
+    P: JsonApiBody<T>,
 {
     type Receiver = Self;
     type Presenter = Self;
