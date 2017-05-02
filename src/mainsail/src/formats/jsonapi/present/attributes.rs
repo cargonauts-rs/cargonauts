@@ -1,9 +1,10 @@
 use serde::{Serialize, Serializer};
 
-use super::{Fields, ApiSerialize};
+use super::ApiSerialize;
+use super::super::Fields;
 
 pub struct Attributes<'a, T: 'a> {
-    pub fields: Option<&'a Fields>,
+    pub fields: Option<&'a Fields<T>>,
     pub attributes: &'a T,
 }
 

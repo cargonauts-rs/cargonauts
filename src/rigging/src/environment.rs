@@ -1,3 +1,4 @@
+use std::any::Any;
 use std::io;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -12,12 +13,28 @@ use c3po::{ConnFuture, Conn, Pool, Config};
 
 use connections::{Client, Configure};
 
-#[derive(Clone)]
 pub struct Environment {
     pools: Rc<AnyMap>,
+    store: AnyMap,
 }
 
 impl Environment {
+    pub fn store<T: Any>(&mut self, val: T) {
+        self.store.insert(val);
+    }
+
+    pub fn get<T: Any>(&self) -> Option<&T> {
+        self.store.get()
+    }
+
+    pub fn get_mut<T: Any>(&mut self) -> Option<&mut T> {
+        self.store.get_mut()
+    }
+
+    pub fn take<T: Any>(&mut self) -> Option<T> {
+        self.store.remove()
+    }
+
     pub fn conn<C: NewService>(&self) -> ConnFuture<Conn<C>, Error> {
         if let Some(pool) = self.pools.get::<Pool<C>>() {
             pool.connection()
@@ -54,6 +71,19 @@ impl Environment {
 }
 
 #[derive(Clone)]
+pub struct PreparedEnv {
+    pools: Rc<AnyMap>,
+}
+
+impl PreparedEnv {
+    pub fn new(&self) -> Environment {
+        Environment {
+            pools: self.pools.clone(),
+            store: AnyMap::new(),
+        }
+    }
+}
+
 pub struct EnvBuilder {
     pools: Rc<RefCell<AnyMap>>,
 }
@@ -88,8 +118,8 @@ impl EnvBuilder {
         }))
     }
 
-    pub fn build(self) -> Environment {
-        Environment {
+    pub fn build(self) -> PreparedEnv {
+        PreparedEnv {
             pools: Rc::new(Rc::try_unwrap(self.pools).unwrap().into_inner()),
         }
     }

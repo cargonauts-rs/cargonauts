@@ -18,7 +18,7 @@ impl<T: Resource> Request<T> for GetRequest<T> {
 }
 
 impl<T: Resource> ResourceRequest<T> for GetRequest<T> {
-    fn new(_: Self::BodyParts, id: T::Identifier, _: &Environment) -> Self {
+    fn new(_: Self::BodyParts, id: T::Identifier, _: &mut Environment) -> Self {
         GetRequest { id }
     }
 }
@@ -33,7 +33,7 @@ impl<T: Get> Method<T> for Get<Identifier = T::Identifier> {
     type Response = T;
     type Outcome = Box<Future<Item = T, Error = Error>>;
 
-    fn call(req: Self::Request, env: &Environment) -> Self::Outcome {
+    fn call(req: Self::Request, env: &mut Environment) -> Self::Outcome {
         T::get(req.id, env)
     }
 }
@@ -54,7 +54,7 @@ impl<T: GetOne<R> + RelationEndpoint<R>, R: Relationship> Method<T> for GetOne<R
     type Response = R::Related;
     type Outcome = Box<Future<Item = R::Related, Error = Error>>;
 
-    fn call(req: Self::Request, env: &Environment) -> Self::Outcome {
+    fn call(req: Self::Request, env: &mut Environment) -> Self::Outcome {
         T::get_one(req.id, env)
     }
 }
@@ -75,7 +75,7 @@ impl<T: GetMany<R> + RelationEndpoint<R>, R: Relationship> Method<T> for GetMany
     type Response = R::Related;
     type Outcome = Box<Stream<Item = R::Related, Error = Error>>;
 
-    fn call(req: Self::Request, env: &Environment) -> Self::Outcome {
+    fn call(req: Self::Request, env: &mut Environment) -> Self::Outcome {
         T::get_many(req.id, env)
     }
 }

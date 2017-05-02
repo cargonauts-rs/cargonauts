@@ -53,10 +53,7 @@ impl GetOne<AllCaps> for MyResource {
     }
 }
 
-fn asrt<T: ::cargonauts::format::jsonapi::JsonApiBody<MyResource>>() { }
-
 fn main() {
-    asrt::<MyResourcePost>();
     cargonauts::server::serve(routes).unwrap();
 }
 

@@ -19,6 +19,12 @@ impl<T: Patch> Request<T> for PatchRequest<T> {
     type BodyParts = T::Patch;
 }
 
+impl<T: Patch> ResourceRequest<T> for PatchRequest<T> {
+    fn new(patch: Self::BodyParts, id: T::Identifier, _: &mut Environment) -> Self {
+        PatchRequest { id, patch }
+    }
+}
+
 impl<T: Patch> Method<T> for Patch<Identifier = T::Identifier, Patch = T::Patch> {
     const ROUTE: Route<'static> = Route {
         kind: Kind::Resource,
@@ -29,7 +35,7 @@ impl<T: Patch> Method<T> for Patch<Identifier = T::Identifier, Patch = T::Patch>
     type Response = T;
     type Outcome = Box<Future<Item = T, Error = Error>>;
 
-    fn call(req: Self::Request, env: &Environment) -> Self::Outcome {
+    fn call(req: Self::Request, env: &mut Environment) -> Self::Outcome {
         T::patch(req.id, req.patch, env)
     }
 }

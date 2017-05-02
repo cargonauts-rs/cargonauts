@@ -3,31 +3,15 @@ use serde::ser::{SerializeMap, SerializeSeq};
 
 use rigging::Error;
 use rigging::resource::ResourceEndpoint;
-use rigging::environment::Environment;
 
 use super::attributes::Attributes;
 use super::rels::Relationships;
+use super::super::Fields;
 
-pub struct Fields;
-
-impl Fields {
-    pub fn get(_: &Environment) -> Option<Fields> {
-        None
-    }
-
-    pub fn len(&self) -> usize {
-        panic!()
-    }
-
-    pub fn contains(&self, _field: &str) -> bool {
-        panic!()
-    }
-}
-
-pub trait ApiSerialize {
+pub trait ApiSerialize: Sized {
     fn identifier(&self) -> String;
 
-    fn serialize<S: Serializer>(&self, fields: Option<&Fields>, serializer: S) -> Result<S::Ok, S::Error>;
+    fn serialize<S: Serializer>(&self, fields: Option<&Fields<Self>>, serializer: S) -> Result<S::Ok, S::Error>;
 }
 
 impl ApiSerialize for () {
@@ -35,13 +19,13 @@ impl ApiSerialize for () {
         panic!("ApiSerialize::identifier for () should never be called.")
     }
 
-    fn serialize<S: Serializer>(&self, _: Option<&Fields>, _: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: Serializer>(&self, _: Option<&Fields<Self>>, _: S) -> Result<S::Ok, S::Error> {
         panic!("ApiSerialize::serialize for () should never be called.")
     }
 }
 
-pub struct Object<'a, T: 'a> {
-    pub fields: Option<&'a Fields>,
+pub struct Object<'a, T: 'a, U: 'a = T> {
+    pub fields: Option<&'a Fields<U>>,
     pub inner: &'a T,
 }
 
@@ -57,7 +41,7 @@ impl<'a, T: ApiSerialize + ResourceEndpoint> Serialize for Object<'a, T> {
     }
 }
 
-impl<'a, T: ApiSerialize + ResourceEndpoint> Serialize for Object<'a, Vec<T>> {
+impl<'a, T: ApiSerialize + ResourceEndpoint> Serialize for Object<'a, Vec<T>, T> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.inner.len()))?;
         for elem in self.inner {

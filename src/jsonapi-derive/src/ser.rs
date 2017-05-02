@@ -23,9 +23,11 @@ pub fn serialize(ast: DeriveInput) -> Tokens {
             }
 
             #[allow(unused_mut)]
+            #[allow(unused_variables)]
+            #[allow(unused_imports)]
             fn serialize<S: ::cargonauts::serde::Serializer>(
                 &self,
-                fields: Option<&::cargonauts::format::jsonapi::Fields>,
+                fields: Option<&::cargonauts::format::jsonapi::Fields<Self>>,
                 serializer: S
             ) -> Result<S::Ok, S::Error> {
                 use ::cargonauts::serde::ser::{Serializer, SerializeMap};
@@ -76,7 +78,7 @@ fn serialize_body(fields: &[Field]) -> Tokens {
     quote! {
         match fields {
             Some(fieldset)  => {
-                let mut map = serializer.serialize_map(Some(::std::cmp::min(fieldset.len(), #len)))?;
+                let mut map = serializer.serialize_map(None)?;
                 #( #fieldset_attrs )*
                 map.end()
             }

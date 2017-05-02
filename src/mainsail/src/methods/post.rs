@@ -19,7 +19,7 @@ impl<T: Post> Request<T> for PostRequest<T> {
 }
 
 impl<T: Post> CollectionRequest<T> for PostRequest<T> {
-    fn new(post: Self::BodyParts, _: &Environment) -> Self {
+    fn new(post: Self::BodyParts, _: &mut Environment) -> Self {
         PostRequest { post }
     }
 }
@@ -34,7 +34,7 @@ impl<T: Post> Method<T> for Post<Identifier = T::Identifier, Post = T::Post> {
     type Response = T;
     type Outcome = Box<Future<Item = T, Error = Error>>;
 
-    fn call(req: Self::Request, env: &Environment) -> Self::Outcome {
+    fn call(req: Self::Request, env: &mut Environment) -> Self::Outcome {
         T::post(req.post, env)
     }
 }

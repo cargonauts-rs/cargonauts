@@ -1,6 +1,8 @@
 mod present;
 mod receive;
 
+mod fieldset;
+
 use futures::{Future, Stream, future};
 
 use rigging::{ResourceEndpoint, Error};
@@ -10,10 +12,12 @@ use rigging::http;
 use rigging::method::Method;
 use rigging::request::Request;
 
-pub use self::present::{Fields, ApiSerialize};
-pub use self::receive::{JsonApiBody, ApiDeserialize, ClientIdPolicy};
+pub use self::fieldset::Fields;
+pub use self::present::ApiSerialize;
+pub use self::receive::{ApiDeserialize, ClientIdPolicy};
 
 use self::present::*;
+use self::receive::*;
 
 pub struct JsonApi;
 
@@ -30,12 +34,14 @@ where
 {
     type ReqFuture = P::Future;
 
-    fn receive_request(req: http::Request, _: &Environment) -> Self::ReqFuture {
-        // TODO set env
+    fn receive_request(req: http::Request, env: &mut Environment) -> Self::ReqFuture {
+        if let Some(fields) = Fields::<M::Response>::new(&req) {
+            env.store(fields);
+        }
         P::parse(req.body())
     }
 
-    fn present_unit<F>(future: F, _: Option<Template>, _: &Environment) -> http::BoxFuture
+    fn present_unit<F>(future: F, _: Option<Template>, _: &mut Environment) -> http::BoxFuture
         where F: Future<Item = (), Error = Error> + 'static,
     {
         Box::new(future.then(move |result| match result {
@@ -44,10 +50,10 @@ where
         }))
     }
 
-    fn present_resource<F>(future: F, _: Option<Template>, env: &Environment) -> http::BoxFuture
+    fn present_resource<F>(future: F, _: Option<Template>, env: &mut Environment) -> http::BoxFuture
         where F: Future<Item = M::Response, Error = Error> + 'static,
     {
-        let fields = Fields::get(env);
+        let fields = env.take::<Fields<M::Response>>();
         Box::new(future.then(move |result| match result {
             Ok(r)   => {
                 let doc = Document {
@@ -66,10 +72,10 @@ where
         }))
     }
 
-    fn present_collection<S>(stream: S, _: Option<Template>, env: &Environment) -> http::BoxFuture
+    fn present_collection<S>(stream: S, _: Option<Template>, env: &mut Environment) -> http::BoxFuture
         where S: Stream<Item = M::Response, Error = Error> + 'static,
     {
-        let fields = Fields::get(env);
+        let fields = env.take::<Fields<M::Response>>();
         Box::new(stream.collect().then(move |result| match result {
             Ok(r)   => {
                 let doc = Document {
@@ -88,7 +94,7 @@ where
         }))
     }
 
-    fn present_error(error: Error, _: &Environment) -> http::BoxFuture {
+    fn present_error(error: Error, _: &mut Environment) -> http::BoxFuture {
         Box::new(future::ok(error_response(error)))
     }
 }

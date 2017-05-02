@@ -18,7 +18,7 @@ impl<T: Resource> Request<T> for DeleteRequest<T> {
 }
 
 impl<T: Resource> ResourceRequest<T> for DeleteRequest<T> {
-    fn new(_: Self::BodyParts, id: T::Identifier, _: &Environment) -> Self {
+    fn new(_: Self::BodyParts, id: T::Identifier, _: &mut Environment) -> Self {
         DeleteRequest { id }
     }
 }
@@ -33,7 +33,7 @@ impl<T: Delete> Method<T> for Delete<Identifier = T::Identifier> {
     type Response = ();
     type Outcome = Box<Future<Item = (), Error = Error>>;
 
-    fn call(req: Self::Request, env: &Environment) -> Self::Outcome {
+    fn call(req: Self::Request, env: &mut Environment) -> Self::Outcome {
         T::delete(req.id, env)
     }
 }

@@ -81,6 +81,6 @@ pub mod format {
     pub use mainsail::formats::jsonapi::JsonApi;
 
     pub mod jsonapi {
-        pub use mainsail::formats::jsonapi::{ApiSerialize, ApiDeserialize, Fields, ClientIdPolicy, JsonApiBody};
+        pub use mainsail::formats::jsonapi::{ApiSerialize, ApiDeserialize, Fields, ClientIdPolicy};
     }
 }

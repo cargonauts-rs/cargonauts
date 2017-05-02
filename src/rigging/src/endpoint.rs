@@ -34,19 +34,19 @@ where
     M::Outcome: Future<Item = M::Response, Error = Error>,
     F: Format<T, M>,
 {
-    fn call(req: http::Request, template: Option<Template>, env: Environment) -> http::BoxFuture {
+    fn call(req: http::Request, template: Option<Template>, mut env: Environment) -> http::BoxFuture {
         let id = match parse_id::<T>(&req) {
             Ok(id) => id,
-            Err(err) => return F::present_error(err, &env),
+            Err(err) => return F::present_error(err, &mut env),
         };
-        Box::new(F::receive_request(req, &env).then(move |result| {
+        Box::new(F::receive_request(req, &mut env).then(move |result| {
             let parts = match result {
                 Ok(parts)   => parts,
-                Err(err)    => return F::present_error(err, &env),
+                Err(err)    => return F::present_error(err, &mut env),
             };
-            let request = M::Request::new(parts, id, &env);
-            let future = M::call(request, &env);
-            F::present_resource(future, template, &env)
+            let request = M::Request::new(parts, id, &mut env);
+            let future = M::call(request, &mut env);
+            F::present_resource(future, template, &mut env)
         }))
     }
 }
@@ -59,19 +59,19 @@ where
     M::Outcome: Future<Item = M::Response, Error = Error>,
     F: Format<T, M>,
 {
-    fn call(req: http::Request, template: Option<Template>, env: Environment) -> http::BoxFuture {
+    fn call(req: http::Request, template: Option<Template>, mut env: Environment) -> http::BoxFuture {
         let id = match parse_id::<T>(&req) {
             Ok(id) => id,
-            Err(err) => return F::present_error(err, &env),
+            Err(err) => return F::present_error(err, &mut env),
         };
-        Box::new(F::receive_request(req, &env).then(move |result| {
+        Box::new(F::receive_request(req, &mut env).then(move |result| {
             let parts = match result {
                 Ok(parts)   => parts,
-                Err(err)    => return F::present_error(err, &env),
+                Err(err)    => return F::present_error(err, &mut env),
             };
-            let request = M::Request::new(parts, id, &env);
-            let future = M::call(request, &env);
-            F::present_unit(future, template, &env)
+            let request = M::Request::new(parts, id, &mut env);
+            let future = M::call(request, &mut env);
+            F::present_unit(future, template, &mut env)
         }))
     }
 }
@@ -84,19 +84,19 @@ where
     M::Outcome: Stream<Item = M::Response, Error = Error>,
     F: Format<T, M>,
 {
-    fn call(req: http::Request, template: Option<Template>, env: Environment) -> http::BoxFuture {
+    fn call(req: http::Request, template: Option<Template>, mut env: Environment) -> http::BoxFuture {
         let id = match parse_id::<T>(&req) {
             Ok(id) => id,
-            Err(err) => return F::present_error(err, &env),
+            Err(err) => return F::present_error(err, &mut env),
         };
-        Box::new(F::receive_request(req, &env).then(move |result| {
+        Box::new(F::receive_request(req, &mut env).then(move |result| {
             let parts = match result {
                 Ok(parts)   => parts,
-                Err(err)    => return F::present_error(err, &env),
+                Err(err)    => return F::present_error(err, &mut env),
             };
-            let request = M::Request::new(parts, id, &env);
-            let stream = M::call(request, &env);
-            F::present_collection(stream, template, &env)
+            let request = M::Request::new(parts, id, &mut env);
+            let stream = M::call(request, &mut env);
+            F::present_collection(stream, template, &mut env)
         }))
     }
 }
@@ -110,15 +110,15 @@ where
     M::Outcome: Future<Item = M::Response, Error = Error>,
     F: Format<T, M>,
 {
-    fn call(req: http::Request, template: Option<Template>, env: Environment) -> http::BoxFuture {
-        Box::new(F::receive_request(req, &env).then(move |result| {
+    fn call(req: http::Request, template: Option<Template>, mut env: Environment) -> http::BoxFuture {
+        Box::new(F::receive_request(req, &mut env).then(move |result| {
             let parts = match result {
                 Ok(parts)   => parts,
-                Err(err)    => return F::present_error(err, &env),
+                Err(err)    => return F::present_error(err, &mut env),
             };
-            let request = M::Request::new(parts, &env);
-            let future = M::call(request, &env);
-            F::present_resource(future, template, &env)
+            let request = M::Request::new(parts, &mut env);
+            let future = M::call(request, &mut env);
+            F::present_resource(future, template, &mut env)
         }))
     }
 }
@@ -132,15 +132,15 @@ where
     M::Outcome: Future<Item = M::Response, Error = Error>,
     F: Format<T, M>,
 {
-    fn call(req: http::Request, template: Option<Template>, env: Environment) -> http::BoxFuture {
-        Box::new(F::receive_request(req, &env).then(move |result| {
+    fn call(req: http::Request, template: Option<Template>, mut env: Environment) -> http::BoxFuture {
+        Box::new(F::receive_request(req, &mut env).then(move |result| {
             let parts = match result {
                 Ok(parts)   => parts,
-                Err(err)    => return F::present_error(err, &env),
+                Err(err)    => return F::present_error(err, &mut env),
             };
-            let request = M::Request::new(parts, &env);
-            let future = M::call(request, &env);
-            F::present_unit(future, template, &env)
+            let request = M::Request::new(parts, &mut env);
+            let future = M::call(request, &mut env);
+            F::present_unit(future, template, &mut env)
         }))
     }
 }
@@ -153,15 +153,15 @@ where
     M::Outcome: Stream<Item = M::Response, Error = Error>,
     F: Format<T, M>,
 {
-    fn call(req: http::Request, template: Option<Template>, env: Environment) -> http::BoxFuture {
-        Box::new(F::receive_request(req, &env).then(move |result| {
+    fn call(req: http::Request, template: Option<Template>, mut env: Environment) -> http::BoxFuture {
+        Box::new(F::receive_request(req, &mut env).then(move |result| {
             let parts = match result {
                 Ok(parts)   => parts,
-                Err(err)    => return F::present_error(err, &env),
+                Err(err)    => return F::present_error(err, &mut env),
             };
-            let request = M::Request::new(parts, &env);
-            let stream = M::call(request, &env);
-            F::present_collection(stream, template, &env)
+            let request = M::Request::new(parts, &mut env);
+            let stream = M::call(request, &mut env);
+            F::present_collection(stream, template, &mut env)
         }))
     }
 }

@@ -7,7 +7,7 @@ use tokio::{Service, NewService};
 use futures::{Future, future};
 
 use http;
-use environment::Environment;
+use environment::{PreparedEnv, Environment};
 
 #[derive(Clone, Hash, Eq, PartialEq)]
 pub struct RouteKey {
@@ -76,7 +76,7 @@ pub struct RoutingTable {
     routes: Rc<HashMap<RouteKey, Handler>>,
     assets: Rc<HashMap<&'static str, &'static [u8]>>,
     asset_handler: AssetHandler,
-    env: Environment,
+    env: PreparedEnv,
 }
 
 impl RoutingTable {
@@ -84,7 +84,7 @@ impl RoutingTable {
         routes: HashMap<RouteKey, Handler>,
         assets: HashMap<&'static str, &'static [u8]>,
         asset_handler: AssetHandler,
-        env: Environment
+        env: PreparedEnv
     ) -> RoutingTable {
         RoutingTable {
             routes: Rc::new(routes),
@@ -109,7 +109,7 @@ impl Service for RoutingTable {
             }
         }
         match RouteKeyRef::req(&req).and_then(|route| self.routes.get(&route)) {
-            Some(handle)    => handle(req, self.env.clone()),
+            Some(handle)    => handle(req, self.env.new()),
             None            => not_found(),
         }
     }
