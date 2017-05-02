@@ -23,17 +23,13 @@ where
     M::Request: Request<T, BodyParts = ()>,
     M::Response: Display,
 {
-    type Receiver = super::BasicReceiver;
-    type Presenter = Self;
-}
+    type ReqFuture = future::FutureResult<(), Error>;
 
-impl<T, M> Present<T, M> for SimpleDisplay
-where
-    T: ResourceEndpoint,
-    M: ?Sized + Method<T>,
-    M::Response: Display,
-{
-    fn unit<F>(future: F, _: Option<Template>, _: &Environment) -> http::BoxFuture
+    fn receive_request(_: http::Request, _: &Environment) -> Self::ReqFuture {
+        future::ok(())
+    }
+
+    fn present_unit<F>(future: F, _: Option<Template>, _: &Environment) -> http::BoxFuture
         where F: Future<Item = (), Error = Error> + 'static,
     {
         Box::new(future.then(|result| match result {
@@ -42,7 +38,7 @@ where
         }))
     }
 
-    fn resource<F>(future: F, _: Option<Template>, _: &Environment) -> http::BoxFuture
+    fn present_resource<F>(future: F, _: Option<Template>, _: &Environment) -> http::BoxFuture
         where F: Future<Item = M::Response, Error = Error> + 'static,
     {
         Box::new(future.then(|result| match result {
@@ -51,7 +47,7 @@ where
         }))
     }
 
-    fn collection<S>(stream: S, _: Option<Template>, _: &Environment) -> http::BoxFuture
+    fn present_collection<S>(stream: S, _: Option<Template>, _: &Environment) -> http::BoxFuture
         where S: Stream<Item = M::Response, Error = Error> + 'static,
     {
         Box::new(stream.collect().then(|result| match result {
@@ -60,7 +56,7 @@ where
         }))
     }
 
-    fn error(error: Error, _: &Environment) -> http::BoxFuture {
+    fn present_error(error: Error, _: &Environment) -> http::BoxFuture {
         Box::new(future::ok(debug_response(error, http::StatusCode::InternalServerError)))
     }
 }

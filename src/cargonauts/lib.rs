@@ -76,8 +76,9 @@ pub mod method {
 
 pub mod format {
 
-    pub use mainsail::formats::{Debug, Display, JsonApi};
-    pub use rigging::format::{Format, Receive, Present, Template};
+    pub use mainsail::formats::{Debug, Display};
+    pub use rigging::format::{Format, Template};
+    pub use mainsail::formats::jsonapi::JsonApi;
 
     pub mod jsonapi {
         pub use mainsail::formats::jsonapi::{ApiSerialize, ApiDeserialize, Fields, ClientIdPolicy, JsonApiBody};

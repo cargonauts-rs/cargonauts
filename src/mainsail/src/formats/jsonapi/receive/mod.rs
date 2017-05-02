@@ -13,27 +13,10 @@ use json;
 
 use rigging::Error;
 use rigging::resource::{ResourceEndpoint, WithRels};
-use rigging::environment::Environment;
-use rigging::format::Receive;
 use rigging::http;
-use rigging::request::Request;
 
 use self::document::DocumentVisitor;
 use self::object::Object;
-
-impl<T, R, P> Receive<T, R> for super::JsonApi
-where
-    T: ResourceEndpoint,
-    R: Request<T, BodyParts = P>,
-    P: JsonApiBody<T>,
-{
-    type Future = P::Future;
-    fn receive(req: http::Request, _: &Environment) -> Self::Future {
-        // TODO set env
-        P::parse(req.body())
-    }
-}
-
 pub trait JsonApiBody<T>: Sized + 'static {
     type Future: Future<Item = Self, Error = Error> + 'static;
     fn parse(body: http::Body) -> Self::Future;

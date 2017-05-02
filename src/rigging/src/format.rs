@@ -7,26 +7,20 @@ use request::Request;
 use http;
 
 pub trait Format<T: ResourceEndpoint, M: ?Sized + Method<T>> {
-    type Receiver: Receive<T, M::Request>;
-    type Presenter: Present<T, M>;
-}
+    type ReqFuture: Future<Item = <M::Request as Request<T>>::BodyParts, Error = Error> + 'static;
 
-pub trait Receive<T: ResourceEndpoint, R: Request<T>> {
-    type Future: Future<Item = R::BodyParts, Error = Error> + 'static;
-    fn receive(req: http::Request, env: &Environment) -> Self::Future;
-}
+    fn receive_request(req: http::Request, env: &Environment) -> Self::ReqFuture;
 
-pub trait Present<T: ResourceEndpoint, M: ?Sized + Method<T>>: Send + 'static {
-    fn unit<F>(future: F, template: Option<Template>, env: &Environment) -> http::BoxFuture
+    fn present_unit<F>(future: F, template: Option<Template>, env: &Environment) -> http::BoxFuture
         where F: Future<Item = (), Error = Error> + 'static;
 
-    fn resource<F>(future: F, template: Option<Template>, env: &Environment) -> http::BoxFuture
+    fn present_resource<F>(future: F, template: Option<Template>, env: &Environment) -> http::BoxFuture
         where F: Future<Item = M::Response, Error = Error> + 'static;
 
-    fn collection<S>(stream: S, template: Option<Template>, env: &Environment) -> http::BoxFuture
+    fn present_collection<S>(stream: S, template: Option<Template>, env: &Environment) -> http::BoxFuture
         where S: Stream<Item = M::Response, Error = Error> + 'static;
 
-    fn error(error: Error, env: &Environment) -> http::BoxFuture;
+    fn present_error(error: Error, env: &Environment) -> http::BoxFuture;
 }
 
 #[derive(Copy, Clone)]
