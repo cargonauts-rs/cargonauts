@@ -1,26 +1,11 @@
 use futures::{Future, Stream};
 use rigging::{RelationEndpoint, ResourceEndpoint, Relationship, Resource, Error, http};
-use rigging::method::Method;
+use rigging::method::{ResourceMethod, Method};
 use rigging::environment::Environment;
 use rigging::routes::{Route, Kind};
-use rigging::request::*;
 
 pub trait Get: Resource {
     fn get(id: Self::Identifier, env: &Environment) -> Box<Future<Item = Self, Error = Error>> where Self: Sized;
-}
-
-pub struct GetRequest<T: Resource> {
-    id: T::Identifier,
-}
-
-impl<T: Resource> Request<T> for GetRequest<T> {
-    type BodyParts = ();
-}
-
-impl<T: Resource> ResourceRequest<T> for GetRequest<T> {
-    fn new(_: Self::BodyParts, id: T::Identifier, _: &mut Environment) -> Self {
-        GetRequest { id }
-    }
 }
 
 impl<T: Get> Method<T> for Get<Identifier = T::Identifier> {
@@ -29,12 +14,14 @@ impl<T: Get> Method<T> for Get<Identifier = T::Identifier> {
         method: http::Method::Get,
     };
 
-    type Request = GetRequest<T>;
+    type Request = ();
     type Response = T;
     type Outcome = Box<Future<Item = T, Error = Error>>;
+}
 
-    fn call(req: Self::Request, env: &mut Environment) -> Self::Outcome {
-        T::get(req.id, env)
+impl<T: Get> ResourceMethod<T> for Get<Identifier = T::Identifier> {
+    fn call(id: T::Identifier, _: Self::Request, env: &mut Environment) -> Self::Outcome {
+        T::get(id, env)
     }
 }
 
@@ -50,12 +37,16 @@ impl<T: GetOne<R> + RelationEndpoint<R>, R: Relationship> Method<T> for GetOne<R
         method: http::Method::Get,
     };
 
-    type Request = GetRequest<T>;
+    type Request = ();
     type Response = R::Related;
     type Outcome = Box<Future<Item = R::Related, Error = Error>>;
+}
 
-    fn call(req: Self::Request, env: &mut Environment) -> Self::Outcome {
-        T::get_one(req.id, env)
+impl<T: GetOne<R> + RelationEndpoint<R>, R: Relationship> ResourceMethod<T> for GetOne<R, Identifier = T::Identifier>
+    where R::Related: ResourceEndpoint,
+{
+    fn call(id: T::Identifier, _: Self::Request, env: &mut Environment) -> Self::Outcome {
+        T::get_one(id, env)
     }
 }
 
@@ -71,11 +62,15 @@ impl<T: GetMany<R> + RelationEndpoint<R>, R: Relationship> Method<T> for GetMany
         method: http::Method::Get,
     };
 
-    type Request = GetRequest<T>;
+    type Request = ();
     type Response = R::Related;
     type Outcome = Box<Stream<Item = R::Related, Error = Error>>;
+}
 
-    fn call(req: Self::Request, env: &mut Environment) -> Self::Outcome {
-        T::get_many(req.id, env)
+impl<T: GetMany<R> + RelationEndpoint<R>, R: Relationship> ResourceMethod<T> for GetMany<R, Identifier = T::Identifier>
+    where R::Related: ResourceEndpoint,
+{
+    fn call(id: T::Identifier, _: Self::Request, env: &mut Environment) -> Self::Outcome {
+        T::get_many(id, env)
     }
 }

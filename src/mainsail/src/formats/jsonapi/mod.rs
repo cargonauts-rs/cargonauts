@@ -10,7 +10,6 @@ use rigging::environment::Environment;
 use rigging::format::{Format, Template};
 use rigging::http;
 use rigging::method::Method;
-use rigging::request::Request;
 
 pub use self::fieldset::Fields;
 pub use self::present::ApiSerialize;
@@ -26,10 +25,8 @@ const MIME: &'static str = "application/vnd.api+json";
 impl<T, M, P> Format<T, M> for JsonApi
 where
     T: ResourceEndpoint,
-    M: ?Sized + Method<T>,
-    M::Request: Request<T>,
+    M: ?Sized + Method<T, Request = P>,
     M::Response: ApiSerialize + ResourceEndpoint,
-    M::Request: Request<T, BodyParts = P>,
     P: JsonApiBody<T>,
 {
     type ReqFuture = P::Future;

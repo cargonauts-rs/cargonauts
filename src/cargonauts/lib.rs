@@ -69,9 +69,7 @@ pub mod clients {
 
 pub mod method {
     pub use rigging::method::Method;
-    pub use rigging::request::{Request, ResourceRequest, CollectionRequest};
     pub use rigging::routes::Route;
-    pub use mainsail::methods::{GetRequest, IndexRequest, PostRequest, PatchRequest};
 }
 
 pub mod format {

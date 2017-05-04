@@ -2,14 +2,13 @@ use futures::{Future, Stream};
 
 use Error;
 use ResourceEndpoint;
-use method::Method;
+use method::*;
 
-use request::*;
 use format::*;
 use environment::Environment;
 use http;
 
-pub trait Endpoint<Hits, Returns> {
+pub trait Endpoint<In, Out> {
     fn call(http::Request, template: Option<Template>, env: Environment) -> http::BoxFuture;
 }
 
@@ -28,8 +27,7 @@ pub struct _Unit;
 impl<M, T, F> Endpoint<_Resource, _Resource> for (T, F, M)
 where
     T: ResourceEndpoint,
-    M: ?Sized + Method<T>,
-    M::Request: ResourceRequest<T>,
+    M: ?Sized + ResourceMethod<T>,
     M::Response: ResourceEndpoint,
     M::Outcome: Future<Item = M::Response, Error = Error>,
     F: Format<T, M>,
@@ -40,12 +38,11 @@ where
             Err(err) => return F::present_error(err, &mut env),
         };
         Box::new(F::receive_request(req, &mut env).then(move |result| {
-            let parts = match result {
+            let request = match result {
                 Ok(parts)   => parts,
                 Err(err)    => return F::present_error(err, &mut env),
             };
-            let request = M::Request::new(parts, id, &mut env);
-            let future = M::call(request, &mut env);
+            let future = M::call(id, request, &mut env);
             F::present_resource(future, template, &mut env)
         }))
     }
@@ -54,8 +51,7 @@ where
 impl<M, T, F> Endpoint<_Resource, _Unit> for (T, F, M)
 where
     T: ResourceEndpoint,
-    M: ?Sized + Method<T, Response = ()>,
-    M::Request: ResourceRequest<T>,
+    M: ?Sized + ResourceMethod<T, Response = ()>,
     M::Outcome: Future<Item = M::Response, Error = Error>,
     F: Format<T, M>,
 {
@@ -65,12 +61,11 @@ where
             Err(err) => return F::present_error(err, &mut env),
         };
         Box::new(F::receive_request(req, &mut env).then(move |result| {
-            let parts = match result {
+            let request = match result {
                 Ok(parts)   => parts,
                 Err(err)    => return F::present_error(err, &mut env),
             };
-            let request = M::Request::new(parts, id, &mut env);
-            let future = M::call(request, &mut env);
+            let future = M::call(id, request, &mut env);
             F::present_unit(future, template, &mut env)
         }))
     }
@@ -79,8 +74,7 @@ where
 impl<M, T, F> Endpoint<_Resource, _Collection> for (T, F, M)
 where
     T: ResourceEndpoint,
-    M: ?Sized + Method<T>,
-    M::Request: ResourceRequest<T>,
+    M: ?Sized + ResourceMethod<T>,
     M::Outcome: Stream<Item = M::Response, Error = Error>,
     F: Format<T, M>,
 {
@@ -90,12 +84,11 @@ where
             Err(err) => return F::present_error(err, &mut env),
         };
         Box::new(F::receive_request(req, &mut env).then(move |result| {
-            let parts = match result {
+            let request = match result {
                 Ok(parts)   => parts,
                 Err(err)    => return F::present_error(err, &mut env),
             };
-            let request = M::Request::new(parts, id, &mut env);
-            let stream = M::call(request, &mut env);
+            let stream = M::call(id, request, &mut env);
             F::present_collection(stream, template, &mut env)
         }))
     }
@@ -104,19 +97,17 @@ where
 impl<M, T, F> Endpoint<_Collection, _Resource> for (T, F, M)
 where
     T: ResourceEndpoint,
-    M: ?Sized + Method<T>,
-    M::Request: CollectionRequest<T>,
+    M: ?Sized + CollectionMethod<T>,
     M::Response: ResourceEndpoint,
     M::Outcome: Future<Item = M::Response, Error = Error>,
     F: Format<T, M>,
 {
     fn call(req: http::Request, template: Option<Template>, mut env: Environment) -> http::BoxFuture {
         Box::new(F::receive_request(req, &mut env).then(move |result| {
-            let parts = match result {
+            let request = match result {
                 Ok(parts)   => parts,
                 Err(err)    => return F::present_error(err, &mut env),
             };
-            let request = M::Request::new(parts, &mut env);
             let future = M::call(request, &mut env);
             F::present_resource(future, template, &mut env)
         }))
@@ -126,19 +117,17 @@ where
 impl<M, T, F> Endpoint<_Collection, _Unit> for (T, F, M)
 where
     T: ResourceEndpoint,
-    M: ?Sized + Method<T, Response = ()>,
-    M::Request: CollectionRequest<T>,
+    M: ?Sized + CollectionMethod<T, Response = ()>,
     M::Response: ResourceEndpoint,
     M::Outcome: Future<Item = M::Response, Error = Error>,
     F: Format<T, M>,
 {
     fn call(req: http::Request, template: Option<Template>, mut env: Environment) -> http::BoxFuture {
         Box::new(F::receive_request(req, &mut env).then(move |result| {
-            let parts = match result {
+            let request = match result {
                 Ok(parts)   => parts,
                 Err(err)    => return F::present_error(err, &mut env),
             };
-            let request = M::Request::new(parts, &mut env);
             let future = M::call(request, &mut env);
             F::present_unit(future, template, &mut env)
         }))
@@ -148,18 +137,16 @@ where
 impl<M, T, F> Endpoint<_Collection, _Collection> for (T, F, M)
 where
     T: ResourceEndpoint,
-    M: ?Sized + Method<T>,
-    M::Request: CollectionRequest<T>,
+    M: ?Sized + CollectionMethod<T>,
     M::Outcome: Stream<Item = M::Response, Error = Error>,
     F: Format<T, M>,
 {
     fn call(req: http::Request, template: Option<Template>, mut env: Environment) -> http::BoxFuture {
         Box::new(F::receive_request(req, &mut env).then(move |result| {
-            let parts = match result {
+            let request = match result {
                 Ok(parts)   => parts,
                 Err(err)    => return F::present_error(err, &mut env),
             };
-            let request = M::Request::new(parts, &mut env);
             let stream = M::call(request, &mut env);
             F::present_collection(stream, template, &mut env)
         }))

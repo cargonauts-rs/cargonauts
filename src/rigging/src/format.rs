@@ -3,11 +3,10 @@ use futures::{Future, Stream};
 use {ResourceEndpoint, Error};
 use environment::Environment;
 use method::Method;
-use request::Request;
 use http;
 
 pub trait Format<T: ResourceEndpoint, M: ?Sized + Method<T>> {
-    type ReqFuture: Future<Item = <M::Request as Request<T>>::BodyParts, Error = Error> + 'static;
+    type ReqFuture: Future<Item = M::Request, Error = Error> + 'static;
 
     fn receive_request(req: http::Request, env: &mut Environment) -> Self::ReqFuture;
 

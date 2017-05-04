@@ -7,7 +7,6 @@ use rigging::environment::Environment;
 use rigging::http;
 use rigging::format::*;
 use rigging::method::Method;
-use rigging::request::Request;
 
 const MIME: &'static str = "text/plain; charset=utf-8";
 
@@ -19,8 +18,7 @@ pub struct SimpleDebug {
 impl<T, M> Format<T, M> for SimpleDebug
 where
     T: ResourceEndpoint,
-    M: ?Sized + Method<T>,
-    M::Request: Request<T, BodyParts = ()>,
+    M: ?Sized + Method<T, Request = ()>,
     M::Response: Debug,
 {
     type ReqFuture = future::FutureResult<(), Error>;
