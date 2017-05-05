@@ -63,12 +63,19 @@ impl ResourceMember {
     }
 }
 
-#[derive(PartialEq, Eq, Debug, Clone, Default)]
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub struct Relation {
     pub rel: String,
     pub endpoint: Option<String>,
     pub members: Vec<RelationMember>,
     pub attrs: Vec<Attribute>,
+    pub kind: RelationKind,
+}
+
+#[derive(PartialEq, Eq, Debug, Clone, Copy)]
+pub enum RelationKind {
+    Single,
+    Many,
 }
 
 #[derive(PartialEq, Eq, Clone, Debug)]

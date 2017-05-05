@@ -42,17 +42,22 @@ ResourceHeader: ResourceHeader  = {
 Endpoint: String = "@" <String>;
 
 ResourceMember: ResourceMember = {
-    "relation" <Relation> => ResourceMember::Relation(<>),
+    "has" <Relation> => ResourceMember::Relation(<>),
     "method" <Method> => ResourceMember::Method(<>),
 };
 
 Relation: Relation = {
-    <attrs:Attribute*> <rel:Ident> <endpoint:Endpoint?> ";" => Relation {
-        attrs, rel, endpoint, members: vec![],
+    <kind:RelationKind> <attrs:Attribute*> <rel:Ident> <endpoint:Endpoint?> ";" => Relation {
+        kind, attrs, rel, endpoint, members: vec![],
     },
-    <attrs:Attribute*> <rel:Ident> <endpoint:Endpoint?> "{" <members:RelationMember*> "}" => Relation {
-        attrs, rel, endpoint, members,
+    <kind:RelationKind> <attrs:Attribute*> <rel:Ident> <endpoint:Endpoint?> "{" <members:RelationMember*> "}" => Relation {
+        kind, attrs, rel, endpoint, members,
     },
+};
+
+RelationKind: RelationKind = {
+    "one" => RelationKind::Single,
+    "many" => RelationKind::Many,
 };
 
 RelationMember: RelationMember = {

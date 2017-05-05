@@ -40,6 +40,7 @@ impl Resource {
             resource: &self.header.ty,
             relation: &rel.rel,
             endpoint: rel.endpoint.as_ref(),
+            kind: rel.kind,
         }).collect()
     }
 
@@ -75,6 +76,7 @@ struct Relationship<'a> {
     resource: &'a str,
     relation: &'a str,
     endpoint: Option<&'a String>,
+    kind: RelationKind,
 }
 
 impl<'a> ToTokens for Relationship<'a> {
@@ -88,7 +90,18 @@ impl<'a> ToTokens for Relationship<'a> {
                 const REL_ENDPOINT: &'static str = #endpoint;
                 const RELATION: &'static str = #relation;
             }
-        })
+        });
+
+        tokens.append(match self.kind {
+            RelationKind::Single => quote! {
+                impl ::cargonauts::routing::HasOneEndpoint<#relation_ty> for #resource_ty {
+                }
+            },
+            RelationKind::Many => quote! {
+                impl ::cargonauts::routing::HasManyEndpoint<#relation_ty> for #resource_ty {
+                }
+            },
+        });
     }
 }
 

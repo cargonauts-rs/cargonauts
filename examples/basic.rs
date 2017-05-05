@@ -62,7 +62,7 @@ routes! {
         method Get in JsonApi;
         method Index in JsonApi;
 
-        relation AllCaps {
+        has one AllCaps {
             method GetOne in JsonApi;
         }
     }
