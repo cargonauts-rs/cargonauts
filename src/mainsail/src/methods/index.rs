@@ -11,7 +11,7 @@ pub trait Index: Resource {
 }
 
 impl<T: Index> Method<T> for Index<Identifier = T::Identifier> {
-    const ROUTE: Route<'static> = Route {
+    const ROUTE: Route = Route {
         kind: Kind::Collection,
         method: http::Method::Get,
     };

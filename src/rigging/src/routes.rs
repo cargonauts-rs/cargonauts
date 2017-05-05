@@ -16,13 +16,16 @@ pub struct RouteKey {
 }
 #[derive(Clone, Hash, Eq, PartialEq)]
 struct RouteKeyRef<'a> {
+    route: Route,
     endpoint: &'a str,
-    route: Route<'a>,
+    subroute: Option<&'a str>,
 }
 
 impl RouteKey {
-    pub fn new(endpoint: &'static str, route: Route<'static>) -> RouteKey {
-        RouteKey { key: RouteKeyRef { endpoint, route } }
+    pub fn new(endpoint: &'static str, route: Route, subroute: Option<&'static str>)
+        ->
+    RouteKey {
+        RouteKey { key: RouteKeyRef { endpoint, route, subroute } }
     }
 }
 
@@ -36,18 +39,19 @@ impl<'a> RouteKeyRef<'a> {
     fn req(req: &'a http::Request) -> Option<RouteKeyRef<'a>> {
         let mut path_components = req.path().split('/').filter(|p| !p.is_empty());
         path_components.next().map(|endpoint| {
-            let kind = match path_components.next() {
+            let (kind, subroute) = match path_components.next() {
                 Some(_) => {
                     match path_components.next() {
-                        Some(rel)   => Kind::Relationship(rel),
-                        None        => Kind::Resource,
+                        Some(rel)   => (Kind::Relationship, Some(rel)),
+                        None        => (Kind::Resource, None),
                     }
                 }
-                None    => Kind::Collection,
+                None    => (Kind::Collection, None),
             };
             let method = req.method().clone();
             RouteKeyRef {
                 endpoint,
+                subroute,
                 route: Route {
                     method,
                     kind,
@@ -58,17 +62,17 @@ impl<'a> RouteKeyRef<'a> {
 }
 
 #[derive(Clone, Hash, Eq, PartialEq)]
-pub struct Route<'a> {
+pub struct Route {
     pub method: http::Method,
-    pub kind: Kind<'a>,
+    pub kind: Kind,
 }
 
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash)]
-pub enum Kind<'a> {
+pub enum Kind {
     Resource,
     Collection,
-    Relationship(&'a str),
+    Relationship,
 }
 
 #[derive(Clone, Copy, Hash, Eq, PartialEq)]

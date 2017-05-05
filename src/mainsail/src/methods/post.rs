@@ -12,7 +12,7 @@ pub trait Post: Resource {
 }
 
 impl<T: Post> Method<T> for Post<Identifier = T::Identifier, Post = T::Post> {
-    const ROUTE: Route<'static> = Route {
+    const ROUTE: Route = Route {
         kind: Kind::Collection,
         method: http::Method::Post,
     };

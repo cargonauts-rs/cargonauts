@@ -11,7 +11,7 @@ pub trait Delete: Resource {
 }
 
 impl<T: Delete> Method<T> for Delete<Identifier = T::Identifier> {
-    const ROUTE: Route<'static> = Route {
+    const ROUTE: Route = Route {
         kind: Kind::Resource,
         method: http::Method::Delete,
     };

@@ -24,12 +24,17 @@ impl<'d, T: ResourceEndpoint> Visitor<'d> for RelsVisitor<T> {
 
     fn visit_map<A: MapAccess<'d>>(mut self, mut map: A) -> Result<Self::Value, A::Error> {
         while let Some(key) = map.next_key::<&'d str>()? {
-            let RelObject { ty, id } = map.next_value()?;
-            if ty != key {
-                return Err(A::Error::invalid_value(Unexpected::Str(ty), &key))
-            }
-            if !self.0.try_set_rel_id(ty, id) {
-                return Err(A::Error::invalid_value(Unexpected::Str(ty), &"a relationship of this resource"))
+            match map.next_value()? {
+                RelData::Single(RelObject { id, ..}) => {
+                    if !self.0.try_set_rel_id(key, id) {
+                        return Err(A::Error::invalid_value(Unexpected::Str(key), &"a relationship of this resource"))
+                    }
+                }
+                RelData::Many(objects) => {
+                    if !self.0.try_set_rel_ids(key, objects.into_iter().map(|RelObject { id, .. }| id).collect()) {
+                        return Err(A::Error::invalid_value(Unexpected::Str(key), &"a relationship of this resource"))
+                    }
+                }
             }
         }
         Ok(RelsBridge(self.0))
@@ -37,8 +42,16 @@ impl<'d, T: ResourceEndpoint> Visitor<'d> for RelsVisitor<T> {
 }
 
 #[derive(Deserialize)]
+#[serde(untagged)]
+enum RelData<'a> {
+    Single(RelObject<'a>),
+    Many(Vec<RelObject<'a>>),
+}
+
+#[derive(Deserialize)]
 struct RelObject<'a> {
     #[serde(rename = "type")]
+    #[allow(dead_code)]
     ty: &'a str,
     id: String,
 }

@@ -48,7 +48,7 @@ impl Resource {
         RelIds {
             ty: self.header.ty.clone() + "RelIds",
             resource: &self.header.ty,
-            rels: self.members.iter().filter_map(|m| m.as_relation()).map(|rel| &rel.rel[..]).collect(),
+            rels: self.members.iter().filter_map(|m| m.as_relation()).map(|rel| (&rel.rel[..], rel.kind)).collect(),
         }
     }
 }
@@ -108,56 +108,101 @@ impl<'a> ToTokens for Relationship<'a> {
 struct RelIds<'a> {
     ty: String,
     resource: &'a str,
-    rels: Vec<&'a str>,
+    rels: Vec<(&'a str, RelationKind)>,
 }
 
 impl<'a> ToTokens for RelIds<'a> {
     fn to_tokens(&self, tokens: &mut Tokens) {
         let resource = Ident::new(self.resource);
         let ty = Ident::new(&self.ty[..]);
-        let rels = self.rels.iter().map(|&rel| Ident::new(rel));
-
-        let try_set_arms = self.rels.iter().map(|&rel| {
+        let rels = self.rels.iter().map(|&(rel, kind)| {
             let rel = Ident::new(rel);
-            quote!(<#resource as ::cargonauts::routing::RelationEndpoint<#rel>>::RELATION => {
-                self.#rel = Some(id);
-                true
-            })
+            match kind {
+                RelationKind::Single    => quote!(#rel: Option<String>,),
+                RelationKind::Many      => quote!(#rel: Vec<String>,),
+            }
         });
 
-        let set_arms = self.rels.iter().map(|&rel| {
-            let rel = Ident::new(rel);
-            quote!(<#resource as ::cargonauts::routing::RelationEndpoint<#rel>>::RELATION => self.#rel = Some(id),)
+        let single_try_set_arms = self.rels.iter().filter_map(|&(rel, kind)| {
+            if let RelationKind::Single = kind {
+                let rel = Ident::new(rel);
+                Some(quote!(<#resource as ::cargonauts::routing::RelationEndpoint<#rel>>::RELATION => {
+                    self.#rel = Some(id);
+                    true
+                }))
+            } else { None }
         });
 
-        let get_arms = self.rels.iter().map(|&rel| {
-            let rel = Ident::new(rel);
-            quote!(<#resource as ::cargonauts::routing::RelationEndpoint<#rel>>::RELATION => self.#rel.as_ref().map(|s| &s[..]),)
+        let many_try_set_arms = self.rels.iter().filter_map(|&(rel, kind)| {
+            if let RelationKind::Single = kind {
+                let rel = Ident::new(rel);
+                Some(quote!(<#resource as ::cargonauts::routing::RelationEndpoint<#rel>>::RELATION => {
+                    self.#rel = ids;
+                    true
+                }))
+            } else { None }
+        });
+
+        let single_set_arms = self.rels.iter().filter_map(|&(rel, kind)| {
+            if let RelationKind::Single = kind {
+                let rel = Ident::new(rel);
+                Some(quote!(<#resource as ::cargonauts::routing::RelationEndpoint<#rel>>::RELATION => self.#rel = Some(id),))
+            } else { None }
+        });
+
+        let single_get_arms = self.rels.iter().filter_map(|&(rel, kind)| {
+            if let RelationKind::Single = kind {
+                let rel = Ident::new(rel);
+                Some(quote!(<#resource as ::cargonauts::routing::RelationEndpoint<#rel>>::RELATION => self.#rel.as_ref().map(|s| &s[..]),))
+            } else { None }
+        });
+
+        let many_set_arms = self.rels.iter().filter_map(|&(rel, kind)| {
+            if let RelationKind::Many = kind {
+                let rel = Ident::new(rel);
+                Some(quote!(<#resource as ::cargonauts::routing::RelationEndpoint<#rel>>::RELATION => self.#rel = ids,))
+            } else { None }
+        });
+
+        let many_get_arms = self.rels.iter().filter_map(|&(rel, kind)| {
+            if let RelationKind::Many = kind {
+                let rel = Ident::new(rel);
+                Some(quote!(<#resource as ::cargonauts::routing::RelationEndpoint<#rel>>::RELATION => &self.#rel[..],))
+            } else { None }
         });
 
         tokens.append(quote! {
             #[allow(non_snake_case)]
             #[derive(Default)]
             pub struct #ty {
-                #(#rels: Option<String>,)*
+                #(#rels)*
             }
 
+            #[allow(unused_variables)]
             impl ::cargonauts::routing::RelIds<#resource> for #ty {
                 fn try_set_rel_id(&mut self, rel: &str, id: String) -> bool {
                     match rel {
-                        #(#try_set_arms)*
+                        #(#single_try_set_arms)*
                         _ => false,
                     }
                 }
 
+                fn try_set_rel_ids(&mut self, rel: &str, ids: Vec<String>) -> bool {
+                    match rel {
+                        #(#many_try_set_arms)*
+                        _ => false,
+                    }
+                }
+
+
                 fn set_rel_id<R>(&mut self, id: String)
                 where
                     R: ::cargonauts::api::Relationship,
-                    #resource: ::cargonauts::routing::RelationEndpoint<R>,
+                    #resource: ::cargonauts::routing::HasOneEndpoint<R>,
                     R::Related: ::cargonauts::routing::ResourceEndpoint,
                 {
                     match <#resource as ::cargonauts::routing::RelationEndpoint<R>>::RELATION {
-                        #(#set_arms)*
+                        #(#single_set_arms)*
                         _ => (),
                     }
                 }
@@ -165,12 +210,36 @@ impl<'a> ToTokens for RelIds<'a> {
                 fn rel_id<R>(&self) -> Option<&str>
                 where
                     R: ::cargonauts::api::Relationship,
-                    #resource: ::cargonauts::routing::RelationEndpoint<R>,
+                    #resource: ::cargonauts::routing::HasOneEndpoint<R>,
                     R::Related: ::cargonauts::routing::ResourceEndpoint,
                 {
                     match <#resource as ::cargonauts::routing::RelationEndpoint<R>>::RELATION {
-                        #(#get_arms)*
+                        #(#single_get_arms)*
                         _ => None,
+                    }
+                }
+
+                fn set_rel_ids<R>(&mut self, id: Vec<String>)
+                where
+                    R: ::cargonauts::api::Relationship,
+                    #resource: ::cargonauts::routing::HasManyEndpoint<R>,
+                    R::Related: ::cargonauts::routing::ResourceEndpoint,
+                {
+                    match <#resource as ::cargonauts::routing::RelationEndpoint<R>>::RELATION {
+                        #(#many_set_arms)*
+                        _ => (),
+                    }
+                }
+
+                fn rel_ids<R>(&self) -> &[String]
+                where
+                    R: ::cargonauts::api::Relationship,
+                    #resource: ::cargonauts::routing::HasManyEndpoint<R>,
+                    R::Related: ::cargonauts::routing::ResourceEndpoint,
+                {
+                    match <#resource as ::cargonauts::routing::RelationEndpoint<R>>::RELATION {
+                        #(#many_get_arms)*
+                        _ => &[],
                     }
                 }
             }

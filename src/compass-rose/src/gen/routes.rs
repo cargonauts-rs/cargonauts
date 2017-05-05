@@ -104,11 +104,16 @@ impl ToTokens for Route {
         let format = Ident::new(&self.format[..]);
         let method = method_for(&self.method, self.rel.as_ref(), &resource);
 
+        let route_key = if let Some(ref rel) = self.rel {
+            quote!(::cargonauts::routing::RouteKey::new(#endpoint, <#method as ::cargonauts::method::Method<#resource>>::ROUTE, Some(#rel)))
+        } else {
+            quote!(::cargonauts::routing::RouteKey::new(#endpoint, <#method as ::cargonauts::method::Method<#resource>>::ROUTE, None))
+        };
+
         if let Some(ref middleware) = self.middleware {
             let middleware = Ident::new(&middleware[..]);
             tokens.append(quote!({
-                let route = <#method as ::cargonauts::method::Method<#resource>>::ROUTE;
-                let route_key = ::cargonauts::routing::RouteKey::new(#endpoint, route);
+                let route_key = #route_key;
                 let service = ::cargonauts::routing::EndpointService::<_, _, (#resource, #format, #method)>::new(#template);
                 let middleware = <#middleware as Default>::default():
                 let service = ::cargonauts::middleware::Middleware::wrap(middleware, service)
@@ -116,8 +121,7 @@ impl ToTokens for Route {
             }));
         } else {
             tokens.append(quote!({
-                let route = <#method as ::cargonauts::method::Method<#resource>>::ROUTE;
-                let route_key = ::cargonauts::routing::RouteKey::new(#endpoint, route);
+                let route_key = #route_key;
                 let service = ::cargonauts::routing::EndpointService::<_, _, (#resource, #format, #method)>::new(#template);
                 (route_key, Box::new(service) as ::cargonauts::routing::Handler)
             }));

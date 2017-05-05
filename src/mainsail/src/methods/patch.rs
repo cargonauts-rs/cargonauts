@@ -12,7 +12,7 @@ pub trait Patch: Resource {
 }
 
 impl<T: Patch> Method<T> for Patch<Identifier = T::Identifier, Patch = T::Patch> {
-    const ROUTE: Route<'static> = Route {
+    const ROUTE: Route = Route {
         kind: Kind::Resource,
         method: http::Method::Patch,
     };

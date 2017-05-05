@@ -13,6 +13,7 @@ pub trait ResourceEndpoint: Sized + Resource {
 
 pub trait RelIds<T>: Default {
     fn try_set_rel_id(&mut self, rel: &str, id: String) -> bool;
+    fn try_set_rel_ids(&mut self, rel: &str, ids: Vec<String>) -> bool;
     fn set_rel_id<R: Relationship>(&mut self, id: String)
         where T: HasOneEndpoint<R>, R::Related: ResourceEndpoint;
     fn rel_id<R: Relationship>(&self) -> Option<&str>

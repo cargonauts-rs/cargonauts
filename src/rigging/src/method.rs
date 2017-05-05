@@ -3,7 +3,7 @@ use environment::Environment;
 use routes::Route;
 
 pub trait Method<T: Resource> {
-    const ROUTE: Route<'static>;
+    const ROUTE: Route;
 
     type Request;
     type Response;
