@@ -30,14 +30,18 @@ pub fn assets(cfg: Option<&CargonautsConfig>) -> Tokens {
         }
     };
 
-    let assets = WalkDir::new(&dir).into_iter().filter_map(|entry| {
-        let entry = if let Ok(entry) = entry { entry } else { return None };
+    let assets = WalkDir::new(&dir).into_iter().filter_map(|entry| entry.ok().and_then(|entry| {
         if entry.file_type().is_file() {
-            let file_path = entry.path().to_string_lossy();
-            let relative_path = entry.path().strip_prefix(&dir).unwrap().to_string_lossy();
-            Some(quote!((#relative_path, include_bytes!(#file_path) as &[u8])))
+            let path = entry.path();
+            let file_path = path.to_string_lossy();
+            let url_path = if entry.file_name().to_string_lossy().starts_with("_index") {
+                path.strip_prefix(&dir).unwrap().parent().unwrap().to_string_lossy()
+            } else {
+                path.strip_prefix(&dir).unwrap().to_string_lossy()
+            };
+            Some(quote!((#url_path, include_bytes!(#file_path) as &[u8])))
         } else { None }
-    }).collect::<Vec<_>>();
+    })).collect::<Vec<_>>();
 
     quote! {
         vec!#assets.into_iter().collect();
