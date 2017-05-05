@@ -1,5 +1,7 @@
 use futures::Future;
-use rigging::{Resource, Error, http};
+
+use rigging::{Error, http};
+use rigging::resource::Resource;
 use rigging::environment::Environment;
 use rigging::method::{Method, ResourceMethod};
 use rigging::routes::{Route, Kind};

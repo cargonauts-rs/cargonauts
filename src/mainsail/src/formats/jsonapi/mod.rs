@@ -5,7 +5,8 @@ mod fieldset;
 
 use futures::{Future, Stream, future};
 
-use rigging::{ResourceEndpoint, Error};
+use rigging::Error;
+use rigging::resource::ResourceEndpoint;
 use rigging::environment::Environment;
 use rigging::format::{Format, Template};
 use rigging::http;

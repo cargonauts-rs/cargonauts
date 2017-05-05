@@ -2,7 +2,8 @@ use std::fmt::Debug;
 
 use futures::{Future, Stream, future};
 
-use rigging::{ResourceEndpoint, Error};
+use rigging::Error;
+use rigging::resource::ResourceEndpoint;
 use rigging::environment::Environment;
 use rigging::http;
 use rigging::format::*;

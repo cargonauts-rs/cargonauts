@@ -1,6 +1,7 @@
 use futures::{Future, Stream};
 
-use {ResourceEndpoint, Error};
+use Error;
+use resource::ResourceEndpoint;
 use environment::Environment;
 use method::Method;
 use http;

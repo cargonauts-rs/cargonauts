@@ -1,4 +1,4 @@
-use Resource;
+use resource::Resource;
 use environment::Environment;
 use routes::Route;
 

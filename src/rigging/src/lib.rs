@@ -21,8 +21,6 @@ pub mod method;
 pub mod resource;
 pub mod routes;
 
-pub use self::resource::*;
-
 use std::io;
 
 #[derive(Debug)]

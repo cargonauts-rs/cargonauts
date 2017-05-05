@@ -4,7 +4,7 @@ use futures::{Future, Stream};
 use tokio::Service;
 
 use Error;
-use ResourceEndpoint;
+use resource::ResourceEndpoint;
 use method::*;
 
 use format::*;

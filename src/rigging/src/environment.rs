@@ -84,6 +84,7 @@ impl PreparedEnv {
     }
 }
 
+#[derive(Clone)]
 pub struct EnvBuilder {
     pools: Rc<RefCell<AnyMap>>,
 }

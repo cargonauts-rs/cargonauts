@@ -23,11 +23,11 @@ proc_macro_item_decl! {
 
 #[macro_use]
 pub mod api {
-    pub use rigging::{Resource, Error};
+    pub use rigging::Error;
     pub use rigging::environment::Environment;
-    pub use mainsail::methods::{Get, Index, Post};
+    pub use mainsail::methods::{Get, Index, Post, Patch, Delete};
 
-    pub use rigging::Relationship;
+    pub use rigging::resource::{Resource, Relationship};
     pub use mainsail::methods::{GetOne, GetMany};
 
     #[macro_export]
