@@ -47,7 +47,7 @@ pub mod routing {
     pub use rigging::resource::{ResourceEndpoint, RelationEndpoint, RelationshipLink, RelIds, HasOneEndpoint, HasManyEndpoint};
     pub use rigging::endpoint::{Endpoint, EndpointService};
     pub use rigging::routes::{Kind, RoutingTable, RouteKey, Handler, not_found};
-    pub use rigging::routes::{AssetHandler, default_asset_handler};
+    pub use rigging::routes::{AssetKey, AssetHandler, default_asset_handler};
     pub use rigging::environment::EnvBuilder;
     pub use rigging::http::BoxFuture as HttpFuture;
 }

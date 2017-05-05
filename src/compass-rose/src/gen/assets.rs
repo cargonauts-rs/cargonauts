@@ -39,7 +39,7 @@ pub fn assets(cfg: Option<&CargonautsConfig>) -> Tokens {
             } else {
                 path.strip_prefix(&dir).unwrap().to_string_lossy()
             };
-            Some(quote!((#url_path, include_bytes!(#file_path) as &[u8])))
+            Some(quote!((::cargonauts::routing::AssetKey::new(#url_path), include_bytes!(#file_path) as &[u8])))
         } else { None }
     })).collect::<Vec<_>>();
 
