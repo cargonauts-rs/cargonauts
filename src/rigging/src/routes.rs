@@ -7,31 +7,17 @@ use tokio::{Service, NewService};
 use futures::{Future, future};
 
 use http;
-use environment::{PreparedEnv, Environment};
+use endpoint;
+use environment::{PreparedEnv};
 
 #[derive(Clone, Hash, Eq, PartialEq)]
 pub struct RouteKey {
     key: RouteKeyRef<'static>,
 }
-
 #[derive(Clone, Hash, Eq, PartialEq)]
 struct RouteKeyRef<'a> {
     endpoint: &'a str,
     route: Route<'a>,
-}
-
-#[derive(Clone, Hash, Eq, PartialEq)]
-pub struct Route<'a> {
-    pub method: http::Method,
-    pub kind: Kind<'a>,
-}
-
-
-#[derive(Copy, Clone, PartialEq, Eq, Hash)]
-pub enum Kind<'a> {
-    Resource,
-    Collection,
-    Relationship(&'a str),
 }
 
 impl RouteKey {
@@ -71,10 +57,53 @@ impl<'a> RouteKeyRef<'a> {
     }
 }
 
+#[derive(Clone, Hash, Eq, PartialEq)]
+pub struct Route<'a> {
+    pub method: http::Method,
+    pub kind: Kind<'a>,
+}
+
+
+#[derive(Copy, Clone, PartialEq, Eq, Hash)]
+pub enum Kind<'a> {
+    Resource,
+    Collection,
+    Relationship(&'a str),
+}
+
+#[derive(Clone, Copy, Hash, Eq, PartialEq)]
+pub struct AssetKey {
+    key: AssetKeyRef<'static>,
+}
+
+#[derive(Clone, Copy, Hash, Eq, PartialEq)]
+struct AssetKeyRef<'a> {
+    endpoint: &'a str,
+}
+
+impl AssetKey {
+    pub fn new(endpoint: &'static str) -> AssetKey {
+        AssetKey { key: AssetKeyRef { endpoint } }
+    }
+}
+
+impl<'a> Borrow<AssetKeyRef<'a>> for AssetKey {
+    fn borrow(&self) -> &AssetKeyRef<'a> {
+        &self.key
+    }
+}
+
+impl<'a> AssetKeyRef<'a> {
+    fn new(req: &'a http::Request) -> AssetKeyRef<'a> {
+        let endpoint = req.path().trim_matches('/');
+        AssetKeyRef { endpoint }
+    }
+}
+
 #[derive(Clone)]
 pub struct RoutingTable {
     routes: Rc<HashMap<RouteKey, Handler>>,
-    assets: Rc<HashMap<&'static str, &'static [u8]>>,
+    assets: Rc<HashMap<AssetKey, &'static [u8]>>,
     asset_handler: AssetHandler,
     env: PreparedEnv,
 }
@@ -82,7 +111,7 @@ pub struct RoutingTable {
 impl RoutingTable {
     pub fn new(
         routes: HashMap<RouteKey, Handler>,
-        assets: HashMap<&'static str, &'static [u8]>,
+        assets: HashMap<AssetKey, &'static [u8]>,
         asset_handler: AssetHandler,
         env: PreparedEnv
     ) -> RoutingTable {
@@ -102,14 +131,12 @@ impl Service for RoutingTable {
     type Future = http::BoxFuture;
 
     fn call(&self, req: Self::Request) -> Self::Future {
-        {
-            let path = req.path().trim_matches('/');
-            if let Some(asset) = self.assets.get(path) {
-                return (self.asset_handler)(asset)
-            }
+        let req = endpoint::Request { req, env: self.env.new() };
+        if let Some(asset) = self.assets.get(&AssetKeyRef::new(&req.req)) {
+            return (self.asset_handler)(asset, req)
         }
-        match RouteKeyRef::req(&req).and_then(|route| self.routes.get(&route)) {
-            Some(handle)    => handle(req, self.env.new()),
+        match RouteKeyRef::req(&req.req).and_then(|route| self.routes.get(&route)) {
+            Some(handle)    => handle.call(req),
             None            => not_found(),
         }
     }
@@ -127,14 +154,14 @@ impl NewService for RoutingTable {
     }
 }
 
-pub type Handler = fn(http::Request, Environment) -> http::BoxFuture;
-pub type AssetHandler = fn(&'static [u8]) -> http::BoxFuture;
+pub type Handler = Box<Service<Request = endpoint::Request, Response = http::Response, Error = http::Error, Future = http::BoxFuture>>;
+pub type AssetHandler = fn(&'static [u8], request: endpoint::Request) -> http::BoxFuture;
 
 pub fn not_found() -> http::BoxFuture {
     future::ok(http::Response::new().with_status(http::StatusCode::NotFound)).boxed()
 }
 
-pub fn default_asset_handler(asset: &'static [u8]) -> http::BoxFuture {
+pub fn default_asset_handler(asset: &'static [u8], _: endpoint::Request) -> http::BoxFuture {
     Box::new(future::ok(http::Response::new()
                             .with_status(http::StatusCode::Ok)
                             .with_header(http::headers::ContentLength(asset.len() as u64))

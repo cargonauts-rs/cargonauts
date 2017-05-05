@@ -7,6 +7,7 @@ extern crate rigging;
 pub extern crate serde;
 pub extern crate serde_json as json;
 pub extern crate tokio_redis as redis;
+extern crate tokio_service;
 
 #[allow(unused_imports)]
 #[macro_use] extern crate compass_rose;
@@ -44,7 +45,7 @@ pub mod api {
 #[doc(hidden)]
 pub mod routing {
     pub use rigging::resource::{ResourceEndpoint, RelationEndpoint, RelationshipLink, RelIds};
-    pub use rigging::endpoint::{Endpoint, endpoint};
+    pub use rigging::endpoint::{Endpoint, EndpointService};
     pub use rigging::routes::{Kind, RoutingTable, RouteKey, Handler, not_found};
     pub use rigging::routes::{AssetHandler, default_asset_handler};
     pub use rigging::environment::EnvBuilder;
@@ -80,5 +81,24 @@ pub mod format {
 
     pub mod jsonapi {
         pub use mainsail::formats::jsonapi::{ApiSerialize, ApiDeserialize, Fields, ClientIdPolicy};
+    }
+}
+
+pub mod middleware {
+    pub use rigging::endpoint::Request;
+
+    pub mod http {
+        pub use rigging::http::{Request, Response, Error, BoxFuture};
+    }
+
+    use tokio_service::Service;
+
+    pub trait Middleware<S>: Default
+    where
+        S: Service<Request = Request, Response = http::Response, Error = http::Error, Future = http::BoxFuture>
+    {
+        type WrappedService: Service<Request = Request, Response = http::Response, Error = http::Error, Future = http::BoxFuture>;
+
+        fn wrap(self, service: S) -> Self::WrappedService;
     }
 }

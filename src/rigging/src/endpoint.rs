@@ -1,4 +1,7 @@
+use std::marker::PhantomData;
+
 use futures::{Future, Stream};
+use tokio::Service;
 
 use Error;
 use ResourceEndpoint;
@@ -153,9 +156,33 @@ where
     }
 }
 
+pub struct Request {
+    pub req: http::Request,
+    pub env: Environment,
+}
 
-pub fn endpoint<H, R, E: ?Sized + Endpoint<H, R>>(req: http::Request, template: Option<Template>, env: Environment)
-    -> http::BoxFuture
+pub struct EndpointService<I, O, T: ?Sized> {
+    template: Option<Template>,
+    _marker: PhantomData<(I, O, T)>
+}
+
+impl<I, O, T: ?Sized> EndpointService<I, O, T> {
+    #[doc(hidden)]
+    pub fn new(template: Option<Template>) -> Self {
+        Self { template, _marker: PhantomData }
+    }
+}
+
+impl<I, O, T> Service for EndpointService<I, O, T>
+where
+    T: ?Sized + Endpoint<I, O>,
 {
-    E::call(req, template, env)
+    type Request = Request;
+    type Response = http::Response;
+    type Error = http::Error;
+    type Future = http::BoxFuture;
+
+    fn call(&self, req: Self::Request) -> Self::Future {
+        T::call(req.req, self.template, req.env)
+    }
 }

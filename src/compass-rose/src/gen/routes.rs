@@ -104,17 +104,25 @@ impl ToTokens for Route {
         let format = Ident::new(&self.format[..]);
         let method = method_for(&self.method, self.rel.as_ref(), &resource);
 
-        tokens.append(quote!({
-            fn handle<H, R, E>(req: ::cargonauts::server::Request, env: ::cargonauts::api::Environment) -> ::cargonauts::routing::HttpFuture
-            where
-                E: ?Sized + ::cargonauts::routing::Endpoint<H, R>,
-            {
-                ::cargonauts::routing::endpoint::<_, _, E>(req, #template, env)
-            }
-            let route = <#method as ::cargonauts::method::Method<#resource>>::ROUTE;
-            let route_key = ::cargonauts::routing::RouteKey::new(#endpoint, route);
-            (route_key, handle::<_, _, (#resource, #format, #method)> as ::cargonauts::routing::Handler)
-        }))
+        if let Some(ref middleware) = self.middleware {
+            let middleware = Ident::new(&middleware[..]);
+            tokens.append(quote!({
+                let route = <#method as ::cargonauts::method::Method<#resource>>::ROUTE;
+                let route_key = ::cargonauts::routing::RouteKey::new(#endpoint, route);
+                let service = ::cargonauts::routing::EndpointService::<_, _, (#resource, #format, #method)>::new(#template);
+                let middleware = <#middleware as Default>::default():
+                let service = ::cargonauts::middleware::Middleware::wrap(middleware, service)
+                (route_key, Box::new(serice) as ::cargonatus::routing::Handler)
+            }));
+        } else {
+            tokens.append(quote!({
+                let route = <#method as ::cargonauts::method::Method<#resource>>::ROUTE;
+                let route_key = ::cargonauts::routing::RouteKey::new(#endpoint, route);
+                let service = ::cargonauts::routing::EndpointService::<_, _, (#resource, #format, #method)>::new(#template);
+                (route_key, Box::new(service) as ::cargonauts::routing::Handler)
+            }));
+        }
+
     }
 }
 
