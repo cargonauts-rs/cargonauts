@@ -39,7 +39,7 @@ ResourceHeader: ResourceHeader  = {
     "resource" <ty:Ident> <endpoint:Endpoint?> => ResourceHeader { ty, endpoint },
 };
 
-Endpoint: String = "@" <String>;
+Endpoint: String = "as" <String>;
 
 ResourceMember: ResourceMember = {
     "has" <Relation> => ResourceMember::Relation(<>),
