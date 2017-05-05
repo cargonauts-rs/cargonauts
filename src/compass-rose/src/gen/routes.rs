@@ -139,6 +139,14 @@ fn method_for(method: &str, rel: Option<&String>, resource: &Ident) -> Tokens {
         "Patch" => {
             quote!(Patch<Identifier = <#resource as ::cargonauts::api::Resource>::Identifier, Patch = <#resource as ::cargonauts::api::Patch>::Patch>)
         }
+        "PostRelated" => {
+            let rel = Ident::new(&rel.unwrap()[..]);
+            quote!(PostRelated<#rel, Identifier = <#resource as ::cargonauts::api::Resource>::Identifier, Post = <#resource as ::cargonauts::api::PostRelated<#rel>::Post>)
+        }
+        "UpdateRelated" => {
+            let rel = Ident::new(&rel.unwrap()[..]);
+            quote!(UpdateRelated<#rel, Identifier = <#resource as ::cargonauts::api::Resource>::Identifier, Update = <#resource as ::cargonauts::api::UpdateRelated<#rel>::Update>)
+        }
         _       => {
             let method = Ident::new(method);
             match rel {

@@ -28,7 +28,7 @@ pub mod api {
     pub use mainsail::methods::{Get, Index, Post, Patch, Delete};
 
     pub use rigging::resource::{Resource, Relationship};
-    pub use mainsail::methods::{GetOne, GetMany};
+    pub use mainsail::methods::{GetOne, GetMany, PostRelated, DeleteRelated, UpdateRelated};
 
     #[macro_export]
     macro_rules! relation {
