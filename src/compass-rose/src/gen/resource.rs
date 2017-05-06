@@ -134,7 +134,7 @@ impl<'a> ToTokens for RelIds<'a> {
         });
 
         let many_try_set_arms = self.rels.iter().filter_map(|&(rel, kind)| {
-            if let RelationKind::Single = kind {
+            if let RelationKind::Many = kind {
                 let rel = Ident::new(rel);
                 Some(quote!(<#resource as ::cargonauts::routing::RelationEndpoint<#rel>>::RELATION => {
                     self.#rel = ids;
