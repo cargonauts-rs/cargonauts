@@ -1,4 +1,4 @@
-use futures::Stream;
+use futures::Future;
 
 use rigging::{Error, http};
 use rigging::resource::Resource;
@@ -7,7 +7,7 @@ use rigging::environment::Environment;
 use rigging::routes::{Route, Kind};
 
 pub trait Index: Resource {
-    fn index(env: &Environment) -> Box<Stream<Item = Self, Error = Error>> where Self: Sized;
+    fn index(env: &Environment) -> Box<Future<Item = Vec<Self>, Error = Error>> where Self: Sized;
 }
 
 impl<T: Index> Method<T> for Index<Identifier = T::Identifier> {
@@ -18,7 +18,7 @@ impl<T: Index> Method<T> for Index<Identifier = T::Identifier> {
 
     type Request = ();
     type Response = T;
-    type Outcome = Box<Stream<Item = T, Error = Error>>;
+    type Outcome = Box<Future<Item = Vec<T>, Error = Error>>;
 }
 
 impl<T: Index> CollectionMethod<T> for Index<Identifier = T::Identifier> {

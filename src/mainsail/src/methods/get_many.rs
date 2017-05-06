@@ -1,4 +1,4 @@
-use futures::Stream;
+use futures::Future;
 
 use rigging::{Error, http};
 use rigging::resource::{Relationship, Resource};
@@ -8,7 +8,7 @@ use rigging::routes::{Route, Kind};
 
 
 pub trait GetMany<R: Relationship>: Resource {
-    fn get_many(id: Self::Identifier, env: &Environment) -> Box<Stream<Item = R::Related, Error = Error>> where Self: Sized;
+    fn get_many(id: Self::Identifier, env: &Environment) -> Box<Future<Item = Vec<R::Related>, Error = Error>> where Self: Sized;
 }
 
 impl<T: GetMany<R>, R: Relationship> Method<T> for GetMany<R, Identifier = T::Identifier> {
@@ -19,7 +19,7 @@ impl<T: GetMany<R>, R: Relationship> Method<T> for GetMany<R, Identifier = T::Id
 
     type Request = ();
     type Response = R::Related;
-    type Outcome = Box<Stream<Item = R::Related, Error = Error>>;
+    type Outcome = Box<Future<Item = Vec<R::Related>, Error = Error>>;
 }
 
 impl<T: GetMany<R>, R: Relationship> ResourceMethod<T> for GetMany<R, Identifier = T::Identifier> {

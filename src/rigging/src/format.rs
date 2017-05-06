@@ -1,4 +1,4 @@
-use futures::{Future, Stream};
+use futures::{Future};
 
 use Error;
 use resource::ResourceEndpoint;
@@ -17,8 +17,8 @@ pub trait Format<T: ResourceEndpoint, M: ?Sized + Method<T>> {
     fn present_resource<F>(future: F, template: Option<Template>, env: &mut Environment) -> http::BoxFuture
         where F: Future<Item = M::Response, Error = Error> + 'static;
 
-    fn present_collection<S>(stream: S, template: Option<Template>, env: &mut Environment) -> http::BoxFuture
-        where S: Stream<Item = M::Response, Error = Error> + 'static;
+    fn present_collection<F>(future: F, template: Option<Template>, env: &mut Environment) -> http::BoxFuture
+        where F: Future<Item = Vec<M::Response>, Error = Error> + 'static;
 
     fn present_error(error: Error, env: &mut Environment) -> http::BoxFuture;
 }

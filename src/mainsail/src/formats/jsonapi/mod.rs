@@ -3,7 +3,7 @@ mod receive;
 
 mod fieldset;
 
-use futures::{Future, Stream, future};
+use futures::{Future, future};
 
 use rigging::Error;
 use rigging::resource::ResourceEndpoint;
@@ -70,11 +70,11 @@ where
         }))
     }
 
-    fn present_collection<S>(stream: S, _: Option<Template>, env: &mut Environment) -> http::BoxFuture
-        where S: Stream<Item = M::Response, Error = Error> + 'static,
+    fn present_collection<F>(future: F, _: Option<Template>, env: &mut Environment) -> http::BoxFuture
+        where F: Future<Item = Vec<M::Response>, Error = Error> + 'static,
     {
         let fields = env.take::<Fields<M::Response>>();
-        Box::new(stream.collect().then(move |result| match result {
+        Box::new(future.then(move |result| match result {
             Ok(r)   => {
                 let doc = Document {
                     member: Object {

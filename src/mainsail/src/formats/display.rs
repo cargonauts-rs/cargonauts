@@ -1,6 +1,6 @@
 use std::fmt::{self, Debug, Display};
 
-use futures::{Future, Stream, future};
+use futures::{Future, future};
 
 use rigging::resource::ResourceEndpoint;
 use rigging::Error;
@@ -46,10 +46,10 @@ where
         }))
     }
 
-    fn present_collection<S>(stream: S, _: Option<Template>, _: &mut Environment) -> http::BoxFuture
-        where S: Stream<Item = M::Response, Error = Error> + 'static,
+    fn present_collection<F>(future: F, _: Option<Template>, _: &mut Environment) -> http::BoxFuture
+        where F: Future<Item = Vec<M::Response>, Error = Error> + 'static,
     {
-        Box::new(stream.collect().then(|result| match result {
+        Box::new(future.then(|result| match result {
             Ok(resources)   => Ok(display_response(Newline(resources), http::StatusCode::Ok)),
             Err(e)          => Ok(debug_response(e, http::StatusCode::InternalServerError)),
         }))

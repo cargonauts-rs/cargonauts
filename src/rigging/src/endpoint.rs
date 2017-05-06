@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use futures::{Future, Stream};
+use futures::{Future};
 use tokio::Service;
 
 use Error;
@@ -78,7 +78,7 @@ impl<M, T, F> Endpoint<_Resource, _Collection> for (T, F, M)
 where
     T: ResourceEndpoint,
     M: ?Sized + ResourceMethod<T>,
-    M::Outcome: Stream<Item = M::Response, Error = Error>,
+    M::Outcome: Future<Item = Vec<M::Response>, Error = Error>,
     F: Format<T, M>,
 {
     fn call(req: http::Request, template: Option<Template>, mut env: Environment) -> http::BoxFuture {
@@ -91,8 +91,8 @@ where
                 Ok(parts)   => parts,
                 Err(err)    => return F::present_error(err, &mut env),
             };
-            let stream = M::call(id, request, &mut env);
-            F::present_collection(stream, template, &mut env)
+            let future = M::call(id, request, &mut env);
+            F::present_collection(future, template, &mut env)
         }))
     }
 }
@@ -141,7 +141,7 @@ impl<M, T, F> Endpoint<_Collection, _Collection> for (T, F, M)
 where
     T: ResourceEndpoint,
     M: ?Sized + CollectionMethod<T>,
-    M::Outcome: Stream<Item = M::Response, Error = Error>,
+    M::Outcome: Future<Item = Vec<M::Response>, Error = Error>,
     F: Format<T, M>,
 {
     fn call(req: http::Request, template: Option<Template>, mut env: Environment) -> http::BoxFuture {
@@ -150,8 +150,8 @@ where
                 Ok(parts)   => parts,
                 Err(err)    => return F::present_error(err, &mut env),
             };
-            let stream = M::call(request, &mut env);
-            F::present_collection(stream, template, &mut env)
+            let future = M::call(request, &mut env);
+            F::present_collection(future, template, &mut env)
         }))
     }
 }

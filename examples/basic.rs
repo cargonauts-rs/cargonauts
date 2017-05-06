@@ -9,7 +9,7 @@ extern crate tokio_service;
 use cargonauts::api::{Resource, Post, Get, Index, Environment, Error};
 use cargonauts::api::GetOne;
 use cargonauts::format::JsonApi;
-use cargonauts::futures::{Future, future, Stream, stream};
+use cargonauts::futures::{Future, future};
 
 #[derive(ApiSerialize)]
 pub struct MyResource { 
@@ -30,8 +30,8 @@ impl Get for MyResource {
 }
 
 impl Index for MyResource {
-    fn index(_: &Environment) -> Box<Stream<Item = MyResource, Error = Error>> {
-        stream::once(Ok(MyResource { slug: String::from("hello-world") })).boxed()
+    fn index(_: &Environment) -> Box<Future<Item = Vec<MyResource>, Error = Error>> {
+        future::ok(vec![MyResource { slug: String::from("hello-world") }]).boxed()
     }
 }
 
