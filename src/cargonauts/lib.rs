@@ -91,7 +91,7 @@ pub mod middleware {
         pub use rigging::http::{Request, Response, Error, BoxFuture};
     }
 
-    use tokio_service::Service;
+    pub use tokio_service::Service;
 
     pub trait Middleware<S>: Default
     where
