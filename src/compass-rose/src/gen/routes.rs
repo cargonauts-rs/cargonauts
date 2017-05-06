@@ -115,9 +115,9 @@ impl ToTokens for Route {
             tokens.append(quote!({
                 let route_key = #route_key;
                 let service = ::cargonauts::routing::EndpointService::<_, _, (#resource, #format, #method)>::new(#template);
-                let middleware = <#middleware as Default>::default():
-                let service = ::cargonauts::middleware::Middleware::wrap(middleware, service)
-                (route_key, Box::new(serice) as ::cargonatus::routing::Handler)
+                let middleware = <#middleware as Default>::default();
+                let service = ::cargonauts::middleware::Middleware::wrap(middleware, service);
+                (route_key, Box::new(service) as ::cargonauts::routing::Handler)
             }));
         } else {
             tokens.append(quote!({
