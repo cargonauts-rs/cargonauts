@@ -60,8 +60,8 @@ impl Route {
 
             let resource_ty = &resource.header.ty;
 
-            for method in resource.members.iter().filter_map(|m| m.as_method()) {
-                let middleware = method.attrs.iter().filter_map(|attr| attr.as_middleware()).next();
+            for (method, attrs) in resource.members.iter().filter_map(|m| m.as_method()) {
+                let middleware = attrs.iter().filter_map(|attr| attr.as_middleware()).next();
                 vec.push(Route {
                     resource: resource_ty.clone(),
                     endpoint: endpoint.clone(),
@@ -74,8 +74,8 @@ impl Route {
             }
 
             for relation in resource.members.iter().filter_map(|m| m.as_relation()) {
-                for method in relation.members.iter().filter_map(|m| m.as_method()) {
-                    let middleware = method.attrs.iter().filter_map(|attr| attr.as_middleware()).next();
+                for (method, attrs) in relation.members.iter().filter_map(|m| m.as_method()) {
+                    let middleware = attrs.iter().filter_map(|attr| attr.as_middleware()).next();
                     vec.push(Route {
                         resource: resource_ty.clone(),
                         endpoint: endpoint.clone(),

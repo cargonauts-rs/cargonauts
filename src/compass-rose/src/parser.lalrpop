@@ -42,16 +42,16 @@ ResourceHeader: ResourceHeader  = {
 Endpoint: String = "as" <String>;
 
 ResourceMember: ResourceMember = {
-    "has" <Relation> => ResourceMember::Relation(<>),
-    "method" <Method> => ResourceMember::Method(<>),
+    <attrs:Attribute*> "has" <rel:Relation> => ResourceMember::Relation(rel, attrs),
+    <attrs:Attribute*> "method" <method:Method> => ResourceMember::Method(method, attrs),
 };
 
 Relation: Relation = {
-    <kind:RelationKind> <attrs:Attribute*> <rel:Ident> <endpoint:Endpoint?> ";" => Relation {
-        kind, attrs, rel, endpoint, members: vec![],
+    <kind:RelationKind> <rel:Ident> <endpoint:Endpoint?> ";" => Relation {
+        kind, rel, endpoint, members: vec![],
     },
-    <kind:RelationKind> <attrs:Attribute*> <rel:Ident> <endpoint:Endpoint?> "{" <members:RelationMember*> "}" => Relation {
-        kind, attrs, rel, endpoint, members,
+    <kind:RelationKind> <rel:Ident> <endpoint:Endpoint?> "{" <members:RelationMember*> "}" => Relation {
+        kind, rel, endpoint, members,
     },
 };
 
@@ -61,12 +61,12 @@ RelationKind: RelationKind = {
 };
 
 RelationMember: RelationMember = {
-    "method" <Method> => RelationMember::Method(<>),
+    <attrs:Attribute*> "method" <method:Method> => RelationMember::Method(method, attrs),
 };
 
 Method: Method = {
-    <attrs:Attribute*> <method:Ident> "in" <format:Ident> ";" => Method {
-        attrs, method, format,
+    <method:Ident> "in" <format:Ident> ";" => Method {
+        method, format,
     }
 };
 

@@ -43,22 +43,22 @@ pub struct ResourceHeader {
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub enum ResourceMember {
-    Relation(Relation),
-    Method(Method),
+    Relation(Relation, Vec<Attribute>),
+    Method(Method, Vec<Attribute>),
 }
 
 impl ResourceMember {
     pub fn as_relation(&self) -> Option<&Relation> {
         match *self {
-            ResourceMember::Relation(ref rel)   => Some(rel),
-            _                                   => None,
+            ResourceMember::Relation(ref rel, _)    => Some(rel),
+            _                                       => None,
         }
     }
 
-    pub fn as_method(&self) -> Option<&Method> {
+    pub fn as_method(&self) -> Option<(&Method, &[Attribute])> {
         match *self {
-            ResourceMember::Method(ref method)  => Some(method),
-            _                                   => None,
+            ResourceMember::Method(ref method, ref attrs)   => Some((method, &attrs[..])),
+            _                                               => None,
         }
     }
 }
@@ -68,7 +68,6 @@ pub struct Relation {
     pub rel: String,
     pub endpoint: Option<String>,
     pub members: Vec<RelationMember>,
-    pub attrs: Vec<Attribute>,
     pub kind: RelationKind,
 }
 
@@ -80,13 +79,13 @@ pub enum RelationKind {
 
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub enum RelationMember {
-    Method(Method),
+    Method(Method, Vec<Attribute>),
 }
 
 impl RelationMember {
-    pub fn as_method(&self) -> Option<&Method> {
+    pub fn as_method(&self) -> Option<(&Method, &[Attribute])> {
         match *self {
-            RelationMember::Method(ref method)  => Some(method),
+            RelationMember::Method(ref method, ref attrs)   => Some((method, &attrs[..])),
         }
     }
 }
@@ -95,7 +94,6 @@ impl RelationMember {
 pub struct Method {
     pub method: String,
     pub format: String,
-    pub attrs: Vec<Attribute>,
 }
 
 #[derive(PartialEq, Eq, Clone, Debug)]
