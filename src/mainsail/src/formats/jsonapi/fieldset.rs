@@ -14,7 +14,8 @@ impl<T: ResourceEndpoint> Fields<T> {
 
         // Get only the query string for the fields of this resource
         let q = q.and_then(|q| q.split('&').filter(|q| q.starts_with("fields")).find(|q| {
-            q.trim_left_matches("fields[").starts_with(T::RESOURCE)
+            q.trim_left_matches("fields%5b").starts_with(T::RESOURCE)
+                || q.trim_left_matches("fields%5B").starts_with(T::RESOURCE)
         }));
 
         // Get the fields from that list
