@@ -27,13 +27,12 @@ pub struct _Collection;
 
 pub struct _Unit;
 
-impl<M, T, F> Endpoint<_Resource, _Resource> for (T, F, M)
+impl<M, T, F, R> Endpoint<_Resource, _Resource> for (T, F, M)
 where
     T: ResourceEndpoint,
-    M: ?Sized + ResourceMethod<T>,
-    M::Response: ResourceEndpoint,
-    M::Outcome: Future<Item = M::Response, Error = Error>,
-    F: Format<T, M>,
+    M: ?Sized + ResourceMethod<T, Response = R>,
+    R: ResourceEndpoint,
+    F: Format<T, R, M>,
 {
     fn call(req: http::Request, template: Option<Template>, mut env: Environment) -> http::BoxFuture {
         let id = match parse_id::<T>(&req) {
@@ -55,8 +54,7 @@ impl<M, T, F> Endpoint<_Resource, _Unit> for (T, F, M)
 where
     T: ResourceEndpoint,
     M: ?Sized + ResourceMethod<T, Response = ()>,
-    M::Outcome: Future<Item = M::Response, Error = Error>,
-    F: Format<T, M>,
+    F: Format<T, (), M>,
 {
     fn call(req: http::Request, template: Option<Template>, mut env: Environment) -> http::BoxFuture {
         let id = match parse_id::<T>(&req) {
@@ -74,12 +72,12 @@ where
     }
 }
 
-impl<M, T, F> Endpoint<_Resource, _Collection> for (T, F, M)
+impl<M, T, F, R> Endpoint<_Resource, _Collection> for (T, F, M)
 where
     T: ResourceEndpoint,
-    M: ?Sized + ResourceMethod<T>,
-    M::Outcome: Future<Item = Vec<M::Response>, Error = Error>,
-    F: Format<T, M>,
+    M: ?Sized + ResourceMethod<T, Response = Vec<R>>,
+    R: ResourceEndpoint,
+    F: Format<T, R, M>,
 {
     fn call(req: http::Request, template: Option<Template>, mut env: Environment) -> http::BoxFuture {
         let id = match parse_id::<T>(&req) {
@@ -97,13 +95,12 @@ where
     }
 }
 
-impl<M, T, F> Endpoint<_Collection, _Resource> for (T, F, M)
+impl<M, T, F, R> Endpoint<_Collection, _Resource> for (T, F, M)
 where
     T: ResourceEndpoint,
-    M: ?Sized + CollectionMethod<T>,
-    M::Response: ResourceEndpoint,
-    M::Outcome: Future<Item = M::Response, Error = Error>,
-    F: Format<T, M>,
+    M: ?Sized + CollectionMethod<T, Response = R>,
+    R: ResourceEndpoint,
+    F: Format<T, R, M>,
 {
     fn call(req: http::Request, template: Option<Template>, mut env: Environment) -> http::BoxFuture {
         Box::new(F::receive_request(req, &mut env).then(move |result| {
@@ -121,9 +118,7 @@ impl<M, T, F> Endpoint<_Collection, _Unit> for (T, F, M)
 where
     T: ResourceEndpoint,
     M: ?Sized + CollectionMethod<T, Response = ()>,
-    M::Response: ResourceEndpoint,
-    M::Outcome: Future<Item = M::Response, Error = Error>,
-    F: Format<T, M>,
+    F: Format<T, (), M>,
 {
     fn call(req: http::Request, template: Option<Template>, mut env: Environment) -> http::BoxFuture {
         Box::new(F::receive_request(req, &mut env).then(move |result| {
@@ -137,12 +132,12 @@ where
     }
 }
 
-impl<M, T, F> Endpoint<_Collection, _Collection> for (T, F, M)
+impl<M, T, F, R> Endpoint<_Collection, _Collection> for (T, F, M)
 where
     T: ResourceEndpoint,
-    M: ?Sized + CollectionMethod<T>,
-    M::Outcome: Future<Item = Vec<M::Response>, Error = Error>,
-    F: Format<T, M>,
+    M: ?Sized + CollectionMethod<T, Response = Vec<R>>,
+    R: ResourceEndpoint,
+    F: Format<T, R, M>,
 {
     fn call(req: http::Request, template: Option<Template>, mut env: Environment) -> http::BoxFuture {
         Box::new(F::receive_request(req, &mut env).then(move |result| {

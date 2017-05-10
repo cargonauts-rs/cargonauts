@@ -11,21 +11,11 @@ use super::super::Fields;
 pub trait ApiSerialize: Sized {
     fn identifier(&self) -> String;
 
-    fn serialize<S: Serializer>(&self, fields: Option<&Fields<Self>>, serializer: S) -> Result<S::Ok, S::Error>;
+    fn serialize<S: Serializer>(&self, fields: Option<&Fields>, serializer: S) -> Result<S::Ok, S::Error>;
 }
 
-impl ApiSerialize for () {
-    fn identifier(&self) -> String {
-        panic!("ApiSerialize::identifier for () should never be called.")
-    }
-
-    fn serialize<S: Serializer>(&self, _: Option<&Fields<Self>>, _: S) -> Result<S::Ok, S::Error> {
-        panic!("ApiSerialize::serialize for () should never be called.")
-    }
-}
-
-pub struct Object<'a, T: 'a, U: 'a = T> {
-    pub fields: Option<&'a Fields<U>>,
+pub struct Object<'a, T: 'a> {
+    pub fields: Option<&'a Fields>,
     pub inner: &'a T,
 }
 
@@ -41,7 +31,7 @@ impl<'a, T: ApiSerialize + ResourceEndpoint> Serialize for Object<'a, T> {
     }
 }
 
-impl<'a, T: ApiSerialize + ResourceEndpoint> Serialize for Object<'a, Vec<T>, T> {
+impl<'a, T: ApiSerialize + ResourceEndpoint> Serialize for Object<'a, Vec<T>> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.inner.len()))?;
         for elem in self.inner {
@@ -51,11 +41,11 @@ impl<'a, T: ApiSerialize + ResourceEndpoint> Serialize for Object<'a, Vec<T>, T>
     }
 }
 
-pub struct ErrorObject {
-    pub error: Error
+pub struct ErrorObject<'a> {
+    pub error: &'a Error
 }
 
-impl Serialize for ErrorObject {
+impl<'a> Serialize for ErrorObject<'a> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         serializer.serialize_map(Some(0))?.end()
     }

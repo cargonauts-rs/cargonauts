@@ -17,7 +17,6 @@ pub mod environment;
 pub mod format;
 pub mod http;
 pub mod method;
-//pub mod request;
 pub mod resource;
 pub mod routes;
 

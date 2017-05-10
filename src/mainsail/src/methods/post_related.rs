@@ -19,11 +19,11 @@ impl<T: PostRelated<R>, R: Relationship> Method<T> for PostRelated<R, Identifier
 
     type Request = T::Post;
     type Response = R::Related;
-    type Outcome = Box<Future<Item = R::Related, Error = Error>>;
+    type Future = Box<Future<Item = R::Related, Error = Error>>;
 }
 
 impl<T: PostRelated<R>, R: Relationship> ResourceMethod<T> for PostRelated<R, Identifier = T::Identifier, Post = T::Post> {
-    fn call(id: T::Identifier, post: Self::Request, env: &mut Environment) -> Self::Outcome {
+    fn call(id: T::Identifier, post: Self::Request, env: &mut Environment) -> Self::Future {
         T::post_related(id, post, env)
     }
 }

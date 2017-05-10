@@ -16,11 +16,11 @@ pub struct SimpleDebug {
     _private: (),
 }
 
-impl<T, M> Format<T, M> for SimpleDebug
+impl<T, R, M> Format<T, R, M> for SimpleDebug
 where
     T: ResourceEndpoint,
     M: ?Sized + Method<T, Request = ()>,
-    M::Response: Debug,
+    R: Debug,
 {
     type ReqFuture = future::FutureResult<(), Error>;
 
@@ -28,8 +28,8 @@ where
         future::ok(())
     }
 
-    fn present_unit<F>(future: F, _: Option<Template>, _: &mut Environment) -> http::BoxFuture
-        where F: Future<Item = (), Error = Error> + 'static,
+    fn present_unit(future: M::Future, _: Option<Template>, _: &mut Environment) -> http::BoxFuture
+        where M: Method<T, Response = ()>
     {
         Box::new(future.then(|result| match result {
             Ok(())  => Ok(http::Response::new().with_status(http::StatusCode::NoContent)),
@@ -37,8 +37,8 @@ where
         }))
     }
 
-    fn present_resource<F>(future: F, _: Option<Template>, _: &mut Environment) -> http::BoxFuture
-        where F: Future<Item = M::Response, Error = Error> + 'static,
+    fn present_resource(future: M::Future, _: Option<Template>, _: &mut Environment) -> http::BoxFuture
+        where M: Method<T, Response = R>, R: ResourceEndpoint
     {
         Box::new(future.then(|result| match result {
             Ok(resource)    => Ok(debug_response(resource, http::StatusCode::Ok)),
@@ -46,8 +46,8 @@ where
         }))
     }
 
-    fn present_collection<F>(future: F, _: Option<Template>, _: &mut Environment) -> http::BoxFuture
-        where F: Future<Item = Vec<M::Response>, Error = Error> + 'static,
+    fn present_collection(future: M::Future, _: Option<Template>, _: &mut Environment) -> http::BoxFuture
+        where M: Method<T, Response = Vec<R>>, R: ResourceEndpoint
     {
         Box::new(future.then(|result| match result {
             Ok(resources)   => Ok(debug_response(resources, http::StatusCode::Ok)),

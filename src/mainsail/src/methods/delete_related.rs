@@ -18,11 +18,11 @@ impl<T: DeleteRelated<R>, R: Relationship> Method<T> for DeleteRelated<R, Identi
 
     type Request = ();
     type Response = ();
-    type Outcome = Box<Future<Item = (), Error = Error>>;
+    type Future = Box<Future<Item = (), Error = Error>>;
 }
 
 impl<T: DeleteRelated<R>, R: Relationship> ResourceMethod<T> for DeleteRelated<R, Identifier = T::Identifier> {
-    fn call(id: T::Identifier, _: Self::Request, env: &mut Environment) -> Self::Outcome {
+    fn call(id: T::Identifier, _: Self::Request, env: &mut Environment) -> Self::Future {
         T::delete_related(id, env)
     }
 }

@@ -1,15 +1,12 @@
-use std::marker::PhantomData;
-
 use rigging::http;
 use rigging::resource::ResourceEndpoint;
 
-pub struct Fields<T> {
+pub struct Fields {
     fields: Vec<String>,
-    _marker: PhantomData<T>
 }
 
-impl<T: ResourceEndpoint> Fields<T> {
-    pub fn new(req: &http::Request) -> Option<Self> {
+impl Fields {
+    pub fn new<T: ResourceEndpoint>(req: &http::Request) -> Option<Self> {
         let q = req.query();
 
         // Get only the query string for the fields of this resource
@@ -23,7 +20,7 @@ impl<T: ResourceEndpoint> Fields<T> {
             fields.split(',').map(String::from).collect()
         });
 
-        fields.map(|fields| Fields { fields, _marker: PhantomData })
+        fields.map(|fields| Fields { fields })
     }
 
     pub fn contains(&self, field: &str) -> bool {

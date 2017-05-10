@@ -19,11 +19,11 @@ impl<T: Post> Method<T> for Post<Identifier = T::Identifier, Post = T::Post> {
 
     type Request = T::Post;
     type Response = T;
-    type Outcome = Box<Future<Item = T, Error = Error>>;
+    type Future = Box<Future<Item = T, Error = Error>>;
 }
 
 impl<T: Post> CollectionMethod<T> for Post<Identifier = T::Identifier, Post = T::Post> {
-    fn call(req: Self::Request, env: &mut Environment) -> Self::Outcome {
+    fn call(req: Self::Request, env: &mut Environment) -> Self::Future {
         T::post(req, env)
     }
 }

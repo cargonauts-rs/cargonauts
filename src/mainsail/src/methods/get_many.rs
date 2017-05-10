@@ -18,12 +18,12 @@ impl<T: GetMany<R>, R: Relationship> Method<T> for GetMany<R, Identifier = T::Id
     };
 
     type Request = ();
-    type Response = R::Related;
-    type Outcome = Box<Future<Item = Vec<R::Related>, Error = Error>>;
+    type Response = Vec<R::Related>;
+    type Future = Box<Future<Item = Vec<R::Related>, Error = Error>>;
 }
 
 impl<T: GetMany<R>, R: Relationship> ResourceMethod<T> for GetMany<R, Identifier = T::Identifier> {
-    fn call(id: T::Identifier, _: Self::Request, env: &mut Environment) -> Self::Outcome {
+    fn call(id: T::Identifier, _: Self::Request, env: &mut Environment) -> Self::Future {
         T::get_many(id, env)
     }
 }

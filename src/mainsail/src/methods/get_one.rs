@@ -18,11 +18,11 @@ impl<T: GetOne<R>, R: Relationship> Method<T> for GetOne<R, Identifier = T::Iden
 
     type Request = ();
     type Response = R::Related;
-    type Outcome = Box<Future<Item = R::Related, Error = Error>>;
+    type Future = Box<Future<Item = R::Related, Error = Error>>;
 }
 
 impl<T: GetOne<R>, R: Relationship> ResourceMethod<T> for GetOne<R, Identifier = T::Identifier> {
-    fn call(id: T::Identifier, _: Self::Request, env: &mut Environment) -> Self::Outcome {
+    fn call(id: T::Identifier, _: Self::Request, env: &mut Environment) -> Self::Future {
         T::get_one(id, env)
     }
 }

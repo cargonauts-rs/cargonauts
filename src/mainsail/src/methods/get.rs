@@ -18,11 +18,11 @@ impl<T: Get> Method<T> for Get<Identifier = T::Identifier> {
 
     type Request = ();
     type Response = T;
-    type Outcome = Box<Future<Item = T, Error = Error>>;
+    type Future = Box<Future<Item = T, Error = Error>>;
 }
 
 impl<T: Get> ResourceMethod<T> for Get<Identifier = T::Identifier> {
-    fn call(id: T::Identifier, _: Self::Request, env: &mut Environment) -> Self::Outcome {
+    fn call(id: T::Identifier, _: Self::Request, env: &mut Environment) -> Self::Future {
         T::get(id, env)
     }
 }

@@ -19,11 +19,11 @@ impl<T: Patch> Method<T> for Patch<Identifier = T::Identifier, Patch = T::Patch>
 
     type Request = T::Patch;
     type Response = T;
-    type Outcome = Box<Future<Item = T, Error = Error>>;
+    type Future = Box<Future<Item = T, Error = Error>>;
 }
 
 impl<T: Patch> ResourceMethod<T> for Patch<Identifier = T::Identifier, Patch = T::Patch> {
-    fn call(id: T::Identifier, req: Self::Request, env: &mut Environment) -> Self::Outcome {
+    fn call(id: T::Identifier, req: Self::Request, env: &mut Environment) -> Self::Future {
         T::patch(id, req, env)
     }
 }

@@ -19,11 +19,11 @@ impl<T: UpdateRelated<R>, R: Relationship> Method<T> for UpdateRelated<R, Identi
 
     type Request = T::Update;
     type Response = R::Related;
-    type Outcome = Box<Future<Item = R::Related, Error = Error>>;
+    type Future = Box<Future<Item = R::Related, Error = Error>>;
 }
 
 impl<T: UpdateRelated<R>, R: Relationship> ResourceMethod<T> for UpdateRelated<R, Identifier = T::Identifier, Update = T::Update> {
-    fn call(id: T::Identifier, update: Self::Request, env: &mut Environment) -> Self::Outcome {
+    fn call(id: T::Identifier, update: Self::Request, env: &mut Environment) -> Self::Future {
         T::update_related(id, update, env)
     }
 }

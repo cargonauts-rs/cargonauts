@@ -17,12 +17,12 @@ impl<T: Index> Method<T> for Index<Identifier = T::Identifier> {
     };
 
     type Request = ();
-    type Response = T;
-    type Outcome = Box<Future<Item = Vec<T>, Error = Error>>;
+    type Response = Vec<T>;
+    type Future = Box<Future<Item = Vec<T>, Error = Error>>;
 }
 
 impl<T: Index> CollectionMethod<T> for Index<Identifier = T::Identifier> {
-    fn call(_: Self::Request, env: &mut Environment) -> Self::Outcome {
+    fn call(_: Self::Request, env: &mut Environment) -> Self::Future {
         T::index(env)
     }
 }

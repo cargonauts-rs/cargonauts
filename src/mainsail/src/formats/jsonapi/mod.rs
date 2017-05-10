@@ -23,24 +23,24 @@ pub struct JsonApi;
 
 const MIME: &'static str = "application/vnd.api+json";
 
-impl<T, M, P> Format<T, M> for JsonApi
+impl<T, R, M, P> Format<T, R, M> for JsonApi
 where
     T: ResourceEndpoint,
     M: ?Sized + Method<T, Request = P>,
-    M::Response: ApiSerialize + ResourceEndpoint,
+    M::Response: JsonApiResponse,
     P: JsonApiBody<T>,
 {
     type ReqFuture = P::Future;
 
     fn receive_request(req: http::Request, env: &mut Environment) -> Self::ReqFuture {
-        if let Some(fields) = Fields::<M::Response>::new(&req) {
+        if let Some(fields) = Fields::new::<T>(&req) {
             env.store(fields);
         }
         P::parse(req.body())
     }
 
-    fn present_unit<F>(future: F, _: Option<Template>, _: &mut Environment) -> http::BoxFuture
-        where F: Future<Item = (), Error = Error> + 'static,
+    fn present_unit(future: M::Future, _: Option<Template>, _: &mut Environment) -> http::BoxFuture
+        where M: Method<T, Response = ()>
     {
         Box::new(future.then(move |result| match result {
             Ok(())  => future::ok(http::Response::new().with_status(http::StatusCode::NoContent)),
@@ -48,46 +48,22 @@ where
         }))
     }
 
-    fn present_resource<F>(future: F, _: Option<Template>, env: &mut Environment) -> http::BoxFuture
-        where F: Future<Item = M::Response, Error = Error> + 'static,
+    fn present_resource(future: M::Future, _: Option<Template>, env: &mut Environment) -> http::BoxFuture
+        where M: Method<T, Response = R>, R: ResourceEndpoint
     {
-        let fields = env.take::<Fields<M::Response>>();
+        let fields = env.take::<Fields>();
         Box::new(future.then(move |result| match result {
-            Ok(r)   => {
-                let doc = Document {
-                    member: Object {
-                        inner: &r,
-                        fields: fields.as_ref(),
-                    }
-                };
-                let buf = vec![];
-                match doc.write(buf) {
-                    Ok(buf) => future::ok(respond_with(buf, http::StatusCode::Ok)),
-                    Err(e)  => panic!("{:?}", e),
-                }
-            }
+            Ok(r)   => future::ok(respond_with(r.write(fields.as_ref()), http::StatusCode::Ok)),
             Err(e)  => future::ok(error_response(e)),
         }))
     }
 
-    fn present_collection<F>(future: F, _: Option<Template>, env: &mut Environment) -> http::BoxFuture
-        where F: Future<Item = Vec<M::Response>, Error = Error> + 'static,
+    fn present_collection(future: M::Future, _: Option<Template>, env: &mut Environment) -> http::BoxFuture
+        where M: Method<T, Response = Vec<R>>, R: ResourceEndpoint
     {
-        let fields = env.take::<Fields<M::Response>>();
+        let fields = env.take::<Fields>();
         Box::new(future.then(move |result| match result {
-            Ok(r)   => {
-                let doc = Document {
-                    member: Object {
-                        inner: &r,
-                        fields: fields.as_ref(),
-                    }
-                };
-                let buf = vec![];
-                match doc.write(buf) {
-                    Ok(buf) => future::ok(respond_with(buf, http::StatusCode::Ok)),
-                    Err(_)  => panic!(),
-                }
-            }
+            Ok(r)   => future::ok(respond_with(r.write(fields.as_ref()), http::StatusCode::Ok)),
             Err(e)  => future::ok(error_response(e)),
         }))
     }
@@ -98,12 +74,7 @@ where
 }
 
 fn error_response(error: Error) -> http::Response {
-    let doc = ErrorDocument { error: ErrorObject { error } };
-    let buf = vec![];
-    match doc.write(buf) {
-        Ok(buf) => respond_with(buf, http::StatusCode::InternalServerError),
-        Err(_)  => panic!()
-    }
+    respond_with(error.write(None), http::StatusCode::InternalServerError)
 }
 
 fn respond_with(data: Vec<u8>, status: http::StatusCode) -> http::Response {

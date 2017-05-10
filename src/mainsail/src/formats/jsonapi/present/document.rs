@@ -9,8 +9,8 @@ pub struct Document<T> {
 }
 
 impl<T: Serialize> Document<T> {
-    pub fn write(&self, buf: Vec<u8>) -> Result<Vec<u8>, json::Error> {
-        let mut serializer = json::Serializer::new(buf);
+    pub fn write(&self) -> Result<Vec<u8>, json::Error> {
+        let mut serializer = json::Serializer::new(vec![]);
         {
             let mut map = serializer.serialize_map(Some(2))?;
             map.serialize_entry("data", &self.member)?;
@@ -32,13 +32,13 @@ impl Serialize for JsonApiObject {
     }
 }
 
-pub struct ErrorDocument {
-    pub error: ErrorObject,
+pub struct ErrorDocument<'a> {
+    pub error: ErrorObject<'a>,
 }
 
-impl ErrorDocument {
-    pub fn write(&self, buf: Vec<u8>) -> Result<Vec<u8>, json::Error> {
-        let mut serializer = json::Serializer::new(buf);
+impl<'a> ErrorDocument<'a> {
+    pub fn write(&self) -> Result<Vec<u8>, json::Error> {
+        let mut serializer = json::Serializer::new(vec![]);
         {
             let mut map = serializer.serialize_map(Some(2))?;
             map.serialize_entry("error", &self.error)?;

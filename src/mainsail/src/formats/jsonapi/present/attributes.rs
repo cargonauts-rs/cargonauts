@@ -4,7 +4,7 @@ use super::ApiSerialize;
 use super::super::Fields;
 
 pub struct Attributes<'a, T: 'a> {
-    pub fields: Option<&'a Fields<T>>,
+    pub fields: Option<&'a Fields>,
     pub attributes: &'a T,
 }
 
