@@ -38,6 +38,7 @@ struct Route {
     method: String,
     format: String,
     rel: Option<String>,
+    rel_endpoint: Option<String>,
     middleware: Option<String>,
     template_root: PathBuf,
 }
@@ -68,6 +69,7 @@ impl Route {
                     method: method.method.clone(),
                     format: method.format.clone(),
                     rel: None,
+                    rel_endpoint: None,
                     middleware,
                     template_root: root.clone(),
                 })
@@ -82,6 +84,7 @@ impl Route {
                         method: method.method.clone(),
                         format: method.format.clone(),
                         rel: Some(relation.rel.clone()),
+                        rel_endpoint: relation.endpoint.clone().or_else(|| Some(relation.rel.to_kebab_case())),
                         middleware,
                         template_root: root.clone(),
                     })
@@ -104,7 +107,7 @@ impl ToTokens for Route {
         let format = Ident::new(&self.format[..]);
         let method = method_for(&self.method, self.rel.as_ref(), &resource);
 
-        let route_key = if let Some(ref rel) = self.rel {
+        let route_key = if let Some(ref rel) = self.rel_endpoint {
             quote!(::cargonauts::routing::RouteKey::new(#endpoint, <#method as ::cargonauts::method::Method<#resource>>::ROUTE, Some(#rel)))
         } else {
             quote!(::cargonauts::routing::RouteKey::new(#endpoint, <#method as ::cargonauts::method::Method<#resource>>::ROUTE, None))
