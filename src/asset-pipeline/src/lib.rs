@@ -1,4 +1,3 @@
-extern crate walkdir;
 extern crate cargonauts_config;
 
 use std::error::Error;
@@ -10,7 +9,7 @@ use cargonauts_config::CargonautsConfig;
 
 pub fn build_assets<F>(f: F) -> Result<(), Box<Error>>
 where
-    F: FnOnce(walkdir::Iter, &Path) -> Result<(), Box<Error>>
+    F: FnOnce(&Path, &Path) -> Result<(), Box<Error>>
 {
     let cfg = CargonautsConfig::find_and_parse().ok();
     let asset_path = {
@@ -26,6 +25,5 @@ where
 
     println!("cargo:rustc-cfg=used_cargonauts_asset_pipeline");
 
-    let iter = walkdir::WalkDir::new(asset_path).into_iter();
-    f(iter, output_path.as_path())
+    f(asset_path.as_path(), output_path.as_path())
 }

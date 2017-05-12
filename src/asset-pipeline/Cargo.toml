@@ -3,9 +3,6 @@ authors = ["Without Boats <woboats@gmail.com>"]
 name = "asset-pipeline"
 version = "0.1.0"
 
-[dependencies]
-walkdir = "1.0.7"
-
 [dependencies.cargonauts-config]
 path = "../cargonauts-config"
 
