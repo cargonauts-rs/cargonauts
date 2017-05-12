@@ -17,11 +17,26 @@ pub use toml::Value;
 
 #[derive(Deserialize)]
 pub struct CargonautsConfig {
+    #[serde(default = "project_root")]
+    project_root: PathBuf,
     host: Option<SocketAddr>,
     templates: Option<PathBuf>,
     assets: Option<PathBuf>,
     conns: Option<BTreeMap<String, BTreeMap<String, toml::Value>>>,
     env: Option<Env>,
+}
+
+impl Default for CargonautsConfig {
+    fn default() -> CargonautsConfig {
+        CargonautsConfig {
+            project_root: project_root(),
+            host: None,
+            templates: None,
+            assets: None,
+            conns: None,
+            env: None,
+        }
+    }
 }
 
 impl CargonautsConfig {
@@ -42,16 +57,28 @@ impl CargonautsConfig {
         Ok(cargo.package.metadata.cargonauts)
     }
 
-    pub fn host(&self) -> Option<SocketAddr> {
-        self.host
+    pub fn project_root(&self) -> &Path {
+        &self.project_root
     }
 
-    pub fn templates(&self) -> Option<&Path> {
-        self.templates.as_ref().map(|p| p.as_path())
+    pub fn host(&self) -> SocketAddr {
+        self.host.unwrap_or_else(|| "127.0.0.1:7878".parse().unwrap())
     }
 
-    pub fn assets(&self) -> Option<&Path> {
-        self.assets.as_ref().map(|p| p.as_path())
+    pub fn templates(&self) -> PathBuf {
+        if let Some(ref templates) = self.templates {
+            self.project_root.join(templates)
+        } else {
+            self.project_root.join("src/templates")
+        }
+    }
+
+    pub fn assets(&self) -> PathBuf {
+        if let Some(ref assets) = self.assets {
+            self.project_root.join(assets)
+        } else {
+            self.project_root.join("src/assets")
+        }
     }
 
     pub fn conn_cfg(&self, conn: &str) -> Option<&BTreeMap<String, Value>> {
@@ -87,5 +114,10 @@ struct Package {
 
 #[derive(Deserialize)]
 struct Metadata {
+    #[serde(default = "CargonautsConfig::default")]
     cargonauts: CargonautsConfig,
+}
+
+fn project_root() -> PathBuf {
+    env::var("CARGO_MANIFEST_DIR").unwrap().into()
 }

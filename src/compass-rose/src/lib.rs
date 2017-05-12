@@ -15,7 +15,7 @@ mod parser;
 
 proc_macro_item_impl! {
     pub fn routes_impl(input: &str) -> String {
-        let cfg = cfg::CargonautsConfig::find_and_parse().ok();
+        let cfg = cfg::CargonautsConfig::find_and_parse().unwrap_or_else(|_| cfg::CargonautsConfig::default());
         gen::code_gen(parser::parse_routes(input).unwrap(), cfg)
     }
 }

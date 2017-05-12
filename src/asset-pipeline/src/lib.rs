@@ -11,12 +11,7 @@ pub fn build_assets<F>(f: F) -> Result<(), Box<Error>>
 where
     F: FnOnce(&Path, &Path) -> Result<(), Box<Error>>
 {
-    let cfg = CargonautsConfig::find_and_parse().ok();
-    let asset_path = {
-            let root: PathBuf = env::var("CARGO_MANIFEST_DIR")?.into();
-            let sub = cfg.as_ref().and_then(|cfg| cfg.assets()).unwrap_or(Path::new("src/assets"));
-            root.join(sub)
-    };
+    let cfg = CargonautsConfig::find_and_parse()?;
     let output_path = {
         let out_dir: PathBuf = env::var("OUT_DIR")?.into();
         out_dir.join("cargonauts/assets")
@@ -25,5 +20,5 @@ where
 
     println!("cargo:rustc-cfg=used_cargonauts_asset_pipeline");
 
-    f(asset_path.as_path(), output_path.as_path())
+    f(&cfg.assets(), &output_path)
 }

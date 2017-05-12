@@ -1,5 +1,5 @@
 use std::env;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use quote::Tokens;
 use walkdir::WalkDir;
@@ -7,7 +7,7 @@ use cfg::CargonautsConfig;
 
 const FLAG: &'static str = "used_cargonauts_asset_pipeline";
 
-pub fn assets(cfg: Option<&CargonautsConfig>) -> Tokens {
+pub fn assets(cfg: &CargonautsConfig) -> Tokens {
     let dir = {
         // First, check if they used an asset pipeline
         let used_asset_pipeline = env::args().find(|arg| arg.starts_with(FLAG));
@@ -15,9 +15,8 @@ pub fn assets(cfg: Option<&CargonautsConfig>) -> Tokens {
             // Check if they specified an unusual build directory
             let arg =  arg.trim_left_matches(FLAG);
             if arg.len() > 2 && arg.starts_with('[') && arg.ends_with(']') {
-                let root: PathBuf = env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR not set").into();
                 let range = 1..(arg.len() - 1);
-                root.join(&arg[range])
+                cfg.project_root().join(&arg[range])
             } else {
                 // If they didn't, assets are in OUT_DIR/cargonauts/assets
                 let out_dir: PathBuf = env::var("OUT_DIR").expect("OUT_DIR not set").into();
@@ -25,8 +24,7 @@ pub fn assets(cfg: Option<&CargonautsConfig>) -> Tokens {
             }
         } else {
             // If they didn't use a pipeline, find their normal assets folder
-            let root: PathBuf = env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR not set").into();
-            root.join(cfg.and_then(|cfg| cfg.assets()).unwrap_or(Path::new("src/assets")))
+            cfg.assets()
         }
     };
 

@@ -9,15 +9,15 @@ use quote::Tokens;
 
 use self::routes::Routes as _Routes;
 
-pub fn code_gen(routes: Routes, cfg: Option<CargonautsConfig>) -> String {
-    let load_env_vars = load_env_vars(cfg.as_ref());
-    let assets = assets::assets(cfg.as_ref());
+pub fn code_gen(routes: Routes, cfg: CargonautsConfig) -> String {
+    let load_env_vars = load_env_vars(&cfg);
+    let assets = assets::assets(&cfg);
     let asset_handler = asset_handler(&routes);
     let resources = &routes.resources;
-    let build_routing_table = _Routes::new(resources, cfg.as_ref());
-    let addr = cfg.as_ref().and_then(|cfg| cfg.host()).map_or("127.0.0.1:7878".to_string(), |addr| addr.to_string());
+    let build_routing_table = _Routes::new(resources, &cfg);
+    let addr = cfg.host().to_string();
     let tokens = if let Some(ref setup) = routes.setup {
-        let setup_environment = setup::setup(setup, cfg.as_ref());
+        let setup_environment = setup::setup(setup, &cfg);
 
         quote! {
             #[allow(unused_variables)]
@@ -60,12 +60,10 @@ pub fn code_gen(routes: Routes, cfg: Option<CargonautsConfig>) -> String {
     tokens.to_string()
 }
 
-fn load_env_vars(cfg: Option<&CargonautsConfig>) -> Tokens {
-    if let Some(cfg) = cfg {
-        if let Some(vars) = cfg.env("dev") {
-            let vars = vars.iter().map(|(k, v)| quote!(::std::env::set_var(#k, #v);));
-            quote!({#(#vars)*})
-        } else { quote!({}) }
+fn load_env_vars(cfg: &CargonautsConfig) -> Tokens {
+    if let Some(vars) = cfg.env("dev") {
+        let vars = vars.iter().map(|(k, v)| quote!(::std::env::set_var(#k, #v);));
+        quote!({#(#vars)*})
     } else { quote!({}) }
 }
 

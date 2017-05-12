@@ -8,7 +8,7 @@ use json;
 
 use ast::*;
 
-pub fn setup(setup: &Setup, config: Option<&CargonautsConfig>) -> Tokens {
+pub fn setup(setup: &Setup, config: &CargonautsConfig) -> Tokens {
     let conn_groups = setup.members.iter().filter_map(|m| m.as_conn()).group_by(|c| &c.conn);
     let conns = conn_groups.into_iter().map(|(proto, conns)| {
        let conns = conns.collect::<Vec<_>>(); 
@@ -34,20 +34,20 @@ pub fn setup(setup: &Setup, config: Option<&CargonautsConfig>) -> Tokens {
     }
 }
 
-fn conn(conn: &Connection, config: Option<&CargonautsConfig>) -> Tokens {
+fn conn(conn: &Connection, config: &CargonautsConfig) -> Tokens {
     let ident = Ident::new(&conn.conn[..]);
     let cfg = pool_cfg(&conn.name, config);
     let member_cfg = member_cfg(&conn.name, &quote!(#ident), config);
     quote!({env_b.new_pool::<#ident>(handle.clone(), #cfg, #member_cfg)})
 }
 
-fn conn_group(proto: &str, conns: &[&Connection], config: Option<&CargonautsConfig>) -> Tokens {
+fn conn_group(proto: &str, conns: &[&Connection], config: &CargonautsConfig) -> Tokens {
     let ident = Ident::new(proto);
     let cfgs = cfg_group(conns, config);
     quote!({env_b.new_pool_vec::<#ident>(handle.clone(), vec!#cfgs)})
 }
 
-fn cfg_group(conns: &[&Connection], config: Option<&CargonautsConfig>) -> Vec<Tokens> {
+fn cfg_group(conns: &[&Connection], config: &CargonautsConfig) -> Vec<Tokens> {
     conns.iter().map(|conn| {
         let name = &conn.name;
         let cfg = pool_cfg(name, config);
@@ -57,8 +57,8 @@ fn cfg_group(conns: &[&Connection], config: Option<&CargonautsConfig>) -> Vec<To
     }).collect()
 }
 
-fn pool_cfg(conn: &str, config: Option<&CargonautsConfig>) -> Tokens {
-    match config.and_then(|cfg| cfg.conn_cfg(conn)) {
+fn pool_cfg(conn: &str, config: &CargonautsConfig) -> Tokens {
+    match config.conn_cfg(conn) {
         Some(cfg)   => {
             let (cfg, _) = split(cfg);
             let config = json::to_string(&cfg).unwrap();
@@ -68,8 +68,8 @@ fn pool_cfg(conn: &str, config: Option<&CargonautsConfig>) -> Tokens {
     }
 }
 
-fn member_cfg(conn: &str, service: &Tokens, config: Option<&CargonautsConfig>) -> Tokens {
-    match config.and_then(|cfg| cfg.conn_cfg(conn)) {
+fn member_cfg(conn: &str, service: &Tokens, config: &CargonautsConfig) -> Tokens {
+    match config.conn_cfg(conn) {
         Some(cfg)   => {
             let (_, cfg) = split(cfg);
             let config = json::to_string(&cfg).unwrap();
