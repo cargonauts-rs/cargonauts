@@ -9,7 +9,7 @@ use std::collections::BTreeMap;
 use std::env;
 use std::error::Error;
 use std::fs::File;
-use std::io::{self, Read};
+use std::io::Read;
 use std::net::SocketAddr;
 use std::path::{Path, PathBuf};
 
