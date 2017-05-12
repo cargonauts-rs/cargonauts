@@ -44,8 +44,8 @@ impl<'d, T: ResourceEndpoint> Visitor<'d> for RelsVisitor<T> {
 #[derive(Deserialize)]
 #[serde(untagged)]
 enum RelData<'a> {
-    Single(RelObject<'a>),
-    Many(Vec<RelObject<'a>>),
+    Single(#[serde(borrow)] RelObject<'a>),
+    Many(#[serde(borrow)] Vec<RelObject<'a>>),
 }
 
 #[derive(Deserialize)]
