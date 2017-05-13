@@ -5,8 +5,8 @@ use ast::*;
 grammar;
 
 pub routes: Routes = {
-    <asset_handler:AssetHandler?> <setup:Setup?> <resources:Resource*>
-        => Routes { asset_handler, setup, resources },
+    <asset_handler:AssetHandler?> <setup:Setup?> <route_items:RouteItem*>
+        => Routes { asset_handler, setup, route_items },
 };
 
 AssetHandler: String = {
@@ -24,6 +24,11 @@ SetupMember: SetupMember = {
 Connection: Connection = {
     "to" <conn:Ident> ";" => Connection { name: conn.to_kebab_case(), conn },
     "to" <conn:Ident> "as" <name:String> ";" => Connection { conn, name },
+};
+
+RouteItem: RouteItem = {
+    "mod" <name:Ident> "{" <items:RouteItem*> "}" => RouteItem::Module(name, items),
+    <Resource> => RouteItem::Resource(<>),
 };
 
 Resource: Resource = {

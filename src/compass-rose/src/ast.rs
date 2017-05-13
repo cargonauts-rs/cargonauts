@@ -2,8 +2,40 @@
 pub struct Routes {
     pub asset_handler: Option<String>,
     pub setup: Option<Setup>,
-    pub resources: Vec<Resource>,
+    pub route_items: Vec<RouteItem>,
 }
+
+impl Routes {
+    pub fn all_resources(&self) -> Vec<&Resource> {
+        let mut vec = vec![];
+
+        for item in &self.route_items {
+            item.push_resources(&mut vec);
+        }
+
+        vec
+    }
+}
+
+#[derive(PartialEq, Eq, Debug, Clone)]
+pub enum RouteItem {
+    Resource(Resource),
+    Module(String, Vec<RouteItem>),
+}
+
+impl RouteItem {
+    fn push_resources<'a>(&'a self, vec: &mut Vec<&'a Resource>) {
+        match *self {
+            RouteItem::Resource(ref resource) => vec.push(resource),
+            RouteItem::Module(_, ref items) => {
+                for item in items {
+                    item.push_resources(vec);
+                }
+            }
+        }
+    }
+}
+
 #[derive(PartialEq, Eq, Debug, Clone, Default)]
 pub struct Setup {
     pub members: Vec<SetupMember>,

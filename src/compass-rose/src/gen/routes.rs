@@ -1,5 +1,5 @@
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use cfg::CargonautsConfig;
 use heck::KebabCase;
@@ -12,7 +12,7 @@ pub struct Routes {
 }
 
 impl Routes {
-    pub fn new(resources: &[Resource], cfg: &CargonautsConfig) -> Routes {
+    pub fn new(resources: &[RouteItem], cfg: &CargonautsConfig) -> Routes {
         Routes {
             routes: Route::build(resources, cfg),
         }
@@ -43,15 +43,24 @@ struct Route {
 }
 
 impl Route {
-    fn build(resources: &[Resource], cfg: &CargonautsConfig) -> Vec<Route> {
-        let mut vec = vec![];
-
-        let root = cfg.templates();
-
-        for resource in resources {
-            let endpoint = resource.header.endpoint.clone().unwrap_or_else(|| {
-                resource.header.ty.to_kebab_case()
-            });
+    fn build(routes: &[RouteItem], cfg: &CargonautsConfig) -> Vec<Route> {
+        fn routes_for_resource(vec: &mut Vec<Route>, resource: &Resource, module: Option<&str>, template_root: &Path) {
+            let endpoint = match module {
+                Some(module)    => {
+                    match resource.header.endpoint.as_ref() {
+                        Some(endpoint)  => [module, endpoint].join("/"),
+                        None            => {
+                            let endpoint = resource.header.ty.to_kebab_case();
+                            [module, &endpoint].join("/")
+                        }
+                    }
+                }
+                None            => {
+                    resource.header.endpoint.clone().unwrap_or_else(|| {
+                        resource.header.ty.to_kebab_case()
+                    })
+                }
+            };
 
             let resource_ty = &resource.header.ty;
 
@@ -66,7 +75,7 @@ impl Route {
                         rel: None,
                         rel_endpoint: None,
                         middleware: middleware.clone(),
-                        template_root: root.clone(),
+                        template_root: template_root.to_owned(),
                     })
                 }
             }
@@ -83,11 +92,36 @@ impl Route {
                             rel: Some(relation.rel.clone()),
                             rel_endpoint: relation.endpoint.clone().or_else(|| Some(relation.rel.to_kebab_case())),
                             middleware: middleware.clone(),
-                            template_root: root.clone(),
+                            template_root: template_root.to_owned(),
                         })
                     }
                 }
             }
+        }
+
+        fn routes_for_item(vec: &mut Vec<Route>, item: &RouteItem, module: Option<&str>, template_root: &Path) {
+            match *item {
+                RouteItem::Resource(ref resource) => {
+                    routes_for_resource(vec, resource, module, template_root);
+                }
+                RouteItem::Module(ref inner, ref items) => {
+                    let module = match module {
+                        Some(module) => [module, inner].join("/"),
+                        None         => inner.to_owned()
+                    };
+                    
+                    for item in items {
+                        routes_for_item(vec, item, Some(&module), template_root)
+                    }
+                }
+            }
+        }
+
+        let mut vec = vec![];
+        let root = cfg.templates();
+
+        for item in routes {
+            routes_for_item(&mut vec, item, None, &root);
         }
 
         vec
