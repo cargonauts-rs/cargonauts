@@ -4,6 +4,7 @@ pub extern crate futures;
 extern crate c3po;
 extern crate mainsail;
 extern crate rigging;
+extern crate cargonauts_config;
 pub extern crate serde;
 pub extern crate serde_json as json;
 pub extern crate tokio_redis as redis;
@@ -19,6 +20,10 @@ pub use compass_rose::*;
 proc_macro_item_decl! {
     /// The routes DSL
     routes! => routes_impl
+}
+
+pub mod config {
+    pub use cargonauts_config::CargonautsConfig;
 }
 
 #[macro_use]
