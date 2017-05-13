@@ -80,8 +80,8 @@ impl Route {
                             endpoint: endpoint.clone(),
                             method: m.clone(),
                             format: method.format.clone(),
-                            rel: None,
-                            rel_endpoint: None,
+                            rel: Some(relation.rel.clone()),
+                            rel_endpoint: relation.endpoint.clone().or_else(|| Some(relation.rel.to_kebab_case())),
                             middleware: middleware.clone(),
                             template_root: root.clone(),
                         })
