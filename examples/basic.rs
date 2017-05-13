@@ -59,8 +59,7 @@ fn main() {
 
 routes! {
     resource MyResource {
-        method Get in JsonApi;
-        method Index in JsonApi;
+        method Get, Index in JsonApi;
 
         has one AllCaps {
             method GetOne in JsonApi;

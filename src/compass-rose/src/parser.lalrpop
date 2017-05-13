@@ -65,8 +65,19 @@ RelationMember: RelationMember = {
 };
 
 Method: Method = {
-    <method:Ident> "in" <format:Ident> ";" => Method {
-        method, format,
+    <methods:Comma<Ident>> "in" <format:Ident> ";" => Method {
+        methods, format,
+    }
+};
+
+Comma<T>: Vec<T> = {
+    <v:(<T> ",")*> <e:T?> => match e {
+        None => v,
+        Some(e) => {
+            let mut v = v;
+            v.push(e);
+            v
+        }
     }
 };
 

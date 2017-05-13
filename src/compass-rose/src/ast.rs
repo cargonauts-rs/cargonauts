@@ -92,7 +92,7 @@ impl RelationMember {
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct Method {
-    pub method: String,
+    pub methods: Vec<String>,
     pub format: String,
 }
 

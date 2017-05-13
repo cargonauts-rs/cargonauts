@@ -57,31 +57,35 @@ impl Route {
 
             for (method, attrs) in resource.members.iter().filter_map(|m| m.as_method()) {
                 let middleware = attrs.iter().filter_map(|attr| attr.as_middleware()).next();
-                vec.push(Route {
-                    resource: resource_ty.clone(),
-                    endpoint: endpoint.clone(),
-                    method: method.method.clone(),
-                    format: method.format.clone(),
-                    rel: None,
-                    rel_endpoint: None,
-                    middleware,
-                    template_root: root.clone(),
-                })
+                for m in &method.methods {
+                    vec.push(Route {
+                        resource: resource_ty.clone(),
+                        endpoint: endpoint.clone(),
+                        method: m.clone(),
+                        format: method.format.clone(),
+                        rel: None,
+                        rel_endpoint: None,
+                        middleware: middleware.clone(),
+                        template_root: root.clone(),
+                    })
+                }
             }
 
             for relation in resource.members.iter().filter_map(|m| m.as_relation()) {
                 for (method, attrs) in relation.members.iter().filter_map(|m| m.as_method()) {
                     let middleware = attrs.iter().filter_map(|attr| attr.as_middleware()).next();
-                    vec.push(Route {
-                        resource: resource_ty.clone(),
-                        endpoint: endpoint.clone(),
-                        method: method.method.clone(),
-                        format: method.format.clone(),
-                        rel: Some(relation.rel.clone()),
-                        rel_endpoint: relation.endpoint.clone().or_else(|| Some(relation.rel.to_kebab_case())),
-                        middleware,
-                        template_root: root.clone(),
-                    })
+                    for m in &method.methods {
+                        vec.push(Route {
+                            resource: resource_ty.clone(),
+                            endpoint: endpoint.clone(),
+                            method: m.clone(),
+                            format: method.format.clone(),
+                            rel: None,
+                            rel_endpoint: None,
+                            middleware: middleware.clone(),
+                            template_root: root.clone(),
+                        })
+                    }
                 }
             }
         }
