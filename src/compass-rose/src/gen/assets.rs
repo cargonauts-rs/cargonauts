@@ -36,7 +36,7 @@ pub fn assets(cfg: &CargonautsConfig, routes: &Routes) -> Tokens {
         if entry.file_type().is_file() {
             let path = entry.path();
             let file_path = path.to_string_lossy();
-            let url_path = if entry.file_name().to_string_lossy().starts_with("_index") {
+            let url_path = if entry.file_name().to_string_lossy().starts_with("index") {
                 path.strip_prefix(&dir).unwrap().parent().unwrap().to_string_lossy()
             } else {
                 path.strip_prefix(&dir).unwrap().to_string_lossy()
