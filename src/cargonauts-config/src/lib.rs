@@ -22,6 +22,7 @@ pub struct CargonautsConfig {
     host: Option<SocketAddr>,
     templates: Option<PathBuf>,
     assets: Option<PathBuf>,
+    index: Option<String>,
     conns: Option<BTreeMap<String, BTreeMap<String, toml::Value>>>,
     env: Option<Env>,
 }
@@ -33,6 +34,7 @@ impl Default for CargonautsConfig {
             host: None,
             templates: None,
             assets: None,
+            index: None,
             conns: None,
             env: None,
         }
@@ -78,6 +80,13 @@ impl CargonautsConfig {
             self.project_root.join(assets)
         } else {
             self.project_root.join("src/assets")
+        }
+    }
+
+    pub fn index(&self) -> &str {
+        match self.index {
+            Some(ref index) => index,
+            None            => "index",
         }
     }
 
