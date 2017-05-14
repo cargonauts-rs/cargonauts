@@ -94,8 +94,8 @@ pub fn resource_path(endpoint: &'static str) -> String {
 pub fn path(kind: Kind, endpoint: &'static str, rel: Option<&'static str>) -> String {
     match kind {
         Kind::Collection    => endpoint.to_owned(),
-        Kind::Resource      => format!("{}/$id", endpoint),
-        Kind::Relationship  => format!("{}/$id/{}", endpoint, rel.unwrap())
+        Kind::Resource      => format!("{}/:id", endpoint),
+        Kind::Relationship  => format!("{}/:id/{}", endpoint, rel.unwrap())
     }
 }
 
