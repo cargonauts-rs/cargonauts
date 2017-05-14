@@ -12,13 +12,11 @@ use environment::Environment;
 use http;
 
 pub trait Endpoint<In, Out> {
-    fn call(http::Request, template: Option<Template>, env: Environment) -> http::BoxFuture;
+    fn call(req: Request, template: Option<Template>) -> http::BoxFuture;
 }
 
-fn parse_id<T: ResourceEndpoint>(req: &http::Request) -> Result<T::Identifier, Error> {
-    req.path().split('/').filter(|p| !p.is_empty()).skip(1).next().ok_or(Error).and_then(|s| {
-        s.parse().map_err(|_| Error)
-    })
+fn parse_id<T: ResourceEndpoint>(id: Option<String>) -> Result<T::Identifier, Error> {
+    id.ok_or(Error).and_then(|id| id.parse().or(Err(Error)))
 }
 
 pub struct _Resource;
@@ -34,8 +32,9 @@ where
     R: ResourceEndpoint,
     F: Format<T, R, M>,
 {
-    fn call(req: http::Request, template: Option<Template>, mut env: Environment) -> http::BoxFuture {
-        let id = match parse_id::<T>(&req) {
+    fn call(req: Request, template: Option<Template>) -> http::BoxFuture {
+        let Request { req, id, mut env } = req;
+        let id = match parse_id::<T>(id) {
             Ok(id) => id,
             Err(err) => return F::present_error(err, &mut env),
         };
@@ -56,8 +55,9 @@ where
     M: ?Sized + ResourceMethod<T, Response = ()>,
     F: Format<T, (), M>,
 {
-    fn call(req: http::Request, template: Option<Template>, mut env: Environment) -> http::BoxFuture {
-        let id = match parse_id::<T>(&req) {
+    fn call(req: Request, template: Option<Template>) -> http::BoxFuture {
+        let Request { req, id, mut env } = req;
+        let id = match parse_id::<T>(id) {
             Ok(id) => id,
             Err(err) => return F::present_error(err, &mut env),
         };
@@ -79,8 +79,9 @@ where
     R: ResourceEndpoint,
     F: Format<T, R, M>,
 {
-    fn call(req: http::Request, template: Option<Template>, mut env: Environment) -> http::BoxFuture {
-        let id = match parse_id::<T>(&req) {
+    fn call(req: Request, template: Option<Template>) -> http::BoxFuture {
+        let Request { req, id, mut env } = req;
+        let id = match parse_id::<T>(id) {
             Ok(id) => id,
             Err(err) => return F::present_error(err, &mut env),
         };
@@ -102,7 +103,8 @@ where
     R: ResourceEndpoint,
     F: Format<T, R, M>,
 {
-    fn call(req: http::Request, template: Option<Template>, mut env: Environment) -> http::BoxFuture {
+    fn call(req: Request, template: Option<Template>) -> http::BoxFuture {
+        let Request { req, mut env, .. } = req;
         Box::new(F::receive_request(req, &mut env).then(move |result| {
             let request = match result {
                 Ok(parts)   => parts,
@@ -120,7 +122,8 @@ where
     M: ?Sized + CollectionMethod<T, Response = ()>,
     F: Format<T, (), M>,
 {
-    fn call(req: http::Request, template: Option<Template>, mut env: Environment) -> http::BoxFuture {
+    fn call(req: Request, template: Option<Template>) -> http::BoxFuture {
+        let Request { req, mut env, .. } = req;
         Box::new(F::receive_request(req, &mut env).then(move |result| {
             let request = match result {
                 Ok(parts)   => parts,
@@ -139,7 +142,8 @@ where
     R: ResourceEndpoint,
     F: Format<T, R, M>,
 {
-    fn call(req: http::Request, template: Option<Template>, mut env: Environment) -> http::BoxFuture {
+    fn call(req: Request, template: Option<Template>) -> http::BoxFuture {
+        let Request { req, mut env, .. } = req;
         Box::new(F::receive_request(req, &mut env).then(move |result| {
             let request = match result {
                 Ok(parts)   => parts,
@@ -154,6 +158,7 @@ where
 pub struct Request {
     pub req: http::Request,
     pub env: Environment,
+    pub id: Option<String>,
 }
 
 pub struct EndpointService<I, O, T: ?Sized> {
@@ -178,6 +183,6 @@ where
     type Future = http::BoxFuture;
 
     fn call(&self, req: Self::Request) -> Self::Future {
-        T::call(req.req, self.template, req.env)
+        T::call(req, self.template)
     }
 }

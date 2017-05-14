@@ -51,8 +51,8 @@ pub mod api {
 pub mod routing {
     pub use rigging::resource::{ResourceEndpoint, RelationEndpoint, RelationshipLink, RelIds, HasOneEndpoint, HasManyEndpoint};
     pub use rigging::endpoint::{Endpoint, EndpointService};
-    pub use rigging::routes::{Kind, RoutingTable, RouteKey, Handler, not_found};
-    pub use rigging::routes::{AssetKey, AssetHandler, default_asset_handler};
+    pub use rigging::routes::{RoutingTable, RouteBuilder, Handler, path};
+    pub use rigging::routes::{AssetHandler, default_asset_handler};
     pub use rigging::environment::EnvBuilder;
     pub use rigging::http::BoxFuture as HttpFuture;
 }
@@ -60,7 +60,7 @@ pub mod routing {
 pub use server::serve;
 
 pub mod server {
-    pub use rigging::http::{Request, Response, Error, Service, NewService, serve, Handle};
+    pub use rigging::http::{Request, Response, Error, Service, NewService, serve, Handle, Method};
 
     pub mod pool {
         pub use rigging::connections::Configure;
@@ -75,7 +75,7 @@ pub mod clients {
 
 pub mod method {
     pub use rigging::method::Method;
-    pub use rigging::routes::Route;
+    pub use rigging::routes::{Route, Kind};
 }
 
 pub mod format {

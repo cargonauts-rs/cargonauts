@@ -1,131 +1,31 @@
-use std::borrow::Borrow;
 use std::collections::HashMap;
 use std::io;
 use std::rc::Rc;
 
+use futures::{future, Future};
+use recognizer::{Match, Router};
 use tokio::{Service, NewService};
-use futures::{Future, future};
 
-use http;
 use endpoint;
-use environment::{PreparedEnv};
+use environment::PreparedEnv;
+use http;
 
-#[derive(Clone, Hash, Eq, PartialEq)]
-pub struct RouteKey {
-    key: RouteKeyRef<'static>,
-}
-#[derive(Clone, Hash, Eq, PartialEq)]
-struct RouteKeyRef<'a> {
-    route: Route,
-    endpoint: &'a str,
-    subroute: Option<&'a str>,
-}
-
-impl RouteKey {
-    pub fn new(endpoint: &'static str, route: Route, subroute: Option<&'static str>)
-        ->
-    RouteKey {
-        RouteKey { key: RouteKeyRef { endpoint, route, subroute } }
-    }
-}
-
-impl<'a> Borrow<RouteKeyRef<'a>> for RouteKey {
-    fn borrow(&self) -> &RouteKeyRef<'a> {
-        &self.key
-    }
-}
-
-impl<'a> RouteKeyRef<'a> {
-    fn req(req: &'a http::Request) -> Option<RouteKeyRef<'a>> {
-        let mut path_components = req.path().split('/').filter(|p| !p.is_empty());
-        path_components.next().map(|endpoint| {
-            let (kind, subroute) = match path_components.next() {
-                Some(_) => {
-                    match path_components.next() {
-                        Some(rel)   => (Kind::Relationship, Some(rel)),
-                        None        => (Kind::Resource, None),
-                    }
-                }
-                None    => (Kind::Collection, None),
-            };
-            let method = req.method().clone();
-            RouteKeyRef {
-                endpoint,
-                subroute,
-                route: Route {
-                    method,
-                    kind,
-                }
-            }
-        })
-    }
-}
-
-#[derive(Clone, Hash, Eq, PartialEq)]
 pub struct Route {
     pub method: http::Method,
     pub kind: Kind,
 }
 
-
-#[derive(Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, Eq, PartialEq)]
 pub enum Kind {
     Resource,
     Collection,
     Relationship,
 }
 
-#[derive(Clone, Copy, Hash, Eq, PartialEq)]
-pub struct AssetKey {
-    key: AssetKeyRef<'static>,
-}
-
-#[derive(Clone, Copy, Hash, Eq, PartialEq)]
-struct AssetKeyRef<'a> {
-    endpoint: &'a str,
-}
-
-impl AssetKey {
-    pub fn new(endpoint: &'static str) -> AssetKey {
-        AssetKey { key: AssetKeyRef { endpoint } }
-    }
-}
-
-impl<'a> Borrow<AssetKeyRef<'a>> for AssetKey {
-    fn borrow(&self) -> &AssetKeyRef<'a> {
-        &self.key
-    }
-}
-
-impl<'a> AssetKeyRef<'a> {
-    fn new(req: &'a http::Request) -> AssetKeyRef<'a> {
-        let endpoint = req.path().trim_matches('/');
-        AssetKeyRef { endpoint }
-    }
-}
-
 #[derive(Clone)]
 pub struct RoutingTable {
-    routes: Rc<HashMap<RouteKey, Handler>>,
-    assets: Rc<HashMap<AssetKey, &'static [u8]>>,
-    asset_handler: AssetHandler,
+    table: Rc<HashMap<http::Method, Router<Handler>>>,
     env: PreparedEnv,
-}
-
-impl RoutingTable {
-    pub fn new(
-        routes: HashMap<RouteKey, Handler>,
-        assets: HashMap<AssetKey, &'static [u8]>,
-        asset_handler: AssetHandler,
-        env: PreparedEnv
-    ) -> RoutingTable {
-        RoutingTable {
-            routes: Rc::new(routes),
-            assets: Rc::new(assets),
-            asset_handler,
-            env,
-        }
-    }
 }
 
 impl Service for RoutingTable {
@@ -135,13 +35,13 @@ impl Service for RoutingTable {
     type Future = http::BoxFuture;
 
     fn call(&self, req: Self::Request) -> Self::Future {
-        let req = endpoint::Request { req, env: self.env.new() };
-        if let Some(asset) = self.assets.get(&AssetKeyRef::new(&req.req)) {
-            return (self.asset_handler)(asset, req)
-        }
-        match RouteKeyRef::req(&req.req).and_then(|route| self.routes.get(&route)) {
-            Some(handle)    => handle.call(req),
-            None            => not_found(),
+        match self.recognize(&req) {
+            Some(handle)    => {
+                let id = handle.params.find("id").map(|s| s.to_owned());
+                let req = endpoint::Request { req, env: self.env.new(), id };
+                handle.handler.call(req)
+            }
+            None            => not_found()
         }
     }
 }
@@ -158,11 +58,45 @@ impl NewService for RoutingTable {
     }
 }
 
+impl RoutingTable {
+    fn recognize(&self, req: &http::Request) -> Option<Match<&Handler>> {
+        self.table.get(req.method()).and_then(|router| {
+            router.recognize(req.path()).ok()
+        })
+    }
+}
+
+#[derive(Default)]
+pub struct RouteBuilder {
+    table: HashMap<http::Method, Router<Handler>>,
+}
+
+impl RouteBuilder {
+    pub fn add(&mut self, method: http::Method, path: String, handler: Handler) {
+        self.table.entry(method).or_insert(Router::new()).add(&path, handler);
+    }
+
+    pub fn build(self, env: PreparedEnv) -> RoutingTable {
+        RoutingTable { table: Rc::new(self.table), env }
+    }
+}
+
 pub type Handler = Box<Service<Request = endpoint::Request, Response = http::Response, Error = http::Error, Future = http::BoxFuture>>;
-pub type AssetHandler = fn(&'static [u8], request: endpoint::Request) -> http::BoxFuture;
 
 pub fn not_found() -> http::BoxFuture {
     future::ok(http::Response::new().with_status(http::StatusCode::NotFound)).boxed()
+}
+
+pub fn resource_path(endpoint: &'static str) -> String {
+    format!("{}/$id", endpoint)
+}
+
+pub fn path(kind: Kind, endpoint: &'static str, rel: Option<&'static str>) -> String {
+    match kind {
+        Kind::Collection    => endpoint.to_owned(),
+        Kind::Resource      => format!("{}/$id", endpoint),
+        Kind::Relationship  => format!("{}/$id/{}", endpoint, rel.unwrap())
+    }
 }
 
 pub fn default_asset_handler(asset: &'static [u8], _: endpoint::Request) -> http::BoxFuture {
@@ -170,4 +104,23 @@ pub fn default_asset_handler(asset: &'static [u8], _: endpoint::Request) -> http
                             .with_status(http::StatusCode::Ok)
                             .with_header(http::headers::ContentLength(asset.len() as u64))
                             .with_body(asset)))
+}
+
+pub struct AssetHandler<F> {
+    pub handler: F,
+    pub data: &'static [u8]
+}
+
+impl<F> Service for AssetHandler<F>
+where
+    F: Fn(&'static [u8], endpoint::Request) -> http::BoxFuture
+{
+    type Request = endpoint::Request;
+    type Response = http::Response;
+    type Error = http::Error;
+    type Future = http::BoxFuture;
+
+    fn call(&self, req: Self::Request) -> Self::Future {
+        (self.handler)(self.data, req)
+    }
 }

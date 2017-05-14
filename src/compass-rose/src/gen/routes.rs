@@ -9,12 +9,14 @@ use ast::*;
 
 pub struct Routes {
     routes: Vec<Route>,
+    assets: Tokens,
 }
 
 impl Routes {
-    pub fn new(resources: &[RouteItem], cfg: &CargonautsConfig) -> Routes {
+    pub fn new(assets: Tokens, resources: &[RouteItem], cfg: &CargonautsConfig) -> Routes {
         Routes {
             routes: Route::build(resources, cfg),
+            assets
         }
     }
 }
@@ -22,10 +24,13 @@ impl Routes {
 impl ToTokens for Routes {
     fn to_tokens(&self, tokens: &mut Tokens) {
         let routes = &self.routes;
+        let assets = &self.assets;
         tokens.append(quote! ({
             use ::cargonauts::server::NewService;
-            let routes = vec!#routes.into_iter().collect();
-            ::cargonauts::routing::RoutingTable::new(routes, assets, asset_handler, env)
+            let mut routes = ::cargonauts::routing::RouteBuilder::default();
+            #(#routes)*
+            #assets
+            routes.build(env)
         }));
     }
 }
@@ -139,26 +144,25 @@ impl ToTokens for Route {
         let format = Ident::new(&self.format[..]);
         let method = method_for(&self.method, self.rel.as_ref(), &resource);
 
-        let route_key = if let Some(ref rel) = self.rel_endpoint {
-            quote!(::cargonauts::routing::RouteKey::new(#endpoint, <#method as ::cargonauts::method::Method<#resource>>::ROUTE, Some(#rel)))
+        let http_method = quote!(<#method as ::cargonauts::method::Method<#resource>>::ROUTE.method);
+
+        let path = if let Some(ref rel) = self.rel_endpoint {
+            quote!(::cargonauts::routing::path(<#method as ::cargonauts::method::Method<#resource>>::ROUTE.kind, #endpoint, Some(#rel)))
         } else {
-            quote!(::cargonauts::routing::RouteKey::new(#endpoint, <#method as ::cargonauts::method::Method<#resource>>::ROUTE, None))
+            quote!(::cargonauts::routing::path(<#method as ::cargonauts::method::Method<#resource>>::ROUTE.kind, #endpoint, None))
         };
 
         if let Some(ref middleware) = self.middleware {
             let middleware = Ident::new(&middleware[..]);
             tokens.append(quote!({
-                let route_key = #route_key;
                 let service = ::cargonauts::routing::EndpointService::<_, _, (#resource, #format, #method)>::new(#template);
-                let middleware = <#middleware as Default>::default();
-                let service = ::cargonauts::middleware::Middleware::wrap(middleware, service);
-                (route_key, Box::new(service) as ::cargonauts::routing::Handler)
+                let service = ::cargonauts::middleware::Middleware::wrap(<#middleware as Default>::default(), service);
+                routes.add(#http_method, #path, Box::new(service) as ::cargonauts::routing::Handler);
             }));
         } else {
             tokens.append(quote!({
-                let route_key = #route_key;
                 let service = ::cargonauts::routing::EndpointService::<_, _, (#resource, #format, #method)>::new(#template);
-                (route_key, Box::new(service) as ::cargonauts::routing::Handler)
+                routes.add(#http_method, #path, Box::new(service) as ::cargonauts::routing::Handler);
             }));
         }
 

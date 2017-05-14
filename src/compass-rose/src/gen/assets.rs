@@ -5,9 +5,13 @@ use quote::Tokens;
 use walkdir::WalkDir;
 use cfg::CargonautsConfig;
 
+use ast::Routes;
+
 const FLAG: &'static str = "used_cargonauts_asset_pipeline";
 
-pub fn assets(cfg: &CargonautsConfig) -> Tokens {
+pub fn assets(cfg: &CargonautsConfig, routes: &Routes) -> Tokens {
+    let handler = asset_handler(routes);
+
     let dir = {
         // First, check if they used an asset pipeline
         let used_asset_pipeline = env::args().find(|arg| arg.starts_with(FLAG));
@@ -37,11 +41,25 @@ pub fn assets(cfg: &CargonautsConfig) -> Tokens {
             } else {
                 path.strip_prefix(&dir).unwrap().to_string_lossy()
             };
-            Some(quote!((::cargonauts::routing::AssetKey::new(#url_path), include_bytes!(#file_path) as &[u8])))
+            Some(quote!({
+                let service = ::cargonauts::routing::AssetHandler {
+                    handler: #handler,
+                    data: include_bytes!(#file_path),
+                };
+                routes.add(::cargonauts::server::Method::Get, String::from(#url_path), Box::new(service) as ::cargonauts::routing::Handler);
+            }))
         } else { None }
     })).collect::<Vec<_>>();
 
     quote! {
-        vec!#assets.into_iter().collect();
+        #(#assets)*
+    }
+}
+
+fn asset_handler(routes: &Routes) -> Tokens {
+    if let Some(handler) = routes.asset_handler.as_ref() {
+        quote!(#handler)
+    } else {
+        quote!(::cargonauts::routing::default_asset_handler)
     }
 }
