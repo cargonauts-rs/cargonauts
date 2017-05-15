@@ -80,7 +80,7 @@ pub mod method {
 
 pub mod format {
 
-    pub use mainsail::formats::{Debug, Display};
+    pub use mainsail::formats::{Debug};
     pub use rigging::format::{Format, Template};
     pub use mainsail::formats::jsonapi::JsonApi;
 
