@@ -1,0 +1,23 @@
+<section id="todoapp">
+  <header id="header">
+    <h1>todos</h1>
+    {{input id="new-todo" placeholder="What is to be done?" enter="createNote"}}
+  </header>
+
+  <section id="main">
+    <ul id="todo-list">
+    {{#each model as |note|}}
+      <li class={{if note.completed "completed" "active"}}>
+        <input type="checkbox" class="toggle" {{action "completeNote" note.id}}>
+        <label>{{note.text}}</label><button class="destroy" {{action "destroyNote" note.id}}></button>
+      </li>
+    {{/each}}
+    </ul>
+  </section>
+
+  <footer id="footer">
+    <button id="clear-completed" {{action "clearCompleted"}}>
+      Clear completed
+    </button>
+  </footer>
+</section>

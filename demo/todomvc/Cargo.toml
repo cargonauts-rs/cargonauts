@@ -1,0 +1,32 @@
+[package]
+authors = ["Without Boats <woboats@gmail.com>"]
+name = "todo"
+version = "0.1.0"
+
+[dependencies]
+serde = "1.0.0"
+serde_derive = "1.0.0"
+serde_json = "1.0.0"
+
+[dependencies.chrono]
+version = "0.3.1"
+features = ["serde"]
+
+[dependencies.uuid]
+version = "0.5.0"
+features = ["v4", "serde"]
+
+[dependencies.cargonauts]
+path = "../../"
+
+[dependencies.jsonapi-derive]
+path = "../../src/jsonapi-derive"
+
+[build-dependencies.asset-pipeline]
+path = "../../src/asset-pipeline"
+
+[features]
+proxy = []
+
+[package.metadata.cargonauts]
+assets = "frontend"

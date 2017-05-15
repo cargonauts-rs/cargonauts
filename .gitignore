@@ -1,2 +1,8 @@
 target
 Cargo.lock
+demo/todomvc/target
+demo/todomvc/Cargo.lock
+demo/todomvc/frontend/dist
+demo/todomvc/frontend/node_modules
+demo/todomvc/frontend/tmp
+demo/todomvc/frontend/yarn.lock
