@@ -7,6 +7,7 @@ pub enum ClientIdPolicy {
     Accepted,
     Required,
     NotAccepted,
+    Ignored,
 }
 
 pub trait ApiDeserialize<'d>: Sized + 'static {

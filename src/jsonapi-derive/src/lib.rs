@@ -10,7 +10,7 @@ mod ser;
 
 use proc_macro::TokenStream;
 
-#[proc_macro_derive(ApiDeserialize, attributes(api_id))]
+#[proc_macro_derive(ApiDeserialize, attributes(api_id, ignore_api_id))]
 pub fn api_deserialize(tokens: TokenStream) -> TokenStream {
     let ast = syn::parse_derive_input(&tokens.to_string()).unwrap();
     de::deserialize(ast).to_string().parse().unwrap()

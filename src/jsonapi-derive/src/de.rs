@@ -14,14 +14,24 @@ pub fn deserialize(ast: DeriveInput) -> Tokens {
     let ids = fields.iter().filter(|field| ::is_id(field)).collect::<Vec<_>>();
 
     match ids.len() {
-        0                           => deserialize_no_id(ty, fields),
+        0                           => {
+            let allow_id = ast.attrs.iter().any(|attr| match attr.value {
+                MetaItem::Word(ref ident)   => ident.as_ref() == "ignore_api_id",
+                _                           => false,
+            });
+            deserialize_no_id(ty, fields, allow_id)
+        }
         1 if is_option(&ids[0].ty)  => deserialize_with_id(ty, fields),
         1                           => deserialize_with_id_required(ty, fields),
         _                           => panic!("Could not derive ApiDeserailize: cannot tag more than one field #[api_id]"),
     }
 }
 
-fn deserialize_no_id(ty: &Ident, fields: &[Field]) -> Tokens {
+fn deserialize_no_id(ty: &Ident, fields: &[Field], allow_id: bool) -> Tokens {
+    let client_id_policy = match allow_id {
+        true    => quote!(::cargonauts::format::jsonapi::ClientIdPolicy::Ignored),
+        false   => quote!(::cargonauts::format::jsonapi::ClientIdPolicy::NotAccepted),
+    };
 
     let field_decls = fields.iter().map(|field| {
         let ident = field.ident.as_ref().unwrap();
@@ -55,8 +65,7 @@ fn deserialize_no_id(ty: &Ident, fields: &[Field]) -> Tokens {
 
     quote! {
         impl<'__derive_d> ::cargonauts::format::jsonapi::ApiDeserialize<'__derive_d> for #ty {
-            const CLIENT_ID_POLICY: ::cargonauts::format::jsonapi::ClientIdPolicy
-                = ::cargonauts::format::jsonapi::ClientIdPolicy::NotAccepted;
+            const CLIENT_ID_POLICY: ::cargonauts::format::jsonapi::ClientIdPolicy = #client_id_policy;
 
             type Identifier = String;
             type Attributes = ();
@@ -103,11 +112,11 @@ fn deserialize_no_id(ty: &Ident, fields: &[Field]) -> Tokens {
 }
 
 fn deserialize_with_id(ty: &Ident, fields: &[Field]) -> Tokens {
-    panic!()
+    panic!("deserializing with ids not implemented")
 }
 
 fn deserialize_with_id_required(ty: &Ident, fields: &[Field]) -> Tokens {
-    panic!()
+    panic!("deserializing with ids not implemented")
 }
 
 fn is_option(ty: &Ty) -> bool {
