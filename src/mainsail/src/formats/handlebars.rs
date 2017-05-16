@@ -18,6 +18,16 @@ pub struct Handlebars {
     registry: hbs::Handlebars,
 }
 
+#[derive(Serialize)]
+struct Object<T: Serialize> {
+    resource: T,
+}
+
+#[derive(Serialize)]
+struct Objects<T: Serialize> {
+    resources: T,
+}
+
 impl<T, R, M> Format<T, R, M> for Handlebars
 where
     T: ResourceEndpoint,
@@ -49,7 +59,7 @@ where
     {
         let this = this.clone();
         Box::new(future.then(move |result| {
-            match result.and_then(|resource| this.registry.render(&key.to_string(), &resource).map_err(|_| Error)) {
+            match result.and_then(|resource| this.registry.render(&key.to_string(), &Object { resource }).map_err(|_| Error)) {
                 Ok(body)    => Ok(respond_with(body)),
                 Err(err)    => Ok(respond_with_err(err)),
             }
@@ -63,7 +73,7 @@ where
     {
         let this = this.clone();
         Box::new(future.then(move |result| {
-            match result.and_then(|resources| this.registry.render(&key.to_string(), &resources).map_err(|_| Error)) {
+            match result.and_then(|resources| this.registry.render(&key.to_string(), &Objects { resources }).map_err(|_| Error)) {
                 Ok(body)    => Ok(respond_with(body)),
                 Err(err)    => Ok(respond_with_err(err)),
             }
