@@ -1,4 +1,6 @@
 use std::fmt::Debug;
+use std::io;
+use std::rc::Rc;
 
 use futures::{Future, future};
 
@@ -24,11 +26,11 @@ where
 {
     type ReqFuture = future::FutureResult<(), Error>;
 
-    fn receive_request(_: http::Request, _: &mut Environment) -> Self::ReqFuture {
+    fn receive_request(_: &Rc<Self>, _: http::Request, _: &mut Environment) -> Self::ReqFuture {
         future::ok(())
     }
 
-    fn present_unit(future: M::Future, _: Option<Template>, _: &mut Environment) -> http::BoxFuture
+    fn present_unit(_: &Rc<Self>, future: M::Future, _: &'static str, _: &mut Environment) -> http::BoxFuture
         where M: Method<T, Response = ()>
     {
         Box::new(future.then(|result| match result {
@@ -37,7 +39,7 @@ where
         }))
     }
 
-    fn present_resource(future: M::Future, _: Option<Template>, _: &mut Environment) -> http::BoxFuture
+    fn present_resource(_: &Rc<Self>, future: M::Future, _: &'static str, _: &mut Environment) -> http::BoxFuture
         where M: Method<T, Response = R>, R: ResourceEndpoint
     {
         Box::new(future.then(|result| match result {
@@ -46,7 +48,7 @@ where
         }))
     }
 
-    fn present_collection(future: M::Future, _: Option<Template>, _: &mut Environment) -> http::BoxFuture
+    fn present_collection(_: &Rc<Self>, future: M::Future, _: &'static str, _: &mut Environment) -> http::BoxFuture
         where M: Method<T, Response = Vec<R>>, R: ResourceEndpoint
     {
         Box::new(future.then(|result| match result {
@@ -55,8 +57,14 @@ where
         }))
     }
 
-    fn present_error(error: Error, _: &mut Environment) -> http::BoxFuture {
+    fn present_error(_: &Rc<Self>, error: Error, _: &mut Environment) -> http::BoxFuture {
         Box::new(future::ok(debug_response(error, http::StatusCode::InternalServerError)))
+    }
+}
+
+impl BuildFormat for SimpleDebug {
+    fn build(_: &[Template]) -> Result<Self, io::Error> {
+        Ok(Self { _private: () })
     }
 }
 

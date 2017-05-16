@@ -3,12 +3,15 @@ mod receive;
 
 mod fieldset;
 
+use std::io;
+use std::rc::Rc;
+
 use futures::{Future, future};
 
 use rigging::Error;
 use rigging::resource::ResourceEndpoint;
 use rigging::environment::Environment;
-use rigging::format::{Format, Template};
+use rigging::format::*;
 use rigging::http;
 use rigging::method::Method;
 
@@ -19,7 +22,9 @@ pub use self::receive::{ApiDeserialize, ClientIdPolicy};
 use self::present::*;
 use self::receive::*;
 
-pub struct JsonApi;
+pub struct JsonApi {
+    _private: ()
+}
 
 const MIME: &'static str = "application/vnd.api+json";
 
@@ -32,14 +37,14 @@ where
 {
     type ReqFuture = P::Future;
 
-    fn receive_request(req: http::Request, env: &mut Environment) -> Self::ReqFuture {
+    fn receive_request(_: &Rc<Self>, req: http::Request, env: &mut Environment) -> Self::ReqFuture {
         if let Some(fields) = Fields::new::<T>(&req) {
             env.store(fields);
         }
         P::parse(req.body())
     }
 
-    fn present_unit(future: M::Future, _: Option<Template>, _: &mut Environment) -> http::BoxFuture
+    fn present_unit(_: &Rc<Self>, future: M::Future, _: &'static str, _: &mut Environment) -> http::BoxFuture
         where M: Method<T, Response = ()>
     {
         Box::new(future.then(move |result| match result {
@@ -48,7 +53,7 @@ where
         }))
     }
 
-    fn present_resource(future: M::Future, _: Option<Template>, env: &mut Environment) -> http::BoxFuture
+    fn present_resource(_: &Rc<Self>, future: M::Future, _: &'static str, env: &mut Environment) -> http::BoxFuture
         where M: Method<T, Response = R>, R: ResourceEndpoint
     {
         let fields = env.take::<Fields>();
@@ -58,7 +63,7 @@ where
         }))
     }
 
-    fn present_collection(future: M::Future, _: Option<Template>, env: &mut Environment) -> http::BoxFuture
+    fn present_collection(_: &Rc<Self>, future: M::Future, _: &'static str, env: &mut Environment) -> http::BoxFuture
         where M: Method<T, Response = Vec<R>>, R: ResourceEndpoint
     {
         let fields = env.take::<Fields>();
@@ -68,8 +73,14 @@ where
         }))
     }
 
-    fn present_error(error: Error, _: &mut Environment) -> http::BoxFuture {
+    fn present_error(_: &Rc<Self>, error: Error, _: &mut Environment) -> http::BoxFuture {
         Box::new(future::ok(error_response(error)))
+    }
+}
+
+impl BuildFormat for JsonApi {
+    fn build(_: &[Template]) -> Result<Self, io::Error> {
+        Ok(Self { _private: () })
     }
 }
 

@@ -1,4 +1,5 @@
 mod assets;
+mod formats;
 mod resource;
 mod routes;
 mod setup;
@@ -13,8 +14,9 @@ pub fn code_gen(routes: Routes, cfg: CargonautsConfig) -> String {
     let load_env_vars = load_env_vars(&cfg);
     let resources = routes.all_resources();
     let assets = assets::assets(&cfg, &routes);
-    let build_routing_table = _Routes::new(assets, &routes.route_items, &cfg);
+    let build_routing_table = _Routes::new(assets, &routes.route_items);
     let addr = cfg.host().to_string();
+    let formats = formats::formats(&routes, &cfg);
     let tokens = if let Some(ref setup) = routes.setup {
         let setup_environment = setup::setup(setup, &cfg);
 
@@ -26,9 +28,14 @@ pub fn code_gen(routes: Routes, cfg: CargonautsConfig) -> String {
                         Box<::cargonauts::futures::Future<Item = ::cargonauts::routing::RoutingTable, Error = ::std::io::Error>>
                     )
             {
+                fn formats() -> ::std::io::Result<::cargonauts::routing::FormatLender> {
+                    #formats
+                }
                 use ::cargonauts::futures::{Future, Stream};
                 #load_env_vars
-                let future: ::cargonauts::futures::future::Map<_, _> = {#setup_environment}.map(move |env| {#build_routing_table});
+                let future: ::cargonauts::futures::future::Map<_, _> =
+                    {#setup_environment}.and_then(move |env| formats().map(|formats| (env, formats)))
+                        .map(move |(env, formats)| {#build_routing_table});
                 (#addr.parse().unwrap(), Box::new(future))
             }
 
@@ -43,9 +50,14 @@ pub fn code_gen(routes: Routes, cfg: CargonautsConfig) -> String {
                         Box<::cargonauts::futures::Future<Item = ::cargonauts::routing::RoutingTable, Error = ::std::io::Error>>
                     )
             {
-                use ::cargonauts::futures::{Future, Stream};
+                fn formats() -> ::std::io::Result<::cargonauts::routing::FormatLender> {
+                    #formats
+                }
+                use ::cargonauts::futures::{Future, IntoFuture, Stream};
                 let env = ::cargonauts::routing::EnvBuilder::new().build();
-                (#addr.parse().unwrap(), Box::new(::cargonauts::futures::future::ok({#build_routing_table})))
+                let future: ::cargonauts::futures::future::Map<_, _> =
+                    formats().into_future().map(move |formats| {#build_routing_table});
+                (#addr.parse().unwrap(), Box::new(future))
             }
 
             #(#resources)*

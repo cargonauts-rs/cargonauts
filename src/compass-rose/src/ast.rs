@@ -15,6 +15,15 @@ impl Routes {
 
         vec
     }
+
+    pub fn visit_resources<'a, T, F>(&'a self, vec: &mut Vec<T>, f: F)
+    where
+        F: Fn(&mut Vec<T>, &'a Resource)
+    {
+        for item in &self.route_items {
+            item.visit_resources(vec, &f);
+        }
+    }
 }
 
 #[derive(PartialEq, Eq, Debug, Clone)]
@@ -24,6 +33,20 @@ pub enum RouteItem {
 }
 
 impl RouteItem {
+    fn visit_resources<'a, T, F>(&'a self, vec: &mut Vec<T>, f: &F)
+    where
+        F: Fn(&mut Vec<T>, &'a Resource)
+    {
+        match *self {
+            RouteItem::Resource(ref resource) => f(vec, resource),
+            RouteItem::Module(_, ref items) => {
+                for item in items {
+                    item.visit_resources(vec, f);
+                }
+            }
+        }
+    }
+
     fn push_resources<'a>(&'a self, vec: &mut Vec<&'a Resource>) {
         match *self {
             RouteItem::Resource(ref resource) => vec.push(resource),

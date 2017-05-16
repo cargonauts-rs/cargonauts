@@ -55,6 +55,7 @@ pub mod routing {
     pub use rigging::routes::{AssetHandler, default_asset_handler};
     pub use rigging::environment::EnvBuilder;
     pub use rigging::http::BoxFuture as HttpFuture;
+    pub use rigging::format::FormatLender;
 }
 
 pub use server::serve;
@@ -81,7 +82,7 @@ pub mod method {
 pub mod format {
 
     pub use mainsail::formats::{Debug};
-    pub use rigging::format::{Format, Template};
+    pub use rigging::format::{Format, BuildFormat, Template};
     pub use mainsail::formats::jsonapi::JsonApi;
 
     pub mod jsonapi {

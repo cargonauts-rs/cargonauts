@@ -1,5 +1,6 @@
 #![feature(associated_consts)]
 
+extern crate handlebars as hbs;
 extern crate futures;
 extern crate rigging;
 extern crate serde;
