@@ -13,7 +13,18 @@ pub fn formats(routes: &Routes, cfg: &CargonautsConfig) -> Tokens {
     let method_refs = &MethodRef::build(routes).into_iter().group_by(|m| m.format);
     let builders = method_refs.into_iter().map(|(format, methods)| {
         let format = Ident::new(format);
-        let templates = methods.filter_map(|method| method.template(&root)).map(|path| Template { path, root: &root });
+
+        let templates = methods.filter_map(|method| {
+            method.template(&root).map(|path| (path, method))
+        }).map(|(path, method)| {
+            let r = method.resource;
+            let m = method.method;
+            let key = match method.relation {
+                Some(rel)   => quote!(::cargonauts::format::TemplateKey::new_rel(#r, #rel, #m)),
+                None        => quote!(::cargonauts::format::TemplateKey::new(#r, #m)),
+            };
+            Template { key, path }
+        });
 
         quote!({
             <#format as ::cargonauts::format::BuildFormat>::build(&[
@@ -88,19 +99,19 @@ impl<'a> MethodRef<'a> {
     }
 }
 
-struct Template<'a> {
+struct Template {
     path: PathBuf,
-    root: &'a Path,
+    key: Tokens,
 }
 
-impl<'a> ToTokens for Template<'a> {
+impl ToTokens for Template {
     fn to_tokens(&self, tokens: &mut Tokens) {
-        let full_path = self.path.to_string_lossy();
-        let path = self.path.strip_prefix(&self.root).unwrap().to_string_lossy();
+        let path = self.path.to_string_lossy();
+        let key = &self.key;
         tokens.append(quote! {
             ::cargonauts::format::Template {
-                path: #path,
-                template: include_str!(#full_path),
+                key: #key,
+                template: include_str!(#path),
             }
         })
     }

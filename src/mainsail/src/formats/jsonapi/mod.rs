@@ -44,7 +44,7 @@ where
         P::parse(req.body())
     }
 
-    fn present_unit(_: &Rc<Self>, future: M::Future, _: &'static str, _: &mut Environment) -> http::BoxFuture
+    fn present_unit(_: &Rc<Self>, future: M::Future, _: TemplateKey, _: &mut Environment) -> http::BoxFuture
         where M: Method<T, Response = ()>
     {
         Box::new(future.then(move |result| match result {
@@ -53,7 +53,7 @@ where
         }))
     }
 
-    fn present_resource(_: &Rc<Self>, future: M::Future, _: &'static str, env: &mut Environment) -> http::BoxFuture
+    fn present_resource(_: &Rc<Self>, future: M::Future, _: TemplateKey, env: &mut Environment) -> http::BoxFuture
         where M: Method<T, Response = R>, R: ResourceEndpoint
     {
         let fields = env.take::<Fields>();
@@ -63,7 +63,7 @@ where
         }))
     }
 
-    fn present_collection(_: &Rc<Self>, future: M::Future, _: &'static str, env: &mut Environment) -> http::BoxFuture
+    fn present_collection(_: &Rc<Self>, future: M::Future, _: TemplateKey, env: &mut Environment) -> http::BoxFuture
         where M: Method<T, Response = Vec<R>>, R: ResourceEndpoint
     {
         let fields = env.take::<Fields>();

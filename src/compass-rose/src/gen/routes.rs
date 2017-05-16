@@ -1,4 +1,4 @@
-use heck::{KebabCase, SnekCase};
+use heck::{KebabCase};
 use quote::{ToTokens, Tokens, Ident};
 
 use ast::*;
@@ -140,22 +140,25 @@ impl ToTokens for Route {
             quote!(::cargonauts::routing::path(<#method as ::cargonauts::method::Method<#resource>>::ROUTE.kind, #endpoint, None))
         };
 
-        let template_path = if let Some(ref rel) = self.rel_endpoint {
-            format!("{}/{}/{}", self.resource.to_snek_case(), rel.to_snek_case(), self.method.to_snek_case())
-        } else {
-            format!("{}/{}", self.resource.to_snek_case(), self.method.to_snek_case())
+        let template_key = {
+            let r = &self.resource;
+            let m = &self.method;
+            match self.rel {
+                Some(ref rel)   => quote!(::cargonauts::format::TemplateKey::new_rel(#r, #rel, #m)),
+                None            => quote!(::cargonauts::format::TemplateKey::new(#r, #m)),
+            }
         };
 
         if let Some(ref middleware) = self.middleware {
             let middleware = Ident::new(&middleware[..]);
             tokens.append(quote!({
-                let service = ::cargonauts::routing::EndpointService::<_, _, (#resource, #method), #format>::new(#template_path, formats.get::<#format>());
+                let service = ::cargonauts::routing::EndpointService::<_, _, (#resource, #method), #format>::new(#template_key, formats.get::<#format>());
                 let service = ::cargonauts::middleware::Middleware::wrap(<#middleware as Default>::default(), service);
                 routes.add(#http_method, #path, Box::new(service) as ::cargonauts::routing::Handler);
             }));
         } else {
             tokens.append(quote!({
-                let service = ::cargonauts::routing::EndpointService::<_, _, (#resource, #method), #format>::new(#template_path, formats.get::<#format>());
+                let service = ::cargonauts::routing::EndpointService::<_, _, (#resource, #method), #format>::new(#template_key, formats.get::<#format>());
                 routes.add(#http_method, #path, Box::new(service) as ::cargonauts::routing::Handler);
             }));
         }

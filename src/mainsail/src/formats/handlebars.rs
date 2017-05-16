@@ -30,40 +30,40 @@ where
         future::ok(())
     }
 
-    fn present_unit(this: &Rc<Self>, future: M::Future, path: &'static str, _: &mut Environment) -> http::BoxFuture
+    fn present_unit(this: &Rc<Self>, future: M::Future, key: TemplateKey, _: &mut Environment) -> http::BoxFuture
     where
         M: Method<T, Response = ()>
     {
         let this = this.clone();
         Box::new(future.then(move |result| {
-            match result.and_then(|_| this.registry.render(path, &()).map_err(|_| Error)) {
+            match result.and_then(|_| this.registry.render(&key.to_string(), &()).map_err(|_| Error)) {
                 Ok(body)    => Ok(respond_with(body)),
                 Err(err)    => Ok(respond_with_err(err)),
             }
         }))
     }
 
-    fn present_resource(this: &Rc<Self>, future: M::Future, path: &'static str, _: &mut Environment) -> http::BoxFuture
+    fn present_resource(this: &Rc<Self>, future: M::Future, key: TemplateKey, _: &mut Environment) -> http::BoxFuture
     where M: Method<T, Response = R>,
         R: ResourceEndpoint
     {
         let this = this.clone();
         Box::new(future.then(move |result| {
-            match result.and_then(|resource| this.registry.render(path, &resource).map_err(|_| Error)) {
+            match result.and_then(|resource| this.registry.render(&key.to_string(), &resource).map_err(|_| Error)) {
                 Ok(body)    => Ok(respond_with(body)),
                 Err(err)    => Ok(respond_with_err(err)),
             }
         }))
     }
 
-    fn present_collection(this: &Rc<Self>, future: M::Future, path: &'static str, _: &mut Environment) -> http::BoxFuture
+    fn present_collection(this: &Rc<Self>, future: M::Future, key: TemplateKey, _: &mut Environment) -> http::BoxFuture
     where
         M: Method<T, Response = Vec<R>>,
         R: ResourceEndpoint
     {
         let this = this.clone();
         Box::new(future.then(move |result| {
-            match result.and_then(|resources| this.registry.render(path, &resources).map_err(|_| Error)) {
+            match result.and_then(|resources| this.registry.render(&key.to_string(), &resources).map_err(|_| Error)) {
                 Ok(body)    => Ok(respond_with(body)),
                 Err(err)    => Ok(respond_with_err(err)),
             }
@@ -79,7 +79,7 @@ impl BuildFormat for Handlebars {
     fn build(templates: &[Template]) -> Result<Self, io::Error> {
         let mut hbs = Handlebars { registry: hbs::Handlebars::new() };
         for template in templates {
-            hbs.registry.register_template_string(template.path, template.template).map_err(|_| -> io::Error { unimplemented!() })?;
+            hbs.registry.register_template_string(&template.key.to_string(), template.template).map_err(|_| -> io::Error { unimplemented!() })?;
         }
         Ok(hbs)
     }
