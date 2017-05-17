@@ -30,3 +30,6 @@ proxy = []
 
 [package.metadata.cargonauts]
 assets = "frontend"
+
+[package.metadata.cargonauts.env.dev]
+REDIS_HOST = "tcp://127.0.0.1:6379"
