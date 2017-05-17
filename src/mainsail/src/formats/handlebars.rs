@@ -2,8 +2,10 @@ use std::io;
 use std::rc::Rc;
 
 use hbs;
-use serde::Serialize;
-use futures::{Future, future};
+use serde::{Deserialize, Serialize};
+use futures::{Future, future, Stream};
+use urlencoded::Deserializer;
+use url::form_urlencoded;
 
 use rigging::Error;
 use rigging::http;
@@ -31,13 +33,24 @@ struct Objects<T: Serialize> {
 impl<T, R, M> Format<T, R, M> for Handlebars
 where
     T: ResourceEndpoint,
-    M: ?Sized + Method<T, Request = ()>,
+    M: ?Sized + Method<T>,
+    M::Request: for<'d> Deserialize<'d> + 'static,
     R: Serialize,
 {
-    type ReqFuture = future::FutureResult<(), Error>;
+    type ReqFuture = Box<Future<Item = M::Request, Error = Error>>;
 
-    fn receive_request(_: &Rc<Self>, _: http::Request, _: &mut Environment) -> Self::ReqFuture {
-        future::ok(())
+    fn receive_request(_: &Rc<Self>, req: http::Request, _: &mut Environment) -> Self::ReqFuture {
+        let future = req.body().fold(vec![], |mut vec, chunk| -> Result<_, http::Error> {
+            vec.extend(&*chunk);
+            Ok(vec)
+        });
+        Box::new(future.then(|result| match result {
+            Ok(data)    => {
+                let deserializer = Deserializer::new(form_urlencoded::parse(&data));
+                M::Request::deserialize(deserializer).map_err(|_| Error)
+            }
+            Err(_)      => Err(Error),
+        }))
     }
 
     fn present_unit(this: &Rc<Self>, future: M::Future, key: TemplateKey, _: &mut Environment) -> http::BoxFuture

@@ -10,14 +10,14 @@ version = "0.2.0"
 futures = "0.1.11"
 proc-macro-hack = "0.3.3"
 serde = "1.0.0"
-serde_json = "1.0.0"
 serde_derive = "1.0.0"
-
-[dependencies.c3po]
-git = "https://github.com/withoutboats/c3po"
+serde_json = "1.0.0"
 
 [dependencies.asset-pipeline]
 path = "src/asset-pipeline"
+
+[dependencies.c3po]
+git = "https://github.com/withoutboats/c3po"
 
 [dependencies.cargonauts-config]
 path = "src/cargonauts-config"
@@ -25,21 +25,21 @@ path = "src/cargonauts-config"
 [dependencies.compass-rose]
 path = "src/compass-rose"
 
+[dependencies.jsonapi-derive]
+path = "src/jsonapi-derive"
+
 [dependencies.mainsail]
 path = "src/mainsail"
 
 [dependencies.rigging]
 path = "src/rigging"
 
-[dependencies.jsonapi-derive]
-path = "src/jsonapi-derive"
+[dependencies.tokio-redis]
+git = "https://github.com/withoutboats/tokio-redis"
 
 [dependencies.tokio-service]
 branch = "new-new-service"
 git = "https://github.com/withoutboats/tokio-service"
-
-[dependencies.tokio-redis]
-git = "https://github.com/withoutboats/tokio-redis"
 
 [lib]
 path = "src/cargonauts/lib.rs"
