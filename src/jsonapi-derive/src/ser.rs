@@ -15,7 +15,7 @@ pub fn serialize(ast: DeriveInput) -> Tokens {
     let id_body = id_body(&fields[..]);
     let ser_body = serialize_body(&fields[..]);
     quote! {
-        impl #impl_generics ::cargonauts::format::jsonapi::ApiSerialize for #ty #ty_generics
+        impl #impl_generics ::cargonauts::formats::jsonapi::ApiSerialize for #ty #ty_generics
             #where_clause
         {
             fn identifier(&self) -> String {
@@ -27,7 +27,7 @@ pub fn serialize(ast: DeriveInput) -> Tokens {
             #[allow(unused_imports)]
             fn serialize<S: ::cargonauts::serde::Serializer>(
                 &self,
-                fields: Option<&::cargonauts::format::jsonapi::Fields>,
+                fields: Option<&::cargonauts::formats::jsonapi::Fields>,
                 serializer: S
             ) -> Result<S::Ok, S::Error> {
                 use ::cargonauts::serde::ser::{Serializer, SerializeMap};

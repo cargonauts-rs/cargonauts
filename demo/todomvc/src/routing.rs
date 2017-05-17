@@ -1,5 +1,5 @@
-use cargonauts::api::{Index, Post, Patch, Delete};
-use cargonauts::format::JsonApi;
+use cargonauts::methods::{Index, Post, Patch, Delete};
+use cargonauts::formats::JsonApi;
 use cargonauts::redis::Redis;
 
 use resources::Note;

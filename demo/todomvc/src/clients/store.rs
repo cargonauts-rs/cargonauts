@@ -1,6 +1,6 @@
 use uuid::Uuid;
 
-use cargonauts::api::Error;
+use cargonauts::resources::Error;
 use cargonauts::futures::Future;
 use cargonauts::clients::{Client, Conn};
 use cargonauts::redis::{Cmd, Redis, FromRedisValue};

@@ -27,25 +27,43 @@ pub mod config {
 }
 
 #[macro_use]
-pub mod api {
+pub mod resources {
     pub use rigging::Error;
     pub use rigging::environment::Environment;
-    pub use mainsail::methods::{Get, Index, Post, Patch, Delete};
 
     pub use rigging::resource::{Resource, Relationship};
-    pub use mainsail::methods::{GetOne, GetMany, PostRelated, DeleteRelated, UpdateRelated};
 
     #[macro_export]
     macro_rules! relation {
         ($rel:ident => $resource:ident) => {
             pub struct $rel;
 
-            impl $crate::api::Relationship for $rel {
+            impl $crate::resources::Relationship for $rel {
                 type Related = $resource;
             }
         }
     }
 }
+
+pub mod methods {
+    pub use rigging::method::Method;
+    pub use rigging::routes::{Route, Kind};
+    pub use mainsail::methods::*;
+}
+
+pub mod formats {
+
+    pub use rigging::format::{Format, BuildFormat, Template, TemplateKey};
+    pub use mainsail::formats::Debug;
+    pub use mainsail::formats::jsonapi::JsonApi;
+    pub use mainsail::formats::handlebars::Handlebars;
+
+    pub mod jsonapi {
+        pub use mainsail::formats::jsonapi::{ApiSerialize, ApiDeserialize, Fields, ClientIdPolicy};
+    }
+}
+
+
 
 #[doc(hidden)]
 pub mod routing {
@@ -72,22 +90,6 @@ pub mod server {
 pub mod clients {
     pub use rigging::connections::{Client, Configure};
     pub use c3po::{Config as PoolConfig, Conn};
-}
-
-pub mod method {
-    pub use rigging::method::Method;
-    pub use rigging::routes::{Route, Kind};
-}
-
-pub mod format {
-
-    pub use mainsail::formats::Debug;
-    pub use rigging::format::{Format, BuildFormat, Template, TemplateKey};
-    pub use mainsail::formats::jsonapi::JsonApi;
-
-    pub mod jsonapi {
-        pub use mainsail::formats::jsonapi::{ApiSerialize, ApiDeserialize, Fields, ClientIdPolicy};
-    }
 }
 
 pub mod middleware {

@@ -1,7 +1,8 @@
 use chrono::{DateTime, UTC};
 
-use cargonauts::api::{Resource, Index, Post, Patch, Delete, Environment, Error};
-use cargonauts::futures::{Future};
+use cargonauts::resources::{Resource, Environment, Error};
+use cargonauts::methods::{Index, Post, Patch, Delete};
+use cargonauts::futures::Future;
 use uuid::Uuid;
 
 use clients::RedisStore;

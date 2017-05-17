@@ -29,8 +29,8 @@ pub fn deserialize(ast: DeriveInput) -> Tokens {
 
 fn deserialize_no_id(ty: &Ident, fields: &[Field], allow_id: bool) -> Tokens {
     let client_id_policy = match allow_id {
-        true    => quote!(::cargonauts::format::jsonapi::ClientIdPolicy::Ignored),
-        false   => quote!(::cargonauts::format::jsonapi::ClientIdPolicy::NotAccepted),
+        true    => quote!(::cargonauts::formats::jsonapi::ClientIdPolicy::Ignored),
+        false   => quote!(::cargonauts::formats::jsonapi::ClientIdPolicy::NotAccepted),
     };
 
     let field_decls = fields.iter().map(|field| {
@@ -64,8 +64,8 @@ fn deserialize_no_id(ty: &Ident, fields: &[Field], allow_id: bool) -> Tokens {
     let field_uses = fields.iter().map(|field| field.ident.as_ref().unwrap());
 
     quote! {
-        impl<'__derive_d> ::cargonauts::format::jsonapi::ApiDeserialize<'__derive_d> for #ty {
-            const CLIENT_ID_POLICY: ::cargonauts::format::jsonapi::ClientIdPolicy = #client_id_policy;
+        impl<'__derive_d> ::cargonauts::formats::jsonapi::ApiDeserialize<'__derive_d> for #ty {
+            const CLIENT_ID_POLICY: ::cargonauts::formats::jsonapi::ClientIdPolicy = #client_id_policy;
 
             type Identifier = String;
             type Attributes = ();

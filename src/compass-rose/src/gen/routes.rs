@@ -132,20 +132,20 @@ impl ToTokens for Route {
         let format = Ident::new(&self.format[..]);
         let method = method_for(&self.method, self.rel.as_ref(), &resource);
 
-        let http_method = quote!(<#method as ::cargonauts::method::Method<#resource>>::ROUTE.method);
+        let http_method = quote!(<#method as ::cargonauts::methods::Method<#resource>>::ROUTE.method);
 
         let path = if let Some(ref rel) = self.rel_endpoint {
-            quote!(::cargonauts::routing::path(<#method as ::cargonauts::method::Method<#resource>>::ROUTE.kind, #endpoint, Some(#rel)))
+            quote!(::cargonauts::routing::path(<#method as ::cargonauts::methods::Method<#resource>>::ROUTE.kind, #endpoint, Some(#rel)))
         } else {
-            quote!(::cargonauts::routing::path(<#method as ::cargonauts::method::Method<#resource>>::ROUTE.kind, #endpoint, None))
+            quote!(::cargonauts::routing::path(<#method as ::cargonauts::methods::Method<#resource>>::ROUTE.kind, #endpoint, None))
         };
 
         let template_key = {
             let r = &self.resource;
             let m = &self.method;
             match self.rel {
-                Some(ref rel)   => quote!(::cargonauts::format::TemplateKey::new_rel(#r, #rel, #m)),
-                None            => quote!(::cargonauts::format::TemplateKey::new(#r, #m)),
+                Some(ref rel)   => quote!(::cargonauts::formats::TemplateKey::new_rel(#r, #rel, #m)),
+                None            => quote!(::cargonauts::formats::TemplateKey::new(#r, #m)),
             }
         };
 
@@ -170,28 +170,28 @@ fn method_for(method: &str, rel: Option<&String>, resource: &Ident) -> Tokens {
     // Special cases to allow mainsail methods to have associated types
     match method {
         "Post"  => {
-            quote!(Post<Identifier = <#resource as ::cargonauts::api::Resource>::Identifier, Post = <#resource as ::cargonauts::api::Post>::Post>)
+            quote!(Post<Identifier = <#resource as ::cargonauts::resources::Resource>::Identifier, Post = <#resource as ::cargonauts::methods::Post>::Post>)
         }
         "Patch" => {
-            quote!(Patch<Identifier = <#resource as ::cargonauts::api::Resource>::Identifier, Patch = <#resource as ::cargonauts::api::Patch>::Patch>)
+            quote!(Patch<Identifier = <#resource as ::cargonauts::resources::Resource>::Identifier, Patch = <#resource as ::cargonauts::methods::Patch>::Patch>)
         }
         "PostRelated" => {
             let rel = Ident::new(&rel.unwrap()[..]);
-            quote!(PostRelated<#rel, Identifier = <#resource as ::cargonauts::api::Resource>::Identifier, Post = <#resource as ::cargonauts::api::PostRelated<#rel>::Post>)
+            quote!(PostRelated<#rel, Identifier = <#resource as ::cargonauts::resources::Resource>::Identifier, Post = <#resource as ::cargonauts::methods::PostRelated<#rel>::Post>)
         }
         "UpdateRelated" => {
             let rel = Ident::new(&rel.unwrap()[..]);
-            quote!(UpdateRelated<#rel, Identifier = <#resource as ::cargonauts::api::Resource>::Identifier, Update = <#resource as ::cargonauts::api::UpdateRelated<#rel>::Update>)
+            quote!(UpdateRelated<#rel, Identifier = <#resource as ::cargonauts::resources::Resource>::Identifier, Update = <#resource as ::cargonauts::methods::UpdateRelated<#rel>::Update>)
         }
         _       => {
             let method = Ident::new(method);
             match rel {
                 Some(rel)   => {
                     let rel = Ident::new(&rel[..]);
-                    quote!(#method<#rel, Identifier = <#resource as ::cargonauts::api::Resource>::Identifier>)
+                    quote!(#method<#rel, Identifier = <#resource as ::cargonauts::resources::Resource>::Identifier>)
                 }
                 None        => {
-                    quote!(#method<Identifier = <#resource as ::cargonauts::api::Resource>::Identifier>)
+                    quote!(#method<Identifier = <#resource as ::cargonauts::resources::Resource>::Identifier>)
                 }
             }
         }

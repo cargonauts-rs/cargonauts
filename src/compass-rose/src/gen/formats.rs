@@ -20,14 +20,14 @@ pub fn formats(routes: &Routes, cfg: &CargonautsConfig) -> Tokens {
             let r = method.resource;
             let m = method.method;
             let key = match method.relation {
-                Some(rel)   => quote!(::cargonauts::format::TemplateKey::new_rel(#r, #rel, #m)),
-                None        => quote!(::cargonauts::format::TemplateKey::new(#r, #m)),
+                Some(rel)   => quote!(::cargonauts::formats::TemplateKey::new_rel(#r, #rel, #m)),
+                None        => quote!(::cargonauts::formats::TemplateKey::new(#r, #m)),
             };
             Template { key, path }
         });
 
         quote!({
-            <#format as ::cargonauts::format::BuildFormat>::build(&[
+            <#format as ::cargonauts::formats::BuildFormat>::build(&[
                 #(#templates,)*
             ])?
         })
@@ -109,7 +109,7 @@ impl ToTokens for Template {
         let path = self.path.to_string_lossy();
         let key = &self.key;
         tokens.append(quote! {
-            ::cargonauts::format::Template {
+            ::cargonauts::formats::Template {
                 key: #key,
                 template: include_str!(#path),
             }
