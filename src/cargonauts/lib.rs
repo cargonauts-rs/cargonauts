@@ -90,6 +90,10 @@ pub mod server {
 pub mod clients {
     pub use rigging::connections::{Client, ConnectClient, Configure, NewServiceLike};
     pub use c3po::{Config as PoolConfig, Conn};
+
+    pub mod mock {
+        pub use rigging::connections::mock::MockConnection;
+    }
 }
 
 pub mod middleware {
