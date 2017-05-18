@@ -35,7 +35,10 @@ where
     {
         Box::new(future.then(|result| match result {
             Ok(())  => Ok(http::Response::new().with_status(http::StatusCode::NoContent)),
-            Err(e)  => Ok(debug_response(e, http::StatusCode::InternalServerError)),
+            Err(e)  => {
+                let code = e.status_code();
+                Ok(debug_response(e, code))
+            }
         }))
     }
 
@@ -44,7 +47,10 @@ where
     {
         Box::new(future.then(|result| match result {
             Ok(resource)    => Ok(debug_response(resource, http::StatusCode::Ok)),
-            Err(e)          => Ok(debug_response(e, http::StatusCode::InternalServerError)),
+            Err(e)  => {
+                let code = e.status_code();
+                Ok(debug_response(e, code))
+            }
         }))
     }
 
@@ -53,12 +59,16 @@ where
     {
         Box::new(future.then(|result| match result {
             Ok(resources)   => Ok(debug_response(resources, http::StatusCode::Ok)),
-            Err(e)          => Ok(debug_response(e, http::StatusCode::InternalServerError)),
+            Err(e)  => {
+                let code = e.status_code();
+                Ok(debug_response(e, code))
+            }
         }))
     }
 
     fn present_error(_: &Rc<Self>, error: Error, _: &mut Environment) -> http::BoxFuture {
-        Box::new(future::ok(debug_response(error, http::StatusCode::InternalServerError)))
+        let code = error.status_code();
+        Box::new(future::ok(debug_response(error, code)))
     }
 }
 

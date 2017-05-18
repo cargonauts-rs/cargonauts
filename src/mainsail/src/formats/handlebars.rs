@@ -47,9 +47,9 @@ where
         Box::new(future.then(|result| match result {
             Ok(data)    => {
                 let deserializer = Deserializer::new(form_urlencoded::parse(&data));
-                M::Request::deserialize(deserializer).map_err(|_| Error)
+                M::Request::deserialize(deserializer).map_err(|e| Error::from_err(e, http::StatusCode::BadRequest))
             }
-            Err(_)      => Err(Error),
+            Err(e)      => Err(Error::from_err(e, http::StatusCode::InternalServerError)),
         }))
     }
 
@@ -59,7 +59,9 @@ where
     {
         let this = this.clone();
         Box::new(future.then(move |result| {
-            match result.and_then(|_| this.registry.render(&key.to_string(), &()).map_err(|_| Error)) {
+            match result.and_then(|_| this.registry.render(&key.to_string(), &()).map_err(|e| {
+                Error::from_err(e, http::StatusCode::BadRequest)
+            })) {
                 Ok(body)    => Ok(respond_with(body)),
                 Err(err)    => Ok(respond_with_err(err)),
             }
@@ -72,7 +74,9 @@ where
     {
         let this = this.clone();
         Box::new(future.then(move |result| {
-            match result.and_then(|resource| this.registry.render(&key.to_string(), &Object { resource }).map_err(|_| Error)) {
+            match result.and_then(|resource| this.registry.render(&key.to_string(), &Object { resource }).map_err(|e| {
+                Error::from_err(e, http::StatusCode::BadRequest)
+            })) {
                 Ok(body)    => Ok(respond_with(body)),
                 Err(err)    => Ok(respond_with_err(err)),
             }
@@ -86,7 +90,9 @@ where
     {
         let this = this.clone();
         Box::new(future.then(move |result| {
-            match result.and_then(|resources| this.registry.render(&key.to_string(), &Objects { resources }).map_err(|_| Error)) {
+            match result.and_then(|resources| this.registry.render(&key.to_string(), &Objects { resources }).map_err(|e| {
+                Error::from_err(e, http::StatusCode::BadRequest)
+            })) {
                 Ok(body)    => Ok(respond_with(body)),
                 Err(err)    => Ok(respond_with_err(err)),
             }

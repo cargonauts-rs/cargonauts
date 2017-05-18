@@ -5,6 +5,7 @@ version = "0.1.0"
 
 [dependencies]
 anymap = "0.12.1"
+backtrace = "0.3.0"
 futures = "0.1.13"
 route-recognizer = "0.1.12"
 serde = "1.0.0"

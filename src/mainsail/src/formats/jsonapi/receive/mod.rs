@@ -42,10 +42,10 @@ impl<T: ResourceEndpoint, P: for<'d> ApiDeserialize<'d>> JsonApiBody<T> for P {
                 let visitor: DocumentVisitor<Object<T, P>> = DocumentVisitor(PhantomData);
                 match deserializer.deserialize_map(visitor) {
                     Ok(object)  => Ok(object.0),
-                    Err(_)      => Err(Error)
+                    Err(e)      => Err(Error::from_err(e, http::StatusCode::BadRequest))
                 }
             }
-            Err(_)      => Err(Error),
+            Err(e)      => Err(Error::from_err(e, http::StatusCode::InternalServerError)),
         }))
     }
 }
@@ -63,10 +63,10 @@ impl<T: ResourceEndpoint, P: for<'d> ApiDeserialize<'d>> JsonApiBody<T> for With
                 let visitor: DocumentVisitor<Object<T, WithRels<T, P>>> = DocumentVisitor(PhantomData);
                 match deserializer.deserialize_map(visitor) {
                     Ok(bridge)  => Ok(bridge.0),
-                    Err(_)      => Err(Error)
+                    Err(e)      => Err(Error::from_err(e, http::StatusCode::BadRequest))
                 }
             }
-            Err(_)      => Err(Error),
+            Err(e)      => Err(Error::from_err(e, http::StatusCode::InternalServerError)),
         }))
     }
 }

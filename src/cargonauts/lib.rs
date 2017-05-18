@@ -79,7 +79,7 @@ pub mod routing {
 pub use server::serve;
 
 pub mod server {
-    pub use rigging::http::{Request, Response, Error, Service, NewService, serve, Handle, Method};
+    pub use rigging::http::{Request, Response, Error, Service, NewService, serve, Handle, Method, StatusCode};
 
     pub mod pool {
         pub use rigging::connections::Configure;

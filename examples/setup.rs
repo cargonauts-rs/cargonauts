@@ -9,7 +9,7 @@ use cargonauts::resources::{Resource, Environment, Error};
 use cargonauts::methods::Get;
 use cargonauts::formats::Debug;
 use cargonauts::futures::{Future, future};
-use cargonauts::server::Handle;
+use cargonauts::server::{Handle, StatusCode};
 
 use tokio_service::Service;
 
@@ -90,7 +90,7 @@ impl Get for MyResource {
             "foo"   => Box::new(env.conn_for::<Foo>("foo").and_then(|foo| foo.call(()))),
             "bar"   => Box::new(env.client::<Bar>().map(|bar| bar.bar())),
             "baz"   => Box::new(env.conn_for::<Foo>("baz").and_then(|foo| foo.call(()))),
-            _       => future::err(Error).boxed(),
+            slug    => Box::new(future::err(Error::with_msg(StatusCode::BadRequest, format!("Invalid slug: {}", slug)))),
         }
     }
 }

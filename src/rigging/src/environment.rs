@@ -11,6 +11,7 @@ use core::reactor::Handle;
 use tokio::NewService;
 use c3po::{ConnFuture, Conn, Pool, Config};
 
+use http::StatusCode;
 use connections::{Client, Configure, ConnectClient};
 
 pub struct Environment {
@@ -39,7 +40,8 @@ impl Environment {
         if let Some(pool) = self.pools.get::<Pool<C>>() {
             pool.connection()
         } else {
-            future::Either::A(future::err(Error))
+            future::Either::A(future::err(Error::with_msg(StatusCode::InternalServerError,
+                                                          "Connection not registered.")))
         }
     }
 
@@ -48,10 +50,12 @@ impl Environment {
             if let Some(&(_, ref pool)) = pools.iter().find(|&&(s, _)| s == name) {
                 pool.connection()
             } else {
-                future::Either::A(future::err(Error))
+                future::Either::A(future::err(Error::with_msg(StatusCode::InternalServerError,
+                                                              "Connection not registered.")))
             }
         } else {
-            future::Either::A(future::err(Error))
+            future::Either::A(future::err(Error::with_msg(StatusCode::InternalServerError,
+                                                          "Connection not registered.")))
         }
     }
 
@@ -65,10 +69,12 @@ impl Environment {
             if let Some(&(_, ref pool)) = pools.iter().find(|&&(s, _)| s == C::CONNECTION_NAME) {
                 Box::new(pool.connection().map(|c| C::connect(c)))
             } else {
-                Box::new(future::err(Error))
+                Box::new(future::err(Error::with_msg(StatusCode::InternalServerError,
+                                                     format!("Connection not registered: {}", C::CONNECTION_NAME))))
             }
         } else {
-            Box::new(future::err(Error))
+            Box::new(future::err(Error::with_msg(StatusCode::InternalServerError,
+                                                 format!("Connection not registered: {}", C::CONNECTION_NAME))))
         }
     }
 }

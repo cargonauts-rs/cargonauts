@@ -10,14 +10,18 @@ use method::*;
 
 use format::{Format, TemplateKey};
 use environment::Environment;
-use http;
+use http::{self, StatusCode};
 
 pub trait Endpoint<F, In, Out> {
     fn call(req: Request, format: Rc<F>, key: TemplateKey) -> http::BoxFuture;
 }
 
 fn parse_id<T: ResourceEndpoint>(id: Option<String>) -> Result<T::Identifier, Error> {
-    id.ok_or(Error).and_then(|id| id.parse().or(Err(Error)))
+    match id {
+        Some(id) => id.parse().map_err(|_| Error::with_msg(StatusCode::BadRequest, 
+                                                           format!("Could not parse resource identifier: {}", id))),
+        None     => Err(Error::with_msg(StatusCode::BadRequest, "Missing resource identifier."))
+    }
 }
 
 pub struct _Resource;
