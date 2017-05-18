@@ -4,20 +4,21 @@
 extern crate cargonauts;
 extern crate tokio_service;
 
-use cargonauts::clients::{Client, Conn, Configure};
+use cargonauts::clients::{Client, ConnectClient, Conn, Configure, NewServiceLike};
 use cargonauts::resources::{Resource, Environment, Error};
 use cargonauts::methods::Get;
 use cargonauts::formats::Debug;
 use cargonauts::futures::{Future, future};
+use cargonauts::server::Handle;
 
 use tokio_service::Service;
 
 #[derive(Default)]
 struct Foo;
 
-impl<Args> Configure<Args> for Foo {
+impl Configure for Foo {
     type Config = ();
-    fn config(_: (), _: Args) -> Foo {
+    fn config(_: (), _: Handle) -> Foo {
         Foo::default()
     }
 }
@@ -55,7 +56,10 @@ impl Bar {
 impl Client for Bar {
     const CONNECTION_NAME: &'static str = "foo";
     type Connection = Foo;
-    fn connect(_: Conn<Self::Connection>) -> Self {
+}
+
+impl<C: NewServiceLike<Foo>> ConnectClient<C> for Bar {
+    fn connect(_: Conn<C>) -> Self {
         Bar
     }
 }

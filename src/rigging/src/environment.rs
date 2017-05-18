@@ -11,7 +11,7 @@ use core::reactor::Handle;
 use tokio::NewService;
 use c3po::{ConnFuture, Conn, Pool, Config};
 
-use connections::{Client, Configure};
+use connections::{Client, Configure, ConnectClient};
 
 pub struct Environment {
     pools: Rc<AnyMap>,
@@ -55,7 +55,10 @@ impl Environment {
         }
     }
 
-    pub fn client<C: Client>(&self) -> Box<Future<Item = C, Error = Error>> {
+    pub fn client<C>(&self) -> Box<Future<Item = C, Error = Error>>
+    where
+        C: ConnectClient<<C as Client>::Connection>,
+    {
         if let Some(pool) = self.pools.get::<Pool<C::Connection>>() {
             Box::new(pool.connection().map(|c| C::connect(c)))
         } else if let Some(pools) = self.pools.get::<Vec<(&'static str, Pool<C::Connection>)>>() {
@@ -98,7 +101,7 @@ impl EnvBuilder {
 
     pub fn new_pool<C>(self, handle: Handle, cfg: Config, client_cfg: C::Config)
         -> Box<Future<Item = (), Error = io::Error>>
-    where C: NewService + Configure<Handle> + 'static
+    where C: NewService + Configure + 'static
     {
         let client = C::config(client_cfg, handle.clone());
         Box::new(Pool::new(client, handle, cfg).map(move |pool| {
@@ -109,7 +112,7 @@ impl EnvBuilder {
     // For multiple connections of the same protocol
     pub fn new_pool_vec<C>(self, handle: Handle, cfgs: Vec<(&'static str, Config, C::Config)>)
         -> Box<Future<Item = (), Error = io::Error>>
-    where C: NewService + Configure<Handle> + 'static
+    where C: NewService + Configure + 'static
     {
         Box::new(stream::futures_unordered(cfgs.into_iter().map(|(name, cfg, client_cfg)| {
             let client = C::config(client_cfg, handle.clone());

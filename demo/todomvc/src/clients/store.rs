@@ -2,27 +2,29 @@ use uuid::Uuid;
 
 use cargonauts::resources::Error;
 use cargonauts::futures::Future;
-use cargonauts::clients::{Client, Conn};
+use cargonauts::clients::{Client, ConnectClient, Conn, NewServiceLike};
 use cargonauts::redis::{Cmd, Redis, FromRedisValue};
 use cargonauts::server::Service;
 
 use serde::{Serialize, Deserialize};
 use json;
 
-pub struct RedisStore {
-    conn: Conn<Redis>
+pub struct RedisStore<C: NewServiceLike<Redis> = Redis> {
+    conn: Conn<C>,
 }
 
-impl Client for RedisStore {
+impl<C: NewServiceLike<Redis>> Client for RedisStore<C> {
     const CONNECTION_NAME: &'static str = "redis";
     type Connection = Redis;
+}
 
-    fn connect(conn: Conn<Redis>) -> RedisStore {
+impl<C: NewServiceLike<Redis>> ConnectClient<C> for RedisStore<C> {
+    fn connect(conn: Conn<C>) -> RedisStore<C> {
         RedisStore { conn }
     }
 }
 
-impl RedisStore {
+impl<C: NewServiceLike<Redis>> RedisStore<C> {
     pub fn get<T: for<'de> Deserialize<'de> + 'static>(&self, id: Uuid) -> impl Future<Item = T, Error = Error> + 'static {
         let mut cmd = Cmd::new();
         cmd.arg("HGET").arg("notes").arg(id.to_string());

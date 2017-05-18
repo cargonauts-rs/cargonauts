@@ -88,7 +88,7 @@ pub mod server {
 }
 
 pub mod clients {
-    pub use rigging::connections::{Client, Configure};
+    pub use rigging::connections::{Client, ConnectClient, Configure, NewServiceLike};
     pub use c3po::{Config as PoolConfig, Conn};
 }
 

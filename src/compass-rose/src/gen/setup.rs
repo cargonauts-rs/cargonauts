@@ -76,7 +76,7 @@ fn member_cfg(conn: &str, service: &Tokens, config: &CargonautsConfig) -> Tokens
             quote!(::cargonauts::json::from_str(#config).unwrap())
         }
         None        => {
-            quote!(<#service as ::cargonauts::server::pool::Configure<::cargonauts::server::Handle>>::Config::default())
+            quote!(<#service as ::cargonauts::server::pool::Configure>::Config::default())
         }
     }
 }

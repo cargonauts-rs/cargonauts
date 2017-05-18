@@ -3,25 +3,12 @@ use std::net::SocketAddr;
 use std::net::ToSocketAddrs;
 
 use core::reactor::Handle;
-use tokio::NewService;
-use c3po::Conn;
-use serde::de::DeserializeOwned;
+use redis::Redis;
 use url::Url;
 
-pub trait Configure<Args>: Sized {
-    type Config: Default + DeserializeOwned;
-    fn config(cfg: Self::Config, args: Args) -> Self;
-}
+use super::Configure;
 
-pub trait Client: 'static {
-    const CONNECTION_NAME: &'static str;
-    type Connection: Configure<Handle> + NewService + 'static;
-    fn connect(conn: Conn<Self::Connection>) -> Self;
-}
-
-use redis::Redis;
-
-impl Configure<Handle> for Redis {
+impl Configure for Redis {
     type Config = ();
     fn config(_: (), handle: Handle) -> Redis {
         let addr = addr_from_var("REDIS_HOST", "Redis", 6379);
