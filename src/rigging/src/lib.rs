@@ -8,6 +8,7 @@ extern crate tokio_service as tokio;
 extern crate tokio_proto as proto;
 extern crate tokio_core as core;
 extern crate c3po;
+extern crate ref_filter_map; // This should 100% be in std!!
 extern crate route_recognizer as recognizer;
 extern crate serde;
 extern crate tokio_redis as redis;

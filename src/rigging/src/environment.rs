@@ -1,39 +1,41 @@
 use std::any::Any;
 use std::io;
-use std::cell::RefCell;
+use std::cell::{RefCell, Ref, RefMut};
 use std::rc::Rc;
 
 use Error;
 
 use anymap::AnyMap;
-use futures::{Future, future, Stream, stream};
 use core::reactor::Handle;
-use tokio::NewService;
 use c3po::{ConnFuture, Conn, Pool, Config};
+use futures::{Future, future, Stream, stream};
+use ref_filter_map::*;
+use tokio::NewService;
 
 use http::StatusCode;
 use connections::{Client, Configure, ConnectClient};
 
+#[derive(Clone)]
 pub struct Environment {
     pools: Rc<AnyMap>,
-    store: AnyMap,
+    store: Rc<RefCell<AnyMap>>,
 }
 
 impl Environment {
     pub fn store<T: Any>(&mut self, val: T) {
-        self.store.insert(val);
+        self.store.borrow_mut().insert(val);
     }
 
-    pub fn get<T: Any>(&self) -> Option<&T> {
-        self.store.get()
+    pub fn get<T: Any>(&self) -> Option<Ref<T>> {
+        ref_filter_map(self.store.borrow(), |map| map.get())
     }
 
-    pub fn get_mut<T: Any>(&mut self) -> Option<&mut T> {
-        self.store.get_mut()
+    pub fn get_mut<T: Any>(&mut self) -> Option<RefMut<T>> {
+        ref_mut_filter_map(self.store.borrow_mut(), |map| map.get_mut())
     }
 
     pub fn take<T: Any>(&mut self) -> Option<T> {
-        self.store.remove()
+        self.store.borrow_mut().remove()
     }
 
     pub fn conn<C: NewService>(&self) -> ConnFuture<Conn<C>, Error> {
@@ -88,7 +90,7 @@ impl PreparedEnv {
     pub fn new(&self) -> Environment {
         Environment {
             pools: self.pools.clone(),
-            store: AnyMap::new(),
+            store: Rc::new(RefCell::new(AnyMap::new())),
         }
     }
 }
