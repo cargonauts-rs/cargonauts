@@ -17,7 +17,7 @@ pub struct Error {
 }
 
 enum Cause {
-    Error(Box<ErrorT + 'static>),
+    Error(Box<ErrorT + Send + 'static>),
     Message(String),
     Unknown,
 }
@@ -31,11 +31,11 @@ impl Error {
         Self::construct(code, Backtrace::new(), Cause::Message(msg.into()))
     }
 
-    pub fn from_err<E: ErrorT + 'static>(err: E, code: StatusCode) -> Self {
+    pub fn from_err<E: ErrorT + Send + 'static>(err: E, code: StatusCode) -> Self {
         Self::with_backtrace(err, code, Backtrace::new())
     }
 
-    pub fn with_backtrace<E: ErrorT + 'static>(err: E, code: StatusCode, backtrace: Backtrace) -> Self {
+    pub fn with_backtrace<E: ErrorT + Send + 'static>(err: E, code: StatusCode, backtrace: Backtrace) -> Self {
         Self::construct(code, backtrace, Cause::Error(Box::new(err)))
     }
 
