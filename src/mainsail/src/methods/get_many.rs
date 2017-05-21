@@ -8,7 +8,7 @@ use rigging::routes::{Route, Kind};
 
 
 pub trait GetMany<R: Relationship>: Resource {
-    fn get_many(id: Self::Identifier, env: &Environment) -> Box<Future<Item = Vec<R::Related>, Error = Error>> where Self: Sized;
+    fn get_many(id: Self::Identifier, env: Environment) -> Box<Future<Item = Vec<R::Related>, Error = Error>> where Self: Sized;
 }
 
 impl<T: GetMany<R>, R: Relationship> Method<T> for GetMany<R, Identifier = T::Identifier> {
@@ -23,7 +23,7 @@ impl<T: GetMany<R>, R: Relationship> Method<T> for GetMany<R, Identifier = T::Id
 }
 
 impl<T: GetMany<R>, R: Relationship> ResourceMethod<T> for GetMany<R, Identifier = T::Identifier> {
-    fn call(id: T::Identifier, _: Self::Request, env: &mut Environment) -> Self::Future {
+    fn call(id: T::Identifier, _: Self::Request, env: Environment) -> Self::Future {
         T::get_many(id, env)
     }
 }

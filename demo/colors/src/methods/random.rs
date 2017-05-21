@@ -3,7 +3,7 @@ use cargonauts::methods::*;
 use cargonauts::resources::*;
 
 pub trait Random: Resource {
-    fn random(env: &mut Environment) -> Box<Future<Item = Self, Error = Error>> where Self: Sized;
+    fn random(env: Environment) -> Box<Future<Item = Self, Error = Error>> where Self: Sized;
 }
 
 impl<T: Random> Method<T> for Random<Identifier = T::Identifier> {
@@ -18,7 +18,7 @@ impl<T: Random> Method<T> for Random<Identifier = T::Identifier> {
 }
 
 impl<T: Random> CollectionMethod<T> for Random<Identifier = T::Identifier> {
-    fn call(_: Self::Request, env: &mut Environment) -> Self::Future {
+    fn call(_: Self::Request, env: Environment) -> Self::Future {
         T::random(env)
     }
 }

@@ -8,7 +8,7 @@ use rigging::routes::{Route, Kind};
 
 pub trait Patch: Resource {
     type Patch;
-    fn patch(id: Self::Identifier, patch: Self::Patch, env: &Environment) -> Box<Future<Item = Self, Error = Error>> where Self: Sized;
+    fn patch(id: Self::Identifier, patch: Self::Patch, env: Environment) -> Box<Future<Item = Self, Error = Error>> where Self: Sized;
 }
 
 impl<T: Patch> Method<T> for Patch<Identifier = T::Identifier, Patch = T::Patch> {
@@ -23,7 +23,7 @@ impl<T: Patch> Method<T> for Patch<Identifier = T::Identifier, Patch = T::Patch>
 }
 
 impl<T: Patch> ResourceMethod<T> for Patch<Identifier = T::Identifier, Patch = T::Patch> {
-    fn call(id: T::Identifier, req: Self::Request, env: &mut Environment) -> Self::Future {
+    fn call(id: T::Identifier, req: Self::Request, env: Environment) -> Self::Future {
         T::patch(id, req, env)
     }
 }

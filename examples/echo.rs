@@ -17,7 +17,7 @@ impl Resource for Echo {
 }
 
 impl Get for Echo {
-    fn get(echo: String, _: &Environment) -> Box<Future<Item = Echo, Error = Error>> {
+    fn get(echo: String, _: Environment) -> Box<Future<Item = Echo, Error = Error>> {
         future::ok(Echo { echo }).boxed()
     }
 }

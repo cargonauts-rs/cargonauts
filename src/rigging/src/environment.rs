@@ -22,7 +22,7 @@ pub struct Environment {
 }
 
 impl Environment {
-    pub fn store<T: Any>(&mut self, val: T) {
+    pub fn store<T: Any>(&self, val: T) {
         self.store.borrow_mut().insert(val);
     }
 
@@ -30,11 +30,11 @@ impl Environment {
         ref_filter_map(self.store.borrow(), |map| map.get())
     }
 
-    pub fn get_mut<T: Any>(&mut self) -> Option<RefMut<T>> {
+    pub fn get_mut<T: Any>(&self) -> Option<RefMut<T>> {
         ref_mut_filter_map(self.store.borrow_mut(), |map| map.get_mut())
     }
 
-    pub fn take<T: Any>(&mut self) -> Option<T> {
+    pub fn take<T: Any>(&self) -> Option<T> {
         self.store.borrow_mut().remove()
     }
 

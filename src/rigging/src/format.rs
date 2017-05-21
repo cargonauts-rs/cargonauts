@@ -14,18 +14,18 @@ use http;
 pub trait Format<T: ResourceEndpoint, R, M: ?Sized + Method<T>>: BuildFormat {
     type ReqFuture: Future<Item = M::Request, Error = Error> + 'static;
 
-    fn receive_request(this: &Rc<Self>, req: http::Request, env: &mut Environment) -> Self::ReqFuture;
+    fn receive_request(this: &Rc<Self>, req: http::Request, env: &Environment) -> Self::ReqFuture;
 
-    fn present_unit(this: &Rc<Self>, future: M::Future, key: TemplateKey, env: &mut Environment) -> http::BoxFuture
+    fn present_unit(this: &Rc<Self>, future: M::Future, key: TemplateKey, env: &Environment) -> http::BoxFuture
         where M: Method<T, Response = ()>;
 
-    fn present_resource(this: &Rc<Self>, future: M::Future, key: TemplateKey, env: &mut Environment) -> http::BoxFuture
+    fn present_resource(this: &Rc<Self>, future: M::Future, key: TemplateKey, env: &Environment) -> http::BoxFuture
         where M: Method<T, Response = R>, R: ResourceEndpoint;
 
-    fn present_collection(this: &Rc<Self>, future: M::Future, key: TemplateKey, env: &mut Environment) -> http::BoxFuture
+    fn present_collection(this: &Rc<Self>, future: M::Future, key: TemplateKey, env: &Environment) -> http::BoxFuture
         where M: Method<T, Response = Vec<R>>, R: ResourceEndpoint;
 
-    fn present_error(this: &Rc<Self>, error: Error, env: &mut Environment) -> http::BoxFuture;
+    fn present_error(this: &Rc<Self>, error: Error, env: &Environment) -> http::BoxFuture;
 }
 
 pub trait BuildFormat: Sized + 'static {

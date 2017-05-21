@@ -24,13 +24,13 @@ impl Resource for MyResource {
 }
 
 impl Get for MyResource {
-    fn get(slug: String, _: &Environment) -> Box<Future<Item = MyResource, Error = Error>> {
+    fn get(slug: String, _: Environment) -> Box<Future<Item = MyResource, Error = Error>> {
         Box::new(future::ok(MyResource { slug }))
     }
 }
 
 impl Index for MyResource {
-    fn index(_: &Environment) -> Box<Future<Item = Vec<MyResource>, Error = Error>> {
+    fn index(_: Environment) -> Box<Future<Item = Vec<MyResource>, Error = Error>> {
         Box::new(future::ok(vec![MyResource { slug: String::from("hello-world") }]))
     }
 }
@@ -42,13 +42,13 @@ pub struct MyResourcePost {
 
 impl Post for MyResource {
     type Post = MyResourcePost;
-    fn post(_: Self::Post, _: &Environment) -> Box<Future<Item = MyResource, Error = Error>> {
+    fn post(_: Self::Post, _: Environment) -> Box<Future<Item = MyResource, Error = Error>> {
         Box::new(future::ok(MyResource { slug: String::from("hello-world") }))
     }
 }
 
 impl GetOne<AllCaps> for MyResource {
-    fn get_one(slug: String, _: &Environment) -> Box<Future<Item = MyResource, Error = Error>> {
+    fn get_one(slug: String, _: Environment) -> Box<Future<Item = MyResource, Error = Error>> {
         Box::new(future::ok(MyResource { slug: slug.to_uppercase() }))
     }
 }

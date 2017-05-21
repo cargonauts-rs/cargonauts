@@ -8,7 +8,7 @@ use rigging::routes::{Route, Kind};
 
 pub trait UpdateRelated<R: Relationship>: Resource {
     type Update;
-    fn update_related(id: Self::Identifier, update: Self::Update, env: &Environment) -> Box<Future<Item = R::Related, Error = Error>> where Self: Sized;
+    fn update_related(id: Self::Identifier, update: Self::Update, env: Environment) -> Box<Future<Item = R::Related, Error = Error>> where Self: Sized;
 }
 
 impl<T: UpdateRelated<R>, R: Relationship> Method<T> for UpdateRelated<R, Identifier = T::Identifier, Update = T::Update> {
@@ -23,7 +23,7 @@ impl<T: UpdateRelated<R>, R: Relationship> Method<T> for UpdateRelated<R, Identi
 }
 
 impl<T: UpdateRelated<R>, R: Relationship> ResourceMethod<T> for UpdateRelated<R, Identifier = T::Identifier, Update = T::Update> {
-    fn call(id: T::Identifier, update: Self::Request, env: &mut Environment) -> Self::Future {
+    fn call(id: T::Identifier, update: Self::Request, env: Environment) -> Self::Future {
         T::update_related(id, update, env)
     }
 }

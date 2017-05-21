@@ -14,9 +14,9 @@ pub trait Method<T: Resource> {
 }
 
 pub trait ResourceMethod<T: Resource>: Method<T> {
-    fn call(id: T::Identifier, req: Self::Request, env: &mut Environment) -> Self::Future;
+    fn call(id: T::Identifier, req: Self::Request, env: Environment) -> Self::Future;
 }
 
 pub trait CollectionMethod<T: Resource>: Method<T> {
-    fn call(req: Self::Request, env: &mut Environment) -> Self::Future;
+    fn call(req: Self::Request, env: Environment) -> Self::Future;
 }

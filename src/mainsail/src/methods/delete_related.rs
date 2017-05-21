@@ -7,7 +7,7 @@ use rigging::environment::Environment;
 use rigging::routes::{Route, Kind};
 
 pub trait DeleteRelated<R: Relationship>: Resource {
-    fn delete_related(id: Self::Identifier, env: &Environment) -> Box<Future<Item = (), Error = Error>> where Self: Sized;
+    fn delete_related(id: Self::Identifier, env: Environment) -> Box<Future<Item = (), Error = Error>> where Self: Sized;
 }
 
 impl<T: DeleteRelated<R>, R: Relationship> Method<T> for DeleteRelated<R, Identifier = T::Identifier> {
@@ -22,7 +22,7 @@ impl<T: DeleteRelated<R>, R: Relationship> Method<T> for DeleteRelated<R, Identi
 }
 
 impl<T: DeleteRelated<R>, R: Relationship> ResourceMethod<T> for DeleteRelated<R, Identifier = T::Identifier> {
-    fn call(id: T::Identifier, _: Self::Request, env: &mut Environment) -> Self::Future {
+    fn call(id: T::Identifier, _: Self::Request, env: Environment) -> Self::Future {
         T::delete_related(id, env)
     }
 }

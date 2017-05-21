@@ -22,13 +22,13 @@ impl Resource for Square {
 }
 
 impl Get for Square {
-    fn get(color: Color, _: &Environment) -> Box<Future<Item = Self, Error = Error>> {
+    fn get(color: Color, _: Environment) -> Box<Future<Item = Self, Error = Error>> {
         Box::new(future::ok(Square { color }))
     }
 }
 
 impl Random for Square {
-    fn random(env: &mut Environment) -> Box<Future<Item = Self, Error = Error>> {
+    fn random(env: Environment) -> Box<Future<Item = Self, Error = Error>> {
         let color = Color(random(), random(), random());
         Square::get(color, env)
     }

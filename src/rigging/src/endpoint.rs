@@ -38,18 +38,18 @@ where
     F: Format<T, R, M>,
 {
     fn call(req: Request, format: Rc<F>, key: TemplateKey) -> http::BoxFuture {
-        let Request { req, id, mut env } = req;
+        let Request { req, id, env } = req;
         let id = match parse_id::<T>(id) {
             Ok(id) => id,
-            Err(err) => return F::present_error(&format, err, &mut env),
+            Err(err) => return F::present_error(&format, err, &env),
         };
-        Box::new(F::receive_request(&format, req, &mut env).then(move |result| {
+        Box::new(F::receive_request(&format, req, &env).then(move |result| {
             let request = match result {
                 Ok(parts)   => parts,
-                Err(err)    => return F::present_error(&format, err, &mut env),
+                Err(err)    => return F::present_error(&format, err, &env),
             };
-            let future = M::call(id, request, &mut env);
-            F::present_resource(&format, future, key, &mut env)
+            let future = M::call(id, request, env.clone());
+            F::present_resource(&format, future, key, &env)
         }))
     }
 }
@@ -61,18 +61,18 @@ where
     F: Format<T, (), M>,
 {
     fn call(req: Request, format: Rc<F>, key: TemplateKey) -> http::BoxFuture {
-        let Request { req, id, mut env } = req;
+        let Request { req, id, env } = req;
         let id = match parse_id::<T>(id) {
             Ok(id) => id,
-            Err(err) => return F::present_error(&format, err, &mut env),
+            Err(err) => return F::present_error(&format, err, &env),
         };
-        Box::new(F::receive_request(&format, req, &mut env).then(move |result| {
+        Box::new(F::receive_request(&format, req, &env).then(move |result| {
             let request = match result {
                 Ok(parts)   => parts,
-                Err(err)    => return F::present_error(&format, err, &mut env),
+                Err(err)    => return F::present_error(&format, err, &env),
             };
-            let future = M::call(id, request, &mut env);
-            F::present_unit(&format, future, key, &mut env)
+            let future = M::call(id, request, env.clone());
+            F::present_unit(&format, future, key, &env)
         }))
     }
 }
@@ -85,18 +85,18 @@ where
     F: Format<T, R, M>,
 {
     fn call(req: Request, format: Rc<F>, key: TemplateKey) -> http::BoxFuture {
-        let Request { req, id, mut env } = req;
+        let Request { req, id, env } = req;
         let id = match parse_id::<T>(id) {
             Ok(id) => id,
-            Err(err) => return F::present_error(&format, err, &mut env),
+            Err(err) => return F::present_error(&format, err, &env),
         };
-        Box::new(F::receive_request(&format, req, &mut env).then(move |result| {
+        Box::new(F::receive_request(&format, req, &env).then(move |result| {
             let request = match result {
                 Ok(parts)   => parts,
-                Err(err)    => return F::present_error(&format, err, &mut env),
+                Err(err)    => return F::present_error(&format, err, &env),
             };
-            let future = M::call(id, request, &mut env);
-            F::present_collection(&format, future, key, &mut env)
+            let future = M::call(id, request, env.clone());
+            F::present_collection(&format, future, key, &env)
         }))
     }
 }
@@ -109,14 +109,14 @@ where
     F: Format<T, R, M>,
 {
     fn call(req: Request, format: Rc<F>, key: TemplateKey) -> http::BoxFuture {
-        let Request { req, mut env, .. } = req;
-        Box::new(F::receive_request(&format, req, &mut env).then(move |result| {
+        let Request { req, env, .. } = req;
+        Box::new(F::receive_request(&format, req, &env).then(move |result| {
             let request = match result {
                 Ok(parts)   => parts,
-                Err(err)    => return F::present_error(&format, err, &mut env),
+                Err(err)    => return F::present_error(&format, err, &env),
             };
-            let future = M::call(request, &mut env);
-            F::present_resource(&format, future, key, &mut env)
+            let future = M::call(request, env.clone());
+            F::present_resource(&format, future, key, &env)
         }))
     }
 }
@@ -128,14 +128,14 @@ where
     F: Format<T, (), M>,
 {
     fn call(req: Request, format: Rc<F>, key: TemplateKey) -> http::BoxFuture {
-        let Request { req, mut env, .. } = req;
-        Box::new(F::receive_request(&format, req, &mut env).then(move |result| {
+        let Request { req, env, .. } = req;
+        Box::new(F::receive_request(&format, req, &env).then(move |result| {
             let request = match result {
                 Ok(parts)   => parts,
-                Err(err)    => return F::present_error(&format, err, &mut env),
+                Err(err)    => return F::present_error(&format, err, &env),
             };
-            let future = M::call(request, &mut env);
-            F::present_unit(&format, future, key, &mut env)
+            let future = M::call(request, env.clone());
+            F::present_unit(&format, future, key, &env)
         }))
     }
 }
@@ -148,14 +148,14 @@ where
     F: Format<T, R, M>,
 {
     fn call(req: Request, format: Rc<F>, key: TemplateKey) -> http::BoxFuture {
-        let Request { req, mut env, .. } = req;
-        Box::new(F::receive_request(&format, req, &mut env).then(move |result| {
+        let Request { req, env, .. } = req;
+        Box::new(F::receive_request(&format, req, &env).then(move |result| {
             let request = match result {
                 Ok(parts)   => parts,
-                Err(err)    => return F::present_error(&format, err, &mut env),
+                Err(err)    => return F::present_error(&format, err, &env),
             };
-            let future = M::call(request, &mut env);
-            F::present_collection(&format, future, key, &mut env)
+            let future = M::call(request, env.clone());
+            F::present_collection(&format, future, key, &env)
         }))
     }
 }

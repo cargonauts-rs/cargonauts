@@ -8,7 +8,7 @@ use rigging::routes::{Route, Kind};
 
 pub trait Post: Resource {
     type Post;
-    fn post(post: Self::Post, env: &Environment) -> Box<Future<Item = Self, Error = Error>> where Self: Sized;
+    fn post(post: Self::Post, env: Environment) -> Box<Future<Item = Self, Error = Error>> where Self: Sized;
 }
 
 impl<T: Post> Method<T> for Post<Identifier = T::Identifier, Post = T::Post> {
@@ -23,7 +23,7 @@ impl<T: Post> Method<T> for Post<Identifier = T::Identifier, Post = T::Post> {
 }
 
 impl<T: Post> CollectionMethod<T> for Post<Identifier = T::Identifier, Post = T::Post> {
-    fn call(req: Self::Request, env: &mut Environment) -> Self::Future {
+    fn call(req: Self::Request, env: Environment) -> Self::Future {
         T::post(req, env)
     }
 }

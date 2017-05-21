@@ -8,7 +8,7 @@ use rigging::routes::{Route, Kind};
 
 pub trait PostRelated<R: Relationship>: Resource {
     type Post;
-    fn post_related(id: Self::Identifier, post: Self::Post, env: &Environment) -> Box<Future<Item = R::Related, Error = Error>> where Self: Sized;
+    fn post_related(id: Self::Identifier, post: Self::Post, env: Environment) -> Box<Future<Item = R::Related, Error = Error>> where Self: Sized;
 }
 
 impl<T: PostRelated<R>, R: Relationship> Method<T> for PostRelated<R, Identifier = T::Identifier, Post = T::Post> {
@@ -23,7 +23,7 @@ impl<T: PostRelated<R>, R: Relationship> Method<T> for PostRelated<R, Identifier
 }
 
 impl<T: PostRelated<R>, R: Relationship> ResourceMethod<T> for PostRelated<R, Identifier = T::Identifier, Post = T::Post> {
-    fn call(id: T::Identifier, post: Self::Request, env: &mut Environment) -> Self::Future {
+    fn call(id: T::Identifier, post: Self::Request, env: Environment) -> Self::Future {
         T::post_related(id, post, env)
     }
 }

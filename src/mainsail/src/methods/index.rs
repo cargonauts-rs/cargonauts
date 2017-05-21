@@ -7,7 +7,7 @@ use rigging::environment::Environment;
 use rigging::routes::{Route, Kind};
 
 pub trait Index: Resource {
-    fn index(env: &Environment) -> Box<Future<Item = Vec<Self>, Error = Error>> where Self: Sized;
+    fn index(env: Environment) -> Box<Future<Item = Vec<Self>, Error = Error>> where Self: Sized;
 }
 
 impl<T: Index> Method<T> for Index<Identifier = T::Identifier> {
@@ -22,7 +22,7 @@ impl<T: Index> Method<T> for Index<Identifier = T::Identifier> {
 }
 
 impl<T: Index> CollectionMethod<T> for Index<Identifier = T::Identifier> {
-    fn call(_: Self::Request, env: &mut Environment) -> Self::Future {
+    fn call(_: Self::Request, env: Environment) -> Self::Future {
         T::index(env)
     }
 }

@@ -36,7 +36,7 @@ impl Resource for Note {
 }
 
 impl Index for Note {
-    fn index(env: &Environment) -> Box<Future<Item = Vec<Note>, Error = Error>> {
+    fn index(env: Environment) -> Box<Future<Item = Vec<Note>, Error = Error>> {
         let future = env.client::<RedisStore>()
                         .and_then(|store| store.get_all());
         Box::new(future)
@@ -46,7 +46,7 @@ impl Index for Note {
 impl Post for Note {
     type Post = PostNote;
 
-    fn post(post: PostNote, env: &Environment) -> Box<Future<Item = Note, Error = Error>> {
+    fn post(post: PostNote, env: Environment) -> Box<Future<Item = Note, Error = Error>> {
         let id = Uuid::new_v4();
         let created_at = post.created_at.unwrap_or_else(UTC::now);
         let note = Note {
@@ -63,7 +63,7 @@ impl Post for Note {
 impl Patch for Note {
     type Patch = PatchNote;
 
-    fn patch(id: Uuid, patch: PatchNote, env: &Environment) -> Box<Future<Item = Note, Error = Error>> {
+    fn patch(id: Uuid, patch: PatchNote, env: Environment) -> Box<Future<Item = Note, Error = Error>> {
         let future = env.client::<RedisStore>().and_then(move |store| {
             store.get::<Note>(id).and_then(move |mut note| {
                 patch.text.map(|text| note.text = text);
@@ -77,7 +77,7 @@ impl Patch for Note {
 }
 
 impl Delete for Note {
-    fn delete(id: Uuid, env: &Environment) -> Box<Future<Item = (), Error = Error>> {
+    fn delete(id: Uuid, env: Environment) -> Box<Future<Item = (), Error = Error>> {
         let future = env.client::<RedisStore>()
                         .and_then(move |store| store.delete(id));
         Box::new(future)

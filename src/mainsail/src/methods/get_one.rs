@@ -7,7 +7,7 @@ use rigging::environment::Environment;
 use rigging::routes::{Route, Kind};
 
 pub trait GetOne<R: Relationship>: Resource {
-    fn get_one(id: Self::Identifier, env: &Environment) -> Box<Future<Item = R::Related, Error = Error>> where Self: Sized;
+    fn get_one(id: Self::Identifier, env: Environment) -> Box<Future<Item = R::Related, Error = Error>> where Self: Sized;
 }
 
 impl<T: GetOne<R>, R: Relationship> Method<T> for GetOne<R, Identifier = T::Identifier> {
@@ -22,7 +22,7 @@ impl<T: GetOne<R>, R: Relationship> Method<T> for GetOne<R, Identifier = T::Iden
 }
 
 impl<T: GetOne<R>, R: Relationship> ResourceMethod<T> for GetOne<R, Identifier = T::Identifier> {
-    fn call(id: T::Identifier, _: Self::Request, env: &mut Environment) -> Self::Future {
+    fn call(id: T::Identifier, _: Self::Request, env: Environment) -> Self::Future {
         T::get_one(id, env)
     }
 }

@@ -37,14 +37,14 @@ where
 {
     type ReqFuture = P::Future;
 
-    fn receive_request(_: &Rc<Self>, req: http::Request, env: &mut Environment) -> Self::ReqFuture {
+    fn receive_request(_: &Rc<Self>, req: http::Request, env: &Environment) -> Self::ReqFuture {
         if let Some(fields) = Fields::new::<T>(&req) {
             env.store(fields);
         }
         P::parse(req.body())
     }
 
-    fn present_unit(_: &Rc<Self>, future: M::Future, _: TemplateKey, _: &mut Environment) -> http::BoxFuture
+    fn present_unit(_: &Rc<Self>, future: M::Future, _: TemplateKey, _: &Environment) -> http::BoxFuture
         where M: Method<T, Response = ()>
     {
         Box::new(future.then(move |result| match result {
@@ -53,7 +53,7 @@ where
         }))
     }
 
-    fn present_resource(_: &Rc<Self>, future: M::Future, _: TemplateKey, env: &mut Environment) -> http::BoxFuture
+    fn present_resource(_: &Rc<Self>, future: M::Future, _: TemplateKey, env: &Environment) -> http::BoxFuture
         where M: Method<T, Response = R>, R: ResourceEndpoint
     {
         let fields = env.take::<Fields>();
@@ -63,7 +63,7 @@ where
         }))
     }
 
-    fn present_collection(_: &Rc<Self>, future: M::Future, _: TemplateKey, env: &mut Environment) -> http::BoxFuture
+    fn present_collection(_: &Rc<Self>, future: M::Future, _: TemplateKey, env: &Environment) -> http::BoxFuture
         where M: Method<T, Response = Vec<R>>, R: ResourceEndpoint
     {
         let fields = env.take::<Fields>();
@@ -73,7 +73,7 @@ where
         }))
     }
 
-    fn present_error(_: &Rc<Self>, error: Error, _: &mut Environment) -> http::BoxFuture {
+    fn present_error(_: &Rc<Self>, error: Error, _: &Environment) -> http::BoxFuture {
         Box::new(future::ok(error_response(error)))
     }
 }

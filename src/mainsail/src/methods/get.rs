@@ -7,7 +7,7 @@ use rigging::environment::Environment;
 use rigging::routes::{Route, Kind};
 
 pub trait Get: Resource {
-    fn get(id: Self::Identifier, env: &Environment) -> Box<Future<Item = Self, Error = Error>> where Self: Sized;
+    fn get(id: Self::Identifier, env: Environment) -> Box<Future<Item = Self, Error = Error>> where Self: Sized;
 }
 
 impl<T: Get> Method<T> for Get<Identifier = T::Identifier> {
@@ -22,7 +22,7 @@ impl<T: Get> Method<T> for Get<Identifier = T::Identifier> {
 }
 
 impl<T: Get> ResourceMethod<T> for Get<Identifier = T::Identifier> {
-    fn call(id: T::Identifier, _: Self::Request, env: &mut Environment) -> Self::Future {
+    fn call(id: T::Identifier, _: Self::Request, env: Environment) -> Self::Future {
         T::get(id, env)
     }
 }
