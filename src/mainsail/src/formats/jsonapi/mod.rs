@@ -85,7 +85,7 @@ impl BuildFormat for JsonApi {
 }
 
 fn error_response(error: Error) -> http::Response {
-    respond_with(error.write(None), http::StatusCode::InternalServerError)
+    respond_with(error.write(None), error.status_code())
 }
 
 fn respond_with(data: Vec<u8>, status: http::StatusCode) -> http::Response {

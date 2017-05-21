@@ -122,6 +122,12 @@ fn respond_with(body: String) -> http::Response {
                          .with_body(body)
 }
 
-fn respond_with_err(_: Error) -> http::Response {
-    http::Response::new().with_status(http::StatusCode::InternalServerError)
+fn respond_with_err(err: Error) -> http::Response {
+    #[cfg(debug_assertions)]
+    let body = format!("{:?}", err);
+    #[cfg(not(debug_assertions))]
+    let body = format!("{}", err);
+    http::Response::new().with_status(err.status_code())
+                         .with_header(http::headers::ContentLength(body.len() as u64))
+                         .with_body(body)
 }
