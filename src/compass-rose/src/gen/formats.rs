@@ -1,6 +1,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use heck::SnekCase;
 use itertools::Itertools;
 use quote::{ToTokens, Tokens, Ident};
 
@@ -86,12 +87,12 @@ impl<'a> MethodRef<'a> {
     }
 
     fn template(self, root: &Path) -> Option<PathBuf> {
-        let mut root = root.join(self.resource);
-        if let Some(rel) = self.relation { root.push(rel); }
+        let mut root = root.join(self.resource.to_snek_case());
+        if let Some(rel) = self.relation { root.push(rel.to_snek_case()); }
         let read_dir = if let Some(rd) = fs::read_dir(root).ok() { rd } else { return None };
         for entry in read_dir {
             let entry = entry.unwrap();
-            if entry.file_name().to_str().unwrap().starts_with(self.method) {
+            if entry.file_name().to_str().unwrap().starts_with(&self.method.to_snek_case()) {
                 return Some(entry.path())
             }
         }
