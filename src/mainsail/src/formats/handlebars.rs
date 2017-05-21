@@ -14,7 +14,7 @@ use rigging::format::*;
 use rigging::method::Method;
 use rigging::resource::ResourceEndpoint;
 
-const MIME: &'static str = "text/plain; charset=utf-8";
+const MIME: &'static str = "text/html; charset=utf-8";
 
 pub struct Handlebars {
     registry: hbs::Handlebars,
