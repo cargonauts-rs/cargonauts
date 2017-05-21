@@ -1,0 +1,12 @@
+[package]
+authors = ["Without Boats <woboats@gmail.com>"]
+name = "colors"
+version = "0.1.0"
+
+[dependencies]
+rand = "0.3.15"
+serde = "1.0.7"
+serde_derive = "1.0.7"
+
+[dependencies.cargonauts]
+path = "../../"

@@ -6,3 +6,5 @@ demo/todomvc/frontend/dist
 demo/todomvc/frontend/node_modules
 demo/todomvc/frontend/tmp
 demo/todomvc/frontend/yarn.lock
+demo/colors/target
+demo/colors/Cargo.lock
