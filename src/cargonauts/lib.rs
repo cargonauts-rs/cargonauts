@@ -46,7 +46,7 @@ pub mod resources {
 }
 
 pub mod methods {
-    pub use rigging::method::Method;
+    pub use rigging::method::*;
     pub use rigging::routes::{Route, Kind};
     pub use mainsail::methods::*;
 }
