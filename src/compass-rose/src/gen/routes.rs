@@ -104,7 +104,7 @@ impl Route {
                 }
                 RouteItem::Module(ref inner, ref items) => {
                     let module = match module {
-                        Some(module) => [module, inner].join("/"),
+                        Some(module) => [module, &inner.to_kebab_case()].join("/"),
                         None         => inner.to_owned()
                     };
                     
