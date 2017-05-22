@@ -58,13 +58,16 @@ pub mod methods {
 
 pub mod formats {
 
-    pub use rigging::format::{Format, BuildFormat, Template, TemplateKey};
     pub use mainsail::formats::Debug;
     pub use mainsail::formats::jsonapi::JsonApi;
     pub use mainsail::formats::handlebars::Handlebars;
 
     pub mod jsonapi {
         pub use mainsail::formats::jsonapi::{ApiSerialize, ApiDeserialize, Fields, ClientIdPolicy};
+    }
+
+    pub mod def {
+        pub use rigging::format::{Format, BuildFormat, Template, TemplateKey};
     }
 }
 
