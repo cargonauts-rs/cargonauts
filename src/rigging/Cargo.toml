@@ -20,10 +20,6 @@ git = "https://github.com/withoutboats/c3po"
 branch = "new-new-service"
 git = "https://github.com/withoutboats/hyper"
 
-[dependencies.tokio-proto]
-branch = "new-new-service"
-git = "https://github.com/withoutboats/tokio-proto"
-
 [dependencies.tokio-redis]
 git = "https://github.com/withoutboats/tokio-redis"
 
