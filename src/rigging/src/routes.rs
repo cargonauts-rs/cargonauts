@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::io;
+use std::path::Path;
 use std::rc::Rc;
 
 use futures::{future, Future};
@@ -99,21 +100,36 @@ pub fn path(kind: Kind, endpoint: &'static str, rel: Option<&'static str>) -> St
     }
 }
 
-pub fn default_asset_handler(asset: &'static [u8], _: endpoint::Request) -> http::BoxFuture {
+pub fn default_asset_handler(path: &'static Path, asset: &'static [u8], _: endpoint::Request) -> http::BoxFuture {
+    let ext = path.file_name().and_then(|f| f.to_str()).and_then(|n| n.rsplit('.').next());
+    let mime = match ext {
+        Some("html")                => "text/html; charset=utf-8",
+        Some("css")                 => "text/css; charset=utf-8",
+        Some("png")                 => "image/png",
+        Some("jpg") | Some("jpeg")  => "image/jpeg",
+        Some("gif")                 => "image/gif",
+        Some("svg")                 => "image/svg+xml",
+        Some("js")                  => "text/javascript; charset=utf-8",
+        Some("pdf")                 => "application/pdf",
+        _                           => "text/plain; charset=utf-8",
+    };
+    
     Box::new(future::ok(http::Response::new()
                             .with_status(http::StatusCode::Ok)
+                            .with_header(http::headers::ContentType(mime.parse().unwrap()))
                             .with_header(http::headers::ContentLength(asset.len() as u64))
                             .with_body(asset)))
 }
 
 pub struct AssetHandler<F> {
     pub handler: F,
-    pub data: &'static [u8]
+    pub data: &'static [u8],
+    pub path: &'static Path,
 }
 
 impl<F> Service for AssetHandler<F>
 where
-    F: Fn(&'static [u8], endpoint::Request) -> http::BoxFuture
+    F: Fn(&'static Path, &'static [u8], endpoint::Request) -> http::BoxFuture
 {
     type Request = endpoint::Request;
     type Response = http::Response;
@@ -121,6 +137,6 @@ where
     type Future = http::BoxFuture;
 
     fn call(&self, req: Self::Request) -> Self::Future {
-        (self.handler)(self.data, req)
+        (self.handler)(self.path, self.data, req)
     }
 }

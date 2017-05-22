@@ -41,10 +41,12 @@ pub fn assets(cfg: &CargonautsConfig, routes: &Routes) -> Tokens {
             } else {
                 path.strip_prefix(&dir).unwrap().to_string_lossy()
             };
+            let relative_file_path = path.strip_prefix(&dir).unwrap().to_string_lossy();
             Some(quote!({
                 let service = ::cargonauts::routing::AssetHandler {
                     handler: #handler,
                     data: include_bytes!(#file_path),
+                    path: ::std::path::Path::new(#relative_file_path),
                 };
                 routes.add(::cargonauts::server::Method::Get, String::from(#url_path), Box::new(service) as ::cargonauts::routing::Handler);
             }))
