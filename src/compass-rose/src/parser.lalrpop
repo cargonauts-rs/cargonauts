@@ -7,6 +7,8 @@ grammar;
 pub routes: Routes = {
     <asset_handler:AssetHandler?> <setup:Setup?> <route_items:RouteItem*>
         => Routes { asset_handler, setup, route_items },
+    <setup:Setup> <asset_handler:AssetHandler> <route_items:RouteItem*>
+        => Routes { asset_handler: Some(asset_handler), setup: Some(setup), route_items },
 };
 
 AssetHandler: String = {
