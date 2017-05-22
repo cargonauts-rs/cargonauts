@@ -1,0 +1,533 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>A very small application. - </title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <base href="">
+
+        <link rel="stylesheet" href="book.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+
+        <!-- MathJax -->
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Fetch JQuery from CDN but have a local fallback -->
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script>
+            if (typeof jQuery == 'undefined') {
+                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
+            }
+        </script>
+    </head>
+    <body class="light">
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme = localStorage.getItem('theme');
+            if (theme == null) { theme = 'light'; }
+            $('body').removeClass().addClass(theme);
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var sidebar = localStorage.getItem('sidebar');
+            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
+            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+        </script>
+
+        <div id="sidebar" class="sidebar">
+            <ul class="chapter"><li><a href="./intro.html"><strong>1.</strong> Welcome to cargonauts</a></li><li><a href="./setup.html"><strong>2.</strong> Starting a new cargonauts app</a></li><li><a href="./structure.html"><strong>3.</strong> Structure of your application.</a></li><li><a href="./mvc.html"><strong>4.</strong> Resources, methods and formats.</a></li><li><a href="./routes.html"><strong>5.</strong> The routes! DSL</a></li><li><a href="./echo.html"><strong>6.</strong> A very small application.</a></li></ul>
+        </div>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar" class="menu-bar">
+                    <div class="left-buttons">
+                        <i id="sidebar-toggle" class="fa fa-bars"></i>
+                        <i id="theme-toggle" class="fa fa-paint-brush"></i>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                    </div>
+                </div>
+
+                <div id="content" class="content">
+                    <a class="header" href="print.html#welcome-to-cargonauts" id="welcome-to-cargonauts"><h1>Welcome to cargonauts</h1></a>
+<p>These docs are incomplete, but hopefully they will help you some.</p>
+<a class="header" href="print.html#starting-a-new-cargonauts-app" id="starting-a-new-cargonauts-app"><h1>Starting a new cargonauts app</h1></a>
+<a class="header" href="print.html#install-rust" id="install-rust"><h2>Install Rust</h2></a>
+<p>This guide assumes that you have both Rust and cargo installed on your
+computer. I recommend using <a href="https://rustup.rs/">rustup.rs</a>, which makes it
+very easy to manage multiple installations of Rust.</p>
+<p>cargonauts currently requires the <strong>nightly</strong> version of Rust. If you don't
+have that installed, you can use rustup to install it:</p>
+<pre><code>rustup install nightly
+</code></pre>
+<a class="header" href="print.html#install-cargonauts-cli" id="install-cargonauts-cli"><h2>Install <code>cargonauts-cli</code></h2></a>
+<p>To quickly get started with cargonauts, you should install the <code>cargonauts-cli</code>
+crate. This is just a tiny app which helps you create a cargonauts app with
+your source directory set up correctly.</p>
+<p>You can install it with cargo:</p>
+<pre><code>cargo install cargonauts-cli
+</code></pre>
+<p>This gives you a new command, <code>cargonauts</code>, which currently only has one
+subcommand, which we'll be using in a second to create your app.</p>
+<a class="header" href="print.html#create-your-project" id="create-your-project"><h2>Create your project</h2></a>
+<p>To create your project, just run this command (where <code>&lt;my-app&gt;</code> is the name of
+your app):</p>
+<pre><code>cargonauts new &lt;my-app&gt;
+</code></pre>
+<p>This will initiate an app in a directory with the same name, which will have
+a source directory set up to make cargonauts easy to use.</p>
+<a class="header" href="print.html#build-your-dependencies" id="build-your-dependencies"><h2>Build your dependencies</h2></a>
+<p>Now, you should build all the dependencies of cargonauts. Unfortunately, this
+takes quite a while right now.</p>
+<p>First, make sure you are using the nightly compiler:</p>
+<pre><code>rustup override set nightly
+</code></pre>
+<p>Then, do a fresh build of your cargonauts dependency:</p>
+<pre><code>cargo build -p cargonauts
+</code></pre>
+<a class="header" href="print.html#running-your-application" id="running-your-application"><h2>Running your application</h2></a>
+<p>You're all set. If you want to run your application, you can do so with this
+command:</p>
+<pre><code>cargo run server
+</code></pre>
+<a class="header" href="print.html#structure-of-your-application" id="structure-of-your-application"><h1>Structure of your application</h1></a>
+<p>If you've just created your application with <code>cargonauts new</code>, you may notice
+that it created a lot of files for you. We'll walk through what each module
+in your application is intended to be used for.</p>
+<a class="header" href="print.html#binserverrs" id="binserverrs"><h3><code>bin/server.rs</code></h3></a>
+<p>This is the server that you're going to be building, running, and deploying.
+Your main application is a library, and this is a binary that depends on it.
+Right now it just servers your application, but you can add any code you want
+here to do additional setup and teardown aroud your running application.</p>
+<a class="header" href="print.html#librs" id="librs"><h3><code>lib.rs</code></h3></a>
+<p>This is the root of your application; it doesn't contain any code by default;
+just extern crate and module declarations. It also re-exports the <code>routes</code> item
+from your routing module; this is the public entrance to your entire
+application.</p>
+<a class="header" href="print.html#routingrs" id="routingrs"><h3><code>routing.rs</code></h3></a>
+<p>The routing file contains the <code>routes!</code> macro, which is how we stitch all of
+the code in your application together. You'll edit this whenever you want to
+add new endpoints to your application.</p>
+<a class="header" href="print.html#the-assets-directory" id="the-assets-directory"><h3>The assets directory</h3></a>
+<p>This directory is for your static assets. By default, any assets here will be
+built into your application at their path relative to the asset directory root.</p>
+<p>Files starting with <code>index</code> will be served as the index for the directory they
+are in, rather than at their filename.</p>
+<p>This is not a submodule of your application; it does not contain Rust code.</p>
+<a class="header" href="print.html#the-clients-module" id="the-clients-module"><h3>The clients module</h3></a>
+<p>This module is for defining clients, high level API wrappers around connections
+to other running services.</p>
+<a class="header" href="print.html#the-formats-module" id="the-formats-module"><h3>The formats module</h3></a>
+<p>This module is for defining custom formats. cargonauts comes with several
+useful formats out of the box, but if you need to define your own, you can do
+so here.</p>
+<a class="header" href="print.html#the-methods-module" id="the-methods-module"><h3>The methods module</h3></a>
+<p>This module is for defining custom methods. cargonauts comes with many methods
+covering most use case, but if you do need to define your own, this is the
+module for them.</p>
+<a class="header" href="print.html#the-middleware-module" id="the-middleware-module"><h3>The middleware module</h3></a>
+<p>This is for defining middleware to wrap around your endpoint. If you need to
+deal directly with the HTTP requests and responses in a way that doesn't
+integrate into the resource/method/format structure of cargonauts, you just
+need to write a middleware for that.</p>
+<p>You can use middleware for instrumenting endpoints, for example.</p>
+<a class="header" href="print.html#the-resources-module" id="the-resources-module"><h3>The resources module</h3></a>
+<p>This is where you define your resources, and implement methods for them. This
+is probably the module you'll turn to most often, at least at first.</p>
+<a class="header" href="print.html#the-templates-directory" id="the-templates-directory"><h3>The templates directory</h3></a>
+<p>This directory is for your templates. When formatting your resources into HTTP
+responses, the format has access to the templates you define here in order to
+render the response. Some formats use templates and some do not.</p>
+<p>Templates are located at <code>templates/$resource/$method</code>, for example, something
+like: <code>templates/user/get.html.hbs</code> (all file extensions are optional).</p>
+<p>Like the assets directory, this is not a part of your application, and you
+shouldn't put any Rust code here.</p>
+<a class="header" href="print.html#resources-methods-and-formats" id="resources-methods-and-formats"><h1>Resources, methods and formats</h1></a>
+<p>The core concepts you need to understand to use cargonauts are <strong>resources</strong>,
+<strong>methods</strong>, and <strong>formats</strong>. These are the building blocks for the &quot;front&quot; of
+your application; by combining a resource, a method, and a route, you can
+construct an HTTP endpoint.</p>
+<a class="header" href="print.html#resources" id="resources"><h2>Resources</h2></a>
+<p>cargonauts is REST-oriented web framework, so it is designed to enable you to
+construct your application in terms of resources. Your application will have
+many resources.</p>
+<p>A resource is just a type that implements the <code>Resource</code> trait. For example:</p>
+<pre><pre class="playpen"><code class="language-rust"># #![allow(unused_variables)]
+#fn main() {
+pub struct User {
+    username: String,
+    email: String,
+    joined_at: DateTime&lt;UTC&gt;,
+}
+
+impl Resource for User {
+    type Identifier = Uuid;
+}
+
+#}</code></pre></pre>
+<p>The Resource trait is very small: it just specifies the type of Identifier
+used to uniquely identify each value of this resource.</p>
+<p>You can think of the resource as defining the data that will be included in an
+HTTP response to certain endpoints. Once you've defined a resource, you will
+need to implement methods on it to give it behavior.</p>
+<p>cargonauts doesnot provide any resources for you. You define all of the
+resources that are appropriate to your domain.</p>
+<a class="header" href="print.html#methods" id="methods"><h2>Methods</h2></a>
+<p>Resources define data, whereas methods define behavior. All methods are traits,
+and the file for a resource will contain not only that resource, but also
+impl blocks for the methods implemented for it.</p>
+<p>cargonauts comes with a large number of methods defined for you. You can see
+the list of methods provided in the API docs.</p>
+<pre><pre class="playpen"><code class="language-rust"># #![allow(unused_variables)]
+#fn main() {
+impl Get for User {
+    fn get(id: Uuid, env: Environment) -&gt; Box&lt;Future&lt;Item = User, Error = Error&gt;&gt; {
+        // ...
+    }
+}
+
+#}</code></pre></pre>
+<a class="header" href="print.html#resource-and-collection-methods" id="resource-and-collection-methods"><h3>Resource and Collection methods</h3></a>
+<p>Some methods are resource methods, whereas some are collection methods. That is
+to say that some define HTTP endpoints on specific resources, whereas some
+define them on the collection of all resources.</p>
+<pre><code># This is a resource endpoint:
+HTTP /&lt;resource-name&gt;/&lt;identifier&gt;
+
+# This is a collection endpoint::
+HTTP /&lt;resource-name&gt;
+</code></pre>
+<p>For example, the <code>Get</code> method is a resource method, which defines what happens
+when you <code>GET</code> a resource. On the other hand, the <code>Post</code> method is a collection
+method, which deifnes what happens when you <code>POST</code> a collection endpoint.</p>
+<p>Resource methods usually have an identifier as an argument, whereas collection
+methods don't. The identifier is parsed from the route path.</p>
+<a class="header" href="print.html#formats" id="formats"><h2>Formats</h2></a>
+<p>Resources define data &amp; methods define behavior, but formats define
+presentation. Once a method has been called on a resource, the format
+translates that into an HTTP response.</p>
+<p>Formats are types which implement the Format trait. A format likely will
+require your resource to implement additional traits for it to work.</p>
+<p>Cargonauts comes with three formats provided for you:</p>
+<ul>
+<li>
+<p><strong>Debug:</strong> This format is not intended for serious use; the Debug format
+debug prints the data returned by a method into the response body.</p>
+</li>
+<li>
+<p><strong>Handlebars:</strong> This format is intended for server side rendering; it renders
+templates using handlebars, and can receive POSTs from HTML forms.</p>
+</li>
+<li>
+<p><strong>JsonApi:</strong> This format is intended for creating APIs in JSON, and is an
+implementation of the JSON API spec. It does not implement everything from that
+spec yet.</p>
+</li>
+</ul>
+<p>You do not directly hook your resources up to formats in the resource module;
+instead, that is entirely handled as a part of the <code>routes!</code> macro.</p>
+<a class="header" href="print.html#the-routes-dsl" id="the-routes-dsl"><h1>The routes! DSL</h1></a>
+<p>Resources, methods, and formats are just normal Rust code, but they are brought
+together in the <code>routes!</code> macro, which implements a complicated domain specific
+language for assembling your application in a declarative way.</p>
+<p>Just implementing a method for a resource isn't enough to create an endpoint;
+it also needs to be added to your <code>routes!</code> macro, which looks like this:</p>
+<pre><pre class="playpen"><code class="language-rust"># #![allow(unused_variables)]
+#fn main() {
+use cargonauts::methods::Get;
+use cargonauts::formats::JsonApi;
+
+use resources::User;
+
+routes! {
+    resource User {
+        method Get in JsonApi;
+    }
+}
+
+#}</code></pre></pre>
+<p>Having implemented Get for User (as well as the traits required to format a
+User with JsonApi), this will create an endpoint for <code>GET /user/$id</code>. If you
+haven't implemented all of the necessary traits, you will get a compiler error.</p>
+<p>Every CamelCase name in the <code>routes!</code> macro is just a type imported into this
+scope; there's no magic lookup for User, Get, or JsonApi, you have to have
+imported them into this module in order to use them in the DSL.</p>
+<p>The rest of this page will document the syntax for the <code>routes!</code> DSL.</p>
+<a class="header" href="print.html#resource-blocks" id="resource-blocks"><h3>Resource blocks</h3></a>
+<p>A resource block looks like this:</p>
+<pre><code>resource $TYPE {
+    ...
+}
+</code></pre>
+<p>The $TYPE must implement the Resource trait.</p>
+<p>By default, resources will be mounted at the kebab case form of the type
+name - that is, all lowercase, joined by hyphens. For example, <code>User</code> will
+be mounted at <code>user</code>, whereas a resource called <code>HappyDoggo</code> would be mounted
+at <code>happy-doggo</code>.</p>
+<p>If you don't like that route choice, you can use an <code>as</code> clause to rename it.
+This takes a string literal. For example, you might prefer plural route names;
+cargonauts will not automatically inflect your names for you, you'll have to
+specify them:</p>
+<pre><code>resource Person as &quot;people&quot; {
+    ...
+}
+
+resource Cat as &quot;cats&quot; {
+
+}
+
+
+resource Doggo as &quot;puppers&quot; {
+
+}
+</code></pre>
+<a class="header" href="print.html#method-statements" id="method-statements"><h3>Method statements</h3></a>
+<p>Within a resource block, you can declare the methods that resource supports.
+A method takes the syntax:</p>
+<pre><code>method $METHOD in $FORMAT;
+</code></pre>
+<p>Where $METHOD is a method trait, and $FORMAT is a type which implements Format.</p>
+<p>You can have multiple methods using the same format on the same line, separated
+with commas, or not:</p>
+<pre><code>method Get, Index, Post in JsonApi;
+method Patch in Handlebars;
+method Delete in Handlebars;
+</code></pre>
+<p>Currently each method can only be provided in one format, someday this will
+change to support dispatching to different formats based on the Accepts
+headers.</p>
+<a class="header" href="print.html#relationship-blocks" id="relationship-blocks"><h3>Relationship blocks</h3></a>
+<p>Resources can also contain relationships, which can be either <code>has one</code> or
+<code>has many</code>:</p>
+<pre><code>resource BlogPost {
+    has one Author {
+        ... 
+    }
+
+    has many Comment {
+        ...
+    }
+}
+</code></pre>
+<p>The type of a relationship block must implement Relationship. Like resource
+blocks, these support aliases with <code>as</code>, and they can contain method
+statements. Their method statements must be relationship methods:</p>
+<pre><code>resource BlogPost {
+    has many Comment as &quot;comments&quot; {
+        method GetMany in JsonApi;
+    }
+}
+</code></pre>
+<a class="header" href="print.html#modules" id="modules"><h3>Modules</h3></a>
+<p>Resources can be put into inline modules; modules use the same syntax as in
+regular Rust, and can be nested:</p>
+<pre><code>mod api {
+    mod foo_bar {
+        resource Baz {
+            ...
+        }
+    }
+}
+</code></pre>
+<p>These will create directories in the API; for example, Baz's endpoints would
+be mounted at <code>api/foo-bar/baz</code>. Note that modules, like types, are kebab
+cased in the actual API.</p>
+<p>These are only used to control the shape of the API; there is no namespacing
+or use statements inside the <code>routes!</code> DSL.</p>
+<a class="header" href="print.html#setup-block" id="setup-block"><h3>Setup block</h3></a>
+<p>The <code>routes!</code> DSL can also begin with a <code>setup</code> block. This block is used to
+set up connections to other services when the application starts.</p>
+<p>The setup block looks like this:</p>
+<pre><code>setup {
+    connection to $SERVICE;
+}
+</code></pre>
+<p>$SERVICE must be a type which implements NewService and Configure. Connections
+to this service will be managed by a connection pool which you can configure
+with your Cargo.toml.</p>
+<a class="header" href="print.html#asset-handler" id="asset-handler"><h3>Asset handler</h3></a>
+<p>By default, assets will be presented with a very simple asset handler,
+providing few headers or other processing. If you wish to perform more complex
+handling for your assets, you can define an asset hnadler function. This
+function must have the signature:</p>
+<pre><code>fn(path: &amp;'static Path, asset: &amp;'static [u8], req: middleware::Request) -&gt; middleware::http::BoxFuture
+</code></pre>
+<p>You can tell cargonauts to use this handler instead of the default with this
+statement at the beginning of the <code>routes!</code> DSL:</p>
+<pre><code>use $ASSET_HANDLER for assets;
+</code></pre>
+<a class="header" href="print.html#a-very-small-application" id="a-very-small-application"><h1>A very small application</h1></a>
+<p>To bring the core concepts we've just introduced together, let's look at very
+small, single-file application.</p>
+<p>This application does one thing: it has an endpoint at <code>/echo/$STRING</code>, and
+will respond to GET requests at that endpoint by Debug printing an Echo object
+with that string into its body. Here's the code:</p>
+<pre><pre class="playpen"><code class="language-rust">#![feature(associated_consts)]
+
+#[macro_use] extern crate cargonauts;
+
+use cargonauts::resources::{Resource, Environment, Error};
+use cargonauts::methods::Get;
+use cargonauts::formats::Debug;
+use cargonauts::futures::{future, Future};
+
+#[derive(Debug)]
+struct Echo {
+    echo: String,
+}
+
+impl Resource for Echo {
+    type Identifier = String;
+}
+
+impl Get for Echo {
+    fn get(id: String, _: Environment) -&gt; Box&lt;Future&lt;Item = Echo, Error = Error&gt;&gt; {
+        future::ok(Echo { echo: id }).boxed()
+    }
+}
+
+routes! {
+    resource Echo {
+        method Get in Debug;
+    }
+}
+
+fn main() {
+    cargonauts::serve(routes).unwrap();
+}
+</code></pre></pre>
+<p>Let's walk through this section by section.</p>
+<a class="header" href="print.html#top-matter" id="top-matter"><h3>Top matter</h3></a>
+<pre><pre class="playpen"><code class="language-rust"># #![allow(unused_variables)]
+#![feature(associated_consts)]
+#fn main() {
+
+#}</code></pre></pre>
+<p>cargonauts depends on associated consts, which is why it is on nightly. When I
+made this choice, I thought associated consts would be stable before I had
+cargonauts ready to show people, but I was wrong.</p>
+<pre><pre class="playpen"><code class="language-rust"># #![allow(unused_variables)]
+#fn main() {
+#[macro_use] extern crate cargonauts;
+
+#}</code></pre></pre>
+<p>We need to depend on cargonauts, and we have to apply macro_use to it or we
+can't get the <code>routes!</code> macro.</p>
+<pre><pre class="playpen"><code class="language-rust"># #![allow(unused_variables)]
+#fn main() {
+use cargonauts::resources::{Resource, Environment, Error};
+use cargonauts::methods::Get;
+use cargonauts::formats::Debug;
+use cargonauts::futures::{future, Future};
+
+#}</code></pre></pre>
+<p>These are all the imports we need for this to work:</p>
+<ul>
+<li>Resource is needed so Echo can implement it; Environment and Error appear in
+any method impl.</li>
+<li>Get is needed because its the method we'll be implemented.</li>
+<li>Debug is needed because its the format we'll be using.</li>
+<li>future and Future are used in our implementation of Get.</li>
+</ul>
+<a class="header" href="print.html#resource-type" id="resource-type"><h3>Resource type</h3></a>
+<pre><pre class="playpen"><code class="language-rust"># #![allow(unused_variables)]
+#fn main() {
+#[derive(Debug)]
+struct Echo {
+    echo: String,
+}
+
+#}</code></pre></pre>
+<p>This is our resource type in this case. Its a simple type; it only has one
+field.</p>
+<p>Echo derives Debug because the Debug format requires that.</p>
+<pre><pre class="playpen"><code class="language-rust"># #![allow(unused_variables)]
+#fn main() {
+impl Resource for Echo {
+    type Identifier = String;
+}
+
+#}</code></pre></pre>
+<p>Echo needs to implement Resource. Its Identifier in this case is a String (the
+string we'll be echoing back).</p>
+<pre><code>impl Get for Echo {
+    fn get(id: String, _: Environment) -&gt; Box&lt;Future&lt;Item = Echo, Error = Error&gt;&gt; {
+        future::ok(Echo { echo: id }).boxed()
+    }
+}
+</code></pre>
+<p>This is our single endpoint: we receive a string and then construct an Echo
+from it to return. This can never fail and does no IO, but it needs to be
+wrapped in a future because cargonauts is an async framework.</p>
+<a class="header" href="print.html#routes-and-main" id="routes-and-main"><h3>Routes and main</h3></a>
+<pre><pre class="playpen"><code class="language-rust"># #![allow(unused_variables)]
+#fn main() {
+routes! {
+    resource Echo {
+        method Get in Debug;
+    }
+}
+
+#}</code></pre></pre>
+<p>The routes DSL here has only one resource and one method. This constructs our
+actual app, hooking up the endpoint we defined. This macro ultimately expands
+to an item named <code>routes</code>.</p>
+<pre><pre class="playpen"><code class="language-rust">fn main() {
+    cargonauts::serve(routes).unwrap();
+}
+</code></pre></pre>
+<p>The main function serves our app uing the <code>serve</code> function from cargonauts,
+which can take a <code>routes</code> object.</p>
+
+                </div>
+
+                <!-- Mobile navigation buttons -->
+                
+
+                
+
+            </div>
+
+            
+
+            
+
+        </div>
+
+
+        <!-- Local fallback for Font Awesome -->
+        <script>
+            if ($(".fa").css("font-family") !== "FontAwesome") {
+                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
+            }
+        </script>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        
+
+        
+
+
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+    </body>
+</html>

@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["HttpMethod","The Request Method (VERB)"],["Kind",""]],"struct":[["Route",""]]});
+initSidebarItems({"mod":[["def",""]],"trait":[["Delete",""],["DeleteRelated",""],["Get",""],["GetMany",""],["GetOne",""],["Index",""],["Patch",""],["Post",""],["PostRelated",""],["UpdateRelated",""]]});

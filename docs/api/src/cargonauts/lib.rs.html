@@ -160,6 +160,10 @@
 <span id="115">115</span>
 <span id="116">116</span>
 <span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
 </pre><pre class="rust ">
 <span class="attribute">#<span class="op">!</span>[<span class="ident">feature</span>(<span class="ident">associated_consts</span>)]</span>
 
@@ -209,10 +213,14 @@
 }
 
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">methods</span> {
-    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">rigging</span>::<span class="ident">method</span>::<span class="kw-2">*</span>;
-    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">rigging</span>::<span class="ident">routes</span>::{<span class="ident">Route</span>, <span class="ident">Kind</span>};
-    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">rigging</span>::<span class="ident">http</span>::<span class="ident">Method</span> <span class="kw">as</span> <span class="ident">HttpMethod</span>;
-    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">mainsail</span>::<span class="ident">methods</span>::<span class="kw-2">*</span>;
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">mainsail</span>::<span class="ident">methods</span>::{<span class="ident">Delete</span>, <span class="ident">Get</span>, <span class="ident">Index</span>, <span class="ident">Patch</span>, <span class="ident">Post</span>};
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">mainsail</span>::<span class="ident">methods</span>::{<span class="ident">DeleteRelated</span>, <span class="ident">GetOne</span>, <span class="ident">GetMany</span>, <span class="ident">PostRelated</span>, <span class="ident">UpdateRelated</span>};
+
+    <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">def</span> {
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">rigging</span>::<span class="ident">method</span>::{<span class="ident">Method</span>, <span class="ident">ResourceMethod</span>, <span class="ident">CollectionMethod</span>};
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">rigging</span>::<span class="ident">routes</span>::{<span class="ident">Route</span>, <span class="ident">Kind</span>};
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">rigging</span>::<span class="ident">http</span>::<span class="ident">Method</span> <span class="kw">as</span> <span class="ident">HttpMethod</span>;
+    }
 }
 
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">formats</span> {
@@ -336,7 +344,6 @@
         window.rootPath = "../../";
         window.currentCrate = "cargonauts";
     </script>
-    <script src="../../jquery.js"></script>
     <script src="../../main.js"></script>
     <script defer src="../../search-index.js"></script>
 </body>

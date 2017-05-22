@@ -1,0 +1,250 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>The routes! DSL - </title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <base href="">
+
+        <link rel="stylesheet" href="book.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+
+        <!-- MathJax -->
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Fetch JQuery from CDN but have a local fallback -->
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script>
+            if (typeof jQuery == 'undefined') {
+                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
+            }
+        </script>
+    </head>
+    <body class="light">
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme = localStorage.getItem('theme');
+            if (theme == null) { theme = 'light'; }
+            $('body').removeClass().addClass(theme);
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var sidebar = localStorage.getItem('sidebar');
+            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
+            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+        </script>
+
+        <div id="sidebar" class="sidebar">
+            <ul class="chapter"><li><a href="./intro.html"><strong>1.</strong> Welcome to cargonauts</a></li><li><a href="./setup.html"><strong>2.</strong> Starting a new cargonauts app</a></li><li><a href="./structure.html"><strong>3.</strong> Structure of your application.</a></li><li><a href="./mvc.html"><strong>4.</strong> Resources, methods and formats.</a></li><li><a href="./routes.html" class="active"><strong>5.</strong> The routes! DSL</a></li><li><a href="./echo.html"><strong>6.</strong> A very small application.</a></li></ul>
+        </div>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar" class="menu-bar">
+                    <div class="left-buttons">
+                        <i id="sidebar-toggle" class="fa fa-bars"></i>
+                        <i id="theme-toggle" class="fa fa-paint-brush"></i>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                    </div>
+                </div>
+
+                <div id="content" class="content">
+                    <a class="header" href="./routes.html#the-routes-dsl" id="the-routes-dsl"><h1>The routes! DSL</h1></a>
+<p>Resources, methods, and formats are just normal Rust code, but they are brought
+together in the <code>routes!</code> macro, which implements a complicated domain specific
+language for assembling your application in a declarative way.</p>
+<p>Just implementing a method for a resource isn't enough to create an endpoint;
+it also needs to be added to your <code>routes!</code> macro, which looks like this:</p>
+<pre><pre class="playpen"><code class="language-rust"># #![allow(unused_variables)]
+#fn main() {
+use cargonauts::methods::Get;
+use cargonauts::formats::JsonApi;
+
+use resources::User;
+
+routes! {
+    resource User {
+        method Get in JsonApi;
+    }
+}
+
+#}</code></pre></pre>
+<p>Having implemented Get for User (as well as the traits required to format a
+User with JsonApi), this will create an endpoint for <code>GET /user/$id</code>. If you
+haven't implemented all of the necessary traits, you will get a compiler error.</p>
+<p>Every CamelCase name in the <code>routes!</code> macro is just a type imported into this
+scope; there's no magic lookup for User, Get, or JsonApi, you have to have
+imported them into this module in order to use them in the DSL.</p>
+<p>The rest of this page will document the syntax for the <code>routes!</code> DSL.</p>
+<a class="header" href="./routes.html#resource-blocks" id="resource-blocks"><h3>Resource blocks</h3></a>
+<p>A resource block looks like this:</p>
+<pre><code>resource $TYPE {
+    ...
+}
+</code></pre>
+<p>The $TYPE must implement the Resource trait.</p>
+<p>By default, resources will be mounted at the kebab case form of the type
+name - that is, all lowercase, joined by hyphens. For example, <code>User</code> will
+be mounted at <code>user</code>, whereas a resource called <code>HappyDoggo</code> would be mounted
+at <code>happy-doggo</code>.</p>
+<p>If you don't like that route choice, you can use an <code>as</code> clause to rename it.
+This takes a string literal. For example, you might prefer plural route names;
+cargonauts will not automatically inflect your names for you, you'll have to
+specify them:</p>
+<pre><code>resource Person as &quot;people&quot; {
+    ...
+}
+
+resource Cat as &quot;cats&quot; {
+
+}
+
+
+resource Doggo as &quot;puppers&quot; {
+
+}
+</code></pre>
+<a class="header" href="./routes.html#method-statements" id="method-statements"><h3>Method statements</h3></a>
+<p>Within a resource block, you can declare the methods that resource supports.
+A method takes the syntax:</p>
+<pre><code>method $METHOD in $FORMAT;
+</code></pre>
+<p>Where $METHOD is a method trait, and $FORMAT is a type which implements Format.</p>
+<p>You can have multiple methods using the same format on the same line, separated
+with commas, or not:</p>
+<pre><code>method Get, Index, Post in JsonApi;
+method Patch in Handlebars;
+method Delete in Handlebars;
+</code></pre>
+<p>Currently each method can only be provided in one format, someday this will
+change to support dispatching to different formats based on the Accepts
+headers.</p>
+<a class="header" href="./routes.html#relationship-blocks" id="relationship-blocks"><h3>Relationship blocks</h3></a>
+<p>Resources can also contain relationships, which can be either <code>has one</code> or
+<code>has many</code>:</p>
+<pre><code>resource BlogPost {
+    has one Author {
+        ... 
+    }
+
+    has many Comment {
+        ...
+    }
+}
+</code></pre>
+<p>The type of a relationship block must implement Relationship. Like resource
+blocks, these support aliases with <code>as</code>, and they can contain method
+statements. Their method statements must be relationship methods:</p>
+<pre><code>resource BlogPost {
+    has many Comment as &quot;comments&quot; {
+        method GetMany in JsonApi;
+    }
+}
+</code></pre>
+<a class="header" href="./routes.html#modules" id="modules"><h3>Modules</h3></a>
+<p>Resources can be put into inline modules; modules use the same syntax as in
+regular Rust, and can be nested:</p>
+<pre><code>mod api {
+    mod foo_bar {
+        resource Baz {
+            ...
+        }
+    }
+}
+</code></pre>
+<p>These will create directories in the API; for example, Baz's endpoints would
+be mounted at <code>api/foo-bar/baz</code>. Note that modules, like types, are kebab
+cased in the actual API.</p>
+<p>These are only used to control the shape of the API; there is no namespacing
+or use statements inside the <code>routes!</code> DSL.</p>
+<a class="header" href="./routes.html#setup-block" id="setup-block"><h3>Setup block</h3></a>
+<p>The <code>routes!</code> DSL can also begin with a <code>setup</code> block. This block is used to
+set up connections to other services when the application starts.</p>
+<p>The setup block looks like this:</p>
+<pre><code>setup {
+    connection to $SERVICE;
+}
+</code></pre>
+<p>$SERVICE must be a type which implements NewService and Configure. Connections
+to this service will be managed by a connection pool which you can configure
+with your Cargo.toml.</p>
+<a class="header" href="./routes.html#asset-handler" id="asset-handler"><h3>Asset handler</h3></a>
+<p>By default, assets will be presented with a very simple asset handler,
+providing few headers or other processing. If you wish to perform more complex
+handling for your assets, you can define an asset hnadler function. This
+function must have the signature:</p>
+<pre><code>fn(path: &amp;'static Path, asset: &amp;'static [u8], req: middleware::Request) -&gt; middleware::http::BoxFuture
+</code></pre>
+<p>You can tell cargonauts to use this handler instead of the default with this
+statement at the beginning of the <code>routes!</code> DSL:</p>
+<pre><code>use $ASSET_HANDLER for assets;
+</code></pre>
+
+                </div>
+
+                <!-- Mobile navigation buttons -->
+                
+                    <a href="./mvc.html" class="mobile-nav-chapters previous">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a href="./echo.html" class="mobile-nav-chapters next">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+
+            </div>
+
+            
+                <a href="./mvc.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+            
+
+            
+                <a href="./echo.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            
+
+        </div>
+
+
+        <!-- Local fallback for Font Awesome -->
+        <script>
+            if ($(".fa").css("font-family") !== "FontAwesome") {
+                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
+            }
+        </script>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        
+
+        
+
+
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+    </body>
+</html>

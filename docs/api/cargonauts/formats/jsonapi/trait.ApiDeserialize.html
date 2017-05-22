@@ -29,7 +29,7 @@
 
     <nav class="sidebar">
         
-        <p class='location'><a href='../../index.html'>cargonauts</a>::<wbr><a href='../index.html'>formats</a>::<wbr><a href='index.html'>jsonapi</a></p><script>window.sidebarCurrent = {name: 'ApiDeserialize', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'>Trait ApiDeserialize</p><div class="block items"><ul><li><a href="#associated-types">Associated Types</a></li><li><a href="#associated-const">Associated Constants</a></li><li><a href="#required-methods">Required Methods</a></li><li><a href="#implementors">Implementors</a></li></ul></div><p class='location'><a href='../../index.html'>cargonauts</a>::<wbr><a href='../index.html'>formats</a>::<wbr><a href='index.html'>jsonapi</a></p><script>window.sidebarCurrent = {name: 'ApiDeserialize', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -48,19 +48,19 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a class='srclink' href='../../../src/mainsail/formats/jsonapi/receive/traits.rs.html#13-19' title='goto source code'>[src]</a></span></h1>
+               </span></span></h1>
 <pre class='rust trait'>pub trait ApiDeserialize&lt;'d&gt;: 'static {
     type <a href='#associatedtype.Identifier' class="type">Identifier</a>: <a class="trait" href="https://doc.rust-lang.org/nightly/core/str/trait.FromStr.html" title="trait core::str::FromStr">FromStr</a>;
-    type <a href='#associatedtype.Attributes' class="type">Attributes</a>: <a class="trait" href="../../../serde/de/trait.Deserialize.html" title="trait serde::de::Deserialize">Deserialize</a>&lt;'d&gt;;
+    type <a href='#associatedtype.Attributes' class="type">Attributes</a>: <a class="trait" href="https://docs.rs/serde/1.0.4/serde/de/trait.Deserialize.html" title="trait serde::de::Deserialize">Deserialize</a>&lt;'d&gt;;
 
     const <a href='#associatedconstant.CLIENT_ID_POLICY' class="constant"><b>CLIENT_ID_POLICY</b></a>: <a class="enum" href="../../../cargonauts/formats/jsonapi/enum.ClientIdPolicy.html" title="enum cargonauts::formats::jsonapi::ClientIdPolicy">ClientIdPolicy</a>;
 
     fn <a href='#tymethod.from_parts' class='fnname'>from_parts</a>(id: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;Self::<a class="trait" href="../../../cargonauts/formats/jsonapi/trait.ApiDeserialize.html" title="trait cargonauts::formats::jsonapi::ApiDeserialize">Identifier</a>&gt;, rest: Self::<a class="trait" href="../../../cargonauts/formats/jsonapi/trait.ApiDeserialize.html" title="trait cargonauts::formats::jsonapi::ApiDeserialize">Attributes</a>) -&gt; Self;
-    fn <a href='#tymethod.deserialize' class='fnname'>deserialize</a>&lt;D&gt;(deserializer: D) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;Self, D::<a class="trait" href="../../../serde/de/trait.Deserializer.html" title="trait serde::de::Deserializer">Error</a>&gt; <span class="where fmt-newline">where D: <a class="trait" href="../../../serde/de/trait.Deserializer.html" title="trait serde::de::Deserializer">Deserializer</a>&lt;'d&gt;</span>;
+    fn <a href='#tymethod.deserialize' class='fnname'>deserialize</a>&lt;D&gt;(<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;deserializer: D<br>&nbsp;&nbsp;&nbsp;&nbsp;) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;Self, &lt;D as <a class="trait" href="https://docs.rs/serde/1.0.4/serde/de/trait.Deserializer.html" title="trait serde::de::Deserializer">Deserializer</a>&lt;'d&gt;&gt;::<a class="trait" href="https://docs.rs/serde/1.0.4/serde/de/trait.Deserializer.html" title="trait serde::de::Deserializer">Error</a>&gt;<br>&nbsp;&nbsp;&nbsp; <span class="where">where<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;D: <a class="trait" href="https://docs.rs/serde/1.0.4/serde/de/trait.Deserializer.html" title="trait serde::de::Deserializer">Deserializer</a>&lt;'d&gt;</span>;
 }</pre>
             <h2 id='associated-types'>Associated Types</h2>
             <div class='methods'>
-        <h3 id='associatedtype.Identifier' class='method'><span id='Identifier.t' class='invisible'><code>type <a href='#associatedtype.Identifier' class="type">Identifier</a>: <a class="trait" href="https://doc.rust-lang.org/nightly/core/str/trait.FromStr.html" title="trait core::str::FromStr">FromStr</a></code></span></h3><h3 id='associatedtype.Attributes' class='method'><span id='Attributes.t' class='invisible'><code>type <a href='#associatedtype.Attributes' class="type">Attributes</a>: <a class="trait" href="../../../serde/de/trait.Deserialize.html" title="trait serde::de::Deserialize">Deserialize</a>&lt;'d&gt;</code></span></h3></div>
+        <h3 id='associatedtype.Identifier' class='method'><span id='Identifier.t' class='invisible'><code>type <a href='#associatedtype.Identifier' class="type">Identifier</a>: <a class="trait" href="https://doc.rust-lang.org/nightly/core/str/trait.FromStr.html" title="trait core::str::FromStr">FromStr</a></code></span></h3><h3 id='associatedtype.Attributes' class='method'><span id='Attributes.t' class='invisible'><code>type <a href='#associatedtype.Attributes' class="type">Attributes</a>: <a class="trait" href="https://docs.rs/serde/1.0.4/serde/de/trait.Deserialize.html" title="trait serde::de::Deserialize">Deserialize</a>&lt;'d&gt;</code></span></h3></div>
             <h2 id='associated-const'>Associated Constants</h2>
             <div class='methods'>
         <h3 id='associatedconstant.CLIENT_ID_POLICY' class='method'><span id='CLIENT_ID_POLICY.v' class='invisible'><code>const <a href='#associatedconstant.CLIENT_ID_POLICY' class="constant"><b>CLIENT_ID_POLICY</b></a>: <a class="enum" href="../../../cargonauts/formats/jsonapi/enum.ClientIdPolicy.html" title="enum cargonauts::formats::jsonapi::ClientIdPolicy">ClientIdPolicy</a></code></span></h3><div class='docblock'>
@@ -69,7 +69,7 @@
 </div></div>
             <h2 id='required-methods'>Required Methods</h2>
             <div class='methods'>
-        <h3 id='tymethod.from_parts' class='method'><span id='from_parts.v' class='invisible'><code>fn <a href='#tymethod.from_parts' class='fnname'>from_parts</a>(id: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;Self::<a class="trait" href="../../../cargonauts/formats/jsonapi/trait.ApiDeserialize.html" title="trait cargonauts::formats::jsonapi::ApiDeserialize">Identifier</a>&gt;, rest: Self::<a class="trait" href="../../../cargonauts/formats/jsonapi/trait.ApiDeserialize.html" title="trait cargonauts::formats::jsonapi::ApiDeserialize">Attributes</a>) -&gt; Self</code></span></h3><h3 id='tymethod.deserialize' class='method'><span id='deserialize.v' class='invisible'><code>fn <a href='#tymethod.deserialize' class='fnname'>deserialize</a>&lt;D&gt;(deserializer: D) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;Self, D::<a class="trait" href="../../../serde/de/trait.Deserializer.html" title="trait serde::de::Deserializer">Error</a>&gt; <span class="where fmt-newline">where D: <a class="trait" href="../../../serde/de/trait.Deserializer.html" title="trait serde::de::Deserializer">Deserializer</a>&lt;'d&gt;</span></code></span></h3></div>
+        <h3 id='tymethod.from_parts' class='method'><span id='from_parts.v' class='invisible'><code>fn <a href='#tymethod.from_parts' class='fnname'>from_parts</a>(id: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;Self::<a class="trait" href="../../../cargonauts/formats/jsonapi/trait.ApiDeserialize.html" title="trait cargonauts::formats::jsonapi::ApiDeserialize">Identifier</a>&gt;, rest: Self::<a class="trait" href="../../../cargonauts/formats/jsonapi/trait.ApiDeserialize.html" title="trait cargonauts::formats::jsonapi::ApiDeserialize">Attributes</a>) -&gt; Self</code></span></h3><h3 id='tymethod.deserialize' class='method'><span id='deserialize.v' class='invisible'><code>fn <a href='#tymethod.deserialize' class='fnname'>deserialize</a>&lt;D&gt;(<br>&nbsp;&nbsp;&nbsp;&nbsp;deserializer: D<br>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;Self, &lt;D as <a class="trait" href="https://docs.rs/serde/1.0.4/serde/de/trait.Deserializer.html" title="trait serde::de::Deserializer">Deserializer</a>&lt;'d&gt;&gt;::<a class="trait" href="https://docs.rs/serde/1.0.4/serde/de/trait.Deserializer.html" title="trait serde::de::Deserializer">Error</a>&gt; <span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;D: <a class="trait" href="https://docs.rs/serde/1.0.4/serde/de/trait.Deserializer.html" title="trait serde::de::Deserializer">Deserializer</a>&lt;'d&gt;,&nbsp;</span></code></span></h3></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
     </ul><script type="text/javascript" async
@@ -131,7 +131,6 @@
         window.rootPath = "../../../";
         window.currentCrate = "cargonauts";
     </script>
-    <script src="../../../jquery.js"></script>
     <script src="../../../main.js"></script>
     <script defer src="../../../search-index.js"></script>
 </body>

@@ -1,0 +1,172 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Structure of your application. - </title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <base href="">
+
+        <link rel="stylesheet" href="book.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+
+        <!-- MathJax -->
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Fetch JQuery from CDN but have a local fallback -->
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script>
+            if (typeof jQuery == 'undefined') {
+                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
+            }
+        </script>
+    </head>
+    <body class="light">
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme = localStorage.getItem('theme');
+            if (theme == null) { theme = 'light'; }
+            $('body').removeClass().addClass(theme);
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var sidebar = localStorage.getItem('sidebar');
+            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
+            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+        </script>
+
+        <div id="sidebar" class="sidebar">
+            <ul class="chapter"><li><a href="./intro.html"><strong>1.</strong> Welcome to cargonauts</a></li><li><a href="./setup.html"><strong>2.</strong> Starting a new cargonauts app</a></li><li><a href="./structure.html" class="active"><strong>3.</strong> Structure of your application.</a></li><li><a href="./mvc.html"><strong>4.</strong> Resources, methods and formats.</a></li><li><a href="./routes.html"><strong>5.</strong> The routes! DSL</a></li><li><a href="./echo.html"><strong>6.</strong> A very small application.</a></li></ul>
+        </div>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar" class="menu-bar">
+                    <div class="left-buttons">
+                        <i id="sidebar-toggle" class="fa fa-bars"></i>
+                        <i id="theme-toggle" class="fa fa-paint-brush"></i>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                    </div>
+                </div>
+
+                <div id="content" class="content">
+                    <a class="header" href="./structure.html#structure-of-your-application" id="structure-of-your-application"><h1>Structure of your application</h1></a>
+<p>If you've just created your application with <code>cargonauts new</code>, you may notice
+that it created a lot of files for you. We'll walk through what each module
+in your application is intended to be used for.</p>
+<a class="header" href="./structure.html#binserverrs" id="binserverrs"><h3><code>bin/server.rs</code></h3></a>
+<p>This is the server that you're going to be building, running, and deploying.
+Your main application is a library, and this is a binary that depends on it.
+Right now it just servers your application, but you can add any code you want
+here to do additional setup and teardown aroud your running application.</p>
+<a class="header" href="./structure.html#librs" id="librs"><h3><code>lib.rs</code></h3></a>
+<p>This is the root of your application; it doesn't contain any code by default;
+just extern crate and module declarations. It also re-exports the <code>routes</code> item
+from your routing module; this is the public entrance to your entire
+application.</p>
+<a class="header" href="./structure.html#routingrs" id="routingrs"><h3><code>routing.rs</code></h3></a>
+<p>The routing file contains the <code>routes!</code> macro, which is how we stitch all of
+the code in your application together. You'll edit this whenever you want to
+add new endpoints to your application.</p>
+<a class="header" href="./structure.html#the-assets-directory" id="the-assets-directory"><h3>The assets directory</h3></a>
+<p>This directory is for your static assets. By default, any assets here will be
+built into your application at their path relative to the asset directory root.</p>
+<p>Files starting with <code>index</code> will be served as the index for the directory they
+are in, rather than at their filename.</p>
+<p>This is not a submodule of your application; it does not contain Rust code.</p>
+<a class="header" href="./structure.html#the-clients-module" id="the-clients-module"><h3>The clients module</h3></a>
+<p>This module is for defining clients, high level API wrappers around connections
+to other running services.</p>
+<a class="header" href="./structure.html#the-formats-module" id="the-formats-module"><h3>The formats module</h3></a>
+<p>This module is for defining custom formats. cargonauts comes with several
+useful formats out of the box, but if you need to define your own, you can do
+so here.</p>
+<a class="header" href="./structure.html#the-methods-module" id="the-methods-module"><h3>The methods module</h3></a>
+<p>This module is for defining custom methods. cargonauts comes with many methods
+covering most use case, but if you do need to define your own, this is the
+module for them.</p>
+<a class="header" href="./structure.html#the-middleware-module" id="the-middleware-module"><h3>The middleware module</h3></a>
+<p>This is for defining middleware to wrap around your endpoint. If you need to
+deal directly with the HTTP requests and responses in a way that doesn't
+integrate into the resource/method/format structure of cargonauts, you just
+need to write a middleware for that.</p>
+<p>You can use middleware for instrumenting endpoints, for example.</p>
+<a class="header" href="./structure.html#the-resources-module" id="the-resources-module"><h3>The resources module</h3></a>
+<p>This is where you define your resources, and implement methods for them. This
+is probably the module you'll turn to most often, at least at first.</p>
+<a class="header" href="./structure.html#the-templates-directory" id="the-templates-directory"><h3>The templates directory</h3></a>
+<p>This directory is for your templates. When formatting your resources into HTTP
+responses, the format has access to the templates you define here in order to
+render the response. Some formats use templates and some do not.</p>
+<p>Templates are located at <code>templates/$resource/$method</code>, for example, something
+like: <code>templates/user/get.html.hbs</code> (all file extensions are optional).</p>
+<p>Like the assets directory, this is not a part of your application, and you
+shouldn't put any Rust code here.</p>
+
+                </div>
+
+                <!-- Mobile navigation buttons -->
+                
+                    <a href="./setup.html" class="mobile-nav-chapters previous">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a href="./mvc.html" class="mobile-nav-chapters next">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+
+            </div>
+
+            
+                <a href="./setup.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+            
+
+            
+                <a href="./mvc.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            
+
+        </div>
+
+
+        <!-- Local fallback for Font Awesome -->
+        <script>
+            if ($(".fa").css("font-family") !== "FontAwesome") {
+                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
+            }
+        </script>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        
+
+        
+
+
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+    </body>
+</html>

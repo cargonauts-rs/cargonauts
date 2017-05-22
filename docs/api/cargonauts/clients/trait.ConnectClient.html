@@ -29,7 +29,7 @@
 
     <nav class="sidebar">
         
-        <p class='location'><a href='../index.html'>cargonauts</a>::<wbr><a href='index.html'>clients</a></p><script>window.sidebarCurrent = {name: 'ConnectClient', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'>Trait ConnectClient</p><div class="block items"><ul><li><a href="#required-methods">Required Methods</a></li><li><a href="#implementors">Implementors</a></li></ul></div><p class='location'><a href='../index.html'>cargonauts</a>::<wbr><a href='index.html'>clients</a></p><script>window.sidebarCurrent = {name: 'ConnectClient', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -48,8 +48,8 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a class='srclink' href='../../src/rigging/connections/mod.rs.html#29-31' title='goto source code'>[src]</a></span></h1>
-<pre class='rust trait'>pub trait ConnectClient&lt;C&gt;: <a class="trait" href="../../cargonauts/clients/trait.Client.html" title="trait cargonauts::clients::Client">Client</a> <span class="where fmt-newline">where C: <a class="trait" href="../../cargonauts/clients/trait.NewServiceLike.html" title="trait cargonauts::clients::NewServiceLike">NewServiceLike</a>&lt;Self::<a class="trait" href="../../cargonauts/clients/trait.Client.html" title="trait cargonauts::clients::Client">Connection</a>&gt;</span> {
+               </span></span></h1>
+<pre class='rust trait'>pub trait ConnectClient&lt;C&gt;: <a class="trait" href="../../cargonauts/clients/trait.Client.html" title="trait cargonauts::clients::Client">Client</a> <span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;C: <a class="trait" href="../../cargonauts/clients/trait.NewServiceLike.html" title="trait cargonauts::clients::NewServiceLike">NewServiceLike</a>&lt;Self::<a class="trait" href="../../cargonauts/clients/trait.Client.html" title="trait cargonauts::clients::Client">Connection</a>&gt;,&nbsp;</span>{
     fn <a href='#tymethod.connect' class='fnname'>connect</a>(conn: <a class="struct" href="../../cargonauts/clients/struct.Conn.html" title="struct cargonauts::clients::Conn">Conn</a>&lt;C&gt;) -&gt; Self;
 }</pre>
             <h2 id='required-methods'>Required Methods</h2>
@@ -116,7 +116,6 @@
         window.rootPath = "../../";
         window.currentCrate = "cargonauts";
     </script>
-    <script src="../../jquery.js"></script>
     <script src="../../main.js"></script>
     <script defer src="../../search-index.js"></script>
 </body>

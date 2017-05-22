@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["FormatLender",""],["Template",""],["TemplateKey",""]],"trait":[["BuildFormat",""],["Format",""]]});

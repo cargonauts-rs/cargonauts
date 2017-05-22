@@ -29,7 +29,7 @@
 
     <nav class="sidebar">
         
-        <p class='location'><a href='../index.html'>cargonauts</a>::<wbr><a href='index.html'>resources</a></p><script>window.sidebarCurrent = {name: 'Relationship', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'>Trait Relationship</p><div class="block items"><ul><li><a href="#associated-types">Associated Types</a></li><li><a href="#implementors">Implementors</a></li></ul></div><p class='location'><a href='../index.html'>cargonauts</a>::<wbr><a href='index.html'>resources</a></p><script>window.sidebarCurrent = {name: 'Relationship', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -48,7 +48,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a class='srclink' href='../../src/rigging/resource.rs.html#32-34' title='goto source code'>[src]</a></span></h1>
+               </span></span></h1>
 <pre class='rust trait'>pub trait Relationship: 'static {
     type <a href='#associatedtype.Related' class="type">Related</a>: <a class="trait" href="../../cargonauts/resources/trait.Resource.html" title="trait cargonauts::resources::Resource">Resource</a>;
 }</pre>
@@ -57,7 +57,7 @@
         <h3 id='associatedtype.Related' class='method'><span id='Related.t' class='invisible'><code>type <a href='#associatedtype.Related' class="type">Related</a>: <a class="trait" href="../../cargonauts/resources/trait.Resource.html" title="trait cargonauts::resources::Resource">Resource</a></code></span></h3></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
-    <li><code>impl&lt;T&gt; Relationship for T <span class="where fmt-newline">where T: <a class="trait" href="../../cargonauts/resources/trait.Resource.html" title="trait cargonauts::resources::Resource">Resource</a></span></code></li>
+    <li><code>impl&lt;T&gt; Relationship for T <span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;T: <a class="trait" href="../../cargonauts/resources/trait.Resource.html" title="trait cargonauts::resources::Resource">Resource</a>,&nbsp;</span></code></li>
 </ul><script type="text/javascript" async
                          src="../../implementors/rigging/resource/trait.Relationship.js">
                  </script></section>
@@ -117,7 +117,6 @@
         window.rootPath = "../../";
         window.currentCrate = "cargonauts";
     </script>
-    <script src="../../jquery.js"></script>
     <script src="../../main.js"></script>
     <script defer src="../../search-index.js"></script>
 </body>

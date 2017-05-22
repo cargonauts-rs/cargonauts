@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["Kind",""]],"fn":[["default_asset_handler",""],["not_found",""],["path",""],["resource_path",""]],"struct":[["AssetHandler",""],["Route",""],["RouteBuilder",""],["RoutingTable",""]],"type":[["Handler",""]]});

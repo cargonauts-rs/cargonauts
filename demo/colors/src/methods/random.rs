@@ -1,5 +1,5 @@
 use cargonauts::futures::Future;
-use cargonauts::methods::*;
+use cargonauts::methods::def::*;
 use cargonauts::resources::*;
 
 pub trait Random: Resource {

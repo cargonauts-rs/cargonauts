@@ -1,1 +1,0 @@
-initSidebarItems({"trait":[["Delete",""],["DeleteRelated",""],["Get",""],["GetMany",""],["GetOne",""],["Index",""],["Patch",""],["Post",""],["PostRelated",""],["UpdateRelated",""]]});

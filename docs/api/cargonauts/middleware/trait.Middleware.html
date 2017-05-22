@@ -29,7 +29,7 @@
 
     <nav class="sidebar">
         
-        <p class='location'><a href='../index.html'>cargonauts</a>::<wbr><a href='index.html'>middleware</a></p><script>window.sidebarCurrent = {name: 'Middleware', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'>Trait Middleware</p><div class="block items"><ul><li><a href="#associated-types">Associated Types</a></li><li><a href="#required-methods">Required Methods</a></li><li><a href="#implementors">Implementors</a></li></ul></div><p class='location'><a href='../index.html'>cargonauts</a>::<wbr><a href='index.html'>middleware</a></p><script>window.sidebarCurrent = {name: 'Middleware', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -48,8 +48,8 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a class='srclink' href='../../src/cargonauts/lib.rs.html#109-116' title='goto source code'>[src]</a></span></h1>
-<pre class='rust trait'>pub trait Middleware&lt;S&gt;: <a class="trait" href="https://doc.rust-lang.org/nightly/core/default/trait.Default.html" title="trait core::default::Default">Default</a> <span class="where fmt-newline">where S: <a class="trait" href="../../cargonauts/middleware/trait.Service.html" title="trait cargonauts::middleware::Service">Service</a>&lt;Request = <a class="struct" href="../../cargonauts/middleware/struct.Request.html" title="struct cargonauts::middleware::Request">Request</a>, Response = <a class="struct" href="../../cargonauts/middleware/http/struct.Response.html" title="struct cargonauts::middleware::http::Response">Response</a>, Error = <a class="enum" href="../../cargonauts/middleware/http/enum.Error.html" title="enum cargonauts::middleware::http::Error">Error</a>, Future = <a class="type" href="../../cargonauts/middleware/http/type.BoxFuture.html" title="type cargonauts::middleware::http::BoxFuture">BoxFuture</a>&gt;</span> {
+               </span><a class='srclink' href='../../src/cargonauts/lib.rs.html#113-120' title='goto source code'>[src]</a></span></h1>
+<pre class='rust trait'>pub trait Middleware&lt;S&gt;: <a class="trait" href="https://doc.rust-lang.org/nightly/core/default/trait.Default.html" title="trait core::default::Default">Default</a> <span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;S: <a class="trait" href="../../cargonauts/middleware/trait.Service.html" title="trait cargonauts::middleware::Service">Service</a>&lt;Request = <a class="struct" href="../../cargonauts/middleware/struct.Request.html" title="struct cargonauts::middleware::Request">Request</a>, Response = <a class="struct" href="../../cargonauts/middleware/http/struct.Response.html" title="struct cargonauts::middleware::http::Response">Response</a>, Error = <a class="enum" href="../../cargonauts/middleware/http/enum.Error.html" title="enum cargonauts::middleware::http::Error">Error</a>, Future = <a class="type" href="../../cargonauts/middleware/http/type.BoxFuture.html" title="type cargonauts::middleware::http::BoxFuture">BoxFuture</a>&gt;,&nbsp;</span>{
     type <a href='#associatedtype.WrappedService' class="type">WrappedService</a>: <a class="trait" href="../../cargonauts/middleware/trait.Service.html" title="trait cargonauts::middleware::Service">Service</a>&lt;Request = <a class="struct" href="../../cargonauts/middleware/struct.Request.html" title="struct cargonauts::middleware::Request">Request</a>, Response = <a class="struct" href="../../cargonauts/middleware/http/struct.Response.html" title="struct cargonauts::middleware::http::Response">Response</a>, Error = <a class="enum" href="../../cargonauts/middleware/http/enum.Error.html" title="enum cargonauts::middleware::http::Error">Error</a>, Future = <a class="type" href="../../cargonauts/middleware/http/type.BoxFuture.html" title="type cargonauts::middleware::http::BoxFuture">BoxFuture</a>&gt;;
     fn <a href='#tymethod.wrap' class='fnname'>wrap</a>(self, service: S) -&gt; Self::<a class="trait" href="../../cargonauts/middleware/trait.Middleware.html" title="trait cargonauts::middleware::Middleware">WrappedService</a>;
 }</pre>
@@ -120,7 +120,6 @@
         window.rootPath = "../../";
         window.currentCrate = "cargonauts";
     </script>
-    <script src="../../jquery.js"></script>
     <script src="../../main.js"></script>
     <script defer src="../../search-index.js"></script>
 </body>

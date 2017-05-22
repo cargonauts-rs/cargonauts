@@ -29,7 +29,7 @@
 
     <nav class="sidebar">
         
-        <p class='location'><a href='../index.html'>cargonauts</a>::<wbr><a href='index.html'>clients</a></p><script>window.sidebarCurrent = {name: 'Configure', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'>Trait Configure</p><div class="block items"><ul><li><a href="#associated-types">Associated Types</a></li><li><a href="#required-methods">Required Methods</a></li><li><a href="#implementors">Implementors</a></li></ul></div><p class='location'><a href='../index.html'>cargonauts</a>::<wbr><a href='index.html'>clients</a></p><script>window.sidebarCurrent = {name: 'Configure', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -48,20 +48,20 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a class='srclink' href='../../src/rigging/connections/mod.rs.html#9-12' title='goto source code'>[src]</a></span></h1>
+               </span></span></h1>
 <pre class='rust trait'>pub trait Configure {
-    type <a href='#associatedtype.Config' class="type">Config</a>: <a class="trait" href="https://doc.rust-lang.org/nightly/core/default/trait.Default.html" title="trait core::default::Default">Default</a> + <a class="trait" href="../../serde/de/trait.DeserializeOwned.html" title="trait serde::de::DeserializeOwned">DeserializeOwned</a>;
+    type <a href='#associatedtype.Config' class="type">Config</a>: <a class="trait" href="https://doc.rust-lang.org/nightly/core/default/trait.Default.html" title="trait core::default::Default">Default</a> + <a class="trait" href="https://docs.rs/serde/1.0.4/serde/de/trait.DeserializeOwned.html" title="trait serde::de::DeserializeOwned">DeserializeOwned</a>;
     fn <a href='#tymethod.config' class='fnname'>config</a>(cfg: Self::<a class="trait" href="../../cargonauts/clients/trait.Configure.html" title="trait cargonauts::clients::Configure">Config</a>, handle: <a class="struct" href="../../cargonauts/server/struct.Handle.html" title="struct cargonauts::server::Handle">Handle</a>) -&gt; Self;
 }</pre>
             <h2 id='associated-types'>Associated Types</h2>
             <div class='methods'>
-        <h3 id='associatedtype.Config' class='method'><span id='Config.t' class='invisible'><code>type <a href='#associatedtype.Config' class="type">Config</a>: <a class="trait" href="https://doc.rust-lang.org/nightly/core/default/trait.Default.html" title="trait core::default::Default">Default</a> + <a class="trait" href="../../serde/de/trait.DeserializeOwned.html" title="trait serde::de::DeserializeOwned">DeserializeOwned</a></code></span></h3></div>
+        <h3 id='associatedtype.Config' class='method'><span id='Config.t' class='invisible'><code>type <a href='#associatedtype.Config' class="type">Config</a>: <a class="trait" href="https://doc.rust-lang.org/nightly/core/default/trait.Default.html" title="trait core::default::Default">Default</a> + <a class="trait" href="https://docs.rs/serde/1.0.4/serde/de/trait.DeserializeOwned.html" title="trait serde::de::DeserializeOwned">DeserializeOwned</a></code></span></h3></div>
             <h2 id='required-methods'>Required Methods</h2>
             <div class='methods'>
         <h3 id='tymethod.config' class='method'><span id='config.v' class='invisible'><code>fn <a href='#tymethod.config' class='fnname'>config</a>(cfg: Self::<a class="trait" href="../../cargonauts/clients/trait.Configure.html" title="trait cargonauts::clients::Configure">Config</a>, handle: <a class="struct" href="../../cargonauts/server/struct.Handle.html" title="struct cargonauts::server::Handle">Handle</a>) -&gt; Self</code></span></h3></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
-    <li><code>impl Configure for <a class="struct" href="../../tokio_redis/struct.Redis.html" title="struct tokio_redis::Redis">Redis</a></code></li>
+    <li><code>impl Configure for Redis</code></li>
 </ul><script type="text/javascript" async
                          src="../../implementors/rigging/connections/trait.Configure.js">
                  </script></section>
@@ -121,7 +121,6 @@
         window.rootPath = "../../";
         window.currentCrate = "cargonauts";
     </script>
-    <script src="../../jquery.js"></script>
     <script src="../../main.js"></script>
     <script defer src="../../search-index.js"></script>
 </body>
