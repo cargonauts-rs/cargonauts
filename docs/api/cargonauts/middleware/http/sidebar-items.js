@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Error","A set of errors that can occur parsing HTTP streams."]],"struct":[["Request","A request bundles several parts of an incoming `NetworkStream`, given to a `Handler`."],["Response","The Response sent to a client after receiving a Request in a Service."]],"type":[["BoxFuture",""]]});

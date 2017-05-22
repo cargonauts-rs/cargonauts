@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Http` struct in crate `hyper`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Http">
+
+    <title>hyper::server::Http - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../normalize.css">
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc struct">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>hyper</a>::<wbr><a href='index.html'>server</a></p><script>window.sidebarCurrent = {name: 'Http', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>hyper</a>::<wbr><a href='index.html'>server</a>::<wbr><a class="struct" href=''>Http</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a class='srclink' href='../../src/hyper/server/mod.rs.html#41-44' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Http&lt;B&nbsp;=&nbsp;<a class="struct" href="../../hyper/struct.Chunk.html" title="struct hyper::Chunk">Chunk</a>&gt; { /* fields omitted */ }</pre><div class='docblock'><p>An instance of the HTTP protocol, and implementation of tokio-proto's
+<code>ServerProto</code> trait.</p>
+<p>This structure is used to create instances of <code>Server</code> or to spawn off tasks
+which handle a connection to an HTTP server. Each instance of <code>Http</code> can be
+configured with various protocol-level options such as keepalive.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><span class='in-band'><code>impl&lt;B:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html" title="trait core::convert::AsRef">AsRef</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">[</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u8.html">u8</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">]</a>&gt; + 'static&gt; <a class="struct" href="../../hyper/server/struct.Http.html" title="struct hyper::server::Http">Http</a>&lt;B&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/hyper/server/mod.rs.html#61-135' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.new' class="method"><span id='new.v' class='invisible'><code>fn <a href='#method.new' class='fnname'>new</a>() -&gt; <a class="struct" href="../../hyper/server/struct.Http.html" title="struct hyper::server::Http">Http</a>&lt;B&gt;</code></span></h4>
+<div class='docblock'><p>Creates a new instance of the HTTP protocol, ready to spawn a server or
+start accepting connections.</p>
+</div><h4 id='method.keep_alive' class="method"><span id='keep_alive.v' class='invisible'><code>fn <a href='#method.keep_alive' class='fnname'>keep_alive</a>(&amp;mut self, val: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>) -&gt; &amp;mut Self</code></span></h4>
+<div class='docblock'><p>Enables or disables HTTP keep-alive.</p>
+<p>Default is true.</p>
+</div><h4 id='method.bind' class="method"><span id='bind.v' class='invisible'><code>fn <a href='#method.bind' class='fnname'>bind</a>&lt;S, Bd&gt;(&amp;self,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; addr: &amp;<a class="enum" href="https://doc.rust-lang.org/nightly/std/net/addr/enum.SocketAddr.html" title="enum std::net::addr::SocketAddr">SocketAddr</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; new_service: S)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -&gt; <a class="type" href="../../hyper/error/type.Result.html" title="type hyper::error::Result">Result</a>&lt;<a class="struct" href="../../hyper/server/struct.Server.html" title="struct hyper::server::Server">Server</a>&lt;S, Bd&gt;&gt; <span class="where fmt-newline">where S: <a class="trait" href="../../hyper/server/trait.NewService.html" title="trait hyper::server::NewService">NewService</a>&lt;Request = <a class="struct" href="../../hyper/server/struct.Request.html" title="struct hyper::server::Request">Request</a>, Response = <a class="struct" href="../../hyper/server/struct.Response.html" title="struct hyper::server::Response">Response</a>&lt;Bd&gt;, Error = <a class="enum" href="../../hyper/error/enum.Error.html" title="enum hyper::error::Error">Error</a>&gt; + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sync.html" title="trait core::marker::Sync">Sync</a> + 'static,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bd: <a class="trait" href="../../futures/stream/trait.Stream.html" title="trait futures::stream::Stream">Stream</a>&lt;Item = B, Error = <a class="enum" href="../../hyper/error/enum.Error.html" title="enum hyper::error::Error">Error</a>&gt;</span></code></span></h4>
+<div class='docblock'><p>Bind the provided <code>addr</code> and return a server ready to handle
+connections.</p>
+<p>This method will bind the <code>addr</code> provided with a new TCP listener ready
+to accept connections. Each connection will be processed with the
+<code>new_service</code> object provided as well, creating a new service per
+connection.</p>
+<p>The returned <code>Server</code> contains one method, <code>run</code>, which is used to
+actually run the server.</p>
+</div><h4 id='method.bind_connection' class="method"><span id='bind_connection.v' class='invisible'><code>fn <a href='#method.bind_connection' class='fnname'>bind_connection</a>&lt;S, I, Bd&gt;(&amp;self,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; handle: &amp;<a class="struct" href="../../tokio_core/reactor/struct.Handle.html" title="struct tokio_core::reactor::Handle">Handle</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; io: I,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; remote_addr: <a class="enum" href="https://doc.rust-lang.org/nightly/std/net/addr/enum.SocketAddr.html" title="enum std::net::addr::SocketAddr">SocketAddr</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; service: S) <span class="where fmt-newline">where S: <a class="trait" href="../../hyper/server/trait.Service.html" title="trait hyper::server::Service">Service</a>&lt;Request = <a class="struct" href="../../hyper/server/struct.Request.html" title="struct hyper::server::Request">Request</a>, Response = <a class="struct" href="../../hyper/server/struct.Response.html" title="struct hyper::server::Response">Response</a>&lt;Bd&gt;, Error = <a class="enum" href="../../hyper/error/enum.Error.html" title="enum hyper::error::Error">Error</a>&gt; + 'static,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bd: <a class="trait" href="../../futures/stream/trait.Stream.html" title="trait futures::stream::Stream">Stream</a>&lt;Item = B, Error = <a class="enum" href="../../hyper/error/enum.Error.html" title="enum hyper::error::Error">Error</a>&gt; + 'static,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;I: <a class="trait" href="../../tokio_io/trait.AsyncRead.html" title="trait tokio_io::AsyncRead">AsyncRead</a> + <a class="trait" href="../../tokio_io/trait.AsyncWrite.html" title="trait tokio_io::AsyncWrite">AsyncWrite</a> + 'static</span></code></span></h4>
+<div class='docblock'><p>Use this <code>Http</code> instance to create a new server task which handles the
+connection <code>io</code> provided.</p>
+<p>This is the low-level method used to actually spawn handling a TCP
+connection, typically. The <code>handle</code> provided is the event loop on which
+the server task will be spawned, <code>io</code> is the I/O object associated with
+this connection (data that's read/written), <code>remote_addr</code> is the remote
+peer address of the HTTP client, and <code>service</code> defines how HTTP requests
+will be handled (and mapped to responses).</p>
+<p>This method is typically not invoked directly but is rather transitively
+used through the <code>serve</code> helper method above. This can be useful,
+however, when writing mocks or accepting sockets from a non-TCP
+location.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl&lt;B&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> for <a class="struct" href="../../hyper/server/struct.Http.html" title="struct hyper::server::Http">Http</a>&lt;B&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/hyper/server/mod.rs.html#137-143' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.clone' class="method"><span id='clone.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class="struct" href="../../hyper/server/struct.Http.html" title="struct hyper::server::Http">Http</a>&lt;B&gt;</code></span></h4>
+<div class='docblock'><p>Returns a copy of the value. <a href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone">Read more</a></p>
+</div><h4 id='method.clone_from' class="method"><span id='clone_from.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code><div class='since' title='Stable since Rust version 1.0.0'>1.0.0</div></span></h4>
+<div class='docblock'><p>Performs copy-assignment from <code>source</code>. <a href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from">Read more</a></p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl&lt;B&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html" title="trait core::fmt::Debug">Debug</a> for <a class="struct" href="../../hyper/server/struct.Http.html" title="struct hyper::server::Http">Http</a>&lt;B&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/hyper/server/mod.rs.html#145-151' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.fmt' class="method"><span id='fmt.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class="struct" href="https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html" title="struct core::fmt::Formatter">Formatter</a>) -&gt; <a class="type" href="https://doc.rust-lang.org/nightly/core/fmt/type.Result.html" title="type core::fmt::Result">Result</a></code></span></h4>
+<div class='docblock'><p>Formats the value using the given formatter.</p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl&lt;T, B&gt; <a class="trait" href="../../tokio_proto/streaming/pipeline/server/trait.ServerProto.html" title="trait tokio_proto::streaming::pipeline::server::ServerProto">ServerProto</a>&lt;T&gt; for <a class="struct" href="../../hyper/server/struct.Http.html" title="struct hyper::server::Http">Http</a>&lt;B&gt; <span class="where fmt-newline">where T: <a class="trait" href="../../tokio_io/trait.AsyncRead.html" title="trait tokio_io::AsyncRead">AsyncRead</a> + <a class="trait" href="../../tokio_io/trait.AsyncWrite.html" title="trait tokio_io::AsyncWrite">AsyncWrite</a> + 'static,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B: <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html" title="trait core::convert::AsRef">AsRef</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">[</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u8.html">u8</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">]</a>&gt; + 'static</span></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/hyper/server/mod.rs.html#168-190' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='associatedtype.Request' class="type"><span id='Request.t' class='invisible'><code>type <a href='../../tokio_proto/streaming/pipeline/server/trait.ServerProto.html#associatedtype.Request' class="type">Request</a> = __ProtoRequest</code></span></h4>
+<div class='docblock'><p>Request headers.</p>
+</div><h4 id='associatedtype.RequestBody' class="type"><span id='RequestBody.t' class='invisible'><code>type <a href='../../tokio_proto/streaming/pipeline/server/trait.ServerProto.html#associatedtype.RequestBody' class="type">RequestBody</a> = <a class="struct" href="../../hyper/struct.Chunk.html" title="struct hyper::Chunk">Chunk</a></code></span></h4>
+<div class='docblock'><p>Request body chunks.</p>
+</div><h4 id='associatedtype.Response' class="type"><span id='Response.t' class='invisible'><code>type <a href='../../tokio_proto/streaming/pipeline/server/trait.ServerProto.html#associatedtype.Response' class="type">Response</a> = __ProtoResponse</code></span></h4>
+<div class='docblock'><p>Response headers.</p>
+</div><h4 id='associatedtype.ResponseBody' class="type"><span id='ResponseBody.t' class='invisible'><code>type <a href='../../tokio_proto/streaming/pipeline/server/trait.ServerProto.html#associatedtype.ResponseBody' class="type">ResponseBody</a> = B</code></span></h4>
+<div class='docblock'><p>Response body chunks.</p>
+</div><h4 id='associatedtype.Error' class="type"><span id='Error.t' class='invisible'><code>type <a href='../../tokio_proto/streaming/pipeline/server/trait.ServerProto.html#associatedtype.Error' class="type">Error</a> = <a class="enum" href="../../hyper/error/enum.Error.html" title="enum hyper::error::Error">Error</a></code></span></h4>
+<div class='docblock'><p>Errors, which are used both for error frames and for the service itself.</p>
+</div><h4 id='associatedtype.Transport' class="type"><span id='Transport.t' class='invisible'><code>type <a href='../../tokio_proto/streaming/pipeline/server/trait.ServerProto.html#associatedtype.Transport' class="type">Transport</a> = __ProtoTransport&lt;T, B&gt;</code></span></h4>
+<div class='docblock'><p>The frame transport, which usually take <code>T</code> as a parameter.</p>
+</div><h4 id='associatedtype.BindTransport' class="type"><span id='BindTransport.t' class='invisible'><code>type <a href='../../tokio_proto/streaming/pipeline/server/trait.ServerProto.html#associatedtype.BindTransport' class="type">BindTransport</a> = __ProtoBindTransport&lt;T, B&gt;</code></span></h4>
+<div class='docblock'><p>A future for initializing a transport from an I/O object. <a href="../../tokio_proto/streaming/pipeline/server/trait.ServerProto.html#associatedtype.BindTransport">Read more</a></p>
+</div><h4 id='method.bind_transport' class="method"><span id='bind_transport.v' class='invisible'><code>fn <a href='../../tokio_proto/streaming/pipeline/server/trait.ServerProto.html#tymethod.bind_transport' class='fnname'>bind_transport</a>(&amp;self, io: T) -&gt; Self::<a class="trait" href="../../tokio_proto/streaming/pipeline/server/trait.ServerProto.html" title="trait tokio_proto::streaming::pipeline::server::ServerProto">BindTransport</a></code></span></h4>
+<div class='docblock'><p>Build a transport from the given I/O object, using <code>self</code> for any configuration. <a href="../../tokio_proto/streaming/pipeline/server/trait.ServerProto.html#tymethod.bind_transport">Read more</a></p>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "hyper";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

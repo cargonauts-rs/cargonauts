@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["RelationshipLink",""],["WithRels",""]],"trait":[["HasManyEndpoint",""],["HasOneEndpoint",""],["RelIds",""],["RelationEndpoint",""],["Relationship",""],["Resource",""],["ResourceEndpoint",""]]});

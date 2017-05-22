@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["serve",""]],"macro":[["relation",""],["routes","The routes DSL"]],"mod":[["clients",""],["config",""],["formats",""],["methods",""],["middleware",""],["resources",""],["server",""]]});

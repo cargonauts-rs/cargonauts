@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Io` trait in crate `tokio_core`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Io">
+
+    <title>tokio_core::io::Io - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../normalize.css">
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc trait">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>tokio_core</a>::<wbr><a href='index.html'>io</a></p><script>window.sidebarCurrent = {name: 'Io', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content">
+<h1 class='fqn'><span class='in-band'>Trait <a href='../index.html'>tokio_core</a>::<wbr><a href='index.html'>io</a>::<wbr><a class="trait" href=''>Io</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a class='srclink' href='../../src/tokio_core/io/mod.rs.html#76-204' title='goto source code'>[src]</a></span></h1>
+<pre class='rust trait'>pub trait Io: <a class="trait" href="https://doc.rust-lang.org/nightly/std/io/trait.Read.html" title="trait std::io::Read">Read</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/std/io/trait.Write.html" title="trait std::io::Write">Write</a> {
+    fn <a href='#method.poll_read' class='fnname'>poll_read</a>(&amp;mut self) -&gt; <a class="enum" href="../../futures/poll/enum.Async.html" title="enum futures::poll::Async">Async</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a>&gt; { ... }
+    fn <a href='#method.poll_write' class='fnname'>poll_write</a>(&amp;mut self) -&gt; <a class="enum" href="../../futures/poll/enum.Async.html" title="enum futures::poll::Async">Async</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a>&gt; { ... }
+    fn <a href='#method.read_vec' class='fnname'>read_vec</a>(&amp;mut self, bufs: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">&amp;mut [</a>&amp;mut <a class="struct" href="../../iovec/struct.IoVec.html" title="struct iovec::IoVec">IoVec</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">]</a>) -&gt; <a class="type" href="https://doc.rust-lang.org/nightly/std/io/error/type.Result.html" title="type std::io::error::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>&gt; { ... }
+    fn <a href='#method.write_vec' class='fnname'>write_vec</a>(&amp;mut self, bufs: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">&amp;[</a>&amp;<a class="struct" href="../../iovec/struct.IoVec.html" title="struct iovec::IoVec">IoVec</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">]</a>) -&gt; <a class="type" href="https://doc.rust-lang.org/nightly/std/io/error/type.Result.html" title="type std::io::error::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>&gt; { ... }
+    fn <a href='#method.framed' class='fnname'>framed</a>&lt;C:&nbsp;<a class="trait" href="../../tokio_core/io/trait.Codec.html" title="trait tokio_core::io::Codec">Codec</a>&gt;(self, codec: C) -&gt; <a class="struct" href="../../tokio_core/io/struct.Framed.html" title="struct tokio_core::io::Framed">Framed</a>&lt;Self, C&gt; <span class="where fmt-newline">where Self: <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a></span> { ... }
+    fn <a href='#method.split' class='fnname'>split</a>(self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">(</a><a class="struct" href="../../tokio_core/io/struct.ReadHalf.html" title="struct tokio_core::io::ReadHalf">ReadHalf</a>&lt;Self&gt;, <a class="struct" href="../../tokio_core/io/struct.WriteHalf.html" title="struct tokio_core::io::WriteHalf">WriteHalf</a>&lt;Self&gt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">)</a> <span class="where fmt-newline">where Self: <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a></span> { ... }
+}</pre><div class='stability'><div class='stab deprecated'>Deprecated<p>: moved to the <code>tokio-io</code> crate</p>
+</div></div><div class='docblock'><p>A trait for read/write I/O objects</p>
+<p>This trait represents I/O object which are readable and writable.
+Additionally, they're associated with the ability to test whether they're
+readable or writable.</p>
+<p>Importantly, the methods of this trait are intended to be used in conjunction
+with the current task of a future. Namely whenever any of them return a
+value that indicates &quot;would block&quot; the current future's task is arranged to
+receive a notification when the method would otherwise not indicate that it
+would block.</p>
+</div>
+            <h2 id='provided-methods'>Provided Methods</h2>
+            <div class='methods'>
+        <h3 id='method.poll_read' class='method'><span id='poll_read.v' class='invisible'><code>fn <a href='#method.poll_read' class='fnname'>poll_read</a>(&amp;mut self) -&gt; <a class="enum" href="../../futures/poll/enum.Async.html" title="enum futures::poll::Async">Async</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a>&gt;</code></span></h3><div class='stability'><div class='stab deprecated'>Deprecated<p>: moved to the <code>tokio-io</code> crate</p>
+</div></div><div class='docblock'><p>Tests to see if this I/O object may be readable.</p>
+<p>This method returns an <code>Async&lt;()&gt;</code> indicating whether the object
+<strong>might</strong> be readable. It is possible that even if this method returns
+<code>Async::Ready</code> that a call to <code>read</code> would return a <code>WouldBlock</code> error.</p>
+<p>There is a default implementation for this function which always
+indicates that an I/O object is readable, but objects which can
+implement a finer grained version of this are recommended to do so.</p>
+<p>If this function returns <code>Async::NotReady</code> then the current future's
+task is arranged to receive a notification when it might not return
+<code>NotReady</code>.</p>
+<h1 id="panics" class="section-header"><a href="#panics">Panics</a></h1>
+<p>This method is likely to panic if called from outside the context of a
+future's task.</p>
+</div><h3 id='method.poll_write' class='method'><span id='poll_write.v' class='invisible'><code>fn <a href='#method.poll_write' class='fnname'>poll_write</a>(&amp;mut self) -&gt; <a class="enum" href="../../futures/poll/enum.Async.html" title="enum futures::poll::Async">Async</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a>&gt;</code></span></h3><div class='stability'><div class='stab deprecated'>Deprecated<p>: moved to the <code>tokio-io</code> crate</p>
+</div></div><div class='docblock'><p>Tests to see if this I/O object may be writable.</p>
+<p>This method returns an <code>Async&lt;()&gt;</code> indicating whether the object
+<strong>might</strong> be writable. It is possible that even if this method returns
+<code>Async::Ready</code> that a call to <code>write</code> would return a <code>WouldBlock</code> error.</p>
+<p>There is a default implementation for this function which always
+indicates that an I/O object is writable, but objects which can
+implement a finer grained version of this are recommended to do so.</p>
+<p>If this function returns <code>Async::NotReady</code> then the current future's
+task is arranged to receive a notification when it might not return
+<code>NotReady</code>.</p>
+<h1 id="panics-1" class="section-header"><a href="#panics-1">Panics</a></h1>
+<p>This method is likely to panic if called from outside the context of a
+future's task.</p>
+</div><h3 id='method.read_vec' class='method'><span id='read_vec.v' class='invisible'><code>fn <a href='#method.read_vec' class='fnname'>read_vec</a>(&amp;mut self, bufs: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">&amp;mut [</a>&amp;mut <a class="struct" href="../../iovec/struct.IoVec.html" title="struct iovec::IoVec">IoVec</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">]</a>) -&gt; <a class="type" href="https://doc.rust-lang.org/nightly/std/io/error/type.Result.html" title="type std::io::error::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>&gt;</code></span></h3><div class='stability'><div class='stab deprecated'>Deprecated<p>: moved to the <code>tokio-io</code> crate</p>
+</div></div><div class='docblock'><p>Read in a list of buffers all at once.</p>
+<p>This operation will attempt to read bytes from this socket and place
+them into the list of buffers provided. Note that each buffer is an
+<code>IoVec</code> which can be created from a byte slice.</p>
+<p>The buffers provided will be filled in sequentially. A buffer will be
+entirely filled up before the next is written to.</p>
+<p>The number of bytes read is returned, if successful, or an error is
+returned otherwise. If no bytes are available to be read yet then
+a &quot;would block&quot; error is returned. This operation should not block.</p>
+<p>There is a default implementation for this function which treats this
+as a single read using the first buffer in the list, but objects which
+can implement this as an atomic read using all the buffers are
+recommended to do so. For example, <code>TcpStream</code> can implement this
+using the <code>readv</code> syscall.</p>
+</div><h3 id='method.write_vec' class='method'><span id='write_vec.v' class='invisible'><code>fn <a href='#method.write_vec' class='fnname'>write_vec</a>(&amp;mut self, bufs: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">&amp;[</a>&amp;<a class="struct" href="../../iovec/struct.IoVec.html" title="struct iovec::IoVec">IoVec</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">]</a>) -&gt; <a class="type" href="https://doc.rust-lang.org/nightly/std/io/error/type.Result.html" title="type std::io::error::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>&gt;</code></span></h3><div class='stability'><div class='stab deprecated'>Deprecated<p>: moved to the <code>tokio-io</code> crate</p>
+</div></div><div class='docblock'><p>Write a list of buffers all at once.</p>
+<p>This operation will attempt to write a list of byte buffers to this
+socket. Note that each buffer is an <code>IoVec</code> which can be created from a
+byte slice.</p>
+<p>The buffers provided will be written sequentially. A buffer will be
+entirely written before the next is written.</p>
+<p>The number of bytes written is returned, if successful, or an error is
+returned otherwise. If the socket is not currently writable then a
+&quot;would block&quot; error is returned. This operation should not block.</p>
+<p>There is a default implementation for this function which writes the
+first buffer only, but objects which can implement this as an atomic
+write using all the buffers are  recommended to do so. For example,
+<code>TcpStream</code> can implement this  using the <code>writev</code> syscall.</p>
+</div><h3 id='method.framed' class='method'><span id='framed.v' class='invisible'><code>fn <a href='#method.framed' class='fnname'>framed</a>&lt;C:&nbsp;<a class="trait" href="../../tokio_core/io/trait.Codec.html" title="trait tokio_core::io::Codec">Codec</a>&gt;(self, codec: C) -&gt; <a class="struct" href="../../tokio_core/io/struct.Framed.html" title="struct tokio_core::io::Framed">Framed</a>&lt;Self, C&gt; <span class="where fmt-newline">where Self: <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a></span></code></span></h3><div class='stability'><div class='stab deprecated'>Deprecated<p>: moved to the <code>tokio-io</code> crate</p>
+</div></div><div class='docblock'><p>Provides a <code>Stream</code> and <code>Sink</code> interface for reading and writing to this
+<code>Io</code> object, using <code>Decode</code> and <code>Encode</code> to read and write the raw data.</p>
+<p>Raw I/O objects work with byte sequences, but higher-level code usually
+wants to batch these into meaningful chunks, called &quot;frames&quot;. This
+method layers framing on top of an I/O object, by using the <code>Codec</code>
+traits to handle encoding and decoding of messages frames. Note that
+the incoming and outgoing frame types may be distinct.</p>
+<p>This function returns a <em>single</em> object that is both <code>Stream</code> and
+<code>Sink</code>; grouping this into a single object is often useful for layering
+things like gzip or TLS, which require both read and write access to the
+underlying object.</p>
+<p>If you want to work more directly with the streams and sink, consider
+calling <code>split</code> on the <code>Framed</code> returned by this method, which will
+break them into separate objects, allowing them to interact more easily.</p>
+</div><h3 id='method.split' class='method'><span id='split.v' class='invisible'><code>fn <a href='#method.split' class='fnname'>split</a>(self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">(</a><a class="struct" href="../../tokio_core/io/struct.ReadHalf.html" title="struct tokio_core::io::ReadHalf">ReadHalf</a>&lt;Self&gt;, <a class="struct" href="../../tokio_core/io/struct.WriteHalf.html" title="struct tokio_core::io::WriteHalf">WriteHalf</a>&lt;Self&gt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">)</a> <span class="where fmt-newline">where Self: <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a></span></code></span></h3><div class='stability'><div class='stab deprecated'>Deprecated<p>: moved to the <code>tokio-io</code> crate</p>
+</div></div><div class='docblock'><p>Helper method for splitting this read/write object into two halves.</p>
+<p>The two halves returned implement the <code>Read</code> and <code>Write</code> traits,
+respectively.</p>
+</div></div>
+        <h2 id='implementors'>Implementors</h2>
+        <ul class='item-list' id='implementors-list'>
+    <li><code>impl Io for <a class="struct" href="../../tokio_core/net/struct.TcpStream.html" title="struct tokio_core::net::TcpStream">TcpStream</a></code></li>
+<li><code>impl&lt;'a&gt; Io for &amp;'a <a class="struct" href="../../tokio_core/net/struct.TcpStream.html" title="struct tokio_core::net::TcpStream">TcpStream</a></code></li>
+<li><code>impl&lt;E:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/std/io/trait.Read.html" title="trait std::io::Read">Read</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/std/io/trait.Write.html" title="trait std::io::Write">Write</a>&gt; Io for <a class="struct" href="../../tokio_core/reactor/struct.PollEvented.html" title="struct tokio_core::reactor::PollEvented">PollEvented</a>&lt;E&gt;</code></li>
+<li><code>impl&lt;'a, E&gt; Io for &amp;'a <a class="struct" href="../../tokio_core/reactor/struct.PollEvented.html" title="struct tokio_core::reactor::PollEvented">PollEvented</a>&lt;E&gt; <span class="where fmt-newline">where &amp;'a E: <a class="trait" href="https://doc.rust-lang.org/nightly/std/io/trait.Read.html" title="trait std::io::Read">Read</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/std/io/trait.Write.html" title="trait std::io::Write">Write</a></span></code></li>
+</ul><script type="text/javascript" async
+                         src="../../implementors/tokio_core/io/trait.Io.js">
+                 </script></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "tokio_core";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

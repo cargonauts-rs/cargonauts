@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["EndpointService",""],["Request",""],["_Collection",""],["_Resource",""],["_Unit",""]],"trait":[["Endpoint",""]]});

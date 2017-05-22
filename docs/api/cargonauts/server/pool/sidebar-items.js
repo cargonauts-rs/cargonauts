@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Config",""],["Pool","An asynchronous, single-threaded connection pool."]],"trait":[["Configure",""]]});

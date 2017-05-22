@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Response` struct in crate `cargonauts`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Response">
+
+    <title>cargonauts::middleware::http::Response - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../normalize.css">
+    <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc struct">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../index.html'>cargonauts</a>::<wbr><a href='../index.html'>middleware</a>::<wbr><a href='index.html'>http</a></p><script>window.sidebarCurrent = {name: 'Response', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../../index.html'>cargonauts</a>::<wbr><a href='../index.html'>middleware</a>::<wbr><a href='index.html'>http</a>::<wbr><a class="struct" href=''>Response</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a class='srclink' href='../../../src/hyper/server/response.rs.html#11-14' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Response&lt;B&nbsp;=&nbsp;<a class="struct" href="../../../hyper/http/body/struct.Body.html" title="struct hyper::http::body::Body">Body</a>&gt; { /* fields omitted */ }</pre><div class='docblock'><p>The Response sent to a client after receiving a Request in a Service.</p>
+<p>The default <code>StatusCode</code> for a <code>Response</code> is <code>200 OK</code>.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><span class='in-band'><code>impl&lt;B&gt; <a class="struct" href="../../../cargonauts/middleware/http/struct.Response.html" title="struct cargonauts::middleware::http::Response">Response</a>&lt;B&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../../src/hyper/server/response.rs.html#16-88' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.new' class="method"><span id='new.v' class='invisible'><code>fn <a href='#method.new' class='fnname'>new</a>() -&gt; <a class="struct" href="../../../cargonauts/middleware/http/struct.Response.html" title="struct cargonauts::middleware::http::Response">Response</a>&lt;B&gt;</code></span></h4>
+<div class='docblock'><p>Create a new Response.</p>
+</div><h4 id='method.headers' class="method"><span id='headers.v' class='invisible'><code>fn <a href='#method.headers' class='fnname'>headers</a>(&amp;self) -&gt; &amp;<a class="struct" href="../../../hyper/header/struct.Headers.html" title="struct hyper::header::Headers">Headers</a></code></span></h4>
+<div class='docblock'><p>The headers of this response.</p>
+</div><h4 id='method.status' class="method"><span id='status.v' class='invisible'><code>fn <a href='#method.status' class='fnname'>status</a>(&amp;self) -&gt; <a class="enum" href="../../../cargonauts/server/enum.StatusCode.html" title="enum cargonauts::server::StatusCode">StatusCode</a></code></span></h4>
+<div class='docblock'><p>The status of this response.</p>
+</div><h4 id='method.version' class="method"><span id='version.v' class='invisible'><code>fn <a href='#method.version' class='fnname'>version</a>(&amp;self) -&gt; <a class="enum" href="../../../hyper/version/enum.HttpVersion.html" title="enum hyper::version::HttpVersion">HttpVersion</a></code></span></h4>
+<div class='docblock'><p>The HTTP version of this response.</p>
+</div><h4 id='method.headers_mut' class="method"><span id='headers_mut.v' class='invisible'><code>fn <a href='#method.headers_mut' class='fnname'>headers_mut</a>(&amp;mut self) -&gt; &amp;mut <a class="struct" href="../../../hyper/header/struct.Headers.html" title="struct hyper::header::Headers">Headers</a></code></span></h4>
+<div class='docblock'><p>Get a mutable reference to the Headers.</p>
+</div><h4 id='method.set_status' class="method"><span id='set_status.v' class='invisible'><code>fn <a href='#method.set_status' class='fnname'>set_status</a>(&amp;mut self, status: <a class="enum" href="../../../cargonauts/server/enum.StatusCode.html" title="enum cargonauts::server::StatusCode">StatusCode</a>)</code></span></h4>
+<div class='docblock'><p>Set the <code>StatusCode</code> for this response.</p>
+</div><h4 id='method.set_body' class="method"><span id='set_body.v' class='invisible'><code>fn <a href='#method.set_body' class='fnname'>set_body</a>&lt;T&gt;(&amp;mut self, body: T) <span class="where fmt-newline">where T: <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;B&gt;</span></code></span></h4>
+<div class='docblock'><p>Set the body.</p>
+</div><h4 id='method.with_status' class="method"><span id='with_status.v' class='invisible'><code>fn <a href='#method.with_status' class='fnname'>with_status</a>(self, status: <a class="enum" href="../../../cargonauts/server/enum.StatusCode.html" title="enum cargonauts::server::StatusCode">StatusCode</a>) -&gt; <a class="struct" href="../../../cargonauts/middleware/http/struct.Response.html" title="struct cargonauts::middleware::http::Response">Response</a>&lt;B&gt;</code></span></h4>
+<div class='docblock'><p>Set the status and move the Response.</p>
+<p>Useful for the &quot;builder-style&quot; pattern.</p>
+</div><h4 id='method.with_header' class="method"><span id='with_header.v' class='invisible'><code>fn <a href='#method.with_header' class='fnname'>with_header</a>&lt;H&gt;(self, header: H) -&gt; <a class="struct" href="../../../cargonauts/middleware/http/struct.Response.html" title="struct cargonauts::middleware::http::Response">Response</a>&lt;B&gt; <span class="where fmt-newline">where H: <a class="trait" href="../../../hyper/header/trait.Header.html" title="trait hyper::header::Header">Header</a></span></code></span></h4>
+<div class='docblock'><p>Set a header and move the Response.</p>
+<p>Useful for the &quot;builder-style&quot; pattern.</p>
+</div><h4 id='method.with_headers' class="method"><span id='with_headers.v' class='invisible'><code>fn <a href='#method.with_headers' class='fnname'>with_headers</a>(self, headers: <a class="struct" href="../../../hyper/header/struct.Headers.html" title="struct hyper::header::Headers">Headers</a>) -&gt; <a class="struct" href="../../../cargonauts/middleware/http/struct.Response.html" title="struct cargonauts::middleware::http::Response">Response</a>&lt;B&gt;</code></span></h4>
+<div class='docblock'><p>Set the headers and move the Response.</p>
+<p>Useful for the &quot;builder-style&quot; pattern.</p>
+</div><h4 id='method.with_body' class="method"><span id='with_body.v' class='invisible'><code>fn <a href='#method.with_body' class='fnname'>with_body</a>&lt;T&gt;(self, body: T) -&gt; <a class="struct" href="../../../cargonauts/middleware/http/struct.Response.html" title="struct cargonauts::middleware::http::Response">Response</a>&lt;B&gt; <span class="where fmt-newline">where T: <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;B&gt;</span></code></span></h4>
+<div class='docblock'><p>Set the body and move the Response.</p>
+<p>Useful for the &quot;builder-style&quot; pattern.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl&lt;B&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/default/trait.Default.html" title="trait core::default::Default">Default</a> for <a class="struct" href="../../../cargonauts/middleware/http/struct.Response.html" title="struct cargonauts::middleware::http::Response">Response</a>&lt;B&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../../src/hyper/server/response.rs.html#90-97' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.default' class="method"><span id='default.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/default/trait.Default.html#tymethod.default' class='fnname'>default</a>() -&gt; <a class="struct" href="../../../cargonauts/middleware/http/struct.Response.html" title="struct cargonauts::middleware::http::Response">Response</a>&lt;B&gt;</code></span></h4>
+<div class='docblock'><p>Returns the &quot;default value&quot; for a type. <a href="https://doc.rust-lang.org/nightly/core/default/trait.Default.html#tymethod.default">Read more</a></p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl&lt;B&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="enum" href="../../../tokio_proto/streaming/message/enum.Message.html" title="enum tokio_proto::streaming::message::Message">Message</a>&lt;__ProtoResponse, B&gt;&gt; for <a class="struct" href="../../../cargonauts/middleware/http/struct.Response.html" title="struct cargonauts::middleware::http::Response">Response</a>&lt;B&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../../src/hyper/server/mod.rs.html#291-300' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.into' class="method"><span id='into.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/convert/trait.Into.html#tymethod.into' class='fnname'>into</a>(self) -&gt; <a class="enum" href="../../../tokio_proto/streaming/message/enum.Message.html" title="enum tokio_proto::streaming::message::Message">Message</a>&lt;__ProtoResponse, B&gt;</code></span></h4>
+</div><h3 class='impl'><span class='in-band'><code>impl&lt;B&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html" title="trait core::fmt::Debug">Debug</a> for <a class="struct" href="../../../cargonauts/middleware/http/struct.Response.html" title="struct cargonauts::middleware::http::Response">Response</a>&lt;B&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../../src/hyper/server/response.rs.html#99-107' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.fmt' class="method"><span id='fmt.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class="struct" href="https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html" title="struct core::fmt::Formatter">Formatter</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a>, <a class="struct" href="https://doc.rust-lang.org/nightly/core/fmt/struct.Error.html" title="struct core::fmt::Error">Error</a>&gt;</code></span></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "cargonauts";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    <script defer src="../../../search-index.js"></script>
+</body>
+</html>

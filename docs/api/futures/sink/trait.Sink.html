@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Sink` trait in crate `futures`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Sink">
+
+    <title>futures::sink::Sink - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../normalize.css">
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc trait">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>futures</a>::<wbr><a href='index.html'>sink</a></p><script>window.sidebarCurrent = {name: 'Sink', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content">
+<h1 class='fqn'><span class='in-band'>Trait <a href='../index.html'>futures</a>::<wbr><a href='index.html'>sink</a>::<wbr><a class="trait" href=''>Sink</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a class='srclink' href='../../src/futures/sink/mod.rs.html#113-415' title='goto source code'>[src]</a></span></h1>
+<pre class='rust trait'>pub trait Sink {
+    type <a href='#associatedtype.SinkItem' class="type">SinkItem</a>;
+    type <a href='#associatedtype.SinkError' class="type">SinkError</a>;
+    fn <a href='#tymethod.start_send' class='fnname'>start_send</a>(&amp;mut self,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; item: Self::<a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">SinkItem</a>)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -&gt; <a class="type" href="../../futures/type.StartSend.html" title="type futures::StartSend">StartSend</a>&lt;Self::<a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">SinkItem</a>, Self::<a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">SinkError</a>&gt;;
+    fn <a href='#tymethod.poll_complete' class='fnname'>poll_complete</a>(&amp;mut self) -&gt; <a class="type" href="../../futures/type.Poll.html" title="type futures::Poll">Poll</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a>, Self::<a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">SinkError</a>&gt;;
+
+    fn <a href='#method.close' class='fnname'>close</a>(&amp;mut self) -&gt; <a class="type" href="../../futures/type.Poll.html" title="type futures::Poll">Poll</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a>, Self::<a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">SinkError</a>&gt; { ... }
+    fn <a href='#method.wait' class='fnname'>wait</a>(self) -&gt; <a class="struct" href="../../futures/sink/struct.Wait.html" title="struct futures::sink::Wait">Wait</a>&lt;Self&gt; <span class="where fmt-newline">where Self: <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a></span> { ... }
+    fn <a href='#method.with' class='fnname'>with</a>&lt;U, F, Fut&gt;(self, f: F) -&gt; <a class="struct" href="../../futures/sink/struct.With.html" title="struct futures::sink::With">With</a>&lt;Self, U, F, Fut&gt; <span class="where fmt-newline">where F: <a class="trait" href="https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html" title="trait core::ops::FnMut">FnMut</a>(U) -&gt; Fut,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Fut: <a class="trait" href="../../futures/future/trait.IntoFuture.html" title="trait futures::future::IntoFuture">IntoFuture</a>&lt;Item = Self::<a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">SinkItem</a>&gt;,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Fut::<a class="trait" href="../../futures/future/trait.IntoFuture.html" title="trait futures::future::IntoFuture">Error</a>: <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;Self::<a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">SinkError</a>&gt;,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Self: <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a></span> { ... }
+    fn <a href='#method.sink_map_err' class='fnname'>sink_map_err</a>&lt;F, E&gt;(self, f: F) -&gt; <a class="struct" href="../../futures/sink/struct.SinkMapErr.html" title="struct futures::sink::SinkMapErr">SinkMapErr</a>&lt;Self, F&gt; <span class="where fmt-newline">where F: <a class="trait" href="https://doc.rust-lang.org/nightly/core/ops/trait.FnOnce.html" title="trait core::ops::FnOnce">FnOnce</a>(Self::<a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">SinkError</a>) -&gt; E, Self: <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a></span> { ... }
+    fn <a href='#method.sink_from_err' class='fnname'>sink_from_err</a>&lt;E:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;Self::<a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">SinkError</a>&gt;&gt;(self) -&gt; <a class="struct" href="../../futures/sink/struct.SinkFromErr.html" title="struct futures::sink::SinkFromErr">SinkFromErr</a>&lt;Self, E&gt; <span class="where fmt-newline">where Self: <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a></span> { ... }
+    fn <a href='#method.buffer' class='fnname'>buffer</a>(self, amt: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>) -&gt; <a class="struct" href="../../futures/sink/struct.Buffer.html" title="struct futures::sink::Buffer">Buffer</a>&lt;Self&gt; <span class="where fmt-newline">where Self: <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a></span> { ... }
+    fn <a href='#method.flush' class='fnname'>flush</a>(self) -&gt; <a class="struct" href="../../futures/sink/struct.Flush.html" title="struct futures::sink::Flush">Flush</a>&lt;Self&gt; <span class="where fmt-newline">where Self: <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a></span> { ... }
+    fn <a href='#method.send' class='fnname'>send</a>(self, item: Self::<a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">SinkItem</a>) -&gt; <a class="struct" href="../../futures/sink/struct.Send.html" title="struct futures::sink::Send">Send</a>&lt;Self&gt; <span class="where fmt-newline">where Self: <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a></span> { ... }
+    fn <a href='#method.send_all' class='fnname'>send_all</a>&lt;S&gt;(self, stream: S) -&gt; <a class="struct" href="../../futures/sink/struct.SendAll.html" title="struct futures::sink::SendAll">SendAll</a>&lt;Self, S&gt; <span class="where fmt-newline">where S: <a class="trait" href="../../futures/stream/trait.Stream.html" title="trait futures::stream::Stream">Stream</a>&lt;Item = Self::<a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">SinkItem</a>&gt;,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Self::<a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">SinkError</a>: <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;S::<a class="trait" href="../../futures/stream/trait.Stream.html" title="trait futures::stream::Stream">Error</a>&gt;,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Self: <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a></span> { ... }
+}</pre><div class='docblock'><p>A <code>Sink</code> is a value into which other values can be sent, asynchronously.</p>
+<p>Basic examples of sinks include the sending side of:</p>
+<ul>
+<li>Channels</li>
+<li>Sockets</li>
+<li>Pipes</li>
+</ul>
+<p>In addition to such &quot;primitive&quot; sinks, it's typical to layer additional
+functionality, such as buffering, on top of an existing sink.</p>
+<p>Sending to a sink is &quot;asynchronous&quot; in the sense that the value may not be
+sent in its entirety immediately. Instead, values are sent in a two-phase
+way: first by initiating a send, and then by polling for completion. This
+two-phase setup is analogous to buffered writing in synchronous code, where
+writes often succeed immediately, but internally are buffered and are
+<em>actually</em> written only upon flushing.</p>
+<p>In addition, the <code>Sink</code> may be <em>full</em>, in which case it is not even possible
+to start the sending process.</p>
+<p>As with <code>Future</code> and <code>Stream</code>, the <code>Sink</code> trait is built from a few core
+required methods, and a host of default methods for working in a
+higher-level way. The <code>Sink::send_all</code> combinator is of particular
+importance: you can use it to send an entire stream to a sink, which is
+the simplest way to ultimately consume a sink.</p>
+<p>You can find more information/tutorials about streams <a href="https://tokio.rs/docs/getting-started/streams-and-sinks/">online at
+https://tokio.rs</a></p>
+</div>
+            <h2 id='associated-types'>Associated Types</h2>
+            <div class='methods'>
+        <h3 id='associatedtype.SinkItem' class='method'><span id='SinkItem.t' class='invisible'><code>type <a href='#associatedtype.SinkItem' class="type">SinkItem</a></code></span></h3><div class='docblock'><p>The type of value that the sink accepts.</p>
+</div><h3 id='associatedtype.SinkError' class='method'><span id='SinkError.t' class='invisible'><code>type <a href='#associatedtype.SinkError' class="type">SinkError</a></code></span></h3><div class='docblock'><p>The type of value produced by the sink when an error occurs.</p>
+</div></div>
+            <h2 id='required-methods'>Required Methods</h2>
+            <div class='methods'>
+        <h3 id='tymethod.start_send' class='method'><span id='start_send.v' class='invisible'><code>fn <a href='#tymethod.start_send' class='fnname'>start_send</a>(&amp;mut self,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; item: Self::<a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">SinkItem</a>)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -&gt; <a class="type" href="../../futures/type.StartSend.html" title="type futures::StartSend">StartSend</a>&lt;Self::<a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">SinkItem</a>, Self::<a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">SinkError</a>&gt;</code></span></h3><div class='docblock'><p>Begin the process of sending a value to the sink.</p>
+<p>As the name suggests, this method only <em>begins</em> the process of sending
+the item. If the sink employs buffering, the item isn't fully processed
+until the buffer is fully flushed. Since sinks are designed to work with
+asynchronous I/O, the process of actually writing out the data to an
+underlying object takes place asynchronously. <strong>You <em>must</em> use
+<code>poll_complete</code> in order to drive completion of a send</strong>. In particular,
+<code>start_send</code> does not begin the flushing process</p>
+<h1 id="return-value" class="section-header"><a href="#return-value">Return value</a></h1>
+<p>This method returns <code>AsyncSink::Ready</code> if the sink was able to start
+sending <code>item</code>. In that case, you <em>must</em> ensure that you call
+<code>poll_complete</code> to process the sent item to completion. Note, however,
+that several calls to <code>start_send</code> can be made prior to calling
+<code>poll_complete</code>, which will work on completing all pending items.</p>
+<p>The method returns <code>AsyncSink::NotReady</code> if the sink was unable to begin
+sending, usually due to being full. The sink must have attempted to
+complete processing any outstanding requests (equivalent to
+<code>poll_complete</code>) before yielding this result. The current task will be
+automatically scheduled for notification when the sink may be ready to
+receive new values.</p>
+<h1 id="errors" class="section-header"><a href="#errors">Errors</a></h1>
+<p>If the sink encounters an error other than being temporarily full, it
+uses the <code>Err</code> variant to signal that error. In most cases, such errors
+mean that the sink will permanently be unable to receive items.</p>
+<h1 id="panics" class="section-header"><a href="#panics">Panics</a></h1>
+<p>This method may panic in a few situations, depending on the specific
+sink:</p>
+<ul>
+<li>It is called outside of the context of a task.</li>
+<li>A previous call to <code>start_send</code> or <code>poll_complete</code> yielded an error.</li>
+</ul>
+</div><h3 id='tymethod.poll_complete' class='method'><span id='poll_complete.v' class='invisible'><code>fn <a href='#tymethod.poll_complete' class='fnname'>poll_complete</a>(&amp;mut self) -&gt; <a class="type" href="../../futures/type.Poll.html" title="type futures::Poll">Poll</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a>, Self::<a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">SinkError</a>&gt;</code></span></h3><div class='docblock'><p>Flush all output from this sink, if necessary.</p>
+<p>Some sinks may buffer intermediate data as an optimization to improve
+throughput. In other words, if a sink has a corresponding receiver then
+a successful <code>start_send</code> above may not guarantee that the value is
+actually ready to be received by the receiver. This function is intended
+to be used to ensure that values do indeed make their way to the
+receiver.</p>
+<p>This function will attempt to process any pending requests on behalf of
+the sink and drive it to completion.</p>
+<h1 id="return-value-1" class="section-header"><a href="#return-value-1">Return value</a></h1>
+<p>Returns <code>Ok(Async::Ready(()))</code> when no buffered items remain. If this
+value is returned then it is guaranteed that all previous values sent
+via <code>start_send</code> will be guaranteed to be available to a listening
+receiver.</p>
+<p>Returns <code>Ok(Async::NotReady)</code> if there is more work left to do, in which
+case the current task is scheduled to wake up when more progress may be
+possible.</p>
+<h1 id="errors-1" class="section-header"><a href="#errors-1">Errors</a></h1>
+<p>Returns <code>Err</code> if the sink encounters an error while processing one of
+its pending requests. Due to the buffered nature of requests, it is not
+generally possible to correlate the error with a particular request. As
+with <code>start_send</code>, these errors are generally &quot;fatal&quot; for continued use
+of the sink.</p>
+<h1 id="panics-1" class="section-header"><a href="#panics-1">Panics</a></h1>
+<p>This method may panic in a few situations, depending on the specific sink:</p>
+<ul>
+<li>It is called outside of the context of a task.</li>
+<li>A previous call to <code>start_send</code> or <code>poll_complete</code> yielded an error.</li>
+</ul>
+<h1 id="compatibility-nodes" class="section-header"><a href="#compatibility-nodes">Compatibility nodes</a></h1>
+<p>The name of this method may be slightly misleading as the original
+intention was to have this method be more general than just flushing
+requests. Over time though it was decided to trim back the ambitions of
+this method to what it's always done, just flushing.</p>
+<p>In the 0.2 release series of futures this method will be renamed to
+<code>poll_flush</code>. For 0.1, however, the breaking change is not happening
+yet.</p>
+</div></div>
+            <h2 id='provided-methods'>Provided Methods</h2>
+            <div class='methods'>
+        <h3 id='method.close' class='method'><span id='close.v' class='invisible'><code>fn <a href='#method.close' class='fnname'>close</a>(&amp;mut self) -&gt; <a class="type" href="../../futures/type.Poll.html" title="type futures::Poll">Poll</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a>, Self::<a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">SinkError</a>&gt;</code></span></h3><div class='docblock'><p>A method to indicate that no more values will ever be pushed into this
+sink.</p>
+<p>This method is used to indicate that a sink will no longer even be given
+another value by the caller. That is, the <code>start_send</code> method above will
+be called no longer (nor <code>poll_complete</code>). This method is intended to
+model &quot;graceful shutdown&quot; in various protocols where the intent to shut
+down is followed by a little more blocking work.</p>
+<p>Callers of this function should work it it in a similar fashion to
+<code>poll_complete</code>. Once called it may return <code>NotReady</code> which indicates
+that more external work needs to happen to make progress. The current
+task will be scheduled to receive a notification in such an event,
+however.</p>
+<p>Note that this function will imply <code>poll_complete</code> above. That is, if a
+sink has buffered data, then it'll be flushed out during a <code>close</code>
+operation. It is not necessary to have <code>poll_complete</code> return <code>Ready</code>
+before a <code>close</code> is called. Once a <code>close</code> is called, though,
+<code>poll_complete</code> cannot be called.</p>
+<h1 id="return-value-2" class="section-header"><a href="#return-value-2">Return value</a></h1>
+<p>This function, like <code>poll_complete</code>, returns a <code>Poll</code>. The value is
+<code>Ready</code> once the close operation has completed. At that point it should
+be safe to drop the sink and deallocate associated resources.</p>
+<p>If the value returned is <code>NotReady</code> then the sink is not yet closed and
+work needs to be done to close it. The work has been scheduled and the
+current task will recieve a notification when it's next ready to call
+this method again.</p>
+<p>Finally, this function may also return an error.</p>
+<h1 id="errors-2" class="section-header"><a href="#errors-2">Errors</a></h1>
+<p>This function will return an <code>Err</code> if any operation along the way during
+the close operation fails. An error typically is fatal for a sink and is
+unable to be recovered from, but in specific situations this may not
+always be true.</p>
+<p>Note that it's also typically an error to call <code>start_send</code> or
+<code>poll_complete</code> after the <code>close</code> function is called. This method will
+<em>initiate</em> a close, and continuing to send values after that (or attempt
+to flush) may result in strange behavior, panics, errors, etc. Once this
+method is called, it must be the only method called on this <code>Sink</code>.</p>
+<h1 id="panics-2" class="section-header"><a href="#panics-2">Panics</a></h1>
+<p>This method may panic or cause panics if:</p>
+<ul>
+<li>It is called outside the context of a future's task</li>
+<li>It is called and then <code>start_send</code> or <code>poll_complete</code> is called</li>
+</ul>
+<h1 id="compatibility-notes" class="section-header"><a href="#compatibility-notes">Compatibility notes</a></h1>
+<p>Note that this function is currently by default a provided function,
+defaulted to calling <code>poll_complete</code> above. This function was added
+in the 0.1 series of the crate as a backwards-compatible addition. It
+is intended that in the 0.2 series the method will no longer be a
+default method.</p>
+<p>It is highly recommended to consider this method a required method and
+to implement it whenever you implement <code>Sink</code> locally. It is especially
+crucial to be sure to close inner sinks, if applicable.</p>
+</div><h3 id='method.wait' class='method'><span id='wait.v' class='invisible'><code>fn <a href='#method.wait' class='fnname'>wait</a>(self) -&gt; <a class="struct" href="../../futures/sink/struct.Wait.html" title="struct futures::sink::Wait">Wait</a>&lt;Self&gt; <span class="where fmt-newline">where Self: <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a></span></code></span></h3><div class='docblock'><p>Creates a new object which will produce a synchronous sink.</p>
+<p>The sink returned does <strong>not</strong> implement the <code>Sink</code> trait, and instead
+only has two methods: <code>send</code> and <code>flush</code>. These two methods correspond
+to <code>start_send</code> and <code>poll_complete</code> above except are executed in a
+blocking fashion.</p>
+</div><h3 id='method.with' class='method'><span id='with.v' class='invisible'><code>fn <a href='#method.with' class='fnname'>with</a>&lt;U, F, Fut&gt;(self, f: F) -&gt; <a class="struct" href="../../futures/sink/struct.With.html" title="struct futures::sink::With">With</a>&lt;Self, U, F, Fut&gt; <span class="where fmt-newline">where F: <a class="trait" href="https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html" title="trait core::ops::FnMut">FnMut</a>(U) -&gt; Fut,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Fut: <a class="trait" href="../../futures/future/trait.IntoFuture.html" title="trait futures::future::IntoFuture">IntoFuture</a>&lt;Item = Self::<a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">SinkItem</a>&gt;,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Fut::<a class="trait" href="../../futures/future/trait.IntoFuture.html" title="trait futures::future::IntoFuture">Error</a>: <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;Self::<a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">SinkError</a>&gt;,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Self: <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a></span></code></span></h3><div class='docblock'><p>Composes a function <em>in front of</em> the sink.</p>
+<p>This adapter produces a new sink that passes each value through the
+given function <code>f</code> before sending it to <code>self</code>.</p>
+<p>To process each value, <code>f</code> produces a <em>future</em>, which is then polled to
+completion before passing its result down to the underlying sink. If the
+future produces an error, that error is returned by the new sink.</p>
+<p>Note that this function consumes the given sink, returning a wrapped
+version, much like <code>Iterator::map</code>.</p>
+</div><h3 id='method.sink_map_err' class='method'><span id='sink_map_err.v' class='invisible'><code>fn <a href='#method.sink_map_err' class='fnname'>sink_map_err</a>&lt;F, E&gt;(self, f: F) -&gt; <a class="struct" href="../../futures/sink/struct.SinkMapErr.html" title="struct futures::sink::SinkMapErr">SinkMapErr</a>&lt;Self, F&gt; <span class="where fmt-newline">where F: <a class="trait" href="https://doc.rust-lang.org/nightly/core/ops/trait.FnOnce.html" title="trait core::ops::FnOnce">FnOnce</a>(Self::<a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">SinkError</a>) -&gt; E, Self: <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a></span></code></span></h3><div class='docblock'><p>Transforms the error returned by the sink.</p>
+</div><h3 id='method.sink_from_err' class='method'><span id='sink_from_err.v' class='invisible'><code>fn <a href='#method.sink_from_err' class='fnname'>sink_from_err</a>&lt;E:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;Self::<a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">SinkError</a>&gt;&gt;(self) -&gt; <a class="struct" href="../../futures/sink/struct.SinkFromErr.html" title="struct futures::sink::SinkFromErr">SinkFromErr</a>&lt;Self, E&gt; <span class="where fmt-newline">where Self: <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a></span></code></span></h3><div class='docblock'><p>Map this sink's error to any error implementing <code>From</code> for this sink's
+<code>Error</code>, returning a new sink.</p>
+<p>If wanting to map errors of a <code>Sink + Stream</code>, use <code>.sink_from_err().from_err()</code>.</p>
+</div><h3 id='method.buffer' class='method'><span id='buffer.v' class='invisible'><code>fn <a href='#method.buffer' class='fnname'>buffer</a>(self, amt: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>) -&gt; <a class="struct" href="../../futures/sink/struct.Buffer.html" title="struct futures::sink::Buffer">Buffer</a>&lt;Self&gt; <span class="where fmt-newline">where Self: <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a></span></code></span></h3><div class='docblock'><p>Adds a fixed-size buffer to the current sink.</p>
+<p>The resulting sink will buffer up to <code>amt</code> items when the underlying
+sink is unwilling to accept additional items. Calling <code>poll_complete</code> on
+the buffered sink will attempt to both empty the buffer and complete
+processing on the underlying sink.</p>
+<p>Note that this function consumes the given sink, returning a wrapped
+version, much like <code>Iterator::map</code>.</p>
+<p>This method is only available when the <code>use_std</code> feature of this
+library is activated, and it is activated by default.</p>
+</div><h3 id='method.flush' class='method'><span id='flush.v' class='invisible'><code>fn <a href='#method.flush' class='fnname'>flush</a>(self) -&gt; <a class="struct" href="../../futures/sink/struct.Flush.html" title="struct futures::sink::Flush">Flush</a>&lt;Self&gt; <span class="where fmt-newline">where Self: <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a></span></code></span></h3><div class='docblock'><p>A future that completes when the sink has finished processing all
+pending requests.</p>
+<p>The sink itself is returned after flushing is complete; this adapter is
+intended to be used when you want to stop sending to the sink until
+all current requests are processed.</p>
+</div><h3 id='method.send' class='method'><span id='send.v' class='invisible'><code>fn <a href='#method.send' class='fnname'>send</a>(self, item: Self::<a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">SinkItem</a>) -&gt; <a class="struct" href="../../futures/sink/struct.Send.html" title="struct futures::sink::Send">Send</a>&lt;Self&gt; <span class="where fmt-newline">where Self: <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a></span></code></span></h3><div class='docblock'><p>A future that completes after the given item has been fully processed
+into the sink, including flushing.</p>
+<p>Note that, <strong>because of the flushing requirement, it is usually better
+to batch together items to send via <code>send_all</code>, rather than flushing
+between each item.</strong></p>
+<p>On completion, the sink is returned.</p>
+</div><h3 id='method.send_all' class='method'><span id='send_all.v' class='invisible'><code>fn <a href='#method.send_all' class='fnname'>send_all</a>&lt;S&gt;(self, stream: S) -&gt; <a class="struct" href="../../futures/sink/struct.SendAll.html" title="struct futures::sink::SendAll">SendAll</a>&lt;Self, S&gt; <span class="where fmt-newline">where S: <a class="trait" href="../../futures/stream/trait.Stream.html" title="trait futures::stream::Stream">Stream</a>&lt;Item = Self::<a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">SinkItem</a>&gt;,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Self::<a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">SinkError</a>: <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;S::<a class="trait" href="../../futures/stream/trait.Stream.html" title="trait futures::stream::Stream">Error</a>&gt;,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Self: <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a></span></code></span></h3><div class='docblock'><p>A future that completes after the given stream has been fully processed
+into the sink, including flushing.</p>
+<p>This future will drive the stream to keep producing items until it is
+exhausted, sending each item to the sink. It will complete once both the
+stream is exhausted, and the sink has fully processed and flushed all of
+the items sent to it.</p>
+<p>Doing <code>sink.send_all(stream)</code> is roughly equivalent to
+<code>stream.forward(sink)</code>.</p>
+<p>On completion, the pair <code>(sink, source)</code> is returned.</p>
+</div></div>
+        <h2 id='implementors'>Implementors</h2>
+        <ul class='item-list' id='implementors-list'>
+    <li><code>impl&lt;S, F, U:&nbsp;<a class="trait" href="../../futures/future/trait.IntoFuture.html" title="trait futures::future::IntoFuture">IntoFuture</a>&gt; Sink for <a class="struct" href="../../futures/stream/struct.AndThen.html" title="struct futures::stream::AndThen">AndThen</a>&lt;S, F, U&gt; <span class="where fmt-newline">where S: <a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">Sink</a></span></code></li>
+<li><code>impl&lt;S, F&gt; Sink for <a class="struct" href="../../futures/stream/struct.Filter.html" title="struct futures::stream::Filter">Filter</a>&lt;S, F&gt; <span class="where fmt-newline">where S: <a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">Sink</a></span></code></li>
+<li><code>impl&lt;S, F&gt; Sink for <a class="struct" href="../../futures/stream/struct.FilterMap.html" title="struct futures::stream::FilterMap">FilterMap</a>&lt;S, F&gt; <span class="where fmt-newline">where S: <a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">Sink</a></span></code></li>
+<li><code>impl&lt;S&gt; Sink for <a class="struct" href="../../futures/stream/struct.Flatten.html" title="struct futures::stream::Flatten">Flatten</a>&lt;S&gt; <span class="where fmt-newline">where S: <a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">Sink</a> + <a class="trait" href="../../futures/stream/trait.Stream.html" title="trait futures::stream::Stream">Stream</a></span></code></li>
+<li><code>impl&lt;S:&nbsp;<a class="trait" href="../../futures/stream/trait.Stream.html" title="trait futures::stream::Stream">Stream</a> + <a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">Sink</a>, E&gt; Sink for <a class="struct" href="../../futures/stream/struct.FromErr.html" title="struct futures::stream::FromErr">FromErr</a>&lt;S, E&gt;</code></li>
+<li><code>impl&lt;S&gt; Sink for <a class="struct" href="../../futures/stream/struct.Fuse.html" title="struct futures::stream::Fuse">Fuse</a>&lt;S&gt; <span class="where fmt-newline">where S: <a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">Sink</a></span></code></li>
+<li><code>impl&lt;S, F&gt; Sink for <a class="struct" href="../../futures/stream/struct.Map.html" title="struct futures::stream::Map">Map</a>&lt;S, F&gt; <span class="where fmt-newline">where S: <a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">Sink</a></span></code></li>
+<li><code>impl&lt;S, F&gt; Sink for <a class="struct" href="../../futures/stream/struct.MapErr.html" title="struct futures::stream::MapErr">MapErr</a>&lt;S, F&gt; <span class="where fmt-newline">where S: <a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">Sink</a></span></code></li>
+<li><code>impl&lt;S, F, U&gt; Sink for <a class="struct" href="../../futures/stream/struct.OrElse.html" title="struct futures::stream::OrElse">OrElse</a>&lt;S, F, U&gt; <span class="where fmt-newline">where S: <a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">Sink</a>, U: <a class="trait" href="../../futures/future/trait.IntoFuture.html" title="trait futures::future::IntoFuture">IntoFuture</a></span></code></li>
+<li><code>impl&lt;S&gt; Sink for <a class="struct" href="../../futures/stream/struct.Peekable.html" title="struct futures::stream::Peekable">Peekable</a>&lt;S&gt; <span class="where fmt-newline">where S: <a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">Sink</a> + <a class="trait" href="../../futures/stream/trait.Stream.html" title="trait futures::stream::Stream">Stream</a></span></code></li>
+<li><code>impl&lt;S&gt; Sink for <a class="struct" href="../../futures/stream/struct.Skip.html" title="struct futures::stream::Skip">Skip</a>&lt;S&gt; <span class="where fmt-newline">where S: <a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">Sink</a></span></code></li>
+<li><code>impl&lt;S, P, R&gt; Sink for <a class="struct" href="../../futures/stream/struct.SkipWhile.html" title="struct futures::stream::SkipWhile">SkipWhile</a>&lt;S, P, R&gt; <span class="where fmt-newline">where S: <a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">Sink</a> + <a class="trait" href="../../futures/stream/trait.Stream.html" title="trait futures::stream::Stream">Stream</a>, R: <a class="trait" href="../../futures/future/trait.IntoFuture.html" title="trait futures::future::IntoFuture">IntoFuture</a></span></code></li>
+<li><code>impl&lt;S&gt; Sink for <a class="struct" href="../../futures/stream/struct.Take.html" title="struct futures::stream::Take">Take</a>&lt;S&gt; <span class="where fmt-newline">where S: <a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">Sink</a> + <a class="trait" href="../../futures/stream/trait.Stream.html" title="trait futures::stream::Stream">Stream</a></span></code></li>
+<li><code>impl&lt;S, P, R&gt; Sink for <a class="struct" href="../../futures/stream/struct.TakeWhile.html" title="struct futures::stream::TakeWhile">TakeWhile</a>&lt;S, P, R&gt; <span class="where fmt-newline">where S: <a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">Sink</a> + <a class="trait" href="../../futures/stream/trait.Stream.html" title="trait futures::stream::Stream">Stream</a>, R: <a class="trait" href="../../futures/future/trait.IntoFuture.html" title="trait futures::future::IntoFuture">IntoFuture</a></span></code></li>
+<li><code>impl&lt;S, F, U&gt; Sink for <a class="struct" href="../../futures/stream/struct.Then.html" title="struct futures::stream::Then">Then</a>&lt;S, F, U&gt; <span class="where fmt-newline">where S: <a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">Sink</a>, U: <a class="trait" href="../../futures/future/trait.IntoFuture.html" title="trait futures::future::IntoFuture">IntoFuture</a></span></code></li>
+<li><code>impl&lt;S&gt; Sink for <a class="struct" href="../../futures/stream/struct.Buffered.html" title="struct futures::stream::Buffered">Buffered</a>&lt;S&gt; <span class="where fmt-newline">where S: <a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">Sink</a> + <a class="trait" href="../../futures/stream/trait.Stream.html" title="trait futures::stream::Stream">Stream</a>, S::<a class="trait" href="../../futures/stream/trait.Stream.html" title="trait futures::stream::Stream">Item</a>: <a class="trait" href="../../futures/future/trait.IntoFuture.html" title="trait futures::future::IntoFuture">IntoFuture</a></span></code></li>
+<li><code>impl&lt;S&gt; Sink for <a class="struct" href="../../futures/stream/struct.BufferUnordered.html" title="struct futures::stream::BufferUnordered">BufferUnordered</a>&lt;S&gt; <span class="where fmt-newline">where S: <a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">Sink</a> + <a class="trait" href="../../futures/stream/trait.Stream.html" title="trait futures::stream::Stream">Stream</a>, S::<a class="trait" href="../../futures/stream/trait.Stream.html" title="trait futures::stream::Stream">Item</a>: <a class="trait" href="../../futures/future/trait.IntoFuture.html" title="trait futures::future::IntoFuture">IntoFuture</a></span></code></li>
+<li><code>impl&lt;S&gt; Sink for <a class="struct" href="../../futures/stream/struct.Chunks.html" title="struct futures::stream::Chunks">Chunks</a>&lt;S&gt; <span class="where fmt-newline">where S: <a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">Sink</a> + <a class="trait" href="../../futures/stream/trait.Stream.html" title="trait futures::stream::Stream">Stream</a></span></code></li>
+<li><code>impl&lt;S:&nbsp;<a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">Sink</a>&gt; Sink for <a class="struct" href="../../futures/stream/struct.SplitSink.html" title="struct futures::stream::SplitSink">SplitSink</a>&lt;S&gt;</code></li>
+<li><code>impl&lt;S, U, F, Fut&gt; Sink for <a class="struct" href="../../futures/sink/struct.With.html" title="struct futures::sink::With">With</a>&lt;S, U, F, Fut&gt; <span class="where fmt-newline">where S: <a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">Sink</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;F: <a class="trait" href="https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html" title="trait core::ops::FnMut">FnMut</a>(U) -&gt; Fut,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Fut: <a class="trait" href="../../futures/future/trait.IntoFuture.html" title="trait futures::future::IntoFuture">IntoFuture</a>&lt;Item = S::<a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">SinkItem</a>&gt;,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Fut::<a class="trait" href="../../futures/future/trait.IntoFuture.html" title="trait futures::future::IntoFuture">Error</a>: <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;S::<a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">SinkError</a>&gt;</span></code></li>
+<li><code>impl&lt;S, E&gt; Sink for <a class="struct" href="../../futures/sink/struct.SinkFromErr.html" title="struct futures::sink::SinkFromErr">SinkFromErr</a>&lt;S, E&gt; <span class="where fmt-newline">where S: <a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">Sink</a>, E: <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;S::<a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">SinkError</a>&gt;</span></code></li>
+<li><code>impl&lt;S, F, E&gt; Sink for <a class="struct" href="../../futures/sink/struct.SinkMapErr.html" title="struct futures::sink::SinkMapErr">SinkMapErr</a>&lt;S, F&gt; <span class="where fmt-newline">where S: <a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">Sink</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;F: <a class="trait" href="https://doc.rust-lang.org/nightly/core/ops/trait.FnOnce.html" title="trait core::ops::FnOnce">FnOnce</a>(S::<a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">SinkError</a>) -&gt; E</span></code></li>
+<li><code>impl&lt;S:&nbsp;<a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">Sink</a>&gt; Sink for <a class="struct" href="../../futures/sink/struct.Buffer.html" title="struct futures::sink::Buffer">Buffer</a>&lt;S&gt;</code></li>
+<li><code>impl&lt;T&gt; Sink for <a class="struct" href="https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html" title="struct collections::vec::Vec">Vec</a>&lt;T&gt;</code></li>
+<li><code>impl&lt;S:&nbsp;?<a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a> + <a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">Sink</a>&gt; Sink for <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;S&gt;</code></li>
+<li><code>impl&lt;'a, S:&nbsp;?<a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a> + <a class="trait" href="../../futures/sink/trait.Sink.html" title="trait futures::sink::Sink">Sink</a>&gt; Sink for &amp;'a mut S</code></li>
+<li><code>impl&lt;T&gt; Sink for futures::sync::mpsc::<a class="struct" href="../../futures/sync/mpsc/struct.Sender.html" title="struct futures::sync::mpsc::Sender">Sender</a>&lt;T&gt;</code></li>
+<li><code>impl&lt;T&gt; Sink for futures::sync::mpsc::<a class="struct" href="../../futures/sync/mpsc/struct.UnboundedSender.html" title="struct futures::sync::mpsc::UnboundedSender">UnboundedSender</a>&lt;T&gt;</code></li>
+<li><code>impl&lt;'a, T&gt; Sink for &amp;'a futures::sync::mpsc::<a class="struct" href="../../futures/sync/mpsc/struct.UnboundedSender.html" title="struct futures::sync::mpsc::UnboundedSender">UnboundedSender</a>&lt;T&gt;</code></li>
+<li><code>impl&lt;T&gt; Sink for futures::unsync::mpsc::<a class="struct" href="../../futures/unsync/mpsc/struct.Sender.html" title="struct futures::unsync::mpsc::Sender">Sender</a>&lt;T&gt;</code></li>
+<li><code>impl&lt;T&gt; Sink for futures::unsync::mpsc::<a class="struct" href="../../futures/unsync/mpsc/struct.UnboundedSender.html" title="struct futures::unsync::mpsc::UnboundedSender">UnboundedSender</a>&lt;T&gt;</code></li>
+<li><code>impl&lt;'a, T&gt; Sink for &amp;'a futures::unsync::mpsc::<a class="struct" href="../../futures/unsync/mpsc/struct.UnboundedSender.html" title="struct futures::unsync::mpsc::UnboundedSender">UnboundedSender</a>&lt;T&gt;</code></li>
+</ul><script type="text/javascript" async
+                         src="../../implementors/futures/sink/trait.Sink.js">
+                 </script></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "futures";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["http",""]],"struct":[["Request",""]],"trait":[["Middleware",""],["Service","An asynchronous function from `Request` to a `Response`."]]});

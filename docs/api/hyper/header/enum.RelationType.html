@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `RelationType` enum in crate `hyper`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, RelationType">
+
+    <title>hyper::header::RelationType - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../normalize.css">
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc enum">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>hyper</a>::<wbr><a href='index.html'>header</a></p><script>window.sidebarCurrent = {name: 'RelationType', ty: 'enum', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content">
+<h1 class='fqn'><span class='in-band'>Enum <a href='../index.html'>hyper</a>::<wbr><a href='index.html'>header</a>::<wbr><a class="enum" href=''>RelationType</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a class='srclink' href='../../src/hyper/header/common/link.rs.html#141-224' title='goto source code'>[src]</a></span></h1>
+<pre class='rust enum'>pub enum RelationType {
+    Alternate,
+    Appendix,
+    Bookmark,
+    Chapter,
+    Contents,
+    Copyright,
+    Current,
+    DescribedBy,
+    Edit,
+    EditMedia,
+    Enclosure,
+    First,
+    Glossary,
+    Help,
+    Hub,
+    Index,
+    Last,
+    LatestVersion,
+    License,
+    Next,
+    NextArchive,
+    Payment,
+    Prev,
+    PredecessorVersion,
+    Previous,
+    PrevArchive,
+    Related,
+    Replies,
+    Section,
+    RelationTypeSelf,
+    Service,
+    Start,
+    Stylesheet,
+    Subsection,
+    SuccessorVersion,
+    Up,
+    VersionHistory,
+    Via,
+    WorkingCopy,
+    WorkingCopyOf,
+    ExtRelType(<a class="struct" href="https://doc.rust-lang.org/nightly/collections/string/struct.String.html" title="struct collections::string::String">String</a>),
+}</pre><div class='docblock'><p>A Link Relation Type Enum based on:
+<a href="https://tools.ietf.org/html/rfc5988#section-6.2.2">RFC5988</a></p>
+</div><h2 class='variants'>Variants</h2>
+<span id='variant.Alternate' class='variant'><span id='Alternate.v' class='invisible'><code>Alternate</code></span></span><div class='docblock'><p>alternate.</p>
+</div><span id='variant.Appendix' class='variant'><span id='Appendix.v' class='invisible'><code>Appendix</code></span></span><div class='docblock'><p>appendix.</p>
+</div><span id='variant.Bookmark' class='variant'><span id='Bookmark.v' class='invisible'><code>Bookmark</code></span></span><div class='docblock'><p>bookmark.</p>
+</div><span id='variant.Chapter' class='variant'><span id='Chapter.v' class='invisible'><code>Chapter</code></span></span><div class='docblock'><p>chapter.</p>
+</div><span id='variant.Contents' class='variant'><span id='Contents.v' class='invisible'><code>Contents</code></span></span><div class='docblock'><p>contents.</p>
+</div><span id='variant.Copyright' class='variant'><span id='Copyright.v' class='invisible'><code>Copyright</code></span></span><div class='docblock'><p>copyright.</p>
+</div><span id='variant.Current' class='variant'><span id='Current.v' class='invisible'><code>Current</code></span></span><div class='docblock'><p>current.</p>
+</div><span id='variant.DescribedBy' class='variant'><span id='DescribedBy.v' class='invisible'><code>DescribedBy</code></span></span><div class='docblock'><p>describedby.</p>
+</div><span id='variant.Edit' class='variant'><span id='Edit.v' class='invisible'><code>Edit</code></span></span><div class='docblock'><p>edit.</p>
+</div><span id='variant.EditMedia' class='variant'><span id='EditMedia.v' class='invisible'><code>EditMedia</code></span></span><div class='docblock'><p>edit-media.</p>
+</div><span id='variant.Enclosure' class='variant'><span id='Enclosure.v' class='invisible'><code>Enclosure</code></span></span><div class='docblock'><p>enclosure.</p>
+</div><span id='variant.First' class='variant'><span id='First.v' class='invisible'><code>First</code></span></span><div class='docblock'><p>first.</p>
+</div><span id='variant.Glossary' class='variant'><span id='Glossary.v' class='invisible'><code>Glossary</code></span></span><div class='docblock'><p>glossary.</p>
+</div><span id='variant.Help' class='variant'><span id='Help.v' class='invisible'><code>Help</code></span></span><div class='docblock'><p>help.</p>
+</div><span id='variant.Hub' class='variant'><span id='Hub.v' class='invisible'><code>Hub</code></span></span><div class='docblock'><p>hub.</p>
+</div><span id='variant.Index' class='variant'><span id='Index.v' class='invisible'><code>Index</code></span></span><div class='docblock'><p>index.</p>
+</div><span id='variant.Last' class='variant'><span id='Last.v' class='invisible'><code>Last</code></span></span><div class='docblock'><p>last.</p>
+</div><span id='variant.LatestVersion' class='variant'><span id='LatestVersion.v' class='invisible'><code>LatestVersion</code></span></span><div class='docblock'><p>latest-version.</p>
+</div><span id='variant.License' class='variant'><span id='License.v' class='invisible'><code>License</code></span></span><div class='docblock'><p>license.</p>
+</div><span id='variant.Next' class='variant'><span id='Next.v' class='invisible'><code>Next</code></span></span><div class='docblock'><p>next.</p>
+</div><span id='variant.NextArchive' class='variant'><span id='NextArchive.v' class='invisible'><code>NextArchive</code></span></span><div class='docblock'><p>next-archive.</p>
+</div><span id='variant.Payment' class='variant'><span id='Payment.v' class='invisible'><code>Payment</code></span></span><div class='docblock'><p>payment.</p>
+</div><span id='variant.Prev' class='variant'><span id='Prev.v' class='invisible'><code>Prev</code></span></span><div class='docblock'><p>prev.</p>
+</div><span id='variant.PredecessorVersion' class='variant'><span id='PredecessorVersion.v' class='invisible'><code>PredecessorVersion</code></span></span><div class='docblock'><p>predecessor-version.</p>
+</div><span id='variant.Previous' class='variant'><span id='Previous.v' class='invisible'><code>Previous</code></span></span><div class='docblock'><p>previous.</p>
+</div><span id='variant.PrevArchive' class='variant'><span id='PrevArchive.v' class='invisible'><code>PrevArchive</code></span></span><div class='docblock'><p>prev-archive.</p>
+</div><span id='variant.Related' class='variant'><span id='Related.v' class='invisible'><code>Related</code></span></span><div class='docblock'><p>related.</p>
+</div><span id='variant.Replies' class='variant'><span id='Replies.v' class='invisible'><code>Replies</code></span></span><div class='docblock'><p>replies.</p>
+</div><span id='variant.Section' class='variant'><span id='Section.v' class='invisible'><code>Section</code></span></span><div class='docblock'><p>section.</p>
+</div><span id='variant.RelationTypeSelf' class='variant'><span id='RelationTypeSelf.v' class='invisible'><code>RelationTypeSelf</code></span></span><div class='docblock'><p>self.</p>
+</div><span id='variant.Service' class='variant'><span id='Service.v' class='invisible'><code>Service</code></span></span><div class='docblock'><p>service.</p>
+</div><span id='variant.Start' class='variant'><span id='Start.v' class='invisible'><code>Start</code></span></span><div class='docblock'><p>start.</p>
+</div><span id='variant.Stylesheet' class='variant'><span id='Stylesheet.v' class='invisible'><code>Stylesheet</code></span></span><div class='docblock'><p>stylesheet.</p>
+</div><span id='variant.Subsection' class='variant'><span id='Subsection.v' class='invisible'><code>Subsection</code></span></span><div class='docblock'><p>subsection.</p>
+</div><span id='variant.SuccessorVersion' class='variant'><span id='SuccessorVersion.v' class='invisible'><code>SuccessorVersion</code></span></span><div class='docblock'><p>successor-version.</p>
+</div><span id='variant.Up' class='variant'><span id='Up.v' class='invisible'><code>Up</code></span></span><div class='docblock'><p>up.</p>
+</div><span id='variant.VersionHistory' class='variant'><span id='VersionHistory.v' class='invisible'><code>VersionHistory</code></span></span><div class='docblock'><p>versionHistory.</p>
+</div><span id='variant.Via' class='variant'><span id='Via.v' class='invisible'><code>Via</code></span></span><div class='docblock'><p>via.</p>
+</div><span id='variant.WorkingCopy' class='variant'><span id='WorkingCopy.v' class='invisible'><code>WorkingCopy</code></span></span><div class='docblock'><p>working-copy.</p>
+</div><span id='variant.WorkingCopyOf' class='variant'><span id='WorkingCopyOf.v' class='invisible'><code>WorkingCopyOf</code></span></span><div class='docblock'><p>working-copy-of.</p>
+</div><span id='variant.ExtRelType' class='variant'><span id='ExtRelType.v' class='invisible'><code>ExtRelType(<a class="struct" href="https://doc.rust-lang.org/nightly/collections/string/struct.String.html" title="struct collections::string::String">String</a>)</code></span></span><div class='docblock'><p>ext-rel-type.</p>
+</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> for <a class="enum" href="../../hyper/header/enum.RelationType.html" title="enum hyper::header::RelationType">RelationType</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/hyper/header/common/link.rs.html#140' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.clone' class="method"><span id='clone.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class="enum" href="../../hyper/header/enum.RelationType.html" title="enum hyper::header::RelationType">RelationType</a></code></span></h4>
+<div class='docblock'><p>Returns a copy of the value. <a href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone">Read more</a></p>
+</div><h4 id='method.clone_from' class="method"><span id='clone_from.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code><div class='since' title='Stable since Rust version 1.0.0'>1.0.0</div></span></h4>
+<div class='docblock'><p>Performs copy-assignment from <code>source</code>. <a href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from">Read more</a></p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html" title="trait core::cmp::PartialEq">PartialEq</a> for <a class="enum" href="../../hyper/header/enum.RelationType.html" title="enum hyper::header::RelationType">RelationType</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/hyper/header/common/link.rs.html#140' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.eq' class="method"><span id='eq.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#tymethod.eq' class='fnname'>eq</a>(&amp;self, __arg_0: &amp;<a class="enum" href="../../hyper/header/enum.RelationType.html" title="enum hyper::header::RelationType">RelationType</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></code></span></h4>
+<div class='docblock'><p>This method tests for <code>self</code> and <code>other</code> values to be equal, and is used by <code>==</code>. <a href="https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#tymethod.eq">Read more</a></p>
+</div><h4 id='method.ne' class="method"><span id='ne.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#method.ne' class='fnname'>ne</a>(&amp;self, __arg_0: &amp;<a class="enum" href="../../hyper/header/enum.RelationType.html" title="enum hyper::header::RelationType">RelationType</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></code></span></h4>
+<div class='docblock'><p>This method tests for <code>!=</code>.</p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html" title="trait core::fmt::Debug">Debug</a> for <a class="enum" href="../../hyper/header/enum.RelationType.html" title="enum hyper::header::RelationType">RelationType</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/hyper/header/common/link.rs.html#140' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.fmt' class="method"><span id='fmt.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class="struct" href="https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html" title="struct core::fmt::Formatter">Formatter</a>) -&gt; <a class="type" href="https://doc.rust-lang.org/nightly/core/fmt/type.Result.html" title="type core::fmt::Result">Result</a></code></span></h4>
+<div class='docblock'><p>Formats the value using the given formatter.</p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html" title="trait core::fmt::Display">Display</a> for <a class="enum" href="../../hyper/header/enum.RelationType.html" title="enum hyper::header::RelationType">RelationType</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/hyper/header/common/link.rs.html#701-747' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.fmt-1' class="method"><span id='fmt.v-1' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class="struct" href="https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html" title="struct core::fmt::Formatter">Formatter</a>) -&gt; <a class="type" href="https://doc.rust-lang.org/nightly/core/fmt/type.Result.html" title="type core::fmt::Result">Result</a></code></span></h4>
+<div class='docblock'><p>Formats the value using the given formatter. <a href="https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html#tymethod.fmt">Read more</a></p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/str/trait.FromStr.html" title="trait core::str::FromStr">FromStr</a> for <a class="enum" href="../../hyper/header/enum.RelationType.html" title="enum hyper::header::RelationType">RelationType</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/hyper/header/common/link.rs.html#749-837' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='associatedtype.Err' class="type"><span id='Err.t' class='invisible'><code>type <a href='https://doc.rust-lang.org/nightly/core/str/trait.FromStr.html#associatedtype.Err' class="type">Err</a> = <a class="enum" href="../../hyper/error/enum.Error.html" title="enum hyper::error::Error">Error</a></code></span></h4>
+<div class='docblock'><p>The associated error which can be returned from parsing.</p>
+</div><h4 id='method.from_str' class="method"><span id='from_str.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/str/trait.FromStr.html#tymethod.from_str' class='fnname'>from_str</a>(s: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="type" href="../../hyper/error/type.Result.html" title="type hyper::error::Result">Result</a>&lt;<a class="enum" href="../../hyper/header/enum.RelationType.html" title="enum hyper::header::RelationType">RelationType</a>&gt;</code></span></h4>
+<div class='docblock'><p>Parses a string <code>s</code> to return a value of this type. <a href="https://doc.rust-lang.org/nightly/core/str/trait.FromStr.html#tymethod.from_str">Read more</a></p>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "hyper";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

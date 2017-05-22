@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Service` trait in crate `cargonauts`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Service">
+
+    <title>cargonauts::server::Service - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../normalize.css">
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc trait">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>cargonauts</a>::<wbr><a href='index.html'>server</a></p><script>window.sidebarCurrent = {name: 'Service', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content">
+<h1 class='fqn'><span class='in-band'>Trait <a href='../index.html'>cargonauts</a>::<wbr><a href='index.html'>server</a>::<wbr><a class="trait" href=''>Service</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a class='srclink' href='../../src/tokio_service/lib.rs.html#142-158' title='goto source code'>[src]</a></span></h1>
+<pre class='rust trait'>pub trait Service <span class="where fmt-newline">where Self::<a class="trait" href="../../cargonauts/middleware/trait.Service.html" title="trait cargonauts::middleware::Service">Future</a>::<a class="trait" href="../../futures/future/trait.Future.html" title="trait futures::future::Future">Item</a> == Self::<a class="trait" href="../../cargonauts/middleware/trait.Service.html" title="trait cargonauts::middleware::Service">Response</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Self::<a class="trait" href="../../cargonauts/middleware/trait.Service.html" title="trait cargonauts::middleware::Service">Future</a>::<a class="trait" href="../../futures/future/trait.Future.html" title="trait futures::future::Future">Error</a> == Self::<a class="trait" href="../../cargonauts/middleware/trait.Service.html" title="trait cargonauts::middleware::Service">Error</a></span> {
+    type <a href='#associatedtype.Request' class="type">Request</a>;
+    type <a href='#associatedtype.Response' class="type">Response</a>;
+    type <a href='#associatedtype.Error' class="type">Error</a>;
+    type <a href='#associatedtype.Future' class="type">Future</a>: <a class="trait" href="../../futures/future/trait.Future.html" title="trait futures::future::Future">Future</a>;
+    fn <a href='#tymethod.call' class='fnname'>call</a>(&amp;self, req: Self::<a class="trait" href="../../cargonauts/middleware/trait.Service.html" title="trait cargonauts::middleware::Service">Request</a>) -&gt; Self::<a class="trait" href="../../cargonauts/middleware/trait.Service.html" title="trait cargonauts::middleware::Service">Future</a>;
+}</pre><div class='docblock'><p>An asynchronous function from <code>Request</code> to a <code>Response</code>.</p>
+<p>The <code>Service</code> trait is a simplified interface making it easy to write
+network applications in a modular and reusable way, decoupled from the
+underlying protocol. It is one of Tokio's fundamental abstractions.</p>
+<h1 id="functional" class="section-header"><a href="#functional">Functional</a></h1>
+<p>A <code>Service</code> is a function from a <code>Request</code>. It immediately returns a
+<code>Future</code> representing the eventual completion of processing the
+request. The actual request processing may happen at any time in the
+future, on any thread or executor. The processing may depend on calling
+other services. At some point in the future, the processing will complete,
+and the <code>Future</code> will resolve to a response or error.</p>
+<p>At a high level, the <code>Service::call</code> represents an RPC request. The
+<code>Service</code> value can be a server or a client.</p>
+<h1 id="server" class="section-header"><a href="#server">Server</a></h1>
+<p>An RPC server <em>implements</em> the <code>Service</code> trait. Requests received by the
+server over the network are deserialized then passed as an argument to the
+server value. The returned response is sent back over the network.</p>
+<p>As an example, here is how an HTTP request is processed by a server:</p>
+
+<pre class="rust rust-example-rendered">
+<span class="kw">impl</span> <span class="ident">Service</span> <span class="kw">for</span> <span class="ident">HelloWorld</span> {
+    <span class="kw">type</span> <span class="ident">Request</span> <span class="op">=</span> <span class="ident">http</span>::<span class="ident">Request</span>;
+    <span class="kw">type</span> <span class="ident">Response</span> <span class="op">=</span> <span class="ident">http</span>::<span class="ident">Response</span>;
+    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">http</span>::<span class="ident">Error</span>;
+    <span class="kw">type</span> <span class="ident">Future</span> <span class="op">=</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="self">Self</span>::<span class="ident">Response</span>, <span class="ident">Error</span> <span class="op">=</span> <span class="ident">http</span>::<span class="ident">Error</span><span class="op">&gt;&gt;</span>;
+
+    <span class="kw">fn</span> <span class="ident">call</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="ident">http</span>::<span class="ident">Request</span>) <span class="op">-&gt;</span> <span class="self">Self</span>::<span class="ident">Future</span> {
+        <span class="comment">// Create the HTTP response</span>
+        <span class="kw">let</span> <span class="ident">resp</span> <span class="op">=</span> <span class="ident">http</span>::<span class="ident">Response</span>::<span class="ident">ok</span>()
+            .<span class="ident">with_body</span>(<span class="string">b&quot;hello world\n&quot;</span>);
+
+        <span class="comment">// Return the response as an immediate future</span>
+        <span class="ident">futures</span>::<span class="ident">finished</span>(<span class="ident">resp</span>).<span class="ident">boxed</span>()
+    }
+}</pre>
+<h1 id="client" class="section-header"><a href="#client">Client</a></h1>
+<p>A client consumes a service by using a <code>Service</code> value. The client may
+issue requests by invoking <code>call</code> and passing the request as an argument.
+It then receives the response by waiting for the returned future.</p>
+<p>As an example, here is how a Redis request would be issued:</p>
+
+<pre class="rust rust-example-rendered">
+<span class="kw">let</span> <span class="ident">client</span> <span class="op">=</span> <span class="ident">redis</span>::<span class="ident">Client</span>::<span class="ident">new</span>()
+    .<span class="ident">connect</span>(<span class="string">&quot;127.0.0.1:6379&quot;</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>())
+    .<span class="ident">unwrap</span>();
+
+<span class="kw">let</span> <span class="ident">resp</span> <span class="op">=</span> <span class="ident">client</span>.<span class="ident">call</span>(<span class="ident">Cmd</span>::<span class="ident">set</span>(<span class="string">&quot;foo&quot;</span>, <span class="string">&quot;this is the value of foo&quot;</span>));
+
+<span class="comment">// Wait for the future to resolve</span>
+<span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;Redis response: {:?}&quot;</span>, <span class="ident">await</span>(<span class="ident">resp</span>));</pre>
+<h1 id="middleware" class="section-header"><a href="#middleware">Middleware</a></h1>
+<p>More often than not, all the pieces needed for writing robust, scalable
+network applications are the same no matter the underlying protocol. By
+unifying the API for both clients and servers in a protocol agnostic way,
+it is possible to write middleware that provide these pieces in a
+reusable way.</p>
+<p>For example, take timeouts as an example:</p>
+
+<pre class="rust rust-example-rendered">
+<span class="kw">use</span> <span class="ident">tokio</span>::<span class="ident">Service</span>;
+<span class="kw">use</span> <span class="ident">futures</span>::<span class="ident">Future</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">time</span>::<span class="ident">Duration</span>;
+
+<span class="comment">// Not yet implemented, but soon :)</span>
+<span class="kw">use</span> <span class="ident">tokio</span>::<span class="ident">timer</span>::{<span class="ident">Timer</span>, <span class="ident">Expired</span>};
+
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Timeout</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="ident">upstream</span>: <span class="ident">T</span>,
+    <span class="ident">delay</span>: <span class="ident">Duration</span>,
+    <span class="ident">timer</span>: <span class="ident">Timer</span>,
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Timeout</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">upstream</span>: <span class="ident">T</span>, <span class="ident">delay</span>: <span class="ident">Duration</span>) <span class="op">-&gt;</span> <span class="ident">Timeout</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="ident">Timeout</span> {
+            <span class="ident">upstream</span>: <span class="ident">upstream</span>,
+            <span class="ident">delay</span>: <span class="ident">delay</span>,
+            <span class="ident">timer</span>: <span class="ident">Timer</span>::<span class="ident">default</span>(),
+        }
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Service</span> <span class="kw">for</span> <span class="ident">Timeout</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
+    <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">Service</span>,
+          <span class="ident">T</span>::<span class="ident">Error</span>: <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Expired</span><span class="op">&gt;</span>,
+{
+    <span class="kw">type</span> <span class="ident">Request</span> <span class="op">=</span> <span class="ident">T</span>::<span class="ident">Request</span>;
+    <span class="kw">type</span> <span class="ident">Response</span> <span class="op">=</span> <span class="ident">T</span>::<span class="ident">Response</span>;
+    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">T</span>::<span class="ident">Error</span>;
+    <span class="kw">type</span> <span class="ident">Future</span> <span class="op">=</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="self">Self</span>::<span class="ident">Response</span>, <span class="ident">Error</span> <span class="op">=</span> <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;&gt;</span>;
+
+    <span class="kw">fn</span> <span class="ident">call</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="self">Self</span>::<span class="ident">Req</span>) <span class="op">-&gt;</span> <span class="self">Self</span>::<span class="ident">Future</span> {
+        <span class="kw">let</span> <span class="ident">timeout</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">timer</span>.<span class="ident">timeout</span>(<span class="self">self</span>.<span class="ident">delay</span>)
+            .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">timeout</span><span class="op">|</span> <span class="prelude-val">Err</span>(<span class="self">Self</span>::<span class="ident">Error</span>::<span class="ident">from</span>(<span class="ident">timeout</span>)));
+
+        <span class="self">self</span>.<span class="ident">upstream</span>.<span class="ident">call</span>(<span class="ident">req</span>)
+            .<span class="ident">select</span>(<span class="ident">timeout</span>)
+            .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">v</span>, _)<span class="op">|</span> <span class="ident">v</span>)
+            .<span class="ident">map_err</span>(<span class="op">|</span>(<span class="ident">e</span>, _)<span class="op">|</span> <span class="ident">e</span>)
+            .<span class="ident">boxed</span>()
+    }
+}
+</pre>
+<p>The above timeout implementation is decoupled from the underlying protocol
+and is also decoupled from client or server concerns. In other words, the
+same timeout middleware could be used in either a client or a server.</p>
+</div>
+            <h2 id='associated-types'>Associated Types</h2>
+            <div class='methods'>
+        <h3 id='associatedtype.Request' class='method'><span id='Request.t' class='invisible'><code>type <a href='#associatedtype.Request' class="type">Request</a></code></span></h3><div class='docblock'><p>Requests handled by the service.</p>
+</div><h3 id='associatedtype.Response' class='method'><span id='Response.t' class='invisible'><code>type <a href='#associatedtype.Response' class="type">Response</a></code></span></h3><div class='docblock'><p>Responses given by the service.</p>
+</div><h3 id='associatedtype.Error' class='method'><span id='Error.t' class='invisible'><code>type <a href='#associatedtype.Error' class="type">Error</a></code></span></h3><div class='docblock'><p>Errors produced by the service.</p>
+</div><h3 id='associatedtype.Future' class='method'><span id='Future.t' class='invisible'><code>type <a href='#associatedtype.Future' class="type">Future</a>: <a class="trait" href="../../futures/future/trait.Future.html" title="trait futures::future::Future">Future</a></code></span></h3><div class='docblock'><p>The future response value.</p>
+</div></div>
+            <h2 id='required-methods'>Required Methods</h2>
+            <div class='methods'>
+        <h3 id='tymethod.call' class='method'><span id='call.v' class='invisible'><code>fn <a href='#tymethod.call' class='fnname'>call</a>(&amp;self, req: Self::<a class="trait" href="../../cargonauts/middleware/trait.Service.html" title="trait cargonauts::middleware::Service">Request</a>) -&gt; Self::<a class="trait" href="../../cargonauts/middleware/trait.Service.html" title="trait cargonauts::middleware::Service">Future</a></code></span></h3><div class='docblock'><p>Process the request and return the response asynchronously.</p>
+</div></div>
+        <h2 id='implementors'>Implementors</h2>
+        <ul class='item-list' id='implementors-list'>
+    <li><code>impl Service for <a class="struct" href="../../hyper/client/connect/struct.HttpConnector.html" title="struct hyper::client::connect::HttpConnector">HttpConnector</a></code></li>
+<li><code>impl&lt;C, B&gt; Service for hyper::client::<a class="struct" href="../../hyper/client/struct.Client.html" title="struct hyper::client::Client">Client</a>&lt;C, B&gt; <span class="where fmt-newline">where B: <a class="trait" href="../../futures/stream/trait.Stream.html" title="trait futures::stream::Stream">Stream</a>&lt;Error = <a class="enum" href="../../cargonauts/middleware/http/enum.Error.html" title="enum cargonauts::middleware::http::Error">Error</a>&gt; + 'static,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C: <a class="trait" href="../../hyper/client/connect/trait.Connect.html" title="trait hyper::client::connect::Connect">Connect</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B::<a class="trait" href="../../futures/stream/trait.Stream.html" title="trait futures::stream::Stream">Item</a>: <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html" title="trait core::convert::AsRef">AsRef</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">[</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u8.html">u8</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">]</a>&gt;</span></code></li>
+<li><code>impl Service for tokio_redis::<a class="struct" href="../../tokio_redis/struct.Client.html" title="struct tokio_redis::Client">Client</a></code></li>
+<li><code>impl&lt;T, P&gt; Service for tokio_proto::simple::pipeline::client::<a class="struct" href="../../tokio_proto/simple/pipeline/client/struct.ClientService.html" title="struct tokio_proto::simple::pipeline::client::ClientService">ClientService</a>&lt;T, P&gt; <span class="where fmt-newline">where P: <a class="trait" href="../../tokio_proto/simple/pipeline/client/trait.ClientProto.html" title="trait tokio_proto::simple::pipeline::client::ClientProto">ClientProto</a>&lt;T&gt;, T: 'static</span></code></li>
+<li><code>impl&lt;T, P&gt; Service for tokio_proto::simple::multiplex::client::<a class="struct" href="../../tokio_proto/simple/multiplex/client/struct.ClientService.html" title="struct tokio_proto::simple::multiplex::client::ClientService">ClientService</a>&lt;T, P&gt; <span class="where fmt-newline">where P: <a class="trait" href="../../tokio_proto/simple/multiplex/client/trait.ClientProto.html" title="trait tokio_proto::simple::multiplex::client::ClientProto">ClientProto</a>&lt;T&gt;, T: 'static</span></code></li>
+<li><code>impl&lt;R, S, E&gt; Service for <a class="struct" href="../../tokio_proto/util/client_proxy/struct.ClientProxy.html" title="struct tokio_proto::util::client_proxy::ClientProxy">ClientProxy</a>&lt;R, S, E&gt; <span class="where fmt-newline">where E: <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/std/io/error/struct.Error.html" title="struct std::io::error::Error">Error</a>&gt;</span></code></li>
+<li><code>impl&lt;S&gt; Service for <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;S&gt; <span class="where fmt-newline">where S: <a class="trait" href="../../cargonauts/middleware/trait.Service.html" title="trait cargonauts::middleware::Service">Service</a> + ?<a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a></span></code></li>
+<li><code>impl&lt;S&gt; Service for <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/rc/struct.Rc.html" title="struct alloc::rc::Rc">Rc</a>&lt;S&gt; <span class="where fmt-newline">where S: <a class="trait" href="../../cargonauts/middleware/trait.Service.html" title="trait cargonauts::middleware::Service">Service</a> + ?<a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a></span></code></li>
+<li><code>impl&lt;S&gt; Service for <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/arc/struct.Arc.html" title="struct alloc::arc::Arc">Arc</a>&lt;S&gt; <span class="where fmt-newline">where S: <a class="trait" href="../../cargonauts/middleware/trait.Service.html" title="trait cargonauts::middleware::Service">Service</a> + ?<a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a></span></code></li>
+<li><code>impl&lt;C&gt; Service for <a class="struct" href="../../cargonauts/clients/mock/struct.MockConnection.html" title="struct cargonauts::clients::mock::MockConnection">MockConnection</a>&lt;C&gt; <span class="where fmt-newline">where C: <a class="trait" href="../../cargonauts/server/trait.NewService.html" title="trait cargonauts::server::NewService">NewService</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C::<a class="trait" href="../../cargonauts/server/trait.NewService.html" title="trait cargonauts::server::NewService">Request</a>: <a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C::<a class="trait" href="../../cargonauts/server/trait.NewService.html" title="trait cargonauts::server::NewService">Request</a>: <a class="trait" href="https://doc.rust-lang.org/nightly/core/hash/trait.Hash.html" title="trait core::hash::Hash">Hash</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C::<a class="trait" href="../../cargonauts/server/trait.NewService.html" title="trait cargonauts::server::NewService">Request</a>: <a class="trait" href="https://doc.rust-lang.org/nightly/core/cmp/trait.Eq.html" title="trait core::cmp::Eq">Eq</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C::<a class="trait" href="../../cargonauts/server/trait.NewService.html" title="trait cargonauts::server::NewService">Response</a>: <a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C::<a class="trait" href="../../cargonauts/server/trait.NewService.html" title="trait cargonauts::server::NewService">Error</a>: <a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a></span></code></li>
+<li><code>impl&lt;I, O, T, F&gt; Service for <a class="struct" href="../../rigging/endpoint/struct.EndpointService.html" title="struct rigging::endpoint::EndpointService">EndpointService</a>&lt;I, O, T, F&gt; <span class="where fmt-newline">where T: <a class="trait" href="../../rigging/endpoint/trait.Endpoint.html" title="trait rigging::endpoint::Endpoint">Endpoint</a>&lt;F, I, O&gt; + ?<a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a></span></code></li>
+<li><code>impl Service for <a class="struct" href="../../rigging/routes/struct.RoutingTable.html" title="struct rigging::routes::RoutingTable">RoutingTable</a></code></li>
+<li><code>impl&lt;F&gt; Service for <a class="struct" href="../../rigging/routes/struct.AssetHandler.html" title="struct rigging::routes::AssetHandler">AssetHandler</a>&lt;F&gt; <span class="where fmt-newline">where F: <a class="trait" href="https://doc.rust-lang.org/nightly/core/ops/trait.Fn.html" title="trait core::ops::Fn">Fn</a>(<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">&amp;'static [</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u8.html">u8</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">]</a>, <a class="struct" href="../../cargonauts/middleware/struct.Request.html" title="struct cargonauts::middleware::Request">Request</a>) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;<a class="trait" href="../../futures/future/trait.Future.html" title="trait futures::future::Future">Future</a>&lt;Error = <a class="enum" href="../../cargonauts/middleware/http/enum.Error.html" title="enum cargonauts::middleware::http::Error">Error</a>, Item = <a class="struct" href="../../cargonauts/middleware/http/struct.Response.html" title="struct cargonauts::middleware::http::Response">Response</a>&lt;<a class="struct" href="../../hyper/http/body/struct.Body.html" title="struct hyper::http::body::Body">Body</a>&gt;&gt; + 'static&gt;</span></code></li>
+</ul><script type="text/javascript" async
+                         src="../../implementors/tokio_service/trait.Service.js">
+                 </script></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "cargonauts";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>
