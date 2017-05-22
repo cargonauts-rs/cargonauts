@@ -92,7 +92,8 @@ impl<'a> MethodRef<'a> {
         let read_dir = if let Some(rd) = fs::read_dir(root).ok() { rd } else { return None };
         for entry in read_dir {
             let entry = entry.unwrap();
-            if entry.file_name().to_str().unwrap().starts_with(&self.method.to_snek_case()) {
+            let filename = entry.file_name();
+            if self.method.to_snek_case() == filename.to_str().unwrap().split('.').next().unwrap() {
                 return Some(entry.path())
             }
         }
