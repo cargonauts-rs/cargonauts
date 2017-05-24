@@ -18,6 +18,7 @@ path = "src/asset-pipeline"
 
 [dependencies.c3po]
 git = "https://github.com/withoutboats/c3po"
+branch = "singlethreaded"
 
 [dependencies.cargonauts-config]
 path = "src/cargonauts-config"

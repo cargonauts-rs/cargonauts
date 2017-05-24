@@ -15,6 +15,7 @@ url = "1.4.0"
 
 [dependencies.c3po]
 git = "https://github.com/withoutboats/c3po"
+branch = "singlethreaded"
 
 [dependencies.hyper]
 branch = "new-new-service"
