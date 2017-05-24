@@ -132,20 +132,20 @@ impl ToTokens for Route {
         let format = Ident::new(&self.format[..]);
         let method = method_for(&self.method, self.rel.as_ref(), &resource);
 
-        let http_method = quote!(<#method as ::cargonauts::methods::Method<#resource>>::ROUTE.method);
+        let http_method = quote!(<#method as ::cargonauts::methods::def::Method<#resource>>::ROUTE.method);
 
         let path = if let Some(ref rel) = self.rel_endpoint {
-            quote!(::cargonauts::routing::path(<#method as ::cargonauts::methods::Method<#resource>>::ROUTE.kind, #endpoint, Some(#rel)))
+            quote!(::cargonauts::routing::path(<#method as ::cargonauts::methods::def::Method<#resource>>::ROUTE.kind, #endpoint, Some(#rel)))
         } else {
-            quote!(::cargonauts::routing::path(<#method as ::cargonauts::methods::Method<#resource>>::ROUTE.kind, #endpoint, None))
+            quote!(::cargonauts::routing::path(<#method as ::cargonauts::methods::def::Method<#resource>>::ROUTE.kind, #endpoint, None))
         };
 
         let template_key = {
             let r = &self.resource;
             let m = &self.method;
             match self.rel {
-                Some(ref rel)   => quote!(::cargonauts::formats::TemplateKey::new_rel(#r, #rel, #m)),
-                None            => quote!(::cargonauts::formats::TemplateKey::new(#r, #m)),
+                Some(ref rel)   => quote!(::cargonauts::formats::def::TemplateKey::new_rel(#r, #rel, #m)),
+                None            => quote!(::cargonauts::formats::def::TemplateKey::new(#r, #m)),
             }
         };
 
