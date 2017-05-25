@@ -152,13 +152,13 @@ impl ToTokens for Route {
         if let Some(ref middleware) = self.middleware {
             let middleware = Ident::new(&middleware[..]);
             tokens.append(quote!({
-                let service = ::cargonauts::routing::EndpointService::<_, _, (#resource, #method), #format>::new(#template_key, formats.get::<#format>());
+                let service = ::cargonauts::routing::EndpointService::<_, _, #resource, #format, #method>::new(#template_key, formats.get::<#format>());
                 let service = ::cargonauts::middleware::Middleware::wrap(<#middleware as Default>::default(), service);
                 routes.add(#http_method, #path, Box::new(service) as ::cargonauts::routing::Handler);
             }));
         } else {
             tokens.append(quote!({
-                let service = ::cargonauts::routing::EndpointService::<_, _, (#resource, #method), #format>::new(#template_key, formats.get::<#format>());
+                let service = ::cargonauts::routing::EndpointService::<_, _, #resource, #format, #method>::new(#template_key, formats.get::<#format>());
                 routes.add(#http_method, #path, Box::new(service) as ::cargonauts::routing::Handler);
             }));
         }
