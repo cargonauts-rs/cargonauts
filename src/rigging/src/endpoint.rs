@@ -12,7 +12,7 @@ use format::{Format, TemplateKey};
 use environment::Environment;
 use http::{self, StatusCode};
 
-pub trait Endpoint<F, M: ?Sized, In, Out> {
+pub trait Endpoint<F: Format<Self, R, M>, M: ?Sized + Method<Self>, R, In, Out>: ResourceEndpoint {
     fn call(req: Request, format: Rc<F>, key: TemplateKey) -> http::BoxFuture;
 }
 
@@ -30,7 +30,7 @@ pub struct _Collection;
 
 pub struct _Unit;
 
-impl<M, T, F, R> Endpoint<F, M, _Resource, _Resource> for T
+impl<M, T, F, R> Endpoint<F, M, R, _Resource, _Resource> for T
 where
     T: ResourceEndpoint,
     M: ?Sized + ResourceMethod<T, Response = R>,
@@ -54,7 +54,7 @@ where
     }
 }
 
-impl<M, T, F> Endpoint<F, M, _Resource, _Unit> for T
+impl<M, T, F> Endpoint<F, M, (), _Resource, _Unit> for T
 where
     T: ResourceEndpoint,
     M: ?Sized + ResourceMethod<T, Response = ()>,
@@ -77,7 +77,7 @@ where
     }
 }
 
-impl<M, T, F, R> Endpoint<F, M, _Resource, _Collection> for T
+impl<M, T, F, R> Endpoint<F, M, R, _Resource, _Collection> for T
 where
     T: ResourceEndpoint,
     M: ?Sized + ResourceMethod<T, Response = Vec<R>>,
@@ -101,7 +101,7 @@ where
     }
 }
 
-impl<M, T, F, R> Endpoint<F, M, _Collection, _Resource> for T
+impl<M, T, F, R> Endpoint<F, M, R, _Collection, _Resource> for T
 where
     T: ResourceEndpoint,
     M: ?Sized + CollectionMethod<T, Response = R>,
@@ -121,7 +121,7 @@ where
     }
 }
 
-impl<M, T, F> Endpoint<F, M, _Collection, _Unit> for T
+impl<M, T, F> Endpoint<F, M, (), _Collection, _Unit> for T
 where
     T: ResourceEndpoint,
     M: ?Sized + CollectionMethod<T, Response = ()>,
@@ -140,7 +140,7 @@ where
     }
 }
 
-impl<M, T, F, R> Endpoint<F, M, _Collection, _Collection> for T
+impl<M, T, F, R> Endpoint<F, M, R, _Collection, _Collection> for T
 where
     T: ResourceEndpoint,
     M: ?Sized + CollectionMethod<T, Response = Vec<R>>,
@@ -166,23 +166,24 @@ pub struct Request {
     pub id: Option<String>,
 }
 
-pub struct EndpointService<I, O, T, F, M: ?Sized> {
+pub struct EndpointService<I, O, T, F, M: ?Sized, R> {
     key: TemplateKey,
     format: Rc<F>,
-    _marker: PhantomData<(I, O, T, M)>
+    _marker: PhantomData<(R, I, O, T, M)>
 }
 
-impl<I, O, T, F, M: ?Sized> EndpointService<I, O, T, F, M> {
+impl<I, O, T, F, M: ?Sized, R> EndpointService<I, O, T, F, M, R> {
     #[doc(hidden)]
     pub fn new(key: TemplateKey, format: Rc<F>) -> Self {
         Self { key, format, _marker: PhantomData }
     }
 }
 
-impl<I, O, T, F, M> Service for EndpointService<I, O, T, F, M>
+impl<I, O, T, F, M, R> Service for EndpointService<I, O, T, F, M, R>
 where
-    T: Endpoint<F, M, I, O>,
-    M: ?Sized
+    T: Endpoint<F, M, R, I, O> + ResourceEndpoint,
+    M: ?Sized + Method<T>,
+    F: Format<T, R, M>,
 {
     type Request = Request;
     type Response = http::Response;
