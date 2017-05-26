@@ -12,7 +12,7 @@ impl Routes {
     pub fn new(assets: Tokens, resources: &[RouteItem]) -> Routes {
         Routes {
             routes: Route::build(resources),
-            assets
+            assets,
         }
     }
 }
@@ -26,7 +26,7 @@ impl ToTokens for Routes {
             let mut routes = ::cargonauts::routing::RouteBuilder::default();
             #(#routes)*
             #assets
-            routes.build(env)
+            routes.build(env, timer)
         }));
     }
 }

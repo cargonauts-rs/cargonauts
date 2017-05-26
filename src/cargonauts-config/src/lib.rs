@@ -12,6 +12,7 @@ use std::fs::File;
 use std::io::Read;
 use std::net::SocketAddr;
 use std::path::{Path, PathBuf};
+use std::time::Duration;
 
 pub use toml::Value;
 
@@ -19,6 +20,8 @@ pub use toml::Value;
 pub struct CargonautsConfig {
     #[serde(default = "project_root")]
     project_root: PathBuf,
+    #[serde(default = "timeout")]
+    timeout: Duration,
     host: Option<SocketAddr>,
     templates: Option<PathBuf>,
     assets: Option<PathBuf>,
@@ -31,6 +34,7 @@ impl Default for CargonautsConfig {
     fn default() -> CargonautsConfig {
         CargonautsConfig {
             project_root: project_root(),
+            timeout: timeout(),
             host: None,
             templates: None,
             assets: None,
@@ -61,6 +65,10 @@ impl CargonautsConfig {
 
     pub fn project_root(&self) -> &Path {
         &self.project_root
+    }
+
+    pub fn timeout(&self) -> Duration {
+        self.timeout
     }
 
     pub fn host(&self) -> SocketAddr {
@@ -129,4 +137,8 @@ struct Metadata {
 
 fn project_root() -> PathBuf {
     env::var("CARGO_MANIFEST_DIR").unwrap().into()
+}
+
+fn timeout() -> Duration {
+    Duration::from_secs(30)
 }

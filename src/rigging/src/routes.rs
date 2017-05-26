@@ -2,7 +2,9 @@ use std::collections::HashMap;
 use std::io;
 use std::path::Path;
 use std::rc::Rc;
+use std::time::Duration;
 
+use core::reactor::{Handle, Timeout};
 use futures::{future, Future};
 use recognizer::{Match, Router};
 use tokio::{Service, NewService};
@@ -27,6 +29,7 @@ pub enum Kind {
 pub struct RoutingTable {
     table: Rc<HashMap<http::Method, Router<Handler>>>,
     env: PreparedEnv,
+    timer: Timer,
 }
 
 impl Service for RoutingTable {
@@ -39,7 +42,12 @@ impl Service for RoutingTable {
         match self.recognize(&req) {
             Some(handle)    => {
                 let id = handle.params.find("id").map(|s| s.to_owned());
-                let req = endpoint::Request { req, env: self.env.new(), id };
+                let req = endpoint::Request {
+                    id, req,
+                    timeout: self.timer.timeout(),
+                    duration: self.timer.duration,
+                    env: self.env.new(),
+                };
                 handle.handler.call(req)
             }
             None            => not_found()
@@ -67,6 +75,22 @@ impl RoutingTable {
     }
 }
 
+#[derive(Clone)]
+pub struct Timer {
+    duration: Duration,
+    handle: Handle,
+}
+
+impl Timer {
+    pub fn new(duration: Duration, handle: Handle) -> Self {
+        Self { duration, handle }
+    }
+
+    pub fn timeout(&self) -> io::Result<Timeout> {
+        Timeout::new(self.duration, &self.handle)
+    }
+}
+
 #[derive(Default)]
 pub struct RouteBuilder {
     table: HashMap<http::Method, Router<Handler>>,
@@ -77,8 +101,8 @@ impl RouteBuilder {
         self.table.entry(method).or_insert(Router::new()).add(&path, handler);
     }
 
-    pub fn build(self, env: PreparedEnv) -> RoutingTable {
-        RoutingTable { table: Rc::new(self.table), env }
+    pub fn build(self, env: PreparedEnv, timer: Timer) -> RoutingTable {
+        RoutingTable { table: Rc::new(self.table), env, timer }
     }
 }
 

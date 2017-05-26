@@ -17,6 +17,8 @@ pub fn code_gen(routes: Routes, cfg: CargonautsConfig) -> String {
     let build_routing_table = _Routes::new(assets, &routes.route_items);
     let addr = cfg.host().to_string();
     let formats = formats::formats(&routes, &cfg);
+    let timeout = cfg.timeout().as_secs();
+
     let tokens = if let Some(ref setup) = routes.setup {
         let setup_environment = setup::setup(setup, &cfg);
 
@@ -32,6 +34,7 @@ pub fn code_gen(routes: Routes, cfg: CargonautsConfig) -> String {
                     #formats
                 }
                 use ::cargonauts::futures::{Future, Stream};
+                let timer = ::cargonauts::routing::Timer::new(::std::time::Duration::from_secs(#timeout), handle.clone());
                 #load_env_vars
                 let future: ::cargonauts::futures::future::Map<_, _> =
                     {#setup_environment}.and_then(move |env| formats().map(|formats| (env, formats)))
@@ -54,6 +57,7 @@ pub fn code_gen(routes: Routes, cfg: CargonautsConfig) -> String {
                     #formats
                 }
                 use ::cargonauts::futures::{Future, IntoFuture, Stream};
+                let timer = ::cargonauts::routing::Timer::new(::std::time::Duration::from_secs(#timeout), handle.clone());
                 let env = ::cargonauts::routing::EnvBuilder::new().build();
                 let future: ::cargonauts::futures::future::Map<_, _> =
                     formats().into_future().map(move |formats| {#build_routing_table});

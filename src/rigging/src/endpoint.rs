@@ -1,16 +1,18 @@
+use std::io;
 use std::marker::PhantomData;
 use std::rc::Rc;
+use std::time::Duration;
 
+use core::reactor::Timeout;
 use futures::Future;
 use tokio::Service;
 
 use Error;
-use resource::ResourceEndpoint;
-use method::*;
-
-use format::{Format, TemplateKey};
 use environment::Environment;
+use format::{Format, TemplateKey};
 use http::{self, StatusCode};
+use method::*;
+use resource::ResourceEndpoint;
 
 pub trait Endpoint<F: Format<Self, R, M>, M: ?Sized + Method<Self>, R, In, Out>: ResourceEndpoint {
     fn call(req: Request, format: Rc<F>, key: TemplateKey) -> http::BoxFuture;
@@ -38,7 +40,15 @@ where
     F: Format<T, R, M>,
 {
     fn call(req: Request, format: Rc<F>, key: TemplateKey) -> http::BoxFuture {
-        let Request { req, id, env } = req;
+        let Request { req, id, env, timeout, duration, .. } = req;
+        let timeout = match timeout {
+            Ok(timeout) => {
+                let env = env.clone();
+                let format = format.clone();
+                timeout.then(move |_| F::present_error(&format, Error::timeout(duration), &env))
+            }
+            Err(err)    => return F::present_error(&format, err.into(), &env),
+        };
         let id = match parse_id::<T>(id) {
             Ok(id) => id,
             Err(err) => return F::present_error(&format, err, &env),
@@ -50,6 +60,9 @@ where
             };
             let future = M::call(id, request, env.clone());
             F::present_resource(&format, future, key, &env)
+        }).select(timeout).then(|result| match result {
+            Ok((ok, _))     => Ok(ok),
+            Err((err, _))   => Err(err),
         }))
     }
 }
@@ -61,10 +74,18 @@ where
     F: Format<T, (), M>,
 {
     fn call(req: Request, format: Rc<F>, key: TemplateKey) -> http::BoxFuture {
-        let Request { req, id, env } = req;
+        let Request { req, id, env, timeout, duration, .. } = req;
         let id = match parse_id::<T>(id) {
             Ok(id) => id,
             Err(err) => return F::present_error(&format, err, &env),
+        };
+        let timeout = match timeout {
+            Ok(timeout) => {
+                let env = env.clone();
+                let format = format.clone();
+                timeout.then(move |_| F::present_error(&format, Error::timeout(duration), &env))
+            }
+            Err(err)    => return F::present_error(&format, err.into(), &env),
         };
         Box::new(F::receive_request(&format, req, &env).then(move |result| {
             let request = match result {
@@ -73,6 +94,9 @@ where
             };
             let future = M::call(id, request, env.clone());
             F::present_unit(&format, future, key, &env)
+        }).select(timeout).then(|result| match result {
+            Ok((ok, _))     => Ok(ok),
+            Err((err, _))   => Err(err),
         }))
     }
 }
@@ -85,10 +109,18 @@ where
     F: Format<T, R, M>,
 {
     fn call(req: Request, format: Rc<F>, key: TemplateKey) -> http::BoxFuture {
-        let Request { req, id, env } = req;
+        let Request { req, id, env, timeout, duration, .. } = req;
         let id = match parse_id::<T>(id) {
             Ok(id) => id,
             Err(err) => return F::present_error(&format, err, &env),
+        };
+        let timeout = match timeout {
+            Ok(timeout) => {
+                let env = env.clone();
+                let format = format.clone();
+                timeout.then(move |_| F::present_error(&format, Error::timeout(duration), &env))
+            }
+            Err(err)    => return F::present_error(&format, err.into(), &env),
         };
         Box::new(F::receive_request(&format, req, &env).then(move |result| {
             let request = match result {
@@ -97,6 +129,9 @@ where
             };
             let future = M::call(id, request, env.clone());
             F::present_collection(&format, future, key, &env)
+        }).select(timeout).then(|result| match result {
+            Ok((ok, _))     => Ok(ok),
+            Err((err, _))   => Err(err),
         }))
     }
 }
@@ -109,7 +144,15 @@ where
     F: Format<T, R, M>,
 {
     fn call(req: Request, format: Rc<F>, key: TemplateKey) -> http::BoxFuture {
-        let Request { req, env, .. } = req;
+        let Request { req, env, timeout, duration, .. } = req;
+        let timeout = match timeout {
+            Ok(timeout) => {
+                let env = env.clone();
+                let format = format.clone();
+                timeout.then(move |_| F::present_error(&format, Error::timeout(duration), &env))
+            }
+            Err(err)    => return F::present_error(&format, err.into(), &env),
+        };
         Box::new(F::receive_request(&format, req, &env).then(move |result| {
             let request = match result {
                 Ok(parts)   => parts,
@@ -117,6 +160,9 @@ where
             };
             let future = M::call(request, env.clone());
             F::present_resource(&format, future, key, &env)
+        }).select(timeout).then(|result| match result {
+            Ok((ok, _))     => Ok(ok),
+            Err((err, _))   => Err(err),
         }))
     }
 }
@@ -128,7 +174,15 @@ where
     F: Format<T, (), M>,
 {
     fn call(req: Request, format: Rc<F>, key: TemplateKey) -> http::BoxFuture {
-        let Request { req, env, .. } = req;
+        let Request { req, env, timeout, duration, .. } = req;
+        let timeout = match timeout {
+            Ok(timeout) => {
+                let env = env.clone();
+                let format = format.clone();
+                timeout.then(move |_| F::present_error(&format, Error::timeout(duration), &env))
+            }
+            Err(err)    => return F::present_error(&format, err.into(), &env),
+        };
         Box::new(F::receive_request(&format, req, &env).then(move |result| {
             let request = match result {
                 Ok(parts)   => parts,
@@ -136,6 +190,9 @@ where
             };
             let future = M::call(request, env.clone());
             F::present_unit(&format, future, key, &env)
+        }).select(timeout).then(|result| match result {
+            Ok((ok, _))     => Ok(ok),
+            Err((err, _))   => Err(err),
         }))
     }
 }
@@ -148,7 +205,15 @@ where
     F: Format<T, R, M>,
 {
     fn call(req: Request, format: Rc<F>, key: TemplateKey) -> http::BoxFuture {
-        let Request { req, env, .. } = req;
+        let Request { req, env, timeout, duration, .. } = req;
+        let timeout = match timeout {
+            Ok(timeout) => {
+                let env = env.clone();
+                let format = format.clone();
+                timeout.then(move |_| F::present_error(&format, Error::timeout(duration), &env))
+            }
+            Err(err)    => return F::present_error(&format, err.into(), &env),
+        };
         Box::new(F::receive_request(&format, req, &env).then(move |result| {
             let request = match result {
                 Ok(parts)   => parts,
@@ -156,6 +221,9 @@ where
             };
             let future = M::call(request, env.clone());
             F::present_collection(&format, future, key, &env)
+        }).select(timeout).then(|result| match result {
+            Ok((ok, _))     => Ok(ok),
+            Err((err, _))   => Err(err),
         }))
     }
 }
@@ -163,7 +231,9 @@ where
 pub struct Request {
     pub req: http::Request,
     pub env: Environment,
-    pub id: Option<String>,
+    pub(crate) id: Option<String>,
+    pub(crate) timeout: io::Result<Timeout>,
+    pub(crate) duration: Duration,
 }
 
 pub struct EndpointService<I, O, T, F, M: ?Sized, R> {

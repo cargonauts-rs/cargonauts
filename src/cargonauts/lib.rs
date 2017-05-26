@@ -75,13 +75,14 @@ pub mod formats {
 
 #[doc(hidden)]
 pub mod routing {
-    pub use rigging::resource::{ResourceEndpoint, RelationEndpoint, RelationshipLink, RelIds, HasOneEndpoint, HasManyEndpoint};
     pub use rigging::endpoint::{Endpoint, EndpointService};
-    pub use rigging::routes::{RoutingTable, RouteBuilder, Handler, path};
-    pub use rigging::routes::{AssetHandler, default_asset_handler};
     pub use rigging::environment::EnvBuilder;
     pub use rigging::http::BoxFuture as HttpFuture;
     pub use rigging::format::FormatLender;
+    pub use rigging::resource::{ResourceEndpoint, RelationEndpoint, RelationshipLink, RelIds, HasOneEndpoint, HasManyEndpoint};
+    pub use rigging::routes::{RoutingTable, RouteBuilder, Handler, path};
+    pub use rigging::routes::{AssetHandler, default_asset_handler};
+    pub use rigging::routes::Timer;
 }
 
 pub use server::serve;

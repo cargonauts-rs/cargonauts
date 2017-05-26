@@ -1,6 +1,7 @@
 use std::fmt;
 use std::io;
 use std::error::Error as ErrorT;
+use std::time::Duration;
 
 use backtrace::Backtrace;
 
@@ -19,6 +20,7 @@ pub struct Error {
 enum Cause {
     Error(Box<ErrorT + Send + 'static>),
     Message(String),
+    Timeout(Duration),
     Unknown,
 }
 
@@ -37,6 +39,10 @@ impl Error {
 
     pub fn with_backtrace<E: ErrorT + Send + 'static>(err: E, code: StatusCode, backtrace: Backtrace) -> Self {
         Self::construct(code, backtrace, Cause::Error(Box::new(err)))
+    }
+
+    pub fn timeout(time: Duration) -> Self {
+        Self::construct(StatusCode::InternalServerError, Backtrace::new(), Cause::Timeout(time))
     }
 
     fn construct(code: StatusCode, backtrace: Backtrace, cause: Cause) -> Self {
@@ -76,6 +82,7 @@ impl fmt::Debug for Error {
         match self.cause {
             Cause::Error(ref cause) => write!(f, "{}\nINFO: {}\n\n{:?}", self.code, cause, self.backtrace),
             Cause::Message(ref msg) => write!(f, "{}\nINFO: {}\n\n{:?}", self.code, msg, self.backtrace),
+            Cause::Timeout(time)    => write!(f, "{}\nINFO: Timed out after {} seconds!", self.code, time.as_secs()),
             Cause::Unknown          => write!(f, "{}\n\n{:?}", self.code, self.backtrace),
         }
     }
@@ -86,6 +93,7 @@ impl fmt::Display for Error {
         match self.cause {
             Cause::Error(ref cause) => write!(f, "{}\nINFO: {}", self.code, cause),
             Cause::Message(ref msg) => write!(f, "{}\nINFO: {}", self.code, msg),
+            Cause::Timeout(time)    => write!(f, "{}\nINFO: Timed out after {} seconds!", self.code, time.as_secs()),
             Cause::Unknown          => write!(f, "{}", self.code),
         }
     }
@@ -93,7 +101,11 @@ impl fmt::Display for Error {
 
 impl ErrorT for Error {
     fn description(&self) -> &str {
-        self.code.canonical_reason().unwrap_or("An unknown error occurred")
+        if let Cause::Timeout(_) = self.cause {
+            "The request timed out."
+        } else {
+            self.code.canonical_reason().unwrap_or("An unknown error occurred")
+        }
     }
 
     fn cause(&self) -> Option<&ErrorT> {
