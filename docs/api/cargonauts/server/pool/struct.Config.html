@@ -58,31 +58,43 @@
     pub max_live_time: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/std/time/duration/struct.Duration.html" title="struct std::time::duration::Duration">Duration</a>&gt;,
     pub max_idle_time: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/std/time/duration/struct.Duration.html" title="struct std::time::duration::Duration">Duration</a>&gt;,
     pub reap_frequency: <a class="struct" href="https://doc.rust-lang.org/nightly/std/time/duration/struct.Duration.html" title="struct std::time::duration::Duration">Duration</a>,
-}</pre><h2 id='fields' class='fields'>Fields</h2><span id='structfield.min_connections' class="structfield">
+}</pre><div class='docblock'><p>The configuration for a connection pool.</p>
+</div><h2 id='fields' class='fields'>Fields</h2><span id='structfield.min_connections' class="structfield">
                            <span id='min_connections.v' class='invisible'>
                            <code>min_connections: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a></code>
-                           </span></span><span id='structfield.max_connections' class="structfield">
+                           </span></span><div class='docblock'><p>The minimum number of connections this pool should maintain.</p>
+</div><span id='structfield.max_connections' class="structfield">
                            <span id='max_connections.v' class='invisible'>
                            <code>max_connections: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>&gt;</code>
-                           </span></span><span id='structfield.min_idle_connections' class="structfield">
+                           </span></span><div class='docblock'><p>The maximum number of connections this pool should maintain.</p>
+</div><span id='structfield.min_idle_connections' class="structfield">
                            <span id='min_idle_connections.v' class='invisible'>
                            <code>min_idle_connections: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>&gt;</code>
-                           </span></span><span id='structfield.max_idle_connections' class="structfield">
+                           </span></span><div class='docblock'><p>The minimum number of idle connections this pool should maintain.</p>
+</div><span id='structfield.max_idle_connections' class="structfield">
                            <span id='max_idle_connections.v' class='invisible'>
                            <code>max_idle_connections: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>&gt;</code>
-                           </span></span><span id='structfield.connect_timeout' class="structfield">
+                           </span></span><div class='docblock'><p>The maximum number of idle connections this pool should maintain.</p>
+</div><span id='structfield.connect_timeout' class="structfield">
                            <span id='connect_timeout.v' class='invisible'>
                            <code>connect_timeout: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/std/time/duration/struct.Duration.html" title="struct std::time::duration::Duration">Duration</a>&gt;</code>
-                           </span></span><span id='structfield.max_live_time' class="structfield">
+                           </span></span><div class='docblock'><p>How long to wait before timing out when trying to lease a new
+connection.</p>
+</div><span id='structfield.max_live_time' class="structfield">
                            <span id='max_live_time.v' class='invisible'>
                            <code>max_live_time: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/std/time/duration/struct.Duration.html" title="struct std::time::duration::Duration">Duration</a>&gt;</code>
-                           </span></span><span id='structfield.max_idle_time' class="structfield">
+                           </span></span><div class='docblock'><p>Maximum time to keep a connection alive.</p>
+</div><span id='structfield.max_idle_time' class="structfield">
                            <span id='max_idle_time.v' class='invisible'>
                            <code>max_idle_time: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/std/time/duration/struct.Duration.html" title="struct std::time::duration::Duration">Duration</a>&gt;</code>
-                           </span></span><span id='structfield.reap_frequency' class="structfield">
+                           </span></span><div class='docblock'><p>Maximum time to keep a connection idle.</p>
+</div><span id='structfield.reap_frequency' class="structfield">
                            <span id='reap_frequency.v' class='invisible'>
                            <code>reap_frequency: <a class="struct" href="https://doc.rust-lang.org/nightly/std/time/duration/struct.Duration.html" title="struct std::time::duration::Duration">Duration</a></code>
-                           </span></span><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html" title="trait core::marker::Copy">Copy</a> for <a class="struct" href="../../../cargonauts/clients/struct.PoolConfig.html" title="struct cargonauts::clients::PoolConfig">Config</a></code></span><span class='out-of-band'></span></h3>
+                           </span></span><div class='docblock'><p>How frequently to run the reap job, which kills connections that have
+been alive or idle for too long, and then re-establishes the minimum
+number of connections.</p>
+</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html" title="trait core::marker::Copy">Copy</a> for <a class="struct" href="../../../cargonauts/clients/struct.PoolConfig.html" title="struct cargonauts::clients::PoolConfig">Config</a></code></span><span class='out-of-band'></span></h3>
 <div class='impl-items'></div><h3 class='impl'><span class='in-band'><code>impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/default/trait.Default.html" title="trait core::default::Default">Default</a> for <a class="struct" href="../../../cargonauts/clients/struct.PoolConfig.html" title="struct cargonauts::clients::PoolConfig">Config</a></code></span><span class='out-of-band'></span></h3>
 <div class='impl-items'><h4 id='method.default' class="method"><span id='default.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/default/trait.Default.html#tymethod.default' class='fnname'>default</a>() -&gt; <a class="struct" href="../../../cargonauts/clients/struct.PoolConfig.html" title="struct cargonauts::clients::PoolConfig">Config</a></code></span></h4>
 <div class='docblock'><p>Returns the &quot;default value&quot; for a type. <a href="https://doc.rust-lang.org/nightly/core/default/trait.Default.html#tymethod.default">Read more</a></p>

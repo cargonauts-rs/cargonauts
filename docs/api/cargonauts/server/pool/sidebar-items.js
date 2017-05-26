@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["Config",""],["Pool","An asynchronous, single-threaded connection pool."]],"trait":[["Configure",""]]});
+initSidebarItems({"struct":[["Config","The configuration for a connection pool."],["Pool","An asynchronous, single-threaded connection pool."]],"trait":[["Configure",""]]});

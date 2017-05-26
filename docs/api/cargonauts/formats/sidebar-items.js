@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["jsonapi",""]],"struct":[["Debug",""],["Handlebars",""],["JsonApi",""],["Template",""],["TemplateKey",""]],"trait":[["BuildFormat",""],["Format",""]]});
+initSidebarItems({"mod":[["def",""],["jsonapi",""]],"struct":[["Debug",""],["Handlebars",""],["JsonApi",""]]});

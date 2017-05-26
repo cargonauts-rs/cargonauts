@@ -1,5 +1,6 @@
 (function() {var implementors = {};
 implementors["cargonauts"] = [];
+implementors["num_traits"] = [];
 
             if (window.register_implementors) {
                 window.register_implementors(implementors);

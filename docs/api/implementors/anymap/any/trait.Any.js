@@ -1,4 +1,5 @@
 (function() {var implementors = {};
+implementors["anymap"] = [];
 implementors["cargonauts"] = [];
 
             if (window.register_implementors) {
