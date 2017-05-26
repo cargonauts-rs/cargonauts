@@ -170,28 +170,28 @@ fn method_for(method: &str, rel: Option<&String>, resource: &Ident) -> Tokens {
     // Special cases to allow mainsail methods to have associated types
     match method {
         "Post"  => {
-            quote!(Post<Identifier = <#resource as ::cargonauts::resources::Resource>::Identifier, Post = <#resource as ::cargonauts::methods::Post>::Post>)
+            quote!(Post<Identifier = <#resource as ::cargonauts::Resource>::Identifier, Post = <#resource as ::cargonauts::methods::Post>::Post>)
         }
         "Patch" => {
-            quote!(Patch<Identifier = <#resource as ::cargonauts::resources::Resource>::Identifier, Patch = <#resource as ::cargonauts::methods::Patch>::Patch>)
+            quote!(Patch<Identifier = <#resource as ::cargonauts::Resource>::Identifier, Patch = <#resource as ::cargonauts::methods::Patch>::Patch>)
         }
         "PostRelated" => {
             let rel = Ident::new(&rel.unwrap()[..]);
-            quote!(PostRelated<#rel, Identifier = <#resource as ::cargonauts::resources::Resource>::Identifier, Post = <#resource as ::cargonauts::methods::PostRelated<#rel>::Post>)
+            quote!(PostRelated<#rel, Identifier = <#resource as ::cargonauts::Resource>::Identifier, Post = <#resource as ::cargonauts::methods::PostRelated<#rel>::Post>)
         }
         "UpdateRelated" => {
             let rel = Ident::new(&rel.unwrap()[..]);
-            quote!(UpdateRelated<#rel, Identifier = <#resource as ::cargonauts::resources::Resource>::Identifier, Update = <#resource as ::cargonauts::methods::UpdateRelated<#rel>::Update>)
+            quote!(UpdateRelated<#rel, Identifier = <#resource as ::cargonauts::Resource>::Identifier, Update = <#resource as ::cargonauts::methods::UpdateRelated<#rel>::Update>)
         }
         _       => {
             let method = Ident::new(method);
             match rel {
                 Some(rel)   => {
                     let rel = Ident::new(&rel[..]);
-                    quote!(#method<#rel, Identifier = <#resource as ::cargonauts::resources::Resource>::Identifier>)
+                    quote!(#method<#rel, Identifier = <#resource as ::cargonauts::Resource>::Identifier>)
                 }
                 None        => {
-                    quote!(#method<Identifier = <#resource as ::cargonauts::resources::Resource>::Identifier>)
+                    quote!(#method<Identifier = <#resource as ::cargonauts::Resource>::Identifier>)
                 }
             }
         }

@@ -6,7 +6,7 @@ extern crate cargonauts;
 extern crate jsonapi_derive;
 extern crate tokio_service;
 
-use cargonauts::resources::{Resource, Environment, Error};
+use cargonauts::{Resource, Environment, Error};
 use cargonauts::methods::{Get, Index, Post, GetOne};
 use cargonauts::formats::JsonApi;
 use cargonauts::futures::{Future, future};

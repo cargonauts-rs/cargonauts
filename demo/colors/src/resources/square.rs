@@ -2,7 +2,7 @@ use std::fmt;
 use std::str::FromStr;
 
 use cargonauts::futures::{future, Future};
-use cargonauts::resources::*;
+use cargonauts::*;
 use cargonauts::methods::*;
 use cargonauts::server::StatusCode;
 

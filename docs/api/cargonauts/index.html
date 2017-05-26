@@ -29,7 +29,7 @@
 
     <nav class="sidebar">
         
-        <p class='location'>Crate cargonauts</p><div class="block items"><ul><li><a href="#reexports">Reexports</a></li><li><a href="#modules">Modules</a></li><li><a href="#macros">Macros</a></li><li><a href="#functions">Functions</a></li></ul></div><p class='location'></p><script>window.sidebarCurrent = {name: 'cargonauts', ty: 'mod', relpath: '../'};</script>
+        <p class='location'>Crate cargonauts</p><div class="block items"><ul><li><a href="#reexports">Reexports</a></li><li><a href="#modules">Modules</a></li><li><a href="#macros">Macros</a></li><li><a href="#structs">Structs</a></li><li><a href="#traits">Traits</a></li><li><a href="#functions">Functions</a></li></ul></div><p class='location'></p><script>window.sidebarCurrent = {name: 'cargonauts', ty: 'mod', relpath: '../'};</script>
     </nav>
 
     <nav class="sub">
@@ -48,57 +48,50 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a class='srclink' href='../src/cargonauts/lib.rs.html#1-125' title='goto source code'>[src]</a></span></h1>
+               </span><a class='srclink' href='../src/cargonauts/lib.rs.html#1-123' title='goto source code'>[src]</a></span></h1>
 <h2 id='reexports' class='section-header'><a href="#reexports">Reexports</a></h2>
-<table><tr><td><code>pub extern crate <a class="mod" href="../futures/index.html" title="mod futures">futures</a>;</code></td></tr><tr><td><code>pub extern crate <a class="mod" href="https://docs.rs/serde/1.0.4/serde/index.html" title="mod serde">serde</a>;</code></td></tr><tr><td><code>pub extern crate <a class="mod" href="https://docs.rs/serde_json/1.0.2/serde_json/index.html" title="mod serde_json">serde_json</a> as json;</code></td></tr><tr><td><code>pub extern crate tokio_redis as redis;</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table><tr><td><code>pub extern crate <a class="mod" href="https://docs.rs/futures/0.1/futures/index.html" title="mod futures">futures</a>;</code></td></tr><tr><td><code>pub extern crate <a class="mod" href="https://docs.rs/serde/1.0.4/serde/index.html" title="mod serde">serde</a>;</code></td></tr><tr><td><code>pub extern crate <a class="mod" href="https://docs.rs/serde_json/1.0.2/serde_json/index.html" title="mod serde_json">serde_json</a> as json;</code></td></tr><tr><td><code>pub extern crate tokio_redis as redis;</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
 <table>
                        <tr class=' module-item'>
                            <td><a class="mod" href="clients/index.html"
                                   title='mod cargonauts::clients'>clients</a></td>
                            <td class='docblock-short'>
-                                
+                                <p>For defining high level clients to other services.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class="mod" href="config/index.html"
                                   title='mod cargonauts::config'>config</a></td>
                            <td class='docblock-short'>
-                                
+                                <p>Configuration of cargonauts.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class="mod" href="formats/index.html"
                                   title='mod cargonauts::formats'>formats</a></td>
                            <td class='docblock-short'>
-                                
+                                <p>For providing formats for methods and defining new ones.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class="mod" href="methods/index.html"
                                   title='mod cargonauts::methods'>methods</a></td>
                            <td class='docblock-short'>
-                                
+                                <p>For implementing methods on resources and defining new ones.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class="mod" href="middleware/index.html"
                                   title='mod cargonauts::middleware'>middleware</a></td>
                            <td class='docblock-short'>
-                                
-                           </td>
-                       </tr>
-                       <tr class=' module-item'>
-                           <td><a class="mod" href="resources/index.html"
-                                  title='mod cargonauts::resources'>resources</a></td>
-                           <td class='docblock-short'>
-                                
+                                <p>For wrapping your endpoints in middleware.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class="mod" href="server/index.html"
                                   title='mod cargonauts::server'>server</a></td>
                            <td class='docblock-short'>
-                                
+                                <p>Raw HTTP types.</p>
                            </td>
                        </tr></table><h2 id='macros' class='section-header'><a href="#macros">Macros</a></h2>
 <table>
@@ -114,6 +107,36 @@
                                   title='macro cargonauts::routes'>routes</a></td>
                            <td class='docblock-short'>
                                 <p>The routes DSL</p>
+                           </td>
+                       </tr></table><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.Environment.html"
+                                  title='struct cargonauts::Environment'>Environment</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.Error.html"
+                                  title='struct cargonauts::Error'>Error</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr></table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class="trait" href="trait.Relationship.html"
+                                  title='trait cargonauts::Relationship'>Relationship</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="trait" href="trait.Resource.html"
+                                  title='trait cargonauts::Resource'>Resource</a></td>
+                           <td class='docblock-short'>
+                                
                            </td>
                        </tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
 <table>

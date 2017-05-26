@@ -4,8 +4,8 @@
 extern crate cargonauts;
 extern crate tokio_service;
 
+use cargonauts::{Resource, Environment, Error};
 use cargonauts::clients::{Client, ConnectClient, Conn, Configure, NewServiceLike};
-use cargonauts::resources::{Resource, Environment, Error};
 use cargonauts::methods::Get;
 use cargonauts::formats::Debug;
 use cargonauts::futures::{Future, future};

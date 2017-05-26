@@ -4,7 +4,7 @@
 
 use cargonauts::formats::Debug;
 use cargonauts::methods::Get;
-use cargonauts::resources::{Resource, Environment, Error};
+use cargonauts::{Resource, Environment, Error};
 use cargonauts::futures::{Future, future};
 
 #[derive(Debug)]

@@ -197,7 +197,7 @@ impl<'a> ToTokens for RelIds<'a> {
 
                 fn set_rel_id<R>(&mut self, id: String)
                 where
-                    R: ::cargonauts::resources::Relationship,
+                    R: ::cargonauts::Relationship,
                     #resource: ::cargonauts::routing::HasOneEndpoint<R>,
                     R::Related: ::cargonauts::routing::ResourceEndpoint,
                 {
@@ -209,7 +209,7 @@ impl<'a> ToTokens for RelIds<'a> {
 
                 fn rel_id<R>(&self) -> Option<&str>
                 where
-                    R: ::cargonauts::resources::Relationship,
+                    R: ::cargonauts::Relationship,
                     #resource: ::cargonauts::routing::HasOneEndpoint<R>,
                     R::Related: ::cargonauts::routing::ResourceEndpoint,
                 {
@@ -221,7 +221,7 @@ impl<'a> ToTokens for RelIds<'a> {
 
                 fn set_rel_ids<R>(&mut self, id: Vec<String>)
                 where
-                    R: ::cargonauts::resources::Relationship,
+                    R: ::cargonauts::Relationship,
                     #resource: ::cargonauts::routing::HasManyEndpoint<R>,
                     R::Related: ::cargonauts::routing::ResourceEndpoint,
                 {
@@ -233,7 +233,7 @@ impl<'a> ToTokens for RelIds<'a> {
 
                 fn rel_ids<R>(&self) -> &[String]
                 where
-                    R: ::cargonauts::resources::Relationship,
+                    R: ::cargonauts::Relationship,
                     #resource: ::cargonauts::routing::HasManyEndpoint<R>,
                     R::Related: ::cargonauts::routing::ResourceEndpoint,
                 {

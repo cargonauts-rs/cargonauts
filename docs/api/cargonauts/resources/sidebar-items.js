@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["Environment",""],["Error",""]],"trait":[["Relationship",""],["Resource",""]]});

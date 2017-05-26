@@ -22,29 +22,28 @@ proc_macro_item_decl! {
     routes! => routes_impl
 }
 
+/// Configuration of cargonauts.
 pub mod config {
     pub use cargonauts_config::CargonautsConfig;
 }
 
-#[macro_use]
-pub mod resources {
-    pub use rigging::Error;
-    pub use rigging::environment::Environment;
+pub use rigging::Error;
+pub use rigging::environment::Environment;
+pub use rigging::resource::{Resource, Relationship};
+pub use server::serve;
 
-    pub use rigging::resource::{Resource, Relationship};
+#[macro_export]
+macro_rules! relation {
+    ($rel:ident => $resource:ident) => {
+        pub struct $rel;
 
-    #[macro_export]
-    macro_rules! relation {
-        ($rel:ident => $resource:ident) => {
-            pub struct $rel;
-
-            impl $crate::resources::Relationship for $rel {
-                type Related = $resource;
-            }
+        impl $crate::Relationship for $rel {
+            type Related = $resource;
         }
     }
 }
 
+/// For implementing methods on resources and defining new ones.
 pub mod methods {
     pub use mainsail::methods::{Delete, Get, Index, Patch, Post};
     pub use mainsail::methods::{DeleteRelated, GetOne, GetMany, PostRelated, UpdateRelated};
@@ -56,8 +55,8 @@ pub mod methods {
     }
 }
 
+/// For providing formats for methods and defining new ones.
 pub mod formats {
-
     pub use mainsail::formats::Debug;
     pub use mainsail::formats::jsonapi::JsonApi;
     pub use mainsail::formats::handlebars::Handlebars;
@@ -71,22 +70,7 @@ pub mod formats {
     }
 }
 
-
-
-#[doc(hidden)]
-pub mod routing {
-    pub use rigging::endpoint::{Endpoint, EndpointService};
-    pub use rigging::environment::EnvBuilder;
-    pub use rigging::http::BoxFuture as HttpFuture;
-    pub use rigging::format::FormatLender;
-    pub use rigging::resource::{ResourceEndpoint, RelationEndpoint, RelationshipLink, RelIds, HasOneEndpoint, HasManyEndpoint};
-    pub use rigging::routes::{RoutingTable, RouteBuilder, Handler, path};
-    pub use rigging::routes::{AssetHandler, default_asset_handler};
-    pub use rigging::routes::Timer;
-}
-
-pub use server::serve;
-
+/// Raw HTTP types.
 pub mod server {
     pub use rigging::http::{Request, Response, Error, Service, NewService, serve, Handle, Method, StatusCode};
 
@@ -96,6 +80,7 @@ pub mod server {
     }
 }
 
+/// For defining high level clients to other services.
 pub mod clients {
     pub use rigging::connections::{Client, ConnectClient, Configure, NewServiceLike};
     pub use c3po::{Config as PoolConfig, Conn};
@@ -105,6 +90,7 @@ pub mod clients {
     }
 }
 
+/// For wrapping your endpoints in middleware.
 pub mod middleware {
     pub use rigging::endpoint::Request;
 
@@ -123,3 +109,16 @@ pub mod middleware {
         fn wrap(self, service: S) -> Self::WrappedService;
     }
 }
+
+#[doc(hidden)]
+pub mod routing {
+    pub use rigging::endpoint::{Endpoint, EndpointService};
+    pub use rigging::environment::EnvBuilder;
+    pub use rigging::http::BoxFuture as HttpFuture;
+    pub use rigging::format::FormatLender;
+    pub use rigging::resource::{ResourceEndpoint, RelationEndpoint, RelationshipLink, RelIds, HasOneEndpoint, HasManyEndpoint};
+    pub use rigging::routes::{RoutingTable, RouteBuilder, Handler, path};
+    pub use rigging::routes::{AssetHandler, default_asset_handler};
+    pub use rigging::routes::Timer;
+}
+

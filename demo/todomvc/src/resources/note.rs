@@ -1,6 +1,6 @@
 use chrono::{DateTime, UTC};
 
-use cargonauts::resources::{Resource, Environment, Error};
+use cargonauts::{Resource, Environment, Error};
 use cargonauts::methods::{Index, Post, Patch, Delete};
 use cargonauts::futures::Future;
 use uuid::Uuid;
