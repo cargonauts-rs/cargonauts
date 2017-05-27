@@ -32,6 +32,9 @@ pub use rigging::environment::Environment;
 pub use rigging::resource::{Resource, Relationship};
 pub use server::serve;
 
+/// This macro constructs a new relationship alias. The syntax is
+/// `relation!(NewRelation => ResourceType);`, which creates a new type called
+/// `NewRelation` that implements Relationship to `ResourceType`.
 #[macro_export]
 macro_rules! relation {
     ($rel:ident => $resource:ident) => {

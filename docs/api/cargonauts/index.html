@@ -48,7 +48,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a class='srclink' href='../src/cargonauts/lib.rs.html#1-123' title='goto source code'>[src]</a></span></h1>
+               </span><a class='srclink' href='../src/cargonauts/lib.rs.html#1-126' title='goto source code'>[src]</a></span></h1>
 <h2 id='reexports' class='section-header'><a href="#reexports">Reexports</a></h2>
 <table><tr><td><code>pub extern crate <a class="mod" href="https://docs.rs/futures/0.1/futures/index.html" title="mod futures">futures</a>;</code></td></tr><tr><td><code>pub extern crate <a class="mod" href="https://docs.rs/serde/1.0.4/serde/index.html" title="mod serde">serde</a>;</code></td></tr><tr><td><code>pub extern crate <a class="mod" href="https://docs.rs/serde_json/1.0.2/serde_json/index.html" title="mod serde_json">serde_json</a> as json;</code></td></tr><tr><td><code>pub extern crate tokio_redis as redis;</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
 <table>
@@ -99,7 +99,9 @@
                            <td><a class="macro" href="macro.relation.html"
                                   title='macro cargonauts::relation'>relation</a></td>
                            <td class='docblock-short'>
-                                
+                                <p>This macro constructs a new relationship alias. The syntax is
+<code>relation!(NewRelation =&gt; ResourceType);</code>, which creates a new type called
+<code>NewRelation</code> that implements Relationship to <code>ResourceType</code>.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -114,14 +116,14 @@
                            <td><a class="struct" href="struct.Environment.html"
                                   title='struct cargonauts::Environment'>Environment</a></td>
                            <td class='docblock-short'>
-                                
+                                <p>The Environment in which an API endpoint runs.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class="struct" href="struct.Error.html"
                                   title='struct cargonauts::Error'>Error</a></td>
                            <td class='docblock-short'>
-                                
+                                <p>The Error type for your application.</p>
                            </td>
                        </tr></table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
 <table>
@@ -129,14 +131,14 @@
                            <td><a class="trait" href="trait.Relationship.html"
                                   title='trait cargonauts::Relationship'>Relationship</a></td>
                            <td class='docblock-short'>
-                                
+                                <p>A relationship to another resource.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class="trait" href="trait.Resource.html"
                                   title='trait cargonauts::Resource'>Resource</a></td>
                            <td class='docblock-short'>
-                                
+                                <p>The trait implemented by all resources.</p>
                            </td>
                        </tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
 <table>

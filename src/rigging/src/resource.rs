@@ -1,6 +1,25 @@
 use std::str::FromStr;
 
+/// The trait implemented by all resources.
+///
+/// This trait has only one item: the Identifier type for this resource. Every
+/// resource is inherently *plural* (that is, there are no singleton
+/// resources). The identifier is used to distinguish one instance of that
+/// resource from another.
 pub trait Resource: Send + 'static {
+    /// Some methods take an identifier argument. The routes which correspond
+    /// to these methods all have an identifier in the URL path. For example,
+    /// the `Get` method corresponds to: `GET /$resource-type/$identifier`. The
+    /// identifier will be parsed from the path before passing to your code.
+    ///
+    /// Because it is converted back and forth between strings, Identifiers
+    /// must implement `ToString` and `FromStr`. Additionally, the Identifier
+    /// must implement `Eq` (so two identifiers could be compared), and, like
+    /// the resource itself, it must be `Send` and `'static`.
+    ///
+    /// Strings & integers are all valid Identifier types, as well as Uuids
+    /// from the `uuid` crate. You can also always define your own identifier
+    /// types.
     type Identifier: Eq + ToString + FromStr + Send + 'static;
 }
 
@@ -29,6 +48,18 @@ pub struct RelationshipLink {
     pub endpoint: &'static str,
 }
 
+/// A relationship to another resource.
+///
+/// Relationships are used to parameterize relationship methods like `GetOne`
+/// or `GetMany`. You can create your own relationship, but there are two ways
+/// to create them provided for you:
+///
+/// 1. All resources inherently implement Relationship to themselves. So if you
+/// want to implement a relationship to `User`, called `"user"`, you can just
+/// use the User type itself.
+///
+/// 2. The `relation!` macro reduces the boilerplate for defining a new
+/// relationship, making it only 1 line of code.
 pub trait Relationship: 'static {
     type Related: Resource;
 }

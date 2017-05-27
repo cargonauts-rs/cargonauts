@@ -1,6 +1,6 @@
 use std::any::Any;
 use std::io;
-use std::cell::{RefCell, Ref, RefMut};
+use std::cell::RefCell;
 use std::rc::Rc;
 
 use Error;
@@ -9,35 +9,44 @@ use anymap::AnyMap;
 use core::reactor::Handle;
 use c3po::{ConnFuture, Conn, Pool, Config};
 use futures::{Future, future, Stream, stream};
-use ref_filter_map::*;
 use tokio::NewService;
 
 use http::StatusCode;
 use connections::{Client, Configure, ConnectClient};
 
 #[derive(Clone)]
+/// The Environment in which an API endpoint runs.
+///
+/// The resource method, format, and middlware of an endpoint all have access
+/// to this environment. It is used for a few basic purposes:
+/// * It controls access to the connections to other network services.
+/// * It allows you to cache values in a type map to share them from the
+/// format/middleware/resource.
 pub struct Environment {
     pools: Rc<AnyMap>,
     store: Rc<RefCell<AnyMap>>,
 }
 
 impl Environment {
-    pub fn store<T: Any>(&self, val: T) {
-        self.store.borrow_mut().insert(val);
+    /// Store a new value in the environment.
+    ///
+    /// If a value of this type was already stored in the environment, that
+    /// previous value is returned.
+    pub fn store<T: Any>(&self, val: T) -> Option<T> {
+        self.store.borrow_mut().insert(val)
     }
 
-    pub fn get<T: Any>(&self) -> Option<Ref<T>> {
-        ref_filter_map(self.store.borrow(), |map| map.get())
-    }
-
-    pub fn get_mut<T: Any>(&self) -> Option<RefMut<T>> {
-        ref_mut_filter_map(self.store.borrow_mut(), |map| map.get_mut())
-    }
-
+    /// Take a value of a type from the environment.
     pub fn take<T: Any>(&self) -> Option<T> {
         self.store.borrow_mut().remove()
     }
 
+    /// Check if the environment contains a value of the given type.
+    pub fn contains<T: Any>(&self) -> bool {
+        self.store.borrow().contains::<T>()
+    }
+
+    /// Check out a connection to a service from the connection pool.
     pub fn conn<C: NewService>(&self) -> ConnFuture<Conn<C>, Error> {
         if let Some(pool) = self.pools.get::<Pool<C>>() {
             pool.connection()
@@ -46,7 +55,8 @@ impl Environment {
                                                           "Connection not registered.")))
         }
     }
-
+    
+    #[doc(hidden)]
     pub fn conn_for<C: NewService>(&self, name: &'static str) -> ConnFuture<Conn<C>, Error> {
         if let Some(pools) = self.pools.get::<Vec<(&'static str, Pool<C>)>>() {
             if let Some(&(_, ref pool)) = pools.iter().find(|&&(s, _)| s == name) {
@@ -61,6 +71,7 @@ impl Environment {
         }
     }
 
+    /// Check out a high level client from the environment.
     pub fn client<C>(&self) -> Box<Future<Item = C, Error = Error>>
     where
         C: ConnectClient<<C as Client>::Connection>,

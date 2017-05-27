@@ -51,7 +51,20 @@
                </span></span></h1>
 <pre class='rust trait'>pub trait Relationship: 'static {
     type <a href='#associatedtype.Related' class="type">Related</a>: <a class="trait" href="../cargonauts/trait.Resource.html" title="trait cargonauts::Resource">Resource</a>;
-}</pre>
+}</pre><div class='docblock'><p>A relationship to another resource.</p>
+
+<p>Relationships are used to parameterize relationship methods like <code>GetOne</code>
+or <code>GetMany</code>. You can create your own relationship, but there are two ways
+to create them provided for you:</p>
+
+<ol>
+<li><p>All resources inherently implement Relationship to themselves. So if you
+want to implement a relationship to <code>User</code>, called <code>&quot;user&quot;</code>, you can just
+use the User type itself.</p></li>
+<li><p>The <code>relation!</code> macro reduces the boilerplate for defining a new
+relationship, making it only 1 line of code.</p></li>
+</ol>
+</div>
             <h2 id='associated-types'>Associated Types</h2>
             <div class='methods'>
         <h3 id='associatedtype.Related' class='method'><span id='Related.t' class='invisible'><code>type <a href='#associatedtype.Related' class="type">Related</a>: <a class="trait" href="../cargonauts/trait.Resource.html" title="trait cargonauts::Resource">Resource</a></code></span></h3></div>

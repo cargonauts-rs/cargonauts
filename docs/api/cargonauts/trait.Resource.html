@@ -51,10 +51,29 @@
                </span></span></h1>
 <pre class='rust trait'>pub trait Resource: 'static + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> {
     type <a href='#associatedtype.Identifier' class="type">Identifier</a>: 'static + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/cmp/trait.Eq.html" title="trait core::cmp::Eq">Eq</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/str/trait.FromStr.html" title="trait core::str::FromStr">FromStr</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/collections/string/trait.ToString.html" title="trait collections::string::ToString">ToString</a>;
-}</pre>
+}</pre><div class='docblock'><p>The trait implemented by all resources.</p>
+
+<p>This trait has only one item: the Identifier type for this resource. Every
+resource is inherently <em>plural</em> (that is, there are no singleton
+resources). The identifier is used to distinguish one instance of that
+resource from another.</p>
+</div>
             <h2 id='associated-types'>Associated Types</h2>
             <div class='methods'>
-        <h3 id='associatedtype.Identifier' class='method'><span id='Identifier.t' class='invisible'><code>type <a href='#associatedtype.Identifier' class="type">Identifier</a>: 'static + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/cmp/trait.Eq.html" title="trait core::cmp::Eq">Eq</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/str/trait.FromStr.html" title="trait core::str::FromStr">FromStr</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/collections/string/trait.ToString.html" title="trait collections::string::ToString">ToString</a></code></span></h3></div>
+        <h3 id='associatedtype.Identifier' class='method'><span id='Identifier.t' class='invisible'><code>type <a href='#associatedtype.Identifier' class="type">Identifier</a>: 'static + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/cmp/trait.Eq.html" title="trait core::cmp::Eq">Eq</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/str/trait.FromStr.html" title="trait core::str::FromStr">FromStr</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/collections/string/trait.ToString.html" title="trait collections::string::ToString">ToString</a></code></span></h3><div class='docblock'><p>Some methods take an identifier argument. The routes which correspond
+to these methods all have an identifier in the URL path. For example,
+the <code>Get</code> method corresponds to: <code>GET /$resource-type/$identifier</code>. The
+identifier will be parsed from the path before passing to your code.</p>
+
+<p>Because it is converted back and forth between strings, Identifiers
+must implement <code>ToString</code> and <code>FromStr</code>. Additionally, the Identifier
+must implement <code>Eq</code> (so two identifiers could be compared), and, like
+the resource itself, it must be <code>Send</code> and <code>&#39;static</code>.</p>
+
+<p>Strings &amp; integers are all valid Identifier types, as well as Uuids
+from the <code>uuid</code> crate. You can also always define your own identifier
+types.</p>
+</div></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
     </ul><script type="text/javascript" async

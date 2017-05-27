@@ -167,6 +167,9 @@
 <span id="122">122</span>
 <span id="123">123</span>
 <span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
 </pre><pre class="rust ">
 <span class="attribute">#<span class="op">!</span>[<span class="ident">feature</span>(<span class="ident">associated_consts</span>)]</span>
 
@@ -202,6 +205,9 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">rigging</span>::<span class="ident">resource</span>::{<span class="ident">Resource</span>, <span class="ident">Relationship</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">server</span>::<span class="ident">serve</span>;
 
+<span class="doccomment">/// This macro constructs a new relationship alias. The syntax is</span>
+<span class="doccomment">/// `relation!(NewRelation =&gt; ResourceType);`, which creates a new type called</span>
+<span class="doccomment">/// `NewRelation` that implements Relationship to `ResourceType`.</span>
 <span class="attribute">#[<span class="ident">macro_export</span>]</span>
 <span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">relation</span> {
     (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rel</span>:<span class="ident">ident</span> <span class="op">=&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">resource</span>:<span class="ident">ident</span>) <span class="op">=&gt;</span> {
