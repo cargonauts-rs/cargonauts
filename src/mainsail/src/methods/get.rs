@@ -6,6 +6,9 @@ use rigging::method::{ResourceMethod, Method};
 use rigging::environment::Environment;
 use rigging::routes::{Route, Kind};
 
+/// Get a single instance of this resource.
+///
+/// This method corresponds to `GET /$resource-type/$identifier`.
 pub trait Get: Resource {
     fn get(id: Self::Identifier, env: Environment) -> Box<Future<Item = Self, Error = Error>> where Self: Sized;
 }

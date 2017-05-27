@@ -6,7 +6,16 @@ use rigging::environment::Environment;
 use rigging::method::{Method, CollectionMethod};
 use rigging::routes::{Route, Kind};
 
+/// Post a new instance of a resource.
+///
+/// This method coresponds to `POST /$resource-type`.
 pub trait Post: Resource {
+    /// The representation of this resouce that will be received by the POST
+    /// request.
+    ///
+    /// This could just be the resource, but it could also be a different type,
+    /// if some fields are generated during posting instead of received as a
+    /// part of the request.
     type Post;
     fn post(post: Self::Post, env: Environment) -> Box<Future<Item = Self, Error = Error>> where Self: Sized;
 }

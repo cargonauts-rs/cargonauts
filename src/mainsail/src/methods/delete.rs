@@ -6,6 +6,9 @@ use rigging::environment::Environment;
 use rigging::method::{Method, ResourceMethod};
 use rigging::routes::{Route, Kind};
 
+/// Delete an instance of this resource.
+///
+/// This method corresponds to `DELETE /$resource-type/$identifier`.
 pub trait Delete: Resource {
     fn delete(id: Self::Identifier, env: Environment) -> Box<Future<Item = (), Error = Error>> where Self: Sized;
 }

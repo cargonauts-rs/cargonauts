@@ -170,6 +170,21 @@
 <span id="125">125</span>
 <span id="126">126</span>
 <span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
 </pre><pre class="rust ">
 <span class="attribute">#<span class="op">!</span>[<span class="ident">feature</span>(<span class="ident">associated_consts</span>)]</span>
 
@@ -220,6 +235,21 @@
 }
 
 <span class="doccomment">/// For implementing methods on resources and defining new ones.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # Methods table</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Method trait  | Route                                     | Http Method | Relationship</span>
+<span class="doccomment">/// --------------|-------------------------------------------|-------------|-------------</span>
+<span class="doccomment">/// Get           | /$resource-type/$identifier               | GET         | </span>
+<span class="doccomment">/// Index         | /$resource-type                           | GET         | </span>
+<span class="doccomment">/// Post          | /$resource-type                           | POST        | </span>
+<span class="doccomment">/// Delete        | /$resource-type/$identifier               | DELETE      | </span>
+<span class="doccomment">/// Patch         | /$resource-type/$identifier               | PATCH       |</span>
+<span class="doccomment">/// GetOne        | /$resource-type/$identifier/$relationship | GET         | has one</span>
+<span class="doccomment">/// GetMany       | /$resource-type/$identifier/$relationship | GET         | has many</span>
+<span class="doccomment">/// PostRelated   | /$resource-type/$identifier/$relationship | POST        | has many</span>
+<span class="doccomment">/// DeleteRelated | /$resource-type/$identifier/$relationship | DELETE      | has one</span>
+<span class="doccomment">/// UpdateRelated | /$resource-type/$identifier/$relationship | PATCH       | has one</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">methods</span> {
     <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">mainsail</span>::<span class="ident">methods</span>::{<span class="ident">Delete</span>, <span class="ident">Get</span>, <span class="ident">Index</span>, <span class="ident">Patch</span>, <span class="ident">Post</span>};
     <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">mainsail</span>::<span class="ident">methods</span>::{<span class="ident">DeleteRelated</span>, <span class="ident">GetOne</span>, <span class="ident">GetMany</span>, <span class="ident">PostRelated</span>, <span class="ident">UpdateRelated</span>};

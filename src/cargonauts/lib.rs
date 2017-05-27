@@ -47,6 +47,21 @@ macro_rules! relation {
 }
 
 /// For implementing methods on resources and defining new ones.
+///
+/// # Methods table
+///
+/// Method trait  | Route                                     | Http Method | Relationship
+/// --------------|-------------------------------------------|-------------|-------------
+/// Get           | /$resource-type/$identifier               | GET         | 
+/// Index         | /$resource-type                           | GET         | 
+/// Post          | /$resource-type                           | POST        | 
+/// Delete        | /$resource-type/$identifier               | DELETE      | 
+/// Patch         | /$resource-type/$identifier               | PATCH       |
+/// GetOne        | /$resource-type/$identifier/$relationship | GET         | has one
+/// GetMany       | /$resource-type/$identifier/$relationship | GET         | has many
+/// PostRelated   | /$resource-type/$identifier/$relationship | POST        | has many
+/// DeleteRelated | /$resource-type/$identifier/$relationship | DELETE      | has one
+/// UpdateRelated | /$resource-type/$identifier/$relationship | PATCH       | has one
 pub mod methods {
     pub use mainsail::methods::{Delete, Get, Index, Patch, Post};
     pub use mainsail::methods::{DeleteRelated, GetOne, GetMany, PostRelated, UpdateRelated};

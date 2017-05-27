@@ -6,6 +6,9 @@ use rigging::method::{Method, CollectionMethod};
 use rigging::environment::Environment;
 use rigging::routes::{Route, Kind};
 
+/// Get the index of this resource. This will return multiple resources.
+///
+/// This method corresponds to `GET /$resource-type`
 pub trait Index: Resource {
     fn index(env: Environment) -> Box<Future<Item = Vec<Self>, Error = Error>> where Self: Sized;
 }

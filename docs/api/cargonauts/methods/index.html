@@ -48,8 +48,83 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a class='srclink' href='../../src/cargonauts/lib.rs.html#50-59' title='goto source code'>[src]</a></span></h1>
+               </span><a class='srclink' href='../../src/cargonauts/lib.rs.html#65-74' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>For implementing methods on resources and defining new ones.</p>
+
+<h1 id='methods-table' class='section-header'><a href='#methods-table'>Methods table</a></h1>
+<table>
+<thead>
+<tr>
+<th>Method trait</th>
+<th>Route</th>
+<th>Http Method</th>
+<th>Relationship</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>Get</td>
+<td>/$resource-type/$identifier</td>
+<td>GET</td>
+<td></td>
+</tr>
+<tr>
+<td>Index</td>
+<td>/$resource-type</td>
+<td>GET</td>
+<td></td>
+</tr>
+<tr>
+<td>Post</td>
+<td>/$resource-type</td>
+<td>POST</td>
+<td></td>
+</tr>
+<tr>
+<td>Delete</td>
+<td>/$resource-type/$identifier</td>
+<td>DELETE</td>
+<td></td>
+</tr>
+<tr>
+<td>Patch</td>
+<td>/$resource-type/$identifier</td>
+<td>PATCH</td>
+<td></td>
+</tr>
+<tr>
+<td>GetOne</td>
+<td>/$resource-type/$identifier/$relationship</td>
+<td>GET</td>
+<td>has one</td>
+</tr>
+<tr>
+<td>GetMany</td>
+<td>/$resource-type/$identifier/$relationship</td>
+<td>GET</td>
+<td>has many</td>
+</tr>
+<tr>
+<td>PostRelated</td>
+<td>/$resource-type/$identifier/$relationship</td>
+<td>POST</td>
+<td>has many</td>
+</tr>
+<tr>
+<td>DeleteRelated</td>
+<td>/$resource-type/$identifier/$relationship</td>
+<td>DELETE</td>
+<td>has one</td>
+</tr>
+<tr>
+<td>UpdateRelated</td>
+<td>/$resource-type/$identifier/$relationship</td>
+<td>PATCH</td>
+<td>has one</td>
+</tr>
+</tbody>
+</table>
 </div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
 <table>
                        <tr class=' module-item'>
@@ -64,7 +139,7 @@
                            <td><a class="trait" href="trait.Delete.html"
                                   title='trait cargonauts::methods::Delete'>Delete</a></td>
                            <td class='docblock-short'>
-                                
+                                <p>Delete an instance of this resource.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -78,7 +153,7 @@
                            <td><a class="trait" href="trait.Get.html"
                                   title='trait cargonauts::methods::Get'>Get</a></td>
                            <td class='docblock-short'>
-                                
+                                <p>Get a single instance of this resource.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -99,21 +174,21 @@
                            <td><a class="trait" href="trait.Index.html"
                                   title='trait cargonauts::methods::Index'>Index</a></td>
                            <td class='docblock-short'>
-                                
+                                <p>Get the index of this resource. This will return multiple resources.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class="trait" href="trait.Patch.html"
                                   title='trait cargonauts::methods::Patch'>Patch</a></td>
                            <td class='docblock-short'>
-                                
+                                <p>Update an instance of this resource.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class="trait" href="trait.Post.html"
                                   title='trait cargonauts::methods::Post'>Post</a></td>
                            <td class='docblock-short'>
-                                
+                                <p>Post a new instance of a resource.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
