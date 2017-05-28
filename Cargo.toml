@@ -3,7 +3,7 @@ authors = ["Without Boats <woboats@gmail.com>"]
 description = "cargonauts - a Rust web framework"
 license = "MIT OR Apache-2.0"
 name = "cargonauts"
-repository = "https://github.com/withoutboats/cargonauts"
+repository = "https://github.com/cargonauts-rs/cargonauts"
 version = "0.2.0"
 
 [dependencies]
