@@ -1,3 +1,4 @@
+use std::env;
 use std::io;
 use std::net::SocketAddr;
 
@@ -23,7 +24,8 @@ where
     let mut core = Core::new()?;
     let protocol = Http::new();
     let handle = core.handle();
-    let (addr, routes) = routes(&handle);
+    let (mut addr, routes) = routes(&handle);
+    set_port(&mut addr);
     let listener = TcpListener::bind(&addr, &handle)?;
     let srv = routes.and_then(|routes| {
         let handle = &handle;
@@ -35,6 +37,13 @@ where
         })
     });
     core.run(srv)
+}
+
+fn set_port(addr: &mut SocketAddr) {
+    if let Ok(port) = env::var("PORT") {
+        let port = port.parse().expect("PORT variable not a valid port number.");
+        addr.set_port(port);
+    }
 }
 
 pub type BoxFuture = Box<Future<Item = Response, Error = Error>>;
