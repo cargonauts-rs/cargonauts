@@ -118,6 +118,26 @@ command:</p>
 <p>If you've just created your application with <code>cargonauts new</code>, you may notice
 that it created a lot of files for you. We'll walk through what each module
 in your application is intended to be used for.</p>
+<p>Once you run <code>cargonauts new</code>, the src directory of your project should look
+like this:</p>
+<pre><code>src
+├── bin
+│   └── server.rs
+├── lib.rs
+├── routing.rs
+├── clients
+│   └── mod.rs
+├── formats
+│   └── mod.rs
+├── methods
+│   └── mod.rs
+├── middleware
+│   └── mod.rs
+├── resources
+│   └── mod.rs
+├── assets
+└── templates
+</code></pre>
 <a class="header" href="print.html#binserverrs" id="binserverrs"><h3><code>bin/server.rs</code></h3></a>
 <p>This is the server that you're going to be building, running, and deploying.
 Your main application is a library, and this is a binary that depends on it.
@@ -132,12 +152,6 @@ application.</p>
 <p>The routing file contains the <code>routes!</code> macro, which is how we stitch all of
 the code in your application together. You'll edit this whenever you want to
 add new endpoints to your application.</p>
-<a class="header" href="print.html#the-assets-directory" id="the-assets-directory"><h3>The assets directory</h3></a>
-<p>This directory is for your static assets. By default, any assets here will be
-built into your application at their path relative to the asset directory root.</p>
-<p>Files starting with <code>index</code> will be served as the index for the directory they
-are in, rather than at their filename.</p>
-<p>This is not a submodule of your application; it does not contain Rust code.</p>
 <a class="header" href="print.html#the-clients-module" id="the-clients-module"><h3>The clients module</h3></a>
 <p>This module is for defining clients, high level API wrappers around connections
 to other running services.</p>
@@ -158,6 +172,12 @@ need to write a middleware for that.</p>
 <a class="header" href="print.html#the-resources-module" id="the-resources-module"><h3>The resources module</h3></a>
 <p>This is where you define your resources, and implement methods for them. This
 is probably the module you'll turn to most often, at least at first.</p>
+<a class="header" href="print.html#the-assets-directory" id="the-assets-directory"><h3>The assets directory</h3></a>
+<p>This directory is for your static assets. By default, any assets here will be
+built into your application at their path relative to the asset directory root.</p>
+<p>Files starting with <code>index</code> will be served as the index for the directory they
+are in, rather than at their filename.</p>
+<p>This is not a submodule of your application; it does not contain Rust code.</p>
 <a class="header" href="print.html#the-templates-directory" id="the-templates-directory"><h3>The templates directory</h3></a>
 <p>This directory is for your templates. When formatting your resources into HTTP
 responses, the format has access to the templates you define here in order to

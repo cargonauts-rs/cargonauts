@@ -4,6 +4,29 @@ If you've just created your application with `cargonauts new`, you may notice
 that it created a lot of files for you. We'll walk through what each module
 in your application is intended to be used for.
 
+Once you run `cargonauts new`, the src directory of your project should look
+like this:
+
+```
+src
+├── bin
+│   └── server.rs
+├── lib.rs
+├── routing.rs
+├── clients
+│   └── mod.rs
+├── formats
+│   └── mod.rs
+├── methods
+│   └── mod.rs
+├── middleware
+│   └── mod.rs
+├── resources
+│   └── mod.rs
+├── assets
+└── templates
+```
+
 ### `bin/server.rs`
 
 This is the server that you're going to be building, running, and deploying.
@@ -23,16 +46,6 @@ application.
 The routing file contains the `routes!` macro, which is how we stitch all of
 the code in your application together. You'll edit this whenever you want to
 add new endpoints to your application.
-
-### The assets directory
-
-This directory is for your static assets. By default, any assets here will be
-built into your application at their path relative to the asset directory root.
-
-Files starting with `index` will be served as the index for the directory they
-are in, rather than at their filename.
-
-This is not a submodule of your application; it does not contain Rust code.
 
 ### The clients module
 
@@ -64,6 +77,16 @@ You can use middleware for instrumenting endpoints, for example.
 
 This is where you define your resources, and implement methods for them. This
 is probably the module you'll turn to most often, at least at first.
+
+### The assets directory
+
+This directory is for your static assets. By default, any assets here will be
+built into your application at their path relative to the asset directory root.
+
+Files starting with `index` will be served as the index for the directory they
+are in, rather than at their filename.
+
+This is not a submodule of your application; it does not contain Rust code.
 
 ### The templates directory
 
