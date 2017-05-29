@@ -3,7 +3,7 @@
 #[macro_use] extern crate cargonauts;
 
 use cargonauts::formats::Debug;
-use cargonauts::methods::Get;
+use cargonauts::methods::{Get, GetOne};
 use cargonauts::{Resource, Environment, Error};
 use cargonauts::futures::{Future, future};
 
@@ -22,9 +22,21 @@ impl Get for Echo {
     }
 }
 
+relation!(AllCaps => Echo);
+
+impl GetOne<AllCaps> for Echo {
+    fn get_one(echo: String, _: Environment) -> Box<Future<Item = Echo, Error = Error>> {
+        future::ok(Echo { echo: echo.to_uppercase() }).boxed()
+    }
+}
+
 routes! {
     resource Echo {
         method Get in Debug;
+
+        has one AllCaps {
+            method GetOne in Debug;
+        }
     }
 }
 

@@ -17,8 +17,8 @@ serde_json = "1.0.0"
 path = "src/asset-pipeline"
 
 [dependencies.c3po]
-git = "https://github.com/withoutboats/c3po"
 branch = "singlethreaded"
+git = "https://github.com/withoutboats/c3po"
 
 [dependencies.cargonauts-config]
 path = "src/cargonauts-config"
@@ -41,6 +41,9 @@ git = "https://github.com/withoutboats/tokio-redis"
 [dependencies.tokio-service]
 branch = "new-new-service"
 git = "https://github.com/withoutboats/tokio-service"
+
+[dev-dependencies]
+reqwest = "0.6.2"
 
 [lib]
 path = "src/cargonauts/lib.rs"
