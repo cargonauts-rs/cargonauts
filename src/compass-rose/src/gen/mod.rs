@@ -24,6 +24,8 @@ pub fn code_gen(routes: Routes, cfg: CargonautsConfig) -> String {
 
         quote! {
             #[allow(unused_variables)]
+            #[allow(unused_mut)]
+            #[allow(unused_imports)]
             pub fn routes(handle: &::cargonauts::server::Handle)
                 ->  (
                         ::std::net::SocketAddr,
@@ -47,6 +49,8 @@ pub fn code_gen(routes: Routes, cfg: CargonautsConfig) -> String {
     } else {
         quote! {
             #[allow(unused_variables)]
+            #[allow(unused_mut)]
+            #[allow(unused_imports)]
             pub fn routes(handle: &::cargonauts::server::Handle)
                 ->  (
                         ::std::net::SocketAddr,
