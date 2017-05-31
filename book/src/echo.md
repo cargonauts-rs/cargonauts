@@ -10,5 +10,3 @@ GET /ping/$slug
 
 It will return a response containing the slug you sent as well as a timestamp
 for the current time.
-
-[TODO link to next section]

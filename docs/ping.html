@@ -69,25 +69,39 @@
 
                 <div id="content" class="content">
                     <a class="header" href="./ping.html#creating-our-first-endpoint" id="creating-our-first-endpoint"><h1>Creating our first endpoint</h1></a>
-<p>[TODO intro]</p>
+<p>Now that our application is set up, its time to actually implement some
+behavior. We're going to write the single endpoint we described earlier:</p>
+<pre><code>GET /ping/$slug
+</code></pre>
 <a class="header" href="./ping.html#committing" id="committing"><h3>Committing</h3></a>
-<p>Its a good idea to commit your repository now that you know you have a
-successfully initiated cargonauts app. That way you can easily restore your
-state if anything bad happens, and you can get a quick diff to view the changes
-you make at each step of this documentation. Just run a commit like so:</p>
+<p>Before we get to that though, its a good idea to commit your repository so
+that you can revert to it if things go bad. You'll also be able to use
+<code>git diff</code> to view the changes you've made at each step of the documentation.</p>
 <pre><code>git add --all
 git commit -m &quot;An empty cargonauts app, ripe with potential.&quot;
 </code></pre>
 <a class="header" href="./ping.html#creating-our-resource" id="creating-our-resource"><h2>Creating our resource</h2></a>
-<p>Right now our application doesn't actually do anything - any request will
-simply return a <code>404</code>. Let's start by creating a resource. Because this is a
-very common thing to do, the cargonauts command has a subcommand which will
-create a new resource, aptly titled <code>generate resource</code>. Let's create a
-resource called Ping:</p>
+<p>The first thing we need to create an endpoint is a resource. Because creating
+resources is a very common thing to do, the cargonauts command has a subcommand
+which will create a new resource for you. This command is aptly named
+<code>generate resource</code>. Let's create a resource called ping:</p>
 <pre><code>cargonauts generate resource ping
 </code></pre>
+<p>Feel free to use git to view the changes, the generator makes these three
+changes:</p>
+<ul>
+<li>We add a new module to the resource module. This contains the beginnings of
+the definition of our new resource.</li>
+<li>We re-export that module from the top-level resource module.</li>
+<li>We use that resource in the <code>routes!</code> macro.</li>
+</ul>
+<p>There's one important problem though: the definition of a resource generated
+by the scaffolding is incomplete. For this reason, if you try to build your
+application right now, you will get some errors.</p>
+<p>We're going to fix that, but before we go any further, let's look at the
+change to the routes! macro.</p>
 <a class="header" href="./ping.html#changes-to-routingrs" id="changes-to-routingrs"><h3>Changes to <code>routing.rs</code></h3></a>
-<p>We've added our first declaration to the <code>routes!</code> DSL:</p>
+<p>Our <code>routes!</code> DSL now has its first declaration:</p>
 <pre><pre class="playpen"><code class="language-rust"># #![allow(unused_variables)]
 #fn main() {
 routes! {
@@ -99,24 +113,135 @@ routes! {
 <p>The <code>routes!</code> DSL consists mostly of &quot;resource objects&quot; like this - there will
 be one for each resource in your application, and it will contain various
 additional items, mainly <code>method</code> statements, which we'll see in a bit.</p>
-<p>In other words, your routes consist of a number of resource objects like this
-one.</p>
-<a class="header" href="./ping.html#srcresourcespingrs" id="srcresourcespingrs"><h3><code>src/resources/ping.rs</code></h3></a>
 <a class="header" href="./ping.html#finishing-the-resource-impl" id="finishing-the-resource-impl"><h3>Finishing the Resource impl</h3></a>
-<p>[TODO]</p>
+<p>If you open <code>src/resources/ping.rs</code>, you'll see that it contains this impl:</p>
+<pre><pre class="playpen"><code class="language-rust"># #![allow(unused_variables)]
+#fn main() {
+impl Resource for Ping {
+    type Identifier = (); // TODO: Select the identifier type for this resource
+}
+
+#}</code></pre></pre>
+<p>This impl contains an error: <code>()</code> is not a valid Identifier type. This is
+because identifiers have to implement both <code>ToString</code> and <code>FromStr</code>, and <code>()</code>
+does not.</p>
+<p>The identifier type is parsed from the URL of the resource. When users request
+<code>/ping/$slug</code>, it is <code>$slug</code> that is parsed into the identifier. If the slug
+is not a valid string representation of that identifier type, users receive an
+error response.</p>
+<p>For our purposes, in which the slug can be anything, a <code>String</code> is a fine
+representation of the slug, so let's make that change:</p>
+<pre><pre class="playpen"><code class="language-rust"># #![allow(unused_variables)]
+#fn main() {
+impl Resource for Ping {
+    type Identifier = String;
+}
+
+#}</code></pre></pre>
 <a class="header" href="./ping.html#adding-data-to-ping" id="adding-data-to-ping"><h3>Adding data to Ping</h3></a>
-<p>[TODO]</p>
+<p>We said earlier that the response from a ping request would have two things:</p>
+<ul>
+<li>The slug requested</li>
+<li>A timestamp</li>
+</ul>
+<p>The <code>Ping</code> type will be used to represent this data, so it needs to have a
+field for each of these.</p>
+<p>We've already decided that the slug is represented as a String. To represent
+the timestamp, we can use the <code>chrono</code> crate.</p>
+<p>Add a dependency on chrono (I used chrono version <code>0.3.1</code> while writing these
+docs), and define your struct:</p>
+<pre><pre class="playpen"><code class="language-rust"># #![allow(unused_variables)]
+#fn main() {
+use chrono::{DateTime, UTC};
+
+pub struct Ping {
+    slug: String,
+    timestamp: DateTime&lt;UTC&gt;,
+}
+
+#}</code></pre></pre>
 <a class="header" href="./ping.html#adding-a-method-to-ping" id="adding-a-method-to-ping"><h2>Adding a method to Ping</h2></a>
 <p>Even though your app has a resource now, it <em>still</em> doesn't do anything! This
 is because we haven't implemented any methods for that resource. A resource
 without methods is like an object without methods, it doesn't actually do
 anything.</p>
-<p>We're going to make the <code>Ping</code> type implement the <code>Get</code> method. [describe the
-Get method]</p>
+<p>We're going to make the <code>Ping</code> type implement the <code>Get</code> method. This is the
+method that corresponds to <code>GET /$resource/$identiifer</code>, so its exactly what
+we need to implement what we said.</p>
 <p>We don't have a generator for this, so we'll do it all by hand.</p>
 <a class="header" href="./ping.html#adding-the-impl" id="adding-the-impl"><h3>Adding the impl</h3></a>
+<p>The <code>Get</code> trait can be found in <code>cargonauts::methods</code>; we need to import it
+and implement it for <code>Ping</code>. We also need to import from the futures crate
+(which cargonauts re-exports), so that we can create a future. We'll start by
+making our endpoint panic:</p>
+<pre><pre class="playpen"><code class="language-rust"># #![allow(unused_variables)]
+#fn main() {
+use cargonauts::methods::Get;
+use cargonauts::futures::*;
+
+impl Get for Ping {
+    fn get(slug: String, _: Environment) -&gt; Box&lt;Future&lt;Item = Ping, Error = Error&gt;&gt; {
+        panic!()
+    }
+}
+
+#}</code></pre></pre>
+<p>Creating our resource doesn't involve any IO or complex method calls; all we
+need to do is construct our resource and wrap <code>future::ok().boxed()</code> around it,
+like so:</p>
+<pre><pre class="playpen"><code class="language-rust"># #![allow(unused_variables)]
+#fn main() {
+future::ok(Ping {
+    slug: slug,
+    timestamp: UTC::now(),
+}).boxed()
+
+#}</code></pre></pre>
+<p>That's it! Ping implements Get.</p>
+<a class="header" href="./ping.html#deciding-what-format-to-use" id="deciding-what-format-to-use"><h3>Deciding what format to use</h3></a>
+<p>The other thing we need to do before our endpoint is complete is to decide
+which format we will use to display this method. cargonauts comes with three
+formats out of the box:</p>
+<ul>
+<li><strong>Debug:</strong> This format prints your type into the response using the <code>Debug</code>
+trait from the standard library. As its name implies, its intended for
+debugging, not as much for production code.</li>
+<li><strong>JsonApi:</strong> An implementation of the <a href="http://jsonapi.org/">JSON API</a> spec,
+this provides a JSON exchange format for machine consumption.</li>
+<li><strong>Handlebars:</strong> This renders your response from a template using the
+handlebars templating language; this is intended for server side rendering of
+HTML.</li>
+</ul>
+<p>For our purposes, we're going to use <code>Debug</code>, because its the easiest to use
+for examples like this. Each format will have its own additional requirements
+for resources to be formatted with it. In the case of <code>Debug</code>, the resource
+type needs to implement the <code>Debug</code> trait from the standard library.</p>
+<p>We can achieve that by deriving <code>Debug</code> for <code>Ping</code>:</p>
+<pre><pre class="playpen"><code class="language-rust"># #![allow(unused_variables)]
+#fn main() {
+#[derive(Debug)]
+struct Ping {
+    slug: String,
+    timestamp: DateTime&lt;UTC&gt;,
+}
+
+#}</code></pre></pre>
 <a class="header" href="./ping.html#adding-the-method-to-the-routes-macro" id="adding-the-method-to-the-routes-macro"><h3>Adding the method to the <code>routes!</code> macro</h3></a>
-<a class="header" href="./ping.html#deciding-on-a-format" id="deciding-on-a-format"><h4>Deciding on a format</h4></a>
+<p>Though Ping implements Get, the endpoint still doesn't exist. The last thing
+you need to do is declare your method in the routes! DSL. This check keeps all
+of your routes in one place, so you don't have to trace impls all over your
+code to figure out what routes your application has.</p>
+<p>The syntax for creating a new route is like this:</p>
+<pre><pre class="playpen"><code class="language-rust"># #![allow(unused_variables)]
+#fn main() {
+resource Ping {
+    method Get in Debug;
+}
+
+#}</code></pre></pre>
+<p>Every method you add to a resource will look like the same, a method name and
+a format the method is to be displayed in. Like the resource, these are just
+types that need to be in scope.</p>
 
                 </div>
 
