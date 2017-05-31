@@ -14,3 +14,10 @@ Cargonauts is primarily distributed under the terms of both the MIT license
 and the Apache License (Version 2.0).
 
 See LICENSE-APACHE and LICENSE-MIT for details.
+
+## Code of Conduct
+
+This project is governed by the Code of Conduct, found in the root of this
+repository. The Code of Conduct has been adapted from the Contributor
+Covenant, with the addition of a clause providing no platform for fascists
+and Nazis.
