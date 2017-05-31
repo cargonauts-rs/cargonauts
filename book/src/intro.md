@@ -6,7 +6,9 @@ In addition to the book, here are other resources:
 
 * [API documentation][apidocs]
 * [GitHub repository][github]
+* [Gitter room][gitter]
 
 
 [apidocs]: https://cargonauts-rs.github.io/cargonauts/api/cargonauts
 [github]: https://github.com/cargonauts-rs/cargonauts
+[gitter]: https://gitter.im/cargonauts-rs/cargonauts
