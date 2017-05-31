@@ -82,11 +82,76 @@ which have behaviors, rather than as &quot;remote procedural call&quot; (RPC) fu
 <p>The three most important building blocks in cargonauts <strong>resources</strong>,
 <strong>methods</strong>, and <strong>formats</strong>. Every endpoint in your application is constructed
 by combining a resource, a method, and a format.</p>
-<p>[TODO summary of the concept of each of these]</p>
-<p>[TODO you can define your own formats and methods but we give you several]</p>
-<p>These aren't the only building blocks that cargonauts gives you, but they are
-the most important. Most of the code you will write for cargonauts will be in
-implementing methods for resources.</p>
+<a class="header" href="print.html#resources" id="resources"><h2>Resources</h2></a>
+<p>Resources are the primary construct you'll be using to define your application.
+A resource is a type which is used to collect the data yielded by a set of
+endpoints. Every resource implements the <code>Resource</code> trait. A resource might
+look like this:</p>
+<pre><pre class="playpen"><code class="language-rust"># #![allow(unused_variables)]
+#fn main() {
+struct User {
+    user_id: Uuid,
+    username: String,
+    email: String,
+    is_admin: bool,
+    joined_at: DateTime&lt;UTC&gt;,
+    last_logged_in: DateTime&lt;UTC&gt;,
+}
+
+
+impl Resource for User {
+    type Identifier = Uuid;
+}
+
+#}</code></pre></pre>
+<a class="header" href="print.html#methods" id="methods"><h2>Methods</h2></a>
+<p>Resources define <em>data</em>; but to create an endpoint you also need some
+<em>behavior</em> - the code that will be executed when the endpoint is accessed. This
+is where methods come in.</p>
+<p>A method is a trait, defining a behavior that could be implemented by any
+resource. To define an endpoint, you will need to implement a method for a
+resource.</p>
+<p>For example, the <code>Index</code> method controls the behavior of <code>GET /$resource-type</code>.
+You can define what happens when that request is hit for the user type by
+implementing Index for User:</p>
+<pre><pre class="playpen"><code class="language-rust"># #![allow(unused_variables)]
+#fn main() {
+impl Index for User {
+    fn index(env: Environment) -&gt; Box&lt;Future&lt;Item = Vec&lt;User&gt;, Error = Error&gt;&gt; {
+        // Note: panicking is not actually a good choice; it will crash your
+        // server.
+        panic!(&quot;Not implemented yet&quot;)
+    }
+}
+
+#}</code></pre></pre>
+<a class="header" href="print.html#formats" id="formats"><h2>Formats</h2></a>
+<p>The last piece of this picture is the format. While the resource has defined
+the data and the method has defined the behavior, you have not yet specified
+how that data will be presented in terms of HTTP.</p>
+<p>Formats specify presentation in a manner which is abstract over different
+resources and methods, so that you can reuse that logic again and again. You
+don't have to write code to bind your resource or method to a particular format</p>
+<ul>
+<li>instead, you will declare the format to use for each method in the <code>routes!</code>
+DSL.</li>
+</ul>
+<a class="header" href="print.html#relationship-to-mvc" id="relationship-to-mvc"><h2>Relationship to MVC</h2></a>
+<p>This tripartite division is essentially an application of the model, view,
+controller pattern - it divides the work into data, logic, and presentation.
+However, it is different from many MVC frameworks (like Ruby on Rails) because
+it has more narrowly scoped the question.</p>
+<p>In Rails, the model is responsible for persistence - in cargonauts, resources
+do not necessarily correspond to any particular persistence form (that is, they
+are not backed by a database table necessarily).</p>
+<p>Similarly, in Rails the controller often encompasses both domain logic and HTTP
+presentation logic. Here, the method and format clearly separate those two
+responsibilities.</p>
+<a class="header" href="print.html#beyond-mvc" id="beyond-mvc"><h2>Beyond MVC</h2></a>
+<p>Resources, methods, and formats aren't the only building block that cargonauts
+gives you. It also comes with an API for wrapping your endpoints in middleware,
+and provides ways to handle interacting with other networked services in a
+way which is designed to be highly decoupled.</p>
 <a class="header" href="print.html#a-little-cargonauts-app" id="a-little-cargonauts-app"><h1>A little cargonauts app</h1></a>
 <p>We're going to get to know cargonauts a bit better by creating a very small
 application. This will be a very small and stateless &quot;echo&quot; service: when
