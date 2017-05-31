@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["def",""],["jsonapi",""]],"struct":[["Debug",""],["Handlebars",""],["JsonApi",""]]});
+initSidebarItems({"mod":[["def",""],["jsonapi",""]],"struct":[["Debug","Debug print your resource into the HTTP response."],["Handlebars","Render your response using a handlebars template."],["JsonApi","Generate a JSON response conforming to the JSON API spec."]]});

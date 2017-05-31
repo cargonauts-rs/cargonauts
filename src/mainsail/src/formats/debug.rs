@@ -13,6 +13,16 @@ use rigging::method::Method;
 
 const MIME: &'static str = "text/plain; charset=utf-8";
 
+/// Debug print your resource into the HTTP response.
+///
+/// This format is intended for debugging, not for real production usage.
+///
+/// Like all formats, it imposes some constraints on the method and the
+/// resource that it is paired with:
+///
+/// * The **resource** type must implement `std::fmt::Debug`.
+/// * The **method** trait must take `()` as the request body (that is, this
+/// format cannot support methods like `Post` or `Patch`).
 #[derive(Default, Clone)]
 pub struct SimpleDebug {
     _private: (),

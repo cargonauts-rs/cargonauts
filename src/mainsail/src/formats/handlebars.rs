@@ -16,6 +16,21 @@ use rigging::resource::ResourceEndpoint;
 
 const MIME: &'static str = "text/html; charset=utf-8";
 
+/// Render your response using a handlebars template.
+///
+/// This format is for server-side rendering of HTML. The template for each
+/// endpoint can be found at `src/templates/$resource/$method.html.hbs`.
+///
+/// Request bodies will be parsed as form encoded data; that is, this format
+/// is designed to receive HTML form data.
+///
+/// Like all formats, it imposes some constraints on the method and the
+/// resource that it is paired with:
+///
+/// * The **resource** type must implement `Serialize`, which will be used by
+/// the handlebars rendering engine.
+/// * The request type of the **method** must implement `Deserialize`; it will
+/// be deserialized from the urlencoded format.
 pub struct Handlebars {
     registry: hbs::Handlebars,
 }

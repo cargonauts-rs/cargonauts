@@ -22,6 +22,20 @@ pub use self::receive::{ApiDeserialize, ClientIdPolicy};
 use self::present::*;
 use self::receive::*;
 
+/// Generate a JSON response conforming to the JSON API spec.
+///
+/// This format produces machine readable JSON responses which conform to the
+/// [JSON API specification](http://jsonapi.org/). Libraries exist in many
+/// languages which can consume JSON API responses automatically.
+///
+/// Like all formats, it imposes some constraints on the method and the
+/// resource that it is paired with:
+///
+/// * The **resource** type must implement `ApiSerialize`.
+/// * The **method** must take a request type which implements
+/// `ApiDeserialize`.
+///
+/// A separate crate provides a derivation for both of these traits.
 pub struct JsonApi {
     _private: ()
 }
