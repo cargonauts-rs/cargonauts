@@ -1,5 +1,7 @@
 # cargonauts - a Rust web framework
 
+[![Join the chat at https://gitter.im/cargonauts-rs/cargonauts](https://badges.gitter.im/cargonauts-rs/cargonauts.svg)](https://gitter.im/cargonauts-rs/cargonauts?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 **cargonauts** is a Rust web framework intended for building long lasting,
 maintainable web services.
 
