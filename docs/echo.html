@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>A very small application. - </title>
+        <title>A little cargonauts app - </title>
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -48,7 +48,7 @@
         </script>
 
         <div id="sidebar" class="sidebar">
-            <ul class="chapter"><li><a href="./intro.html"><strong>1.</strong> Welcome to cargonauts</a></li><li><a href="./setup.html"><strong>2.</strong> Starting a new cargonauts app</a></li><li><a href="./structure.html"><strong>3.</strong> Structure of your application.</a></li><li><a href="./mvc.html"><strong>4.</strong> Resources, methods and formats.</a></li><li><a href="./routes.html"><strong>5.</strong> The routes! DSL</a></li><li><a href="./echo.html" class="active"><strong>6.</strong> A very small application.</a></li></ul>
+            <ul class="chapter"><li><a href="./intro.html"><strong>1.</strong> Welcome to cargonauts</a></li><li><a href="./mvc.html"><strong>2.</strong> Resources, methods and formats.</a></li><li><a href="./echo.html" class="active"><strong>3.</strong> A little cargonauts app</a></li><li><ul class="section"><li><a href="./setup.html"><strong>3.1.</strong> Setting up a new cargonauts project</a></li><li><a href="./structure.html"><strong>3.2.</strong> The structure of our crate</a></li><li><a href="./ping.html"><strong>3.3.</strong> Creating our first endpoint</a></li></ul></li><li><a href="./routes.html"><strong>4.</strong> The routes! DSL Reference</a></li></ul>
         </div>
 
         <div id="page-wrapper" class="page-wrapper">
@@ -68,148 +68,43 @@
                 </div>
 
                 <div id="content" class="content">
-                    <a class="header" href="./echo.html#a-very-small-application" id="a-very-small-application"><h1>A very small application</h1></a>
-<p>To bring the core concepts we've just introduced together, let's look at very
-small, single-file application.</p>
-<p>This application does one thing: it has an endpoint at <code>/echo/$STRING</code>, and
-will respond to GET requests at that endpoint by Debug printing an Echo object
-with that string into its body. Here's the code:</p>
-<pre><pre class="playpen"><code class="language-rust">#![feature(associated_consts)]
-
-#[macro_use] extern crate cargonauts;
-
-use cargonauts::resources::{Resource, Environment, Error};
-use cargonauts::methods::Get;
-use cargonauts::formats::Debug;
-use cargonauts::futures::{future, Future};
-
-#[derive(Debug)]
-struct Echo {
-    echo: String,
-}
-
-impl Resource for Echo {
-    type Identifier = String;
-}
-
-impl Get for Echo {
-    fn get(id: String, _: Environment) -&gt; Box&lt;Future&lt;Item = Echo, Error = Error&gt;&gt; {
-        future::ok(Echo { echo: id }).boxed()
-    }
-}
-
-routes! {
-    resource Echo {
-        method Get in Debug;
-    }
-}
-
-fn main() {
-    cargonauts::serve(routes).unwrap();
-}
-</code></pre></pre>
-<p>Let's walk through this section by section.</p>
-<a class="header" href="./echo.html#top-matter" id="top-matter"><h3>Top matter</h3></a>
-<pre><pre class="playpen"><code class="language-rust"># #![allow(unused_variables)]
-#![feature(associated_consts)]
-#fn main() {
-
-#}</code></pre></pre>
-<p>cargonauts depends on associated consts, which is why it is on nightly. When I
-made this choice, I thought associated consts would be stable before I had
-cargonauts ready to show people, but I was wrong.</p>
-<pre><pre class="playpen"><code class="language-rust"># #![allow(unused_variables)]
-#fn main() {
-#[macro_use] extern crate cargonauts;
-
-#}</code></pre></pre>
-<p>We need to depend on cargonauts, and we have to apply macro_use to it or we
-can't get the <code>routes!</code> macro.</p>
-<pre><pre class="playpen"><code class="language-rust"># #![allow(unused_variables)]
-#fn main() {
-use cargonauts::resources::{Resource, Environment, Error};
-use cargonauts::methods::Get;
-use cargonauts::formats::Debug;
-use cargonauts::futures::{future, Future};
-
-#}</code></pre></pre>
-<p>These are all the imports we need for this to work:</p>
-<ul>
-<li>Resource is needed so Echo can implement it; Environment and Error appear in
-any method impl.</li>
-<li>Get is needed because its the method we'll be implemented.</li>
-<li>Debug is needed because its the format we'll be using.</li>
-<li>future and Future are used in our implementation of Get.</li>
-</ul>
-<a class="header" href="./echo.html#resource-type" id="resource-type"><h3>Resource type</h3></a>
-<pre><pre class="playpen"><code class="language-rust"># #![allow(unused_variables)]
-#fn main() {
-#[derive(Debug)]
-struct Echo {
-    echo: String,
-}
-
-#}</code></pre></pre>
-<p>This is our resource type in this case. Its a simple type; it only has one
-field.</p>
-<p>Echo derives Debug because the Debug format requires that.</p>
-<pre><pre class="playpen"><code class="language-rust"># #![allow(unused_variables)]
-#fn main() {
-impl Resource for Echo {
-    type Identifier = String;
-}
-
-#}</code></pre></pre>
-<p>Echo needs to implement Resource. Its Identifier in this case is a String (the
-string we'll be echoing back).</p>
-<pre><code>impl Get for Echo {
-    fn get(id: String, _: Environment) -&gt; Box&lt;Future&lt;Item = Echo, Error = Error&gt;&gt; {
-        future::ok(Echo { echo: id }).boxed()
-    }
-}
+                    <a class="header" href="./echo.html#a-little-cargonauts-app" id="a-little-cargonauts-app"><h1>A little cargonauts app</h1></a>
+<p>We're going to get to know cargonauts a bit better by creating a very small
+application. This will be a very small and stateless &quot;echo&quot; service: when
+you request a route like this:</p>
+<pre><code>GET /ping/$slug
 </code></pre>
-<p>This is our single endpoint: we receive a string and then construct an Echo
-from it to return. This can never fail and does no IO, but it needs to be
-wrapped in a future because cargonauts is an async framework.</p>
-<a class="header" href="./echo.html#routes-and-main" id="routes-and-main"><h3>Routes and main</h3></a>
-<pre><pre class="playpen"><code class="language-rust"># #![allow(unused_variables)]
-#fn main() {
-routes! {
-    resource Echo {
-        method Get in Debug;
-    }
-}
-
-#}</code></pre></pre>
-<p>The routes DSL here has only one resource and one method. This constructs our
-actual app, hooking up the endpoint we defined. This macro ultimately expands
-to an item named <code>routes</code>.</p>
-<pre><pre class="playpen"><code class="language-rust">fn main() {
-    cargonauts::serve(routes).unwrap();
-}
-</code></pre></pre>
-<p>The main function serves our app uing the <code>serve</code> function from cargonauts,
-which can take a <code>routes</code> object.</p>
+<p>It will return a response containing the slug you sent as well as a timestamp
+for the current time.</p>
+<p>[TODO link to next section]</p>
 
                 </div>
 
                 <!-- Mobile navigation buttons -->
                 
-                    <a href="./routes.html" class="mobile-nav-chapters previous">
+                    <a href="./mvc.html" class="mobile-nav-chapters previous">
                         <i class="fa fa-angle-left"></i>
                     </a>
                 
 
                 
+                    <a href="./setup.html" class="mobile-nav-chapters next">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
 
             </div>
 
             
-                <a href="./routes.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
+                <a href="./mvc.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
                     <i class="fa fa-angle-left"></i>
                 </a>
             
 
+            
+                <a href="./setup.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-right"></i>
+                </a>
             
 
         </div>

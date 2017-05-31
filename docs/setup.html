@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Starting a new cargonauts app - </title>
+        <title>Setting up a new cargonauts project - </title>
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -48,7 +48,7 @@
         </script>
 
         <div id="sidebar" class="sidebar">
-            <ul class="chapter"><li><a href="./intro.html"><strong>1.</strong> Welcome to cargonauts</a></li><li><a href="./setup.html" class="active"><strong>2.</strong> Starting a new cargonauts app</a></li><li><a href="./structure.html"><strong>3.</strong> Structure of your application.</a></li><li><a href="./mvc.html"><strong>4.</strong> Resources, methods and formats.</a></li><li><a href="./routes.html"><strong>5.</strong> The routes! DSL</a></li><li><a href="./echo.html"><strong>6.</strong> A very small application.</a></li></ul>
+            <ul class="chapter"><li><a href="./intro.html"><strong>1.</strong> Welcome to cargonauts</a></li><li><a href="./mvc.html"><strong>2.</strong> Resources, methods and formats.</a></li><li><a href="./echo.html"><strong>3.</strong> A little cargonauts app</a></li><li><ul class="section"><li><a href="./setup.html" class="active"><strong>3.1.</strong> Setting up a new cargonauts project</a></li><li><a href="./structure.html"><strong>3.2.</strong> The structure of our crate</a></li><li><a href="./ping.html"><strong>3.3.</strong> Creating our first endpoint</a></li></ul></li><li><a href="./routes.html"><strong>4.</strong> The routes! DSL Reference</a></li></ul>
         </div>
 
         <div id="page-wrapper" class="page-wrapper">
@@ -68,51 +68,54 @@
                 </div>
 
                 <div id="content" class="content">
-                    <a class="header" href="./setup.html#starting-a-new-cargonauts-app" id="starting-a-new-cargonauts-app"><h1>Starting a new cargonauts app</h1></a>
-<a class="header" href="./setup.html#install-rust" id="install-rust"><h2>Install Rust</h2></a>
-<p>This guide assumes that you have both Rust and cargo installed on your
-computer. I recommend using <a href="https://rustup.rs/">rustup.rs</a>, which makes it
-very easy to manage multiple installations of Rust.</p>
-<p>cargonauts currently requires the <strong>nightly</strong> version of Rust. If you don't
-have that installed, you can use rustup to install it:</p>
+                    <a class="header" href="./setup.html#setting-up-a-new-cargonauts-project" id="setting-up-a-new-cargonauts-project"><h1>Setting up a new cargonauts project</h1></a>
+<a class="header" href="./setup.html#install-nightly-rust" id="install-nightly-rust"><h2>Install nightly Rust</h2></a>
+<p>This guide assumes you have both Rust and cargo. Specifically, cargonauts
+currently depends on the <strong>nightly</strong> version of Rust. You need to get the
+nightly Rust compiler on your machine in order to use cargonauts.</p>
+<p>If you don't have Rust yet, I recommend installing it using
+<a href="https://rustup.rs/">rustup.rs</a>, which will help you handle having multiple
+versions of Rust installed at the same time. Once you've installed rustup,
+you can get the nightly version of Rust with this command:</p>
 <pre><code>rustup install nightly
 </code></pre>
 <a class="header" href="./setup.html#install-cargonauts-cli" id="install-cargonauts-cli"><h2>Install <code>cargonauts-cli</code></h2></a>
 <p>To quickly get started with cargonauts, you should install the <code>cargonauts-cli</code>
-crate. This is just a tiny app which helps you create a cargonauts app with
-your source directory set up correctly.</p>
-<p>You can install it with cargo:</p>
+crate. This is just a tiny app which helps you generate the source code for
+your app, it isn't involved in running it.</p>
+<p>You can install the CLI with cargo:</p>
 <pre><code>cargo install cargonauts-cli
 </code></pre>
-<p>This gives you a new command, <code>cargonauts</code>, which currently only has one
-subcommand, which we'll be using in a second to create your app.</p>
-<a class="header" href="./setup.html#create-your-project" id="create-your-project"><h2>Create your project</h2></a>
-<p>To create your project, just run this command (where <code>&lt;my-app&gt;</code> is the name of
-your app):</p>
-<pre><code>cargonauts new &lt;my-app&gt;
+<p>This gives you a new command, <code>cargonauts</code>.</p>
+<a class="header" href="./setup.html#create-the-echo-project" id="create-the-echo-project"><h2>Create the echo project</h2></a>
+<p>Now that we have the CLI, we'll use it to create our application, which we're
+going to call &quot;echo&quot;. The command to create our app is this:</p>
+<pre><code>cargonauts new echo
 </code></pre>
-<p>This will initiate an app in a directory with the same name, which will have
-a source directory set up to make cargonauts easy to use.</p>
-<a class="header" href="./setup.html#build-your-dependencies" id="build-your-dependencies"><h2>Build your dependencies</h2></a>
-<p>Now, you should build all the dependencies of cargonauts. Unfortunately, this
-takes quite a while right now.</p>
-<p>First, make sure you are using the nightly compiler:</p>
-<pre><code>rustup override set nightly
+<p>This will create a new Rust application in the <code>echo</code> directory. Move into that
+directory and make sure that you'll be using the nightly compiler with rustup:</p>
+<pre><code>cd ./echo
+rustup override set nightly
 </code></pre>
-<p>Then, do a fresh build of your cargonauts dependency:</p>
-<pre><code>cargo build -p cargonauts
-</code></pre>
-<a class="header" href="./setup.html#running-your-application" id="running-your-application"><h2>Running your application</h2></a>
-<p>You're all set. If you want to run your application, you can do so with this
-command:</p>
-<pre><code>cargo run server
-</code></pre>
+<a class="header" href="./setup.html#build-your-application" id="build-your-application"><h3>Build your application</h3></a>
+<p>Now, to make sure that everything is in order, let's build the application with
+<code>cargo build</code>.</p>
+<p>Unfortunately, and despite our best intentions, building all of cargonauts'
+dependencies for the first time will take several minutes. Feel free to treat
+yourself to a refreshment, or do something you like to do, while your waiting
+for all of our dependencies to build.</p>
+<p>If you're looking for something to do, feel free to advance to the
+<a href="./structure.md">next section</a> of this book, where we'll explore some of the
+files that we've created so far. You can read through this section before your
+app has finished building.</p>
+<p>If your app doesn't build correctly, please visit the
+<a href="https://gitter.im/cargonauts-rs/cargonauts">gitter channel</a> for help.</p>
 
                 </div>
 
                 <!-- Mobile navigation buttons -->
                 
-                    <a href="./intro.html" class="mobile-nav-chapters previous">
+                    <a href="./echo.html" class="mobile-nav-chapters previous">
                         <i class="fa fa-angle-left"></i>
                     </a>
                 
@@ -126,7 +129,7 @@ command:</p>
             </div>
 
             
-                <a href="./intro.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
+                <a href="./echo.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
                     <i class="fa fa-angle-left"></i>
                 </a>
             

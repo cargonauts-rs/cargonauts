@@ -1,4 +1,4 @@
-# The routes! DSL
+# The routes! DSL Reference
 
 Resources, methods, and formats are just normal Rust code, but they are brought
 together in the `routes!` macro, which implements a complicated domain specific

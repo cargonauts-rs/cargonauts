@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Structure of your application. - </title>
+        <title>The structure of our crate - </title>
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -48,7 +48,7 @@
         </script>
 
         <div id="sidebar" class="sidebar">
-            <ul class="chapter"><li><a href="./intro.html"><strong>1.</strong> Welcome to cargonauts</a></li><li><a href="./setup.html"><strong>2.</strong> Starting a new cargonauts app</a></li><li><a href="./structure.html" class="active"><strong>3.</strong> Structure of your application.</a></li><li><a href="./mvc.html"><strong>4.</strong> Resources, methods and formats.</a></li><li><a href="./routes.html"><strong>5.</strong> The routes! DSL</a></li><li><a href="./echo.html"><strong>6.</strong> A very small application.</a></li></ul>
+            <ul class="chapter"><li><a href="./intro.html"><strong>1.</strong> Welcome to cargonauts</a></li><li><a href="./mvc.html"><strong>2.</strong> Resources, methods and formats.</a></li><li><a href="./echo.html"><strong>3.</strong> A little cargonauts app</a></li><li><ul class="section"><li><a href="./setup.html"><strong>3.1.</strong> Setting up a new cargonauts project</a></li><li><a href="./structure.html" class="active"><strong>3.2.</strong> The structure of our crate</a></li><li><a href="./ping.html"><strong>3.3.</strong> Creating our first endpoint</a></li></ul></li><li><a href="./routes.html"><strong>4.</strong> The routes! DSL Reference</a></li></ul>
         </div>
 
         <div id="page-wrapper" class="page-wrapper">
@@ -69,77 +69,73 @@
 
                 <div id="content" class="content">
                     <a class="header" href="./structure.html#structure-of-your-application" id="structure-of-your-application"><h1>Structure of your application</h1></a>
-<p>If you've just created your application with <code>cargonauts new</code>, you may notice
-that it created a lot of files for you. We'll walk through what each module
-in your application is intended to be used for.</p>
-<p>Once you run <code>cargonauts new</code>, the src directory of your project should look
-like this:</p>
+<p>If you look at the src directory you've created with <code>cargonauts new</code>, you'll
+notice that it has created quite a few files for you. We're going to walk
+through some of the most important ones now, and leave the rest of them for
+later.</p>
+<p>Here's the files and directories we'll be walking through in this section of
+the book:</p>
 <pre><code>src
 ├── bin
 │   └── server.rs
 ├── lib.rs
-├── routing.rs
-├── clients
-│   └── mod.rs
-├── formats
-│   └── mod.rs
-├── methods
-│   └── mod.rs
-├── middleware
-│   └── mod.rs
 ├── resources
 │   └── mod.rs
-├── assets
+├── routing.rs
 └── templates
 </code></pre>
-<a class="header" href="./structure.html#binserverrs" id="binserverrs"><h3><code>bin/server.rs</code></h3></a>
-<p>This is the server that you're going to be building, running, and deploying.
-Your main application is a library, and this is a binary that depends on it.
-Right now it just servers your application, but you can add any code you want
-here to do additional setup and teardown aroud your running application.</p>
-<a class="header" href="./structure.html#librs" id="librs"><h3><code>lib.rs</code></h3></a>
-<p>This is the root of your application; it doesn't contain any code by default;
-just extern crate and module declarations. It also re-exports the <code>routes</code> item
-from your routing module; this is the public entrance to your entire
-application.</p>
-<a class="header" href="./structure.html#routingrs" id="routingrs"><h3><code>routing.rs</code></h3></a>
-<p>The routing file contains the <code>routes!</code> macro, which is how we stitch all of
-the code in your application together. You'll edit this whenever you want to
-add new endpoints to your application.</p>
-<a class="header" href="./structure.html#the-clients-module" id="the-clients-module"><h3>The clients module</h3></a>
-<p>This module is for defining clients, high level API wrappers around connections
-to other running services.</p>
-<a class="header" href="./structure.html#the-formats-module" id="the-formats-module"><h3>The formats module</h3></a>
-<p>This module is for defining custom formats. cargonauts comes with several
-useful formats out of the box, but if you need to define your own, you can do
-so here.</p>
-<a class="header" href="./structure.html#the-methods-module" id="the-methods-module"><h3>The methods module</h3></a>
-<p>This module is for defining custom methods. cargonauts comes with many methods
-covering most use case, but if you do need to define your own, this is the
-module for them.</p>
-<a class="header" href="./structure.html#the-middleware-module" id="the-middleware-module"><h3>The middleware module</h3></a>
-<p>This is for defining middleware to wrap around your endpoint. If you need to
-deal directly with the HTTP requests and responses in a way that doesn't
-integrate into the resource/method/format structure of cargonauts, you just
-need to write a middleware for that.</p>
-<p>You can use middleware for instrumenting endpoints, for example.</p>
+<p>(If you look at the source yourself, you'll see that there are some additional
+modules, but we won't be looking at them just yet.)</p>
+<a class="header" href="./structure.html#srcbinserverrs" id="srcbinserverrs"><h3><code>src/bin/server.rs</code></h3></a>
+<p>The application created by <code>cargonauts new</code> has a split library/binary
+structure, like many Rust applications. The bulk of your application exists in
+a library, but it is wrapped by a smaller binary that depends on it. This file
+is the binary for your server.</p>
+<p>The default server binary is very brief: it just runs your application using
+<code>cargonauts::serve</code>. If you want to perform additional set up or tear down
+around your application, you can do so by editing this file.</p>
+<a class="header" href="./structure.html#srclibrs" id="srclibrs"><h3><code>src/lib.rs</code></h3></a>
+<p>This is the root of your application. It is also fairly brief: it activates the
+<code>associated_consts</code> feature flag, declares a dependency on cargonauts, lists
+your top level modules, and contains one re-export.</p>
+<p>The re-export is worth noticing: we re-export <code>routing::routes</code>; this is the
+item created by the <code>routes!</code> macro, which is a high level description of your
+application. The <code>routes</code> item is the &quot;entry-point&quot; to your application which
+the server binary uses to serve it.</p>
+<a class="header" href="./structure.html#srcroutingrs" id="srcroutingrs"><h3><code>src/routing.rs</code></h3></a>
+<p>This file contains the <code>routes!</code> macro. At the top, it imports many of the
+things you'll need to make your <code>routes!</code> macro work as you add to it, and then
+it contains an empty macro, waiting for you to add routes to your application.</p>
+<p>The <code>routes!</code> macro is the magic that binds cargonauts together. The rest of
+your application is normal Rust code: you define types and implement traits for
+them. But the <code>routes!</code> macro has its own language, which takes a high level
+description of all of your endpoints and constructs your application from it.</p>
+<p>One important aspect of the <code>routes!</code> macro is that every <em>CamelCase</em> name
+inside it is just a type that has been imported into this module. All of the
+imports at the top of this file bring in types that you'll be using in
+describing in your routes - mainly the names of resources, methods, and
+formats.</p>
 <a class="header" href="./structure.html#the-resources-module" id="the-resources-module"><h3>The resources module</h3></a>
 <p>This is where you define your resources, and implement methods for them. This
 is probably the module you'll turn to most often, at least at first.</p>
-<a class="header" href="./structure.html#the-assets-directory" id="the-assets-directory"><h3>The assets directory</h3></a>
-<p>This directory is for your static assets. By default, any assets here will be
-built into your application at their path relative to the asset directory root.</p>
-<p>Files starting with <code>index</code> will be served as the index for the directory they
-are in, rather than at their filename.</p>
-<p>This is not a submodule of your application; it does not contain Rust code.</p>
+<p>In the next section, we're going to create a new resource and implement a
+method for it, so we'll be editing code in this module quite a bit.</p>
 <a class="header" href="./structure.html#the-templates-directory" id="the-templates-directory"><h3>The templates directory</h3></a>
 <p>This directory is for your templates. When formatting your resources into HTTP
 responses, the format has access to the templates you define here in order to
 render the response. Some formats use templates and some do not.</p>
 <p>Templates are located at <code>templates/$resource/$method</code>, for example, something
 like: <code>templates/user/get.html.hbs</code> (all file extensions are optional).</p>
-<p>Like the assets directory, this is not a part of your application, and you
-shouldn't put any Rust code here.</p>
+<p>This is <strong>not</strong> a submodule of your Rust application; you should not put
+Rust code in this directory, just templates.</p>
+<a class="header" href="./structure.html#running-your-application" id="running-your-application"><h2>Running your application</h2></a>
+<p>As a final note about the structure of your application, you can run your
+server any time with this command:</p>
+<pre><code>cargo run server
+</code></pre>
+<p>By default, your server will serve on port <code>7878</code>. Right now it should be
+an empty application, so any request to <code>localhost:7878</code> should return a 404,
+file not found error.</p>
 
                 </div>
 
@@ -151,7 +147,7 @@ shouldn't put any Rust code here.</p>
                 
 
                 
-                    <a href="./mvc.html" class="mobile-nav-chapters next">
+                    <a href="./ping.html" class="mobile-nav-chapters next">
                         <i class="fa fa-angle-right"></i>
                     </a>
                 
@@ -165,7 +161,7 @@ shouldn't put any Rust code here.</p>
             
 
             
-                <a href="./mvc.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
+                <a href="./ping.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
                     <i class="fa fa-angle-right"></i>
                 </a>
             

@@ -1,0 +1,169 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Creating our first endpoint - </title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <base href="">
+
+        <link rel="stylesheet" href="book.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+
+        <!-- MathJax -->
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Fetch JQuery from CDN but have a local fallback -->
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script>
+            if (typeof jQuery == 'undefined') {
+                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
+            }
+        </script>
+    </head>
+    <body class="light">
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme = localStorage.getItem('theme');
+            if (theme == null) { theme = 'light'; }
+            $('body').removeClass().addClass(theme);
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var sidebar = localStorage.getItem('sidebar');
+            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
+            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+        </script>
+
+        <div id="sidebar" class="sidebar">
+            <ul class="chapter"><li><a href="./intro.html"><strong>1.</strong> Welcome to cargonauts</a></li><li><a href="./mvc.html"><strong>2.</strong> Resources, methods and formats.</a></li><li><a href="./echo.html"><strong>3.</strong> A little cargonauts app</a></li><li><ul class="section"><li><a href="./setup.html"><strong>3.1.</strong> Setting up a new cargonauts project</a></li><li><a href="./structure.html"><strong>3.2.</strong> The structure of our crate</a></li><li><a href="./ping.html" class="active"><strong>3.3.</strong> Creating our first endpoint</a></li></ul></li><li><a href="./routes.html"><strong>4.</strong> The routes! DSL Reference</a></li></ul>
+        </div>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar" class="menu-bar">
+                    <div class="left-buttons">
+                        <i id="sidebar-toggle" class="fa fa-bars"></i>
+                        <i id="theme-toggle" class="fa fa-paint-brush"></i>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                    </div>
+                </div>
+
+                <div id="content" class="content">
+                    <a class="header" href="./ping.html#creating-our-first-endpoint" id="creating-our-first-endpoint"><h1>Creating our first endpoint</h1></a>
+<p>[TODO intro]</p>
+<a class="header" href="./ping.html#committing" id="committing"><h3>Committing</h3></a>
+<p>Its a good idea to commit your repository now that you know you have a
+successfully initiated cargonauts app. That way you can easily restore your
+state if anything bad happens, and you can get a quick diff to view the changes
+you make at each step of this documentation. Just run a commit like so:</p>
+<pre><code>git add --all
+git commit -m &quot;An empty cargonauts app, ripe with potential.&quot;
+</code></pre>
+<a class="header" href="./ping.html#creating-our-resource" id="creating-our-resource"><h2>Creating our resource</h2></a>
+<p>Right now our application doesn't actually do anything - any request will
+simply return a <code>404</code>. Let's start by creating a resource. Because this is a
+very common thing to do, the cargonauts command has a subcommand which will
+create a new resource, aptly titled <code>generate resource</code>. Let's create a
+resource called Ping:</p>
+<pre><code>cargonauts generate resource ping
+</code></pre>
+<a class="header" href="./ping.html#changes-to-routingrs" id="changes-to-routingrs"><h3>Changes to <code>routing.rs</code></h3></a>
+<p>We've added our first declaration to the <code>routes!</code> DSL:</p>
+<pre><pre class="playpen"><code class="language-rust"># #![allow(unused_variables)]
+#fn main() {
+routes! {
+    resource Ping {
+    }
+}
+
+#}</code></pre></pre>
+<p>The <code>routes!</code> DSL consists mostly of &quot;resource objects&quot; like this - there will
+be one for each resource in your application, and it will contain various
+additional items, mainly <code>method</code> statements, which we'll see in a bit.</p>
+<p>In other words, your routes consist of a number of resource objects like this
+one.</p>
+<a class="header" href="./ping.html#srcresourcespingrs" id="srcresourcespingrs"><h3><code>src/resources/ping.rs</code></h3></a>
+<a class="header" href="./ping.html#finishing-the-resource-impl" id="finishing-the-resource-impl"><h3>Finishing the Resource impl</h3></a>
+<p>[TODO]</p>
+<a class="header" href="./ping.html#adding-data-to-ping" id="adding-data-to-ping"><h3>Adding data to Ping</h3></a>
+<p>[TODO]</p>
+<a class="header" href="./ping.html#adding-a-method-to-ping" id="adding-a-method-to-ping"><h2>Adding a method to Ping</h2></a>
+<p>Even though your app has a resource now, it <em>still</em> doesn't do anything! This
+is because we haven't implemented any methods for that resource. A resource
+without methods is like an object without methods, it doesn't actually do
+anything.</p>
+<p>We're going to make the <code>Ping</code> type implement the <code>Get</code> method. [describe the
+Get method]</p>
+<p>We don't have a generator for this, so we'll do it all by hand.</p>
+<a class="header" href="./ping.html#adding-the-impl" id="adding-the-impl"><h3>Adding the impl</h3></a>
+<a class="header" href="./ping.html#adding-the-method-to-the-routes-macro" id="adding-the-method-to-the-routes-macro"><h3>Adding the method to the <code>routes!</code> macro</h3></a>
+<a class="header" href="./ping.html#deciding-on-a-format" id="deciding-on-a-format"><h4>Deciding on a format</h4></a>
+
+                </div>
+
+                <!-- Mobile navigation buttons -->
+                
+                    <a href="./structure.html" class="mobile-nav-chapters previous">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a href="./routes.html" class="mobile-nav-chapters next">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+
+            </div>
+
+            
+                <a href="./structure.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+            
+
+            
+                <a href="./routes.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            
+
+        </div>
+
+
+        <!-- Local fallback for Font Awesome -->
+        <script>
+            if ($(".fa").css("font-family") !== "FontAwesome") {
+                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
+            }
+        </script>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        
+
+        
+
+
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+    </body>
+</html>

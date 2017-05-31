@@ -1,92 +1,73 @@
 # Structure of your application
 
-If you've just created your application with `cargonauts new`, you may notice
-that it created a lot of files for you. We'll walk through what each module
-in your application is intended to be used for.
+If you look at the src directory you've created with `cargonauts new`, you'll
+notice that it has created quite a few files for you. We're going to walk
+through some of the most important ones now, and leave the rest of them for
+later.
 
-Once you run `cargonauts new`, the src directory of your project should look
-like this:
+Here's the files and directories we'll be walking through in this section of
+the book:
 
 ```
 src
 ├── bin
 │   └── server.rs
 ├── lib.rs
-├── routing.rs
-├── clients
-│   └── mod.rs
-├── formats
-│   └── mod.rs
-├── methods
-│   └── mod.rs
-├── middleware
-│   └── mod.rs
 ├── resources
 │   └── mod.rs
-├── assets
+├── routing.rs
 └── templates
 ```
 
-### `bin/server.rs`
+(If you look at the source yourself, you'll see that there are some additional
+modules, but we won't be looking at them just yet.)
 
-This is the server that you're going to be building, running, and deploying.
-Your main application is a library, and this is a binary that depends on it.
-Right now it just servers your application, but you can add any code you want
-here to do additional setup and teardown aroud your running application.
+### `src/bin/server.rs`
 
-### `lib.rs`
+The application created by `cargonauts new` has a split library/binary 
+structure, like many Rust applications. The bulk of your application exists in
+a library, but it is wrapped by a smaller binary that depends on it. This file
+is the binary for your server.
 
-This is the root of your application; it doesn't contain any code by default;
-just extern crate and module declarations. It also re-exports the `routes` item
-from your routing module; this is the public entrance to your entire
-application.
+The default server binary is very brief: it just runs your application using
+`cargonauts::serve`. If you want to perform additional set up or tear down
+around your application, you can do so by editing this file.
 
-### `routing.rs`
+### `src/lib.rs`
 
-The routing file contains the `routes!` macro, which is how we stitch all of
-the code in your application together. You'll edit this whenever you want to
-add new endpoints to your application.
+This is the root of your application. It is also fairly brief: it activates the
+`associated_consts` feature flag, declares a dependency on cargonauts, lists
+your top level modules, and contains one re-export.
 
-### The clients module
+The re-export is worth noticing: we re-export `routing::routes`; this is the
+item created by the `routes!` macro, which is a high level description of your
+application. The `routes` item is the "entry-point" to your application which
+the server binary uses to serve it.
 
-This module is for defining clients, high level API wrappers around connections
-to other running services.
+### `src/routing.rs`
 
-### The formats module
+This file contains the `routes!` macro. At the top, it imports many of the
+things you'll need to make your `routes!` macro work as you add to it, and then
+it contains an empty macro, waiting for you to add routes to your application.
 
-This module is for defining custom formats. cargonauts comes with several
-useful formats out of the box, but if you need to define your own, you can do
-so here.
+The `routes!` macro is the magic that binds cargonauts together. The rest of
+your application is normal Rust code: you define types and implement traits for
+them. But the `routes!` macro has its own language, which takes a high level
+description of all of your endpoints and constructs your application from it.
 
-### The methods module
-
-This module is for defining custom methods. cargonauts comes with many methods
-covering most use case, but if you do need to define your own, this is the
-module for them.
-
-### The middleware module
-
-This is for defining middleware to wrap around your endpoint. If you need to
-deal directly with the HTTP requests and responses in a way that doesn't
-integrate into the resource/method/format structure of cargonauts, you just
-need to write a middleware for that.
-
-You can use middleware for instrumenting endpoints, for example.
+One important aspect of the `routes!` macro is that every *CamelCase* name
+inside it is just a type that has been imported into this module. All of the
+imports at the top of this file bring in types that you'll be using in
+describing in your routes - mainly the names of resources, methods, and
+formats.
 
 ### The resources module
 
 This is where you define your resources, and implement methods for them. This
 is probably the module you'll turn to most often, at least at first.
 
-### The assets directory
-
-This directory is for your static assets. By default, any assets here will be
-built into your application at their path relative to the asset directory root.
-
-Files starting with `index` will be served as the index for the directory they
-are in, rather than at their filename.
-
-This is not a submodule of your application; it does not contain Rust code.
+In the next section, we're going to create a new resource and implement a
+method for it, so we'll be editing code in this module quite a bit.
 
 ### The templates directory
 
@@ -97,5 +78,18 @@ render the response. Some formats use templates and some do not.
 Templates are located at `templates/$resource/$method`, for example, something
 like: `templates/user/get.html.hbs` (all file extensions are optional).
 
-Like the assets directory, this is not a part of your application, and you
-shouldn't put any Rust code here.
+This is **not** a submodule of your Rust application; you should not put
+Rust code in this directory, just templates.
+
+## Running your application
+
+As a final note about the structure of your application, you can run your
+server any time with this command:
+
+```
+cargo run server
+```
+
+By default, your server will serve on port `7878`. Right now it should be
+an empty application, so any request to `localhost:7878` should return a 404,
+file not found error.
