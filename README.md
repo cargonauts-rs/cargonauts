@@ -2,6 +2,8 @@
 
 [![Join the chat at https://gitter.im/cargonauts-rs/cargonauts](https://badges.gitter.im/cargonauts-rs/cargonauts.svg)](https://gitter.im/cargonauts-rs/cargonauts?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
+[Documentation](cargonauts-rs.github.io/cargonauts)
+
 **cargonauts** is a Rust web framework intended for building maintainable,
 well-factored web apps.
 
@@ -30,5 +32,4 @@ See LICENSE-APACHE and LICENSE-MIT for details.
 
 This project is governed by the Code of Conduct, found in the root of this
 repository. The Code of Conduct has been adapted from the Contributor
-Covenant, with the addition of a clause providing no platform for fascists
-and Nazis.
+Covenant.
