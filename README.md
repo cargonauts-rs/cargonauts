@@ -2,7 +2,7 @@
 
 [![Join the chat at https://gitter.im/cargonauts-rs/cargonauts](https://badges.gitter.im/cargonauts-rs/cargonauts.svg)](https://gitter.im/cargonauts-rs/cargonauts?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-[Documentation](cargonauts-rs.github.io/cargonauts)
+[Documentation](https://cargonauts-rs.github.io/cargonauts)
 
 **cargonauts** is a Rust web framework intended for building maintainable,
 well-factored web apps.
