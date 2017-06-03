@@ -3,10 +3,13 @@
 extern crate anymap;
 extern crate backtrace;
 extern crate futures;
+extern crate futures_cpupool;
 extern crate hyper;
 extern crate tokio_service as tokio;
 extern crate tokio_core as core;
 extern crate c3po;
+extern crate r2d2;
+extern crate num_cpus;
 extern crate route_recognizer as recognizer;
 extern crate serde;
 extern crate tokio_redis as redis;

@@ -3,14 +3,16 @@ use std::io;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use Error;
-
 use anymap::AnyMap;
 use core::reactor::Handle;
 use c3po::{ConnFuture, Conn, Pool, Config};
-use futures::{Future, future, Stream, stream};
+use futures::{IntoFuture, Future, future, Stream, stream};
+use futures_cpupool::{CpuPool, CpuFuture};
+use num_cpus;
 use tokio::NewService;
+use r2d2::{ManageConnection, Pool as SyncPool, PooledConnection};
 
+use Error;
 use http::StatusCode;
 use connections::{Client, Configure, ConnectClient};
 
@@ -23,9 +25,12 @@ use connections::{Client, Configure, ConnectClient};
 /// * It allows you to cache values in a type map to share them from the
 /// format/middleware/resource.
 pub struct Environment {
+    cpu_pool: Rc<CpuPool>,
     pools: Rc<AnyMap>,
     store: Rc<RefCell<AnyMap>>,
 }
+
+pub type SyncConnFuture<T, E> = future::Either<CpuFuture<T, E>, future::FutureResult<T, E>>;
 
 impl Environment {
     /// Store a new value in the environment.
@@ -53,6 +58,38 @@ impl Environment {
         } else {
             future::Either::A(future::err(Error::with_msg(StatusCode::InternalServerError,
                                                           "Connection not registered.")))
+        }
+    }
+
+    pub fn on_pool<T, R, F>(&self, f: F) -> CpuFuture<T, Error>
+    where
+        T: Send + 'static,
+        F: FnOnce() -> R + Send + 'static,
+        R: IntoFuture<Item = T, Error = Error> + Send + 'static,
+        R::Future: Send + 'static,
+    {
+        self.cpu_pool.spawn_fn(f)
+    }
+
+    pub fn sync_conn<C, T, R, F>(&self, f: F) -> SyncConnFuture<T, Error>
+    where
+        C: ManageConnection,
+        T: Send + 'static,
+        F: FnOnce(PooledConnection<C>) -> R + Send + 'static,
+        R: IntoFuture<Item = T, Error = Error> + Send + 'static,
+        R::Future: Send + 'static,
+    {
+        if let Some(pool) = self.pools.get::<SyncPool<C>>() {
+            let conn = match pool.get() {
+                Ok(conn) => conn,
+                Err(err) => {
+                    return future::Either::B(future::err(Error::from_err(err, StatusCode::InternalServerError)))
+                }
+            };
+            future::Either::A(self.on_pool(move || f(conn)))
+        } else {
+            return future::Either::B(future::err(Error::with_msg(StatusCode::InternalServerError,
+                                                                 "Connection not registered.")))
         }
     }
     
@@ -95,12 +132,14 @@ impl Environment {
 #[derive(Clone)]
 pub struct PreparedEnv {
     pools: Rc<AnyMap>,
+    cpu_pool: Rc<CpuPool>,
 }
 
 impl PreparedEnv {
     pub fn new(&self) -> Environment {
         Environment {
             pools: self.pools.clone(),
+            cpu_pool: self.cpu_pool.clone(),
             store: Rc::new(RefCell::new(AnyMap::new())),
         }
     }
@@ -144,6 +183,7 @@ impl EnvBuilder {
     pub fn build(self) -> PreparedEnv {
         PreparedEnv {
             pools: Rc::new(Rc::try_unwrap(self.pools).unwrap().into_inner()),
+            cpu_pool: Rc::new(CpuPool::new(num_cpus::get() * 4)),
         }
     }
 }
