@@ -36,6 +36,7 @@ where
             })
         })
     });
+    println!("Running on {}", addr);
     core.run(srv)
 }
 
