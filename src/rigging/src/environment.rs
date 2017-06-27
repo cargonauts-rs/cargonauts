@@ -3,14 +3,15 @@ use std::io;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use Error;
-
 use anymap::AnyMap;
 use core::reactor::Handle;
 use c3po::{ConnFuture, Conn, Pool, Config};
-use futures::{Future, future, Stream, stream};
+use futures::{IntoFuture, Future, future, Stream, stream};
+use futures_cpupool::{CpuPool, CpuFuture};
+use num_cpus;
 use tokio::NewService;
 
+use Error;
 use http::StatusCode;
 use connections::{Client, Configure, ConnectClient};
 
@@ -23,6 +24,7 @@ use connections::{Client, Configure, ConnectClient};
 /// * It allows you to cache values in a type map to share them from the
 /// format/middleware/resource.
 pub struct Environment {
+    cpu_pool: Rc<CpuPool>,
     pools: Rc<AnyMap>,
     store: Rc<RefCell<AnyMap>>,
 }
@@ -55,7 +57,22 @@ impl Environment {
                                                           "Connection not registered.")))
         }
     }
-    
+
+    /// Spawn a function to run on a thread pool.
+    ///
+    /// By default, all methods run on the IO thread. If a method performs slow
+    /// computation or blocking IO, yoiu can choose to spawn it into a thread
+    /// pool.
+    pub fn spawn<T, R, F>(&self, f: F) -> CpuFuture<T, Error>
+    where
+        T: Send + 'static,
+        F: FnOnce() -> R + Send + 'static,
+        R: IntoFuture<Item = T, Error = Error> + Send + 'static,
+        R::Future: Send + 'static,
+    {
+        self.cpu_pool.spawn_fn(f)
+    }
+
     #[doc(hidden)]
     pub fn conn_for<C: NewService>(&self, name: &'static str) -> ConnFuture<Conn<C>, Error> {
         if let Some(pools) = self.pools.get::<Vec<(&'static str, Pool<C>)>>() {
@@ -95,12 +112,14 @@ impl Environment {
 #[derive(Clone)]
 pub struct PreparedEnv {
     pools: Rc<AnyMap>,
+    cpu_pool: Rc<CpuPool>,
 }
 
 impl PreparedEnv {
     pub fn new(&self) -> Environment {
         Environment {
             pools: self.pools.clone(),
+            cpu_pool: self.cpu_pool.clone(),
             store: Rc::new(RefCell::new(AnyMap::new())),
         }
     }
@@ -144,6 +163,7 @@ impl EnvBuilder {
     pub fn build(self) -> PreparedEnv {
         PreparedEnv {
             pools: Rc::new(Rc::try_unwrap(self.pools).unwrap().into_inner()),
+            cpu_pool: Rc::new(CpuPool::new(num_cpus::get() * 4)),
         }
     }
 }
