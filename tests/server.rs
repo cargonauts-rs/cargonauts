@@ -107,7 +107,14 @@ fn request<T: CheckBody>(
     body: T,
     status: reqwest::StatusCode,
 ) {
-    let response = client.request(method, &format!("http://127.0.0.1:{}/{}", port, endpoint)).send().unwrap();
+    let mut ctr = 10;
+    let response = loop {
+        match client.request(method.clone(), &format!("http://127.0.0.1:{}/{}", port, endpoint)).send() {
+            Ok(response)    => break response,
+            _               => { ctr -= 1; if ctr == 0 { panic!() } }
+        };
+    };
+
     assert_eq!(response.status(), &status);
     body.check_body(response);
 }
