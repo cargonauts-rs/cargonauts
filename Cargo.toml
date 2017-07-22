@@ -4,7 +4,7 @@ description = "cargonauts - a Rust web framework"
 license = "MIT OR Apache-2.0"
 name = "cargonauts"
 repository = "https://github.com/cargonauts-rs/cargonauts"
-version = "0.2.0"
+version = "0.2.1"
 
 [dependencies]
 futures = "0.1.11"
