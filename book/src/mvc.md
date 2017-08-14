@@ -21,8 +21,8 @@ struct User {
     username: String,
     email: String,
     is_admin: bool,
-    joined_at: DateTime<UTC>,
-    last_logged_in: DateTime<UTC>,
+    joined_at: DateTime<Utc>,
+    last_logged_in: DateTime<Utc>,
 }
 
 
