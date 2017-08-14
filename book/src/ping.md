@@ -100,15 +100,15 @@ field for each of these.
 We've already decided that the slug is represented as a String. To represent
 the timestamp, we can use the `chrono` crate.
 
-Add a dependency on chrono (I used chrono version `0.3.1` while writing these
-docs), and define your struct:
+Add a dependency on [chrono](https://crates.io/crates/chrono),
+and define your struct:
 
 ```rust
-use chrono::{DateTime, UTC};
+use chrono::{DateTime, Utc};
 
 pub struct Ping {
     slug: String,
-    timestamp: DateTime<UTC>,
+    timestamp: DateTime<Utc>,
 }
 ```
 
@@ -120,7 +120,7 @@ without methods is like an object without methods, it doesn't actually do
 anything.
 
 We're going to make the `Ping` type implement the `Get` method. This is the
-method that corresponds to `GET /$resource/$identiifer`, so its exactly what
+method that corresponds to `GET /$resource/$identifer`, so its exactly what
 we need to implement what we said.
 
 We don't have a generator for this, so we'll do it all by hand.
@@ -150,7 +150,7 @@ like so:
 ```rust
 future::ok(Ping {
     slug: slug,
-    timestamp: UTC::now(),
+    timestamp: Utc::now(),
 }).boxed()
 ```
 
@@ -182,7 +182,7 @@ We can achieve that by deriving `Debug` for `Ping`:
 #[derive(Debug)]
 struct Ping {
     slug: String,
-    timestamp: DateTime<UTC>,
+    timestamp: DateTime<Utc>,
 }
 ```
 

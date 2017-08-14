@@ -1,4 +1,4 @@
-use chrono::{DateTime, UTC};
+use chrono::{DateTime, Utc};
 
 use cargonauts::{Resource, Environment, Error};
 use cargonauts::methods::{Index, Post, Patch, Delete};
@@ -13,14 +13,14 @@ pub struct Note {
     id: Uuid,
     text: String,
     completed: bool,
-    created_at: DateTime<UTC>,
+    created_at: DateTime<Utc>,
 }
 
 #[derive(ApiDeserialize)]
 pub struct PostNote {
     text: String,
     completed: bool,
-    created_at: Option<DateTime<UTC>>,
+    created_at: Option<DateTime<Utc>>,
 }
 
 #[derive(ApiDeserialize)]
@@ -28,7 +28,7 @@ pub struct PostNote {
 pub struct PatchNote {
     text: Option<String>,
     completed: Option<bool>,
-    created_at: Option<DateTime<UTC>>,
+    created_at: Option<DateTime<Utc>>,
 }
 
 impl Resource for Note {
@@ -48,7 +48,7 @@ impl Post for Note {
 
     fn post(post: PostNote, env: Environment) -> Box<Future<Item = Note, Error = Error>> {
         let id = Uuid::new_v4();
-        let created_at = post.created_at.unwrap_or_else(UTC::now);
+        let created_at = post.created_at.unwrap_or_else(Utc::now);
         let note = Note {
             id, created_at,
             text: post.text,
